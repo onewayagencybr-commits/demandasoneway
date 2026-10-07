@@ -171,7 +171,7 @@ body:before,body:after{content:"";position:fixed;pointer-events:none;z-index:0;b
 
 /* Financeiro da agência */
 .finance-side-tab{position:fixed;right:0;top:48%;z-index:45;display:flex;align-items:center;gap:7px;padding:13px 9px;border:1px solid rgba(224,236,255,.20);border-right:0;border-radius:14px 0 0 14px;background:linear-gradient(180deg,rgba(14,43,102,.96),rgba(31,81,218,.96));color:#fff;box-shadow:0 18px 44px rgba(0,10,40,.28);font-size:10px;font-weight:850;letter-spacing:.04em;writing-mode:vertical-rl;transform:translateY(-50%);transition:all .2s var(--ease)}.finance-side-tab:hover{padding-right:12px;filter:brightness(1.08)}.finance-side-tab.active{background:linear-gradient(180deg,#fff,#e9f0ff);color:#17336e;border-color:rgba(255,255,255,.62)}.finance-side-tab .finance-icon{writing-mode:horizontal-tb;font-size:12px}
-.finance-wrap{display:grid;gap:16px}.finance-overview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.finance-kpi{padding:17px 18px;border:1px solid rgba(220,233,255,.14);border-radius:17px;background:rgba(255,255,255,.07);box-shadow:0 14px 34px rgba(0,10,40,.10)}.finance-kpi span{display:block;font-size:8px;font-weight:850;letter-spacing:.11em;text-transform:uppercase;color:rgba(231,240,255,.66)}.finance-kpi strong{display:block;margin-top:7px;font-size:25px;letter-spacing:-.03em;color:#fff}.finance-kpi.net.positive strong{color:#bbf7d0}.finance-kpi.net.negative strong{color:#fecaca}
+.finance-wrap{display:grid;gap:16px}.finance-export-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 16px;border:1px solid rgba(220,233,255,.14);border-radius:16px;background:rgba(255,255,255,.055)}.finance-export-row>div{display:grid;gap:3px}.finance-export-row strong{font-size:12px;color:#fff}.finance-export-row span{font-size:9px;color:rgba(231,240,255,.60)}.finance-export-row button{white-space:nowrap}.finance-overview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.finance-kpi{padding:17px 18px;border:1px solid rgba(220,233,255,.14);border-radius:17px;background:rgba(255,255,255,.07);box-shadow:0 14px 34px rgba(0,10,40,.10)}.finance-kpi span{display:block;font-size:8px;font-weight:850;letter-spacing:.11em;text-transform:uppercase;color:rgba(231,240,255,.66)}.finance-kpi strong{display:block;margin-top:7px;font-size:25px;letter-spacing:-.03em;color:#fff}.finance-kpi.net.positive strong{color:#bbf7d0}.finance-kpi.net.negative strong{color:#fecaca}
 .finance-panel{border:1px solid rgba(220,233,255,.14);background:rgba(6,25,62,.48);border-radius:20px;padding:18px;box-shadow:0 18px 42px rgba(0,10,40,.10)}.finance-panel-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:12px}.finance-panel-head h3{margin:0;color:#fff;font-size:15px}.finance-panel-head p{margin:4px 0 0;color:rgba(231,240,255,.60);font-size:9px}.finance-panel-head button{white-space:nowrap}.finance-table{display:grid;gap:7px}.finance-table #financeIncomeRows,.finance-table #financeCostRows{display:grid;gap:7px}.finance-table-head,.finance-row{display:grid;grid-template-columns:minmax(230px,1.8fr) 150px 160px 42px;gap:9px;align-items:center}.finance-table-head{padding:0 10px 3px;color:rgba(225,237,255,.58);font-size:8px;font-weight:850;letter-spacing:.09em;text-transform:uppercase}.finance-row{padding:10px;border:1px solid rgba(220,233,255,.11);border-radius:13px;background:rgba(255,255,255,.055)}.finance-row input,.finance-row select{width:100%;height:39px;border:1px solid rgba(220,233,255,.14);border-radius:10px;padding:0 11px;background:rgba(255,255,255,.075);color:#fff;-webkit-text-fill-color:#fff;color-scheme:dark;outline:none;font:600 11px/1.2 Arial,sans-serif}.finance-row input::placeholder{color:rgba(231,240,255,.38)}.finance-row select option{background:#0a1f47;color:#fff}.finance-row input:focus,.finance-row select:focus{border-color:rgba(125,166,255,.58);box-shadow:0 0 0 3px rgba(69,117,255,.11)}.finance-money{position:relative}.finance-money:before{content:'R$';position:absolute;left:11px;top:13px;font-size:9px;font-weight:800;color:rgba(229,239,255,.58);pointer-events:none}.finance-money input{padding-left:33px}.finance-delete{width:38px;height:38px;border:1px solid rgba(248,113,113,.22);border-radius:10px;background:rgba(239,68,68,.08);color:#fecaca;font-size:17px}.finance-empty{padding:22px;border:1px dashed rgba(220,233,255,.14);border-radius:13px;color:rgba(232,241,255,.55);font-size:10px;text-align:center}.finance-month-note{margin:-5px 0 2px;color:rgba(230,239,255,.58);font-size:9px}.finance-month-note strong{color:#fff}
 @media(max-width:780px){.finance-side-tab{top:auto;bottom:16px;right:14px;writing-mode:horizontal-tb;transform:none;border-right:1px solid rgba(224,236,255,.20);border-radius:999px;padding:11px 14px}.finance-overview{grid-template-columns:1fr}.finance-table-head{display:none}.finance-row{grid-template-columns:1fr 1fr}.finance-row .finance-name{grid-column:1/-1}.finance-delete{width:100%;grid-column:1/-1}.finance-money{min-width:0}}
 
@@ -221,6 +221,7 @@ body:before,body:after{content:"";position:fixed;pointer-events:none;z-index:0;b
     <section id="proposalHistoryContent" class="hidden"><div class="proposal-history-wrap"><div class="proposal-history-head"><div><h2>Propostas geradas</h2><p>Somente propostas efetivamente exportadas em PDF ou JPEG ficam salvas aqui.</p></div><button class="primary small" id="newProposalHistoryBtn">+ Nova proposta</button></div><div class="proposal-history-list" id="proposalHistoryList"></div></div></section>
 
     <section id="financeContent" class="hidden"><div class="finance-wrap">
+      <div class="finance-export-row"><div><strong>Resumo financeiro</strong><span id="financeSyncStatus">Sincronização segura entre administradores.</span></div><button class="ghost small" id="financeJpegBtn">Baixar resumo JPEG</button></div>
       <div class="finance-overview" id="financeOverview"></div>
       <div class="finance-month-note" id="financeMonthNote"></div>
       <div class="finance-panel"><div class="finance-panel-head"><div><h3>Entradas de clientes</h3><p>Digite qualquer nome. Clientes cadastrados aparecem apenas como sugestão.</p></div><button class="primary small" id="addFinanceIncomeBtn">+ Entrada</button></div><div class="finance-table"><div class="finance-table-head"><span>Cliente</span><span>Tipo</span><span>Valor</span><span></span></div><div id="financeIncomeRows"></div></div></div>
@@ -317,7 +318,13 @@ body:before,body:after{content:"";position:fixed;pointer-events:none;z-index:0;b
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
 const USERS={Administrador:'admin',Visitante:'status','Design Login':'design','Vídeos Login':'video'};
-const ADMIN_PASSWORD='oneway4324';
+const ADMIN_VERIFIER_HEX='1f6959ebf3643ab012cb91e61c941f11274a1ba88a3e3806025ee2e2cee28c6a';
+const ADMIN_VERIFY_SALT='oneway-admin-verifier-v1';
+const ADMIN_VERIFY_ITERATIONS=180000;
+const REMOTE_FINANCE_ID='finance-secure-v1';
+const FINANCE_KDF_SALT='oneway-finance-v1';
+const FINANCE_KDF_ITERATIONS=250000;
+const FINANCE_LOCAL_KEY='oneway-finance-secure-cache-v1';
 const AREAS={arte:'Arte',video:'Vídeo',trafego:'Tráfego'};
 const STATUS_DEFAULT={green:'Aprovado',red:'Não feito',yellow:'Em produção',purple:'Aguardando aprovação'};
 const STATUS_TRAFEGO={green:'Campanha ativa',red:'Campanha inativa',yellow:'Aguardando produção',orange:'Em montagem',purple:'Finalizada'};
@@ -336,7 +343,7 @@ const SUPABASE_KEY='sb_publishable_R7Umvf3iStv_e6xkIzKEyQ_YHFThLxe';
 const REMOTE_STATE_ID='main';
 const STORAGE_BUCKET='demand-files';
 const supabaseClient=window.supabase?.createClient?.(SUPABASE_URL,SUPABASE_KEY)||null;
-let realtimeChannel=null;
+let realtimeChannel=null,financeRealtimeChannel=null,financeCryptoKey=null,financeUnlocked=false,financeUpdatedAt=0,legacyFinanceItems=[];
 let state=seed(),currentUser=null,currentArea=null,currentMonth=currentMonthKey(),openClientId=null,openDemandId=null,toastTimer=null,lastAddedClientId=null,activeAnalytics=null,bulkImportDrafts=[],bulkImportMeta={warnings:[],expected:{}};
 let bulkSpeechRecognition=null,bulkSpeechListening=false,bulkSpeechBaseText='',bulkSpeechCommitted='';
 
@@ -373,10 +380,17 @@ function readLocalCache(){
     return raw?normalizeState(JSON.parse(raw)):null;
   }catch{return null}
 }
+function privateFreeSnapshot(value){
+  const clean=typeof structuredClone==='function'?structuredClone(value):JSON.parse(JSON.stringify(value));
+  delete clean.financeItems;
+  return clean;
+}
 function writeLocalCache(value){
-  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(value))}catch{}
+  const clean=privateFreeSnapshot(value);
+  if(legacyFinanceItems.length&&!financeUnlocked)clean.financeItems=legacyFinanceItems.slice();
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(clean))}catch{}
   Promise.race([
-    dbWriteState(typeof structuredClone==='function'?structuredClone(value):JSON.parse(JSON.stringify(value))),
+    dbWriteState(typeof structuredClone==='function'?structuredClone(clean):JSON.parse(JSON.stringify(clean))),
     new Promise(resolve=>setTimeout(resolve,1000))
   ]).catch(()=>{});
 }
@@ -384,45 +398,82 @@ function hasMeaningfulData(value){
   return !!value && ((value.clients?.length||0)+(value.demands?.length||0)+(value.deletedDemands?.length||0)+(value.removedClientMonths?.length||0)+(value.proposalHistory?.length||0)>0 || Number(value.updatedAt)>0);
 }
 function sharedStateSnapshot(source=state){
-  const snapshot=typeof structuredClone==='function'?structuredClone(source):JSON.parse(JSON.stringify(source));
-  // Financeiro fica somente no armazenamento local. Nunca vai para a tabela pública compartilhada.
-  delete snapshot.financeItems;
-  return snapshot;
+  return privateFreeSnapshot(source);
 }
 function mergeRemoteWithLocalPrivate(remote,local){
   const merged=normalizeState(remote);
-  merged.financeItems=Array.isArray(local?.financeItems)?local.financeItems:Array.isArray(state?.financeItems)?state.financeItems:[];
+  merged.financeItems=financeUnlocked&&Array.isArray(state?.financeItems)?state.financeItems:[];
   return merged;
 }
+function bytesToBase64(bytes){let bin='';for(let i=0;i<bytes.length;i+=0x8000)bin+=String.fromCharCode(...bytes.subarray(i,i+0x8000));return btoa(bin)}
+function base64ToBytes(value){const bin=atob(String(value||'')),out=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)out[i]=bin.charCodeAt(i);return out}
+async function derivePbkdf2Bits(password,salt,iterations,length=256){const material=await crypto.subtle.importKey('raw',new TextEncoder().encode(password),'PBKDF2',false,['deriveBits']);return new Uint8Array(await crypto.subtle.deriveBits({name:'PBKDF2',salt:new TextEncoder().encode(salt),iterations,hash:'SHA-256'},material,length))}
+async function verifyAdminPassword(password){try{const bits=await derivePbkdf2Bits(password,ADMIN_VERIFY_SALT,ADMIN_VERIFY_ITERATIONS,256),hex=[...bits].map(b=>b.toString(16).padStart(2,'0')).join('');return hex===ADMIN_VERIFIER_HEX}catch{return false}}
+async function deriveFinanceKey(password){const material=await crypto.subtle.importKey('raw',new TextEncoder().encode(password),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt:new TextEncoder().encode(FINANCE_KDF_SALT),iterations:FINANCE_KDF_ITERATIONS,hash:'SHA-256'},material,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])}
+async function encryptFinancePayload(items){if(!financeCryptoKey)throw new Error('Financeiro bloqueado');const iv=crypto.getRandomValues(new Uint8Array(12)),payload={items:Array.isArray(items)?items:[],updatedAt:Date.now()},plain=new TextEncoder().encode(JSON.stringify(payload)),cipher=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},financeCryptoKey,plain));return {v:1,alg:'AES-GCM',iv:bytesToBase64(iv),cipher:bytesToBase64(cipher),updatedAt:payload.updatedAt}}
+async function decryptFinancePayload(pack){if(!financeCryptoKey||!pack?.iv||!pack?.cipher)throw new Error('Pacote financeiro inválido');const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:base64ToBytes(pack.iv)},financeCryptoKey,base64ToBytes(pack.cipher)),parsed=JSON.parse(new TextDecoder().decode(plain));return {items:Array.isArray(parsed?.items)?parsed.items:[],updatedAt:Number(parsed?.updatedAt||pack?.updatedAt)||0}}
+function setFinanceSyncStatus(text){const el=document.getElementById('financeSyncStatus');if(el)el.textContent=text}
+async function loadSecureFinance(password){
+  financeCryptoKey=await deriveFinanceKey(password);
+  financeUnlocked=false;
+  let remotePack=null;
+  if(supabaseClient){const {data,error}=await supabaseClient.from('app_state').select('data').eq('id',REMOTE_FINANCE_ID).maybeSingle();if(error)throw error;remotePack=data?.data?.cipher?data.data:null}
+  if(remotePack){
+    const decoded=await decryptFinancePayload(remotePack);financeUpdatedAt=decoded.updatedAt;financeUnlocked=true;
+    if(!decoded.items.length&&legacyFinanceItems.length){state.financeItems=legacyFinanceItems.slice();legacyFinanceItems=[];await saveFinanceSecure({silent:true})}
+    else{state.financeItems=decoded.items;legacyFinanceItems=[];try{localStorage.setItem(FINANCE_LOCAL_KEY,JSON.stringify(remotePack))}catch{}}
+    writeLocalCache(state);subscribeFinanceRealtime();setFinanceSyncStatus('Sincronizado em tempo real entre administradores.');return true;
+  }
+  let cachedPack=null;try{const raw=localStorage.getItem(FINANCE_LOCAL_KEY);if(raw)cachedPack=JSON.parse(raw)}catch{}
+  if(cachedPack?.cipher){try{const decoded=await decryptFinancePayload(cachedPack);state.financeItems=decoded.items;financeUpdatedAt=decoded.updatedAt;financeUnlocked=true}catch{cachedPack=null}}
+  if(!financeUnlocked){state.financeItems=legacyFinanceItems.slice();financeUnlocked=true}
+  legacyFinanceItems=[];
+  const ok=await saveFinanceSecure({silent:true});
+  if(!ok&&supabaseClient)throw new Error('Não foi possível criar o Financeiro compartilhado');
+  writeLocalCache(state);subscribeFinanceRealtime();setFinanceSyncStatus(supabaseClient?'Sincronizado em tempo real entre administradores.':'Somente neste navegador — Supabase indisponível.');return true;
+}
+async function saveFinanceSecure(options={}){
+  if(!financeUnlocked||!financeCryptoKey)return false;
+  try{
+    const pack=await encryptFinancePayload(state.financeItems||[]);try{localStorage.setItem(FINANCE_LOCAL_KEY,JSON.stringify(pack))}catch{}
+    financeUpdatedAt=Number(pack.updatedAt)||Date.now();
+    if(!supabaseClient){setFinanceSyncStatus('Somente neste navegador — Supabase indisponível.');return true}
+    const {error}=await supabaseClient.from('app_state').upsert({id:REMOTE_FINANCE_ID,data:pack,updated_at:new Date().toISOString()},{onConflict:'id'});
+    if(error)throw error;setFinanceSyncStatus('Sincronizado em tempo real entre administradores.');return true;
+  }catch(e){console.error('Falha ao sincronizar Financeiro:',e);setFinanceSyncStatus('Falha na sincronização do Financeiro.');if(!options.silent)toast('Financeiro salvo neste navegador, mas não sincronizou com os outros administradores.');return false}
+}
+function subscribeFinanceRealtime(){
+  if(!supabaseClient||financeRealtimeChannel)return;
+  financeRealtimeChannel=supabaseClient.channel('oneway-finance-tempo-real').on('postgres_changes',{event:'*',schema:'public',table:'app_state',filter:`id=eq.${REMOTE_FINANCE_ID}`},async payload=>{
+    if(!financeUnlocked||!financeCryptoKey)return;const pack=payload?.new?.data;if(!pack?.cipher)return;
+    try{const decoded=await decryptFinancePayload(pack);if(decoded.updatedAt&&decoded.updatedAt<=financeUpdatedAt)return;state.financeItems=decoded.items;financeUpdatedAt=decoded.updatedAt;try{localStorage.setItem(FINANCE_LOCAL_KEY,JSON.stringify(pack))}catch{}if(currentUser&&isAdmin()){if(currentArea==='finance')renderFinance();setFinanceSyncStatus('Atualizado em tempo real.')}}catch(e){console.error('Falha ao abrir atualização financeira:',e)}
+  }).subscribe(status=>console.log('Finance realtime:',status));
+}
+function lockFinance(){financeUnlocked=false;financeCryptoKey=null;financeUpdatedAt=0;state.financeItems=[];if(financeRealtimeChannel&&supabaseClient){try{supabaseClient.removeChannel(financeRealtimeChannel)}catch{}financeRealtimeChannel=null}}
 async function loadState(){
   let local=readLocalCache();
+  if(local?.financeItems?.length)legacyFinanceItems=local.financeItems.slice();
   if(!local){
-    try{
-      const rawDb=await Promise.race([dbReadState(),new Promise(resolve=>setTimeout(()=>resolve(null),900))]);
-      if(rawDb)local=normalizeState(rawDb);
-    }catch{}
+    try{const rawDb=await Promise.race([dbReadState(),new Promise(resolve=>setTimeout(()=>resolve(null),900))]);if(rawDb){local=normalizeState(rawDb);if(local?.financeItems?.length)legacyFinanceItems=local.financeItems.slice()}}catch{}
   }
-  if(!supabaseClient)return local||seed();
+  const publicLocal=local?normalizeState(privateFreeSnapshot(local)):null;
+  if(!supabaseClient)return publicLocal||seed();
   try{
     const {data,error}=await supabaseClient.from('app_state').select('data').eq('id',REMOTE_STATE_ID).maybeSingle();
     if(error)throw error;
     if(data?.data){
-      let remote=mergeRemoteWithLocalPrivate(data.data,local);
-      if(!hasMeaningfulData(remote)&&hasMeaningfulData(local)){
-        const migrated=normalizeState(local);migrated.updatedAt=Date.now();
+      let remote=mergeRemoteWithLocalPrivate(data.data,publicLocal);
+      if(!hasMeaningfulData(remote)&&hasMeaningfulData(publicLocal)){
+        const migrated=normalizeState(publicLocal);migrated.updatedAt=Date.now();
         const {error:migrationError}=await supabaseClient.from('app_state').upsert({id:REMOTE_STATE_ID,data:sharedStateSnapshot(migrated),updated_at:new Date().toISOString()},{onConflict:'id'});
         if(!migrationError){writeLocalCache(migrated);return migrated}
       }
       writeLocalCache(remote);return remote;
     }
-    const initial=hasMeaningfulData(local)?normalizeState(local):seed();initial.updatedAt=Date.now();
+    const initial=hasMeaningfulData(publicLocal)?normalizeState(publicLocal):seed();initial.financeItems=[];initial.updatedAt=Date.now();
     const {error:insertError}=await supabaseClient.from('app_state').upsert({id:REMOTE_STATE_ID,data:sharedStateSnapshot(initial),updated_at:new Date().toISOString()},{onConflict:'id'});
-    if(insertError)throw insertError;
-    writeLocalCache(initial);return initial;
-  }catch(e){
-    console.error('Falha ao carregar Supabase:',e);
-    return local||seed();
-  }
+    if(insertError)throw insertError;writeLocalCache(initial);return initial;
+  }catch(e){console.error('Falha ao carregar Supabase:',e);return publicLocal||seed()}
 }
 async function saveState(){
   state.updatedAt=Date.now();
@@ -464,14 +515,22 @@ function initLogin(){
   const buttons=[...document.querySelectorAll('[data-login-user]')],passwordField=document.getElementById('passwordField'),passwordInput=document.getElementById('adminPassword'),error=document.getElementById('loginError'),adminBtn=document.getElementById('loginBtn');
   let selected='';
   const enterAs=user=>{currentUser=user;try{sessionStorage.setItem('demanda-user-v7',currentUser)}catch{}enterApp()};
-  const selectAccess=user=>{selected=user;buttons.forEach(b=>b.classList.toggle('selected',b.dataset.loginUser===user));error.textContent='';if(user==='Administrador'){passwordField.classList.remove('hidden');setTimeout(()=>passwordInput.focus(),60)}else{passwordField.classList.add('hidden');passwordInput.value='';enterAs(user)}};
+  const selectAccess=user=>{selected=user;buttons.forEach(b=>b.classList.toggle('selected',b.dataset.loginUser===user));error.textContent='';if(user==='Administrador'){passwordField.classList.remove('hidden');setTimeout(()=>passwordInput.focus(),60)}else{lockFinance();passwordField.classList.add('hidden');passwordInput.value='';enterAs(user)}};
   buttons.forEach(b=>b.onclick=()=>selectAccess(b.dataset.loginUser));
-  const doAdminLogin=()=>{if(selected!=='Administrador')selected='Administrador';if(passwordInput.value!==ADMIN_PASSWORD){error.textContent='Senha incorreta.';passwordInput.focus();passwordInput.select();return}enterAs('Administrador')};
+  const doAdminLogin=async()=>{
+    if(selected!=='Administrador')selected='Administrador';const password=passwordInput.value;adminBtn.disabled=true;error.textContent='Validando acesso…';
+    try{
+      if(!(await verifyAdminPassword(password))){error.textContent='Senha incorreta.';passwordInput.focus();passwordInput.select();return}
+      error.textContent='Sincronizando financeiro…';
+      try{await loadSecureFinance(password)}catch(e){console.error(e);lockFinance();error.textContent='Administrador liberado. O Financeiro não conseguiu sincronizar agora.'}
+      enterAs('Administrador');
+    }finally{adminBtn.disabled=false}
+  };
   adminBtn.onclick=doAdminLogin;passwordInput.addEventListener('keydown',e=>{if(e.key==='Enter')doAdminLogin()});
-  let saved=null;try{saved=sessionStorage.getItem('demanda-user-v7')}catch{}if(saved&&USERS[saved]){currentUser=saved;enterApp()}
+  let saved=null;try{saved=sessionStorage.getItem('demanda-user-v7')}catch{}if(saved&&USERS[saved]&&saved!=='Administrador'){currentUser=saved;enterApp()}else if(saved==='Administrador'){try{sessionStorage.removeItem('demanda-user-v7')}catch{}}
 }
 function enterApp(){document.getElementById('loginScreen').classList.add('hidden');document.getElementById('app').classList.remove('hidden');if(isAdmin()){if(currentArea==='agenda')currentArea=null}else if(isDesign()){currentArea='arte'}else if(isVideoUser()){currentArea='video'}else if(!currentArea||!canAccessArea(currentArea)){currentArea='agenda'}renderAll()}
-function logout(){try{sessionStorage.removeItem('demanda-user-v7')}catch{}location.reload()}
+function logout(){lockFinance();try{sessionStorage.removeItem('demanda-user-v7')}catch{}location.reload()}
 
 function renderTabs(){
   const cluster=document.querySelector('.area-nav-cluster');if(cluster)cluster.classList.toggle('role-limited',isDesign()||isVideoUser());
@@ -782,8 +841,22 @@ function financeVisibleInMonth(item,month=currentMonth){if(!item)return false;if
 function financeItemsFor(kind,month=currentMonth){return (state.financeItems||[]).filter(x=>x.kind===kind&&financeVisibleInMonth(x,month)).sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'pt-BR',{sensitivity:'base'}))}
 function financeClientSuggestionNames(){return [...new Set([...(state.clients||[]).map(c=>c.name),...(state.recentClients||[])].filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR',{sensitivity:'base'}))}
 function financeRowHTML(item){const income=item.kind==='income',typeLabel=item.type==='recurring'?'Recorrente':income?'Entrada única':'Custo único';return `<div class="finance-row" data-finance-id="${item.id}"><input class="finance-name" data-finance="name" ${income?'list="financeClientSuggestions"':''} value="${esc(item.name||'')}" placeholder="${income?'Nome do cliente':'Ex.: IA, Adobe, equipe'}"><select data-finance="type"><option value="recurring" ${item.type==='recurring'?'selected':''}>Recorrente</option><option value="oneoff" ${item.type==='oneoff'?'selected':''}>${income?'Entrada única':'Custo único'}</option></select><div class="finance-money"><input data-finance="amount" inputmode="decimal" value="${item.amount?String(Number(item.amount).toFixed(2)).replace('.',','):''}" placeholder="0,00"></div><button class="finance-delete" type="button" title="Excluir">×</button></div>`}
-function renderFinance(){if(!isAdmin())return;state.financeItems=Array.isArray(state.financeItems)?state.financeItems:[];const incomes=financeItemsFor('income'),costs=financeItemsFor('cost'),incomeTotal=incomes.reduce((a,b)=>a+(Number(b.amount)||0),0),costTotal=costs.reduce((a,b)=>a+(Number(b.amount)||0),0),net=incomeTotal-costTotal;document.getElementById('financeOverview').innerHTML=`<div class="finance-kpi"><span>Entradas</span><strong>${financeMoney(incomeTotal)}</strong></div><div class="finance-kpi"><span>Custos</span><strong>${financeMoney(costTotal)}</strong></div><div class="finance-kpi net ${net>=0?'positive':'negative'}"><span>Saldo do mês</span><strong>${financeMoney(net)}</strong></div>`;document.getElementById('financeMonthNote').innerHTML=`Competência: <strong>${esc(fmtMonth(currentMonth))}</strong> · itens recorrentes aparecem automaticamente nos meses seguintes.`;document.getElementById('financeClientSuggestions').innerHTML=financeClientSuggestionNames().map(n=>`<option value="${esc(n)}"></option>`).join('');const ir=document.getElementById('financeIncomeRows'),cr=document.getElementById('financeCostRows');ir.innerHTML=incomes.length?incomes.map(financeRowHTML).join(''):'<div class="finance-empty">Nenhuma entrada cadastrada neste mês.</div>';cr.innerHTML=costs.length?costs.map(financeRowHTML).join(''):'<div class="finance-empty">Nenhum custo cadastrado neste mês.</div>';document.querySelectorAll('.finance-row').forEach(row=>{const id=row.dataset.financeId,item=state.financeItems.find(x=>x.id===id);if(!item)return;row.querySelector('[data-finance="name"]').onchange=async e=>{item.name=e.target.value.trim();await saveState();renderFinance()};row.querySelector('[data-finance="amount"]').onchange=async e=>{item.amount=analyticsNumber(e.target.value);await saveState();renderFinance()};row.querySelector('[data-finance="type"]').onchange=async e=>{item.type=e.target.value;if(item.type==='recurring'){item.startMonth=currentMonth;delete item.month}else{item.month=currentMonth;item.startMonth=currentMonth}await saveState();renderFinance()};row.querySelector('.finance-delete').onclick=async()=>{const idx=state.financeItems.findIndex(x=>x.id===id);if(idx<0)return;const removed=state.financeItems.splice(idx,1)[0];if(!await saveState()){state.financeItems.splice(idx,0,removed);return}renderFinance()}})}
-async function addFinanceItem(kind){if(!isAdmin())return;state.financeItems=Array.isArray(state.financeItems)?state.financeItems:[];const item={id:uid(),kind,name:'',amount:0,type:'recurring',startMonth:currentMonth,createdAt:new Date().toISOString()};state.financeItems.push(item);if(!await saveState()){state.financeItems.pop();return}renderFinance();setTimeout(()=>document.querySelector(`[data-finance-id="${item.id}"] [data-finance="name"]`)?.focus(),30)}
+function renderFinance(){
+  if(!isAdmin())return;
+  if(!financeUnlocked){document.getElementById('financeOverview').innerHTML='<div class="finance-empty" style="grid-column:1/-1">Financeiro protegido. Entre novamente como Administrador para sincronizar os valores.</div>';document.getElementById('financeIncomeRows').innerHTML='';document.getElementById('financeCostRows').innerHTML='';setFinanceSyncStatus('Financeiro bloqueado nesta sessão.');return}
+  state.financeItems=Array.isArray(state.financeItems)?state.financeItems:[];const incomes=financeItemsFor('income'),costs=financeItemsFor('cost'),incomeTotal=incomes.reduce((a,b)=>a+(Number(b.amount)||0),0),costTotal=costs.reduce((a,b)=>a+(Number(b.amount)||0),0),net=incomeTotal-costTotal;document.getElementById('financeOverview').innerHTML=`<div class="finance-kpi"><span>Entradas</span><strong>${financeMoney(incomeTotal)}</strong></div><div class="finance-kpi"><span>Custos</span><strong>${financeMoney(costTotal)}</strong></div><div class="finance-kpi net ${net>=0?'positive':'negative'}"><span>Saldo do mês</span><strong>${financeMoney(net)}</strong></div>`;document.getElementById('financeMonthNote').innerHTML=`Competência: <strong>${esc(fmtMonth(currentMonth))}</strong> · itens recorrentes aparecem automaticamente nos meses seguintes.`;document.getElementById('financeClientSuggestions').innerHTML=financeClientSuggestionNames().map(n=>`<option value="${esc(n)}"></option>`).join('');const ir=document.getElementById('financeIncomeRows'),cr=document.getElementById('financeCostRows');ir.innerHTML=incomes.length?incomes.map(financeRowHTML).join(''):'<div class="finance-empty">Nenhuma entrada cadastrada neste mês.</div>';cr.innerHTML=costs.length?costs.map(financeRowHTML).join(''):'<div class="finance-empty">Nenhum custo cadastrado neste mês.</div>';document.querySelectorAll('.finance-row').forEach(row=>{const id=row.dataset.financeId,item=state.financeItems.find(x=>x.id===id);if(!item)return;row.querySelector('[data-finance="name"]').onchange=async e=>{item.name=e.target.value.trim();await saveFinanceSecure();renderFinance()};row.querySelector('[data-finance="amount"]').onchange=async e=>{item.amount=analyticsNumber(e.target.value);await saveFinanceSecure();renderFinance()};row.querySelector('[data-finance="type"]').onchange=async e=>{item.type=e.target.value;if(item.type==='recurring'){item.startMonth=currentMonth;delete item.month}else{item.month=currentMonth;item.startMonth=currentMonth}await saveFinanceSecure();renderFinance()};row.querySelector('.finance-delete').onclick=async()=>{const idx=state.financeItems.findIndex(x=>x.id===id);if(idx<0)return;const removed=state.financeItems.splice(idx,1)[0];if(!await saveFinanceSecure()){state.financeItems.splice(idx,0,removed);return}renderFinance()}})
+}
+async function addFinanceItem(kind){if(!isAdmin()||!financeUnlocked)return;state.financeItems=Array.isArray(state.financeItems)?state.financeItems:[];const item={id:uid(),kind,name:'',amount:0,type:'recurring',startMonth:currentMonth,createdAt:new Date().toISOString()};state.financeItems.push(item);if(!await saveFinanceSecure()){state.financeItems.pop();return}renderFinance();setTimeout(()=>document.querySelector(`[data-finance-id="${item.id}"] [data-finance="name"]`)?.focus(),30)}
+async function exportFinanceJPEG(){
+  if(!isAdmin()||!financeUnlocked){toast('Entre novamente como Administrador para gerar o relatório financeiro.');return false}
+  const incomes=financeItemsFor('income'),costs=financeItemsFor('cost'),incomeTotal=incomes.reduce((a,b)=>a+(Number(b.amount)||0),0),costTotal=costs.reduce((a,b)=>a+(Number(b.amount)||0),0),net=incomeTotal-costTotal;
+  const W=1400,pad=80,rowH=46,maxRows=8,visibleIncomes=incomes.slice(0,maxRows),visibleCosts=costs.slice(0,maxRows),sectionRows=Math.max(visibleIncomes.length,visibleCosts.length,1),H=Math.max(1080,560+sectionRows*rowH+170),c=document.createElement('canvas');c.width=W;c.height=H;const ctx=c.getContext('2d');drawAnalyticsBackground(ctx,W,H);
+  drawCanvasRoundRect(ctx,pad,58,W-pad*2,200,28,'rgba(255,255,255,.09)','rgba(220,233,255,.16)');ctx.fillStyle='#cfe0ff';ctx.font='700 18px Arial';ctx.fillText('ONE WAY · FINANCEIRO',pad+30,102);ctx.fillStyle='#fff';ctx.font='700 48px Arial';ctx.fillText('Resumo Financeiro',pad+30,160);ctx.fillStyle='#dce9ff';ctx.font='700 24px Arial';ctx.fillText(fmtMonth(currentMonth),pad+30,205);try{const logo=await loadImage(TRAFFIC_LOGO_DATA_URI||LOGO_DATA_URI),tw=245,th=tw*(logo.height/logo.width),ly=58+(200-th)/2;ctx.drawImage(logo,W-pad-tw-30,ly,tw,th)}catch{}
+  const cards=[['ENTRADAS',incomeTotal],['CUSTOS',costTotal],['SALDO',net]];const cardGap=14,cardW=(W-pad*2-cardGap*2)/3;cards.forEach((x,i)=>{const x0=pad+i*(cardW+cardGap);drawCanvasRoundRect(ctx,x0,282,cardW,132,18,'rgba(255,255,255,.075)','rgba(220,233,255,.14)');ctx.fillStyle='rgba(225,237,255,.70)';ctx.font='700 14px Arial';ctx.fillText(x[0],x0+22,318);ctx.fillStyle='#fff';ctx.font='700 31px Arial';ctx.fillText(financeMoney(x[1]),x0+22,365)});
+  const y0=450,colGap=24,colW=(W-pad*2-colGap)/2;const drawList=(title,items,x)=>{drawCanvasRoundRect(ctx,x,y0,colW,90+sectionRows*rowH+30,20,'rgba(255,255,255,.055)','rgba(220,233,255,.12)');ctx.fillStyle='#fff';ctx.font='700 22px Arial';ctx.fillText(title,x+24,y0+38);ctx.fillStyle='rgba(225,237,255,.55)';ctx.font='700 12px Arial';ctx.fillText('Descrição',x+24,y0+68);ctx.textAlign='right';ctx.fillText('Valor',x+colW-24,y0+68);ctx.textAlign='left';if(!items.length){ctx.fillStyle='rgba(235,243,255,.55)';ctx.font='400 16px Arial';ctx.fillText('Nenhum lançamento neste mês.',x+24,y0+112);return}items.forEach((it,i)=>{const yy=y0+108+i*rowH;ctx.fillStyle=i%2===0?'rgba(255,255,255,.025)':'rgba(255,255,255,.045)';ctx.fillRect(x+16,yy-24,colW-32,38);ctx.fillStyle='#f4f7ff';ctx.font='600 16px Arial';const name=String(it.name||'Sem descrição');ctx.fillText(name.length>34?name.slice(0,31)+'…':name,x+24,yy);ctx.textAlign='right';ctx.font='700 16px Arial';ctx.fillText(financeMoney(it.amount),x+colW-24,yy);ctx.textAlign='left'});if((title.startsWith('Entradas')?incomes:costs).length>maxRows){ctx.fillStyle='rgba(225,237,255,.55)';ctx.font='400 13px Arial';ctx.fillText(`+ ${(title.startsWith('Entradas')?incomes:costs).length-maxRows} lançamentos no sistema`,x+24,y0+108+sectionRows*rowH)}};
+  drawList('Entradas de clientes',visibleIncomes,pad);drawList('Custos da agência',visibleCosts,pad+colW+colGap);
+  ctx.fillStyle='rgba(235,243,255,.62)';ctx.font='400 15px Arial';ctx.fillText('Resumo mensal simplificado · valores cadastrados no Financeiro da One Way.',pad,H-42);const a=document.createElement('a');a.download=`financeiro-${currentMonth}.jpg`;a.href=c.toDataURL('image/jpeg',.94);a.click();toast('Resumo financeiro em JPEG gerado.',null,null,'success');return true
+}
 
 
 function importNorm(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim()}
@@ -1073,7 +1146,7 @@ function handleGlobalEscape(e){
   if(modal){e.preventDefault();closeModal(modal.id);return}
   if(isAdmin()&&currentArea){e.preventDefault();returnToHome()}
 }
-function start(){setTimeout(()=>document.body.classList.remove('booting'),900);document.getElementById('logoutBtn').onclick=logout;document.getElementById('trafficReportBtn').onclick=openTrafficAnalytics;document.getElementById('analyzePdfBtn').onclick=analyzeAnalyticsPdf;document.querySelectorAll('#analyticsSourceOptions [data-source]').forEach(b=>b.onclick=()=>setAnalyticsSource(b.dataset.source));document.getElementById('newProposalBtn').onclick=openProposalModal;document.getElementById('newProposalHistoryBtn').onclick=openProposalModal;document.getElementById('bulkImportBtn').onclick=openBulkDemandImport;document.getElementById('bulkMicBtn').onclick=toggleBulkSpeech;document.getElementById('bulkAnalyzeBtn').onclick=analyzeBulkDemandImport;document.getElementById('bulkConfirmBtn').onclick=confirmBulkDemandImport;document.getElementById('addFinanceIncomeBtn').onclick=()=>addFinanceItem('income');document.getElementById('addFinanceCostBtn').onclick=()=>addFinanceItem('cost');document.getElementById('newDemandTop').onclick=()=>openDemandModal();document.getElementById('addClientBtn').onclick=openClientModal;document.getElementById('demandForm').onsubmit=submitDemand;document.getElementById('clientForm').onsubmit=submitClient;document.getElementById('proposalForm').onsubmit=submitProposal;document.getElementById('addProposalItem').onclick=()=>addProposalItem();document.getElementById('proposalTotal').oninput=updateProposalTotals;document.getElementById('proposalJpegBtn').onclick=async()=>{const data=proposalData();if(validateProposal(data)){rememberClientName(data.client);const ok=await exportProposalJPEG(data);if(ok){await recordGeneratedProposal(data,'jpeg');toast('JPEG gerado e salvo no histórico.',null,null,'success')}}};document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>closeModal(b.dataset.close));document.querySelectorAll('.modal-backdrop').forEach(m=>m.onclick=e=>{if(e.target===m)closeModal(m.id)});document.querySelectorAll('#clientTypeChoices .choice').forEach(b=>b.onclick=()=>setClientType(b.dataset.type));document.getElementById('clientNameInput').oninput=e=>renderRecentClientSuggestions(e.target.value);document.getElementById('searchInput').oninput=()=>{openClientId=null;openDemandId=null;if(currentArea==='deleted')renderDeleted();else if(currentArea==='agenda')renderAgenda();else if(currentArea&&Object.keys(AREAS).includes(currentArea)){renderStats();renderClients()}};document.addEventListener('click',e=>{if(!e.target.closest('.client-options')&&!e.target.closest('.client-menu'))document.querySelectorAll('.client-menu').forEach(m=>m.classList.add('hidden'))});document.addEventListener('keydown',handleGlobalEscape);initLogin()}
+function start(){setTimeout(()=>document.body.classList.remove('booting'),900);document.getElementById('logoutBtn').onclick=logout;document.getElementById('trafficReportBtn').onclick=openTrafficAnalytics;document.getElementById('analyzePdfBtn').onclick=analyzeAnalyticsPdf;document.querySelectorAll('#analyticsSourceOptions [data-source]').forEach(b=>b.onclick=()=>setAnalyticsSource(b.dataset.source));document.getElementById('newProposalBtn').onclick=openProposalModal;document.getElementById('newProposalHistoryBtn').onclick=openProposalModal;document.getElementById('bulkImportBtn').onclick=openBulkDemandImport;document.getElementById('bulkMicBtn').onclick=toggleBulkSpeech;document.getElementById('bulkAnalyzeBtn').onclick=analyzeBulkDemandImport;document.getElementById('bulkConfirmBtn').onclick=confirmBulkDemandImport;document.getElementById('addFinanceIncomeBtn').onclick=()=>addFinanceItem('income');document.getElementById('addFinanceCostBtn').onclick=()=>addFinanceItem('cost');document.getElementById('financeJpegBtn').onclick=exportFinanceJPEG;document.getElementById('newDemandTop').onclick=()=>openDemandModal();document.getElementById('addClientBtn').onclick=openClientModal;document.getElementById('demandForm').onsubmit=submitDemand;document.getElementById('clientForm').onsubmit=submitClient;document.getElementById('proposalForm').onsubmit=submitProposal;document.getElementById('addProposalItem').onclick=()=>addProposalItem();document.getElementById('proposalTotal').oninput=updateProposalTotals;document.getElementById('proposalJpegBtn').onclick=async()=>{const data=proposalData();if(validateProposal(data)){rememberClientName(data.client);const ok=await exportProposalJPEG(data);if(ok){await recordGeneratedProposal(data,'jpeg');toast('JPEG gerado e salvo no histórico.',null,null,'success')}}};document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>closeModal(b.dataset.close));document.querySelectorAll('.modal-backdrop').forEach(m=>m.onclick=e=>{if(e.target===m)closeModal(m.id)});document.querySelectorAll('#clientTypeChoices .choice').forEach(b=>b.onclick=()=>setClientType(b.dataset.type));document.getElementById('clientNameInput').oninput=e=>renderRecentClientSuggestions(e.target.value);document.getElementById('searchInput').oninput=()=>{openClientId=null;openDemandId=null;if(currentArea==='deleted')renderDeleted();else if(currentArea==='agenda')renderAgenda();else if(currentArea&&Object.keys(AREAS).includes(currentArea)){renderStats();renderClients()}};document.addEventListener('click',e=>{if(!e.target.closest('.client-options')&&!e.target.closest('.client-menu'))document.querySelectorAll('.client-menu').forEach(m=>m.classList.add('hidden'))});document.addEventListener('keydown',handleGlobalEscape);initLogin()}
 
 (async()=>{state=await loadState();subscribeRealtime();start()})();
 </script>
