@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Acompanhamento de Demandas</title>
+<style>
+:root{
+  --bg:#06101f;--bg-2:#0a1f47;--bg-3:#2153eb;--panel:#f8fbff;--panel-2:#eef4ff;--text:#0f172a;--muted:#5d6b85;--line:#d7e1f2;--soft:#f4f8ff;
+  --dark:#0d1b3d;--accent:#2f66ff;--accent-2:#4f84ff;--accent-soft:#dce8ff;--green:#16a34a;--red:#dc2626;--yellow:#eab308;--purple:#7c3aed;
+  --shadow:0 24px 70px rgba(2,8,23,.26);--shadow-soft:0 16px 40px rgba(6,17,38,.16);
+  --ease:cubic-bezier(.22,.8,.28,1);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;min-height:100vh;background:linear-gradient(135deg,var(--bg) 0%,var(--bg-2) 48%,var(--bg-3) 100%) fixed;color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:none!important}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid rgba(23,25,30,.12);outline-offset:2px}
+
+/* neutral brand */
+.brand{display:flex;align-items:center;gap:14px}.brand-logo{display:block;width:118px;height:auto;filter:drop-shadow(0 10px 22px rgba(47,102,255,.18))}.brand-copy strong{font-size:14px;letter-spacing:-.01em;color:#f8fbff}.brand-copy span{display:block;font-size:10px;color:rgba(232,241,255,.72);text-transform:uppercase;letter-spacing:.12em;margin-top:2px}.login .brand-copy strong{color:#102040}.login .brand-copy span{color:#5d6b85}.login .brand-logo{width:138px}
+
+/* login */
+.login{min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at 18% 16%,rgba(79,132,255,.26),transparent 28%),radial-gradient(circle at 85% 12%,rgba(44,88,230,.28),transparent 24%),linear-gradient(135deg,var(--bg) 0%,var(--bg-2) 48%,var(--bg-3) 100%)}
+.login-card{width:min(430px,100%);background:rgba(248,251,255,.98);border:1px solid rgba(255,255,255,.18);border-radius:26px;padding:34px;box-shadow:var(--shadow);animation:rise .55s var(--ease) both}
+.login h1{font-size:30px;letter-spacing:-.045em;margin:34px 0 8px}.login p{margin:0 0 24px;color:var(--muted);line-height:1.55}.login-error{min-height:18px;margin:10px 0 0;color:#b42318;font-size:11px;font-weight:700;animation:fade .2s ease both}.login-note{font-size:10px;color:#9aa0aa;margin-top:10px;line-height:1.45}
+.field{display:grid;gap:8px;margin:15px 0}.field label{font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:.1em;color:#858b97}.field input,.field select,.field textarea{width:100%;border:1px solid #d9dde4;background:#fff!important;color:#17191e!important;-webkit-text-fill-color:#17191e!important;border-radius:13px;padding:12px 13px;outline:none;color-scheme:light;transition:border .18s,box-shadow .18s}.field select option{background:#fff;color:#17191e}.field textarea{min-height:118px;resize:vertical}.field input:focus,.field select:focus,.field textarea:focus{border-color:#aeb4bf;box-shadow:0 0 0 4px rgba(23,25,30,.05)}
+.recent-clients{margin:-2px 0 15px;padding:12px 13px;background:#fafbfc;border:1px solid #eceef2;border-radius:13px;animation:fade .2s ease both}.recent-clients-label{font-size:9px;font-weight:850;text-transform:uppercase;letter-spacing:.1em;color:#969ba5;margin-bottom:8px}.recent-client-chips{display:flex;gap:7px;flex-wrap:wrap}.recent-client-chip{border:1px solid #e0e3e8;background:#fff;color:#434851;border-radius:999px;padding:7px 10px;font-size:11px;font-weight:700;transition:transform .16s var(--ease),background .16s,border-color .16s}.recent-client-chip:hover{background:#f4f5f7;border-color:#cfd3da;transform:translateY(-1px)}
+.primary,.ghost,.soft-btn{border-radius:12px;padding:10px 13px;font-weight:760;transition:transform .16s var(--ease),background .16s,box-shadow .16s,border-color .16s}.primary{border:0;background:linear-gradient(135deg,var(--dark) 0%,var(--accent) 100%);color:#fff;box-shadow:0 10px 24px rgba(17,45,126,.25)}.primary:hover{transform:translateY(-1px);box-shadow:0 14px 28px rgba(17,45,126,.32)}.ghost{border:1px solid #d9e4f6;background:#fff;color:#1d2d52}.ghost:hover,.soft-btn:hover{background:#f1f6ff}.soft-btn{border:1px solid #d9e4f6;background:#f8fbff;color:#28406d}.small{font-size:12px;padding:8px 10px}.full{width:100%}.danger{color:#b42318;border-color:#fecdca;background:#fff8f7}
+
+/* shell */
+.topbar{position:sticky;top:0;z-index:30;background:rgba(7,17,36,.72);backdrop-filter:blur(18px);border-bottom:1px solid rgba(190,210,255,.14)}
+.topbar-inner{max-width:1420px;margin:auto;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:18px}.top-actions{display:flex;align-items:center;gap:9px}.user-chip{display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.12);border:1px solid rgba(201,217,255,.18);border-radius:999px;padding:6px 10px 6px 6px}.avatar{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.16);color:#fff;font-weight:800;font-size:12px}.user-meta strong{display:block;font-size:11px;color:#fff}.user-meta span{font-size:9px;color:rgba(232,241,255,.76)}
+.shell{max-width:1420px;margin:auto;padding:30px 24px 60px}.hero{display:grid;grid-template-columns:1fr auto;gap:20px;align-items:end;margin:10px 0 22px}.eyebrow{font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:.14em;color:rgba(229,238,255,.72)}.hero h1{font-size:34px;letter-spacing:-.05em;margin:7px 0 5px;color:#fff}.hero p{margin:0;color:rgba(234,241,255,.8)}.hero-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.search,.month-select{border:1px solid rgba(203,220,255,.22);background:rgba(255,255,255,.12)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;border-radius:12px;padding:10px 12px;outline:none;color-scheme:dark;backdrop-filter:blur(10px)}.search::placeholder{color:rgba(232,241,255,.72)}.month-select option{background:#0d1b3d;color:#fff}.search{min-width:250px}.month-select{min-width:178px;font-weight:680}
+
+/* area tabs */
+.nav-row{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px}.tabs{display:flex;gap:7px;background:rgba(255,255,255,.12);padding:5px;border-radius:14px;width:max-content;max-width:calc(100% - 52px);overflow:auto;margin:0;border:1px solid rgba(201,217,255,.16);backdrop-filter:blur(10px)}.tab{border:0;background:transparent;padding:9px 18px;border-radius:10px;color:rgba(233,240,255,.8);font-weight:790;white-space:nowrap;transition:all .22s var(--ease)}.tab:hover{color:#fff}.tab.active{background:linear-gradient(135deg,#f8fbff 0%,#dbe8ff 100%);color:#102040;box-shadow:0 8px 20px rgba(10,20,45,.18);transform:translateY(-1px)}.trash-tab{width:40px;height:40px;flex:0 0 40px;display:grid;place-items:center;border:1px solid rgba(201,217,255,.16);background:rgba(255,255,255,.08);color:rgba(233,240,255,.8);border-radius:11px;transition:all .2s var(--ease)}.trash-tab svg{width:16px;height:16px;stroke:currentColor}.trash-tab:hover{background:rgba(255,255,255,.14);color:#fff;border-color:rgba(201,217,255,.24);transform:translateY(-1px)}.trash-tab.active{background:#fff;color:#b42318;border-color:#f1d1cd;box-shadow:0 5px 14px rgba(17,24,39,.14)}
+
+/* compact stats */
+.stats{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:18px;animation:fade .28s ease both}.stat{display:flex;align-items:center;gap:5px;border:1px solid rgba(201,217,255,.16);background:rgba(255,255,255,.1);backdrop-filter:blur(10px);border-radius:8px;padding:5px 7px;color:rgba(233,240,255,.82)}.stat small{font-size:9px;font-weight:650;white-space:nowrap}.stat strong{font-size:10px;color:#fff}.dot{width:6px;height:6px;border-radius:2px;display:inline-block}.green{background:var(--green)}.red{background:var(--red)}.yellow{background:var(--yellow)}.purple{background:var(--purple)}
+
+.section-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:19px 0 13px}.section-copy h2{margin:0;font-size:17px;letter-spacing:-.02em;color:#fff}.section-copy span{display:block;font-size:11px;color:rgba(229,238,255,.72);margin-top:3px}.section-actions{display:flex;gap:8px}
+
+/* client cards */
+.clients{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;align-items:start}.client{position:relative;background:rgba(248,251,255,.98);border:1px solid rgba(214,226,247,.92);border-radius:18px;box-shadow:var(--shadow-soft);overflow:visible;animation:cardIn .36s var(--ease) both;transition:transform .24s var(--ease),box-shadow .24s var(--ease),border-color .24s var(--ease)}.client:hover{transform:translateY(-2px);box-shadow:0 16px 34px rgba(20,24,33,.065);border-color:#dadee5}.client.just-added{animation:newClientPulse .72s var(--ease) both}.client-top{display:flex;align-items:stretch}.client-head{flex:1;border:0;background:#fff;border-radius:18px;padding:19px 20px;display:flex;align-items:center;justify-content:space-between;gap:13px;text-align:left}.client-name{font-size:16px;font-weight:760;letter-spacing:-.022em;color:#17191e}.client-meta{display:flex;align-items:center;gap:7px;margin-top:5px}.type-chip{font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#8c919c}.demand-count{font-size:10px;color:#a0a5ae}.client-arrow{color:#a0a5ae;font-size:16px;transition:transform .3s var(--ease),color .2s}.client.open .client-arrow{transform:rotate(180deg);color:#24272d}.client-options{width:45px;border:0;border-left:1px solid #f0f1f3;background:#fff;border-radius:0 18px 18px 0;color:#7a808a;font-size:20px}.client-options:hover{background:#f8f9fa;color:#17191e}.client-menu{position:absolute;right:9px;top:57px;z-index:25;background:#fff;border:1px solid var(--line);border-radius:12px;padding:6px;min-width:210px;box-shadow:0 18px 48px rgba(23,25,30,.14);animation:menuIn .2s var(--ease) both}.client-menu button{width:100%;border:0;background:#fff;border-radius:8px;padding:10px 11px;text-align:left;font-size:11px;font-weight:720;color:#444952}.client-menu button:hover{background:#f7f8fa}.client-menu .danger-menu{color:#b42318}
+.clients.focus-mode{display:block;max-width:980px;margin:34px auto 0}.clients.focus-mode .client{border-radius:24px;box-shadow:0 26px 70px rgba(20,24,33,.085);animation:focusIn .36s var(--ease) both}.clients.focus-mode .client:hover{transform:none}.clients.focus-mode .client-head{padding:24px 28px}.clients.focus-mode .client-name{font-size:22px}.clients.focus-mode .client-options{border-radius:0 24px 0 0}
+.client-body{display:grid;grid-template-rows:0fr;opacity:0;border-top:1px solid transparent;transition:grid-template-rows .32s var(--ease),opacity .24s ease,border-color .24s}.client-body-inner{overflow:hidden}.client.open .client-body{grid-template-rows:1fr;opacity:1;border-top-color:#eef0f3}.client-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:17px 28px 10px}.client-helper{font-size:11px;color:#999ea8}.demand-list{padding:0 28px 27px}
+
+/* simple demand list */
+.demand{border-top:1px solid #edf0f3}.demand:first-child{border-top:0}.demand-row{width:100%;border:0;background:transparent;padding:14px 1px;display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:13px;align-items:center;text-align:left;transition:padding .2s,background .2s}.demand-row:hover{padding-left:6px}.demand-title{font-size:13px;font-weight:600;line-height:1.4;color:#2d3138}.demand-index{display:inline-block;width:25px;color:#a4a9b2;font-size:11px}.current-status{font-size:9px;font-weight:820;padding:5px 7px;border-radius:7px;white-space:nowrap;border:1px solid transparent}.current-status.green{background:#ecfdf3;color:#027a48;border-color:#abefc6}.current-status.red{background:#fef3f2;color:#b42318;border-color:#fecdca}.current-status.yellow{background:#fefce8;color:#854d0e;border-color:#fde68a}.current-status.purple{background:#f5f3ff;color:#6d28d9;border-color:#ddd6fe}.demand-caret{color:#a3a8b1;font-size:14px;transition:transform .25s var(--ease)}.demand.expanded .demand-caret{transform:rotate(180deg)}
+.demand-detail{display:grid;grid-template-rows:0fr;opacity:0;transition:grid-template-rows .3s var(--ease),opacity .24s ease}.detail-overflow{overflow:hidden}.demand.expanded .demand-detail{grid-template-rows:1fr;opacity:1}.detail-panel{margin:1px 0 18px;background:#fafbfc;border:1px solid #e8ebef;border-radius:16px;padding:19px;animation:fade .25s ease both}.detail-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(270px,.75fr);gap:22px}.detail-label{font-size:9px;font-weight:850;text-transform:uppercase;letter-spacing:.11em;color:#9ca1aa;margin-bottom:8px}.description{margin:0;color:#5d636e;line-height:1.62;white-space:pre-wrap;font-size:13px}.status-edit{display:flex;gap:5px;flex-wrap:wrap}.status-btn{border:1px solid transparent;border-radius:8px;padding:6px 8px;font-size:9px;font-weight:820;line-height:1.1;white-space:nowrap;transition:transform .14s var(--ease),filter .14s}.status-btn:hover{transform:translateY(-1px);filter:brightness(.98)}.status-btn[data-status="green"]{background:#ecfdf3;color:#027a48;border-color:#abefc6}.status-btn[data-status="red"]{background:#fef3f2;color:#b42318;border-color:#fecdca}.status-btn[data-status="yellow"]{background:#fefce8;color:#854d0e;border-color:#fde68a}.status-btn[data-status="purple"]{background:#f5f3ff;color:#6d28d9;border-color:#ddd6fe}.status-btn.active[data-status="green"]{background:var(--green);color:#fff;border-color:var(--green)}.status-btn.active[data-status="red"]{background:var(--red);color:#fff;border-color:var(--red)}.status-btn.active[data-status="yellow"]{background:var(--yellow);color:#382800;border-color:var(--yellow)}.status-btn.active[data-status="purple"]{background:var(--purple);color:#fff;border-color:var(--purple)}
+.refs{display:grid;gap:8px}.ref-item{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#fff;border:1px solid #e6e9ed;border-radius:10px;padding:8px 9px;font-size:11px}.ref-item a{color:#333842;text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ref-item a:hover{text-decoration:underline}.mini-link{border:0;background:transparent;color:#8a909a;font-size:10px;font-weight:760;padding:3px}.mini-link.danger{color:#b42318}.ref-add{display:flex;gap:6px;margin-top:8px}.ref-add input{min-width:0;flex:1;border:1px solid #dfe3e8;background:#fff;color:#222;border-radius:9px;padding:8px 9px;font-size:11px}.file-upload{margin-top:8px}.file-upload label{display:inline-flex;align-items:center;gap:6px;border:1px dashed #cfd4dc;background:#fff;border-radius:9px;padding:8px 10px;font-size:10px;font-weight:760;color:#656b75;cursor:pointer}.file-upload input{display:none}.detail-actions{display:flex;gap:7px;justify-content:flex-end;margin-top:16px;padding-top:14px;border-top:1px solid #e9ebef}
+.empty{grid-column:1/-1;padding:34px 20px;text-align:center;color:#8e949e;background:#fff;border:1px dashed #d7dbe2;border-radius:16px;animation:fade .25s ease both}.empty strong{display:block;color:#555b65;margin-bottom:4px;font-size:13px}.empty span{font-size:11px}
+
+/* agenda do visitante */
+.agenda-wrap{max-width:1120px;margin:8px auto 0;animation:fade .28s ease both}.agenda-summary{display:flex;align-items:end;justify-content:space-between;gap:16px;margin:18px 0 12px}.agenda-summary h2{margin:0;font-size:17px;letter-spacing:-.02em}.agenda-summary span{font-size:11px;color:#9297a1}.agenda-list{display:grid;gap:8px}.agenda-item{width:100%;border:1px solid #e7e9ee;background:#fff;border-radius:14px;padding:12px 14px;display:grid;grid-template-columns:92px minmax(0,1fr) 82px auto 18px;gap:14px;align-items:center;text-align:left;box-shadow:0 7px 20px rgba(20,24,33,.025);transition:transform .18s var(--ease),box-shadow .18s var(--ease),border-color .18s}.agenda-item:hover{transform:translateY(-1px);box-shadow:0 12px 28px rgba(20,24,33,.055);border-color:#d9dde4}.agenda-date{display:flex;align-items:center;gap:8px}.agenda-day{font-size:22px;font-weight:820;letter-spacing:-.05em;line-height:1}.agenda-month{font-size:9px;color:#8e949e;font-weight:820;text-transform:uppercase;letter-spacing:.08em;line-height:1.2}.agenda-info{min-width:0}.agenda-info strong{display:block;font-size:12px;color:#292d34;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.agenda-info span{display:block;font-size:10px;color:#9297a1;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.area-chip{justify-self:start;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#747a85;background:#f5f6f8;border:1px solid #e7e9ee;border-radius:7px;padding:5px 7px}.agenda-arrow{color:#a5aab3}.agenda-undated .agenda-day{font-size:12px;letter-spacing:0}.agenda-undated .agenda-month{display:none}.demand-date{margin-left:9px;font-size:10px;color:#9297a1;font-weight:560;white-space:nowrap}
+
+/* deleted */
+.deleted-wrap{display:grid;gap:18px}.trash-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:2px 2px 0}.trash-toolbar span{font-size:11px;color:#9297a1}.empty-trash-btn{border:1px solid #f1d1cd;background:#fff;color:#b42318;border-radius:10px;padding:8px 11px;font-size:10px;font-weight:800;transition:all .18s var(--ease)}.empty-trash-btn:hover{background:#fff7f6;border-color:#e7b8b2;transform:translateY(-1px)}.empty-trash-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}.deleted-section{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:var(--shadow-soft);animation:cardIn .32s var(--ease) both}.deleted-section h3{margin:0;font-size:15px}.deleted-section>p{margin:4px 0 14px;color:#90959f;font-size:11px}.deleted-list{display:grid;gap:8px}.deleted-item{display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px;border:1px solid #eceef1;background:#fafbfc;border-radius:11px;padding:11px 12px}.deleted-item strong{font-size:12px}.deleted-meta{font-size:10px;color:#989da7;margin-top:3px}.deleted-actions{display:flex;gap:6px}.restore-btn,.permanent-btn{border:1px solid #dddfe4;background:#fff;border-radius:8px;padding:7px 9px;font-size:10px;font-weight:760}.permanent-btn{color:#b42318;border-color:#fecdca}
+
+/* modal */
+.modal-backdrop{position:fixed;inset:0;z-index:60;background:rgba(16,18,23,.42);backdrop-filter:blur(6px);display:grid;place-items:center;padding:20px;animation:fade .18s ease both}.modal{width:min(610px,100%);max-height:92vh;overflow:auto;background:#fff;border-radius:22px;padding:23px;box-shadow:0 32px 90px rgba(16,18,23,.22);animation:modalIn .28s var(--ease) both}.modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}.modal h3{margin:0;font-size:20px;letter-spacing:-.03em}.modal-head p{margin:5px 0 0;color:#8a909a;font-size:11px;line-height:1.5}.x{border:0;background:#f2f3f5;width:34px;height:34px;border-radius:10px;color:#666c76;font-size:19px}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:20px}.choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.choice{border:1px solid #e0e3e8;background:#fff;border-radius:12px;padding:12px;text-align:left;transition:.18s}.choice strong{display:block;font-size:12px}.choice span{display:block;font-size:10px;color:#8f949e;margin-top:4px;line-height:1.4}.choice.active{border-color:#25282e;box-shadow:0 0 0 2px rgba(23,25,30,.05);background:#fafafa}.context-note{background:#f7f8fa;border:1px solid #e7e9ed;border-radius:11px;padding:10px 11px;color:#6f7580;font-size:10px;line-height:1.45;margin-top:4px}.form-status-wrap{display:flex;gap:6px;flex-wrap:wrap}.form-status-wrap .status-btn{padding:9px 11px;font-size:10px}
+.toast{position:fixed;z-index:90;right:20px;bottom:20px;display:flex;align-items:center;gap:10px;background:#17191e;color:#fff;border-radius:12px;padding:11px 13px;font-size:11px;box-shadow:0 16px 42px rgba(17,24,39,.2);animation:toastIn .28s var(--ease) both}.toast-icon{width:20px;height:20px;flex:0 0 20px;display:grid;place-items:center;border-radius:50%;background:#dcfce7;color:#15803d;font-size:12px;font-weight:900}.toast-action{border:0;background:#fff;color:#17191e;border-radius:8px;padding:6px 8px;font-size:10px;font-weight:850}
+
+@keyframes newClientPulse{0%{opacity:0;transform:translateY(8px) scale(.985);box-shadow:0 0 0 0 rgba(22,163,74,0)}45%{opacity:1;transform:none;box-shadow:0 0 0 4px rgba(22,163,74,.10)}100%{box-shadow:var(--shadow-soft)}}@keyframes fade{from{opacity:0}to{opacity:1}}@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}@keyframes cardIn{from{opacity:0;transform:translateY(8px) scale(.992)}to{opacity:1;transform:none}}@keyframes focusIn{from{opacity:.45;transform:scale(.985)}to{opacity:1;transform:scale(1)}}@keyframes menuIn{from{opacity:0;transform:translateY(-5px) scale(.98)}to{opacity:1;transform:none}}@keyframes modalIn{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:none}}@keyframes toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+@media(max-width:850px){.hero{grid-template-columns:1fr}.hero-controls{justify-content:flex-start}.detail-grid{grid-template-columns:1fr}.clients{grid-template-columns:repeat(2,minmax(0,1fr))}.demand-row{grid-template-columns:minmax(0,1fr) auto auto}}
+@media(max-width:640px){.agenda-item{grid-template-columns:70px minmax(0,1fr) auto 14px;gap:9px;padding:11px}.agenda-item .area-chip{display:none}.agenda-day{font-size:18px}.agenda-summary{align-items:flex-start;flex-direction:column;gap:4px}.shell,.topbar-inner{padding-left:14px;padding-right:14px}.brand-copy span,.user-meta{display:none}.brand-logo{width:98px}.hero h1{font-size:27px}.hero-controls{display:grid;grid-template-columns:1fr;width:100%}.search,.month-select{min-width:0;width:100%}.nav-row{gap:8px}.tabs{width:auto;flex:1;max-width:none}.tab{flex:1;padding:9px 8px}.trash-tab{width:38px;height:38px;flex-basis:38px}.clients{grid-template-columns:1fr}.clients.focus-mode{margin-top:18px}.clients.focus-mode .client-head{padding:20px}.clients.focus-mode .client-name{font-size:19px}.client-toolbar,.demand-list{padding-left:17px;padding-right:17px}.section-head{align-items:flex-start;flex-direction:column}.section-actions{width:100%}.section-actions button{flex:1}.choice-grid{grid-template-columns:1fr}.demand-row{grid-template-columns:minmax(0,1fr) auto}.demand-caret{display:none}.deleted-item{grid-template-columns:1fr}.deleted-actions{justify-content:flex-start}.toast{left:14px;right:14px;bottom:14px}.top-actions .ghost{padding:8px}.current-status{justify-self:end}}
+</style>
+</head>
+<body>
+<section class="login" id="loginScreen">
+  <div class="login-card">
+    <div class="brand"><img class="brand-logo" src="oneway-logo.png" alt="One Way Agency"><div class="brand-copy"><strong>Acompanhamento de Demandas</strong><span>Painel interno</span></div></div>
+    <h1>Acesso ao painel</h1><p>Escolha como deseja entrar.</p>
+    <div class="field"><label>Acesso</label><select id="loginUser"><option value="Visitante">Visitante</option><option value="Administrador">Administrador</option></select></div>
+    <div class="field hidden" id="passwordField"><label>Senha do administrador</label><input id="adminPassword" type="password" autocomplete="current-password" placeholder="Digite a senha"></div>
+    <button class="primary full" id="loginBtn">Entrar</button>
+    <div class="login-error" id="loginError"></div>
+  </div>
+</section>
+
+<div id="app" class="hidden">
+  <header class="topbar"><div class="topbar-inner">
+    <div class="brand"><img class="brand-logo" src="oneway-logo.png" alt="One Way Agency"><div class="brand-copy"><strong>Acompanhamento de Demandas</strong><span>Painel interno</span></div></div>
+    <div class="top-actions"><div class="user-chip"><div class="avatar" id="avatar">G</div><div class="user-meta"><strong id="userName"></strong><span id="userRole"></span></div></div><button class="ghost small" id="logoutBtn">Sair</button></div>
+  </div></header>
+
+  <main class="shell">
+    <section class="hero">
+      <div><div class="eyebrow">Organização mensal</div><h1 id="pageTitle">Acompanhamento de Demandas</h1><p id="pageSubtitle">Selecione Arte, Vídeo ou Tráfego.</p></div>
+      <div class="hero-controls hidden" id="heroControls"><input class="search" id="searchInput" placeholder="Buscar cliente ou demanda"><select class="month-select" id="monthSelect"></select><button class="primary" id="newDemandTop">+ Nova demanda</button></div>
+    </section>
+
+    <div class="nav-row"><nav class="tabs" id="tabs"></nav><button class="trash-tab" id="trashTab" title="Excluídos" aria-label="Abrir excluídos"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v5M14 11v5"/></svg></button></div>
+
+    <section id="areaContent" class="hidden">
+      <div class="stats" id="stats"></div>
+      <div class="section-head"><div class="section-copy"><h2>Clientes</h2><span id="clientCount"></span></div><div class="section-actions"><button class="ghost small" id="addClientBtn">+ Adicionar cliente</button></div></div>
+      <div class="clients" id="clients"></div>
+    </section>
+
+    <section id="agendaContent" class="hidden"><div class="agenda-wrap"><div class="agenda-summary"><div><h2>Agenda de postagens</h2><span>Lista completa de todas as demandas cadastradas.</span></div><span id="agendaCount"></span></div><div class="agenda-list" id="agendaList"></div></div></section>
+
+    <section id="deletedContent" class="hidden"><div class="deleted-wrap" id="deletedWrap"></div></section>
+  </main>
+</div>
+
+<div class="modal-backdrop hidden" id="demandModal"><div class="modal">
+  <div class="modal-head"><div><h3 id="demandModalTitle">Nova demanda</h3><p>Crie a demanda. Referências e arquivos podem ser adicionados depois.</p></div><button class="x" data-close="demandModal">×</button></div>
+  <form id="demandForm"><input type="hidden" id="editDemandId">
+    <div class="field"><label>Cliente</label><select id="formClient" required></select></div>
+    <div class="field"><label>Nome da demanda</label><input id="formTitle" required placeholder="Ex.: Carrossel — lançamento"></div>
+    <div class="field"><label>Data da postagem</label><input id="formPostDate" type="date" required></div>
+    <div class="field"><label>Descrição</label><textarea id="formDescription" placeholder="Briefing, observações, entregáveis..."></textarea></div>
+    <div class="field"><label>Status</label><input type="hidden" id="formStatus" value="red"><div class="form-status-wrap" id="formStatusButtons"></div></div>
+    <div class="modal-actions"><button type="button" class="ghost" data-close="demandModal">Cancelar</button><button type="submit" class="primary">Salvar demanda</button></div>
+  </form>
+</div></div>
+
+<div class="modal-backdrop hidden" id="clientModal"><div class="modal">
+  <div class="modal-head"><div><h3>Adicionar cliente</h3><p>O cliente será adicionado somente na área atual.</p></div><button class="x" data-close="clientModal">×</button></div>
+  <form id="clientForm">
+    <div class="field"><label>Nome completo do cliente</label><input id="clientNameInput" required placeholder="Nome do cliente"></div>
+    <div class="recent-clients hidden" id="recentClientsWrap"><div class="recent-clients-label">Últimos clientes</div><div class="recent-client-chips" id="recentClientChips"></div></div>
+    <div class="field"><label>Tipo</label><input type="hidden" id="clientTypeInput" value="fixed"><div class="choice-grid" id="clientTypeChoices"><button type="button" class="choice active" data-type="fixed"><strong>Cliente fixo</strong><span>Repete apenas nos próximos meses desta mesma área.</span></button><button type="button" class="choice" data-type="oneoff"><strong>Cliente pontual</strong><span>Existe somente neste mês e nesta área.</span></button></div></div>
+    <div class="context-note" id="clientContextNote"></div>
+    <div class="modal-actions"><button type="button" class="ghost" data-close="clientModal">Cancelar</button><button type="submit" class="primary">Adicionar cliente</button></div>
+  </form>
+</div></div>
+
+<div class="toast hidden" id="toast"><span class="toast-icon hidden" id="toastIcon">✓</span><span id="toastText"></span><button class="toast-action hidden" id="toastAction"></button></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const USERS={Administrador:'admin',Visitante:'status'};
+const ADMIN_PASSWORD='oneway4324';
+const AREAS={arte:'Arte',video:'Vídeo',trafego:'Tráfego'};
+const STATUS={green:'Aprovado',red:'Não feito',yellow:'Em produção',purple:'Aguardando aprovação'};
+const SUPABASE_URL='https://wreolbaiqfpoytfshmoz.supabase.co';
+const SUPABASE_KEY='sb_publishable_R7Umvf3iStv_e6xkIzKEyQ_YHFThLxe';
+const REMOTE_STATE_ID='main';
+const STORAGE_BUCKET='demand-files';
+const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const STORAGE_KEY='demandas-neutro-v7';
+const DB_NAME='demandas-neutro-v7-db';
+let realtimeChannel=null;
+let state=seed(),currentUser=null,currentArea=null,currentMonth=currentMonthKey(),openClientId=null,openDemandId=null,toastTimer=null,lastAddedClientId=null;
+
+function seed(){return {version:7,clients:[],demands:[],deletedDemands:[],removedClientMonths:[],recentClients:[],updatedAt:Date.now()}}
+function uid(){return 'id_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,10)}
+function esc(v=''){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function currentMonthKey(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}
+function addMonths(key,n){const [y,m]=key.split('-').map(Number),d=new Date(y,m-1+n,1);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}
+function fmtMonth(key){const [y,m]=key.split('-').map(Number);return new Intl.DateTimeFormat('pt-BR',{month:'long',year:'numeric'}).format(new Date(y,m-1,1)).replace(/^./,c=>c.toUpperCase())}
+function fmtPostDate(value){if(!value)return 'Sem data';const [y,m,d]=value.split('-').map(Number);return new Intl.DateTimeFormat('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'}).format(new Date(y,m-1,d))}
+function dateParts(value){if(!value)return {day:'—',month:''};const [y,m,d]=value.split('-').map(Number),dt=new Date(y,m-1,d);return {day:String(d).padStart(2,'0'),month:new Intl.DateTimeFormat('pt-BR',{month:'short'}).format(dt).replace('.','')}}
+function monthBounds(key){const [y,m]=key.split('-').map(Number),last=new Date(y,m,0).getDate();return {min:`${y}-${String(m).padStart(2,'0')}-01`,max:`${y}-${String(m).padStart(2,'0')}-${String(last).padStart(2,'0')}`}}
+function isAdmin(){return USERS[currentUser]==='admin'}
+function safeUrl(v){try{const u=new URL(v);return ['http:','https:'].includes(u.protocol)?u.href:'#'}catch{return '#'}}
+function normalizeState(s){if(!s||typeof s!=='object')return seed();const clients=Array.isArray(s.clients)?s.clients:[];const derivedRecent=[...clients].sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||''))).map(c=>c.name).filter(Boolean);const recent=Array.isArray(s.recentClients)?s.recentClients:derivedRecent;return {version:7,clients,demands:Array.isArray(s.demands)?s.demands:[],deletedDemands:Array.isArray(s.deletedDemands)?s.deletedDemands:[],removedClientMonths:Array.isArray(s.removedClientMonths)?s.removedClientMonths:[],recentClients:[...new Set(recent)].slice(0,8),updatedAt:Number(s.updatedAt)||0}}
+
+function openDB(){return new Promise((resolve,reject)=>{try{const req=indexedDB.open(DB_NAME,1);req.onupgradeneeded=()=>{const db=req.result;if(!db.objectStoreNames.contains('app'))db.createObjectStore('app',{keyPath:'key'});if(!db.objectStoreNames.contains('files'))db.createObjectStore('files',{keyPath:'id'})};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)}catch(e){reject(e)}})}
+async function dbReadState(){try{const db=await openDB();return await new Promise((resolve,reject)=>{const req=db.transaction('app').objectStore('app').get('state');req.onsuccess=()=>resolve(req.result?.value||null);req.onerror=()=>reject(req.error)})}catch{return null}}
+async function dbWriteState(value){const db=await openDB();return new Promise((resolve,reject)=>{const tx=db.transaction('app','readwrite');tx.objectStore('app').put({key:'state',value});tx.oncomplete=()=>resolve(true);tx.onerror=()=>reject(tx.error)})}
+async function dbPutFile(rec){const db=await openDB();return new Promise((resolve,reject)=>{const tx=db.transaction('files','readwrite');tx.objectStore('files').put(rec);tx.oncomplete=()=>resolve(true);tx.onerror=()=>reject(tx.error)})}
+async function dbGetFile(id){try{const db=await openDB();return await new Promise((resolve,reject)=>{const req=db.transaction('files').objectStore('files').get(id);req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(req.error)})}catch{return null}}
+async function dbDeleteFile(id){try{const db=await openDB();return await new Promise(resolve=>{const tx=db.transaction('files','readwrite');tx.objectStore('files').delete(id);tx.oncomplete=()=>resolve(true);tx.onerror=()=>resolve(false)})}catch{return false}}
+
+function readLocalCache(){
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY);
+    return raw?normalizeState(JSON.parse(raw)):null;
+  }catch{return null}
+}
+function writeLocalCache(value){
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(value))}catch{}
+}
+function hasMeaningfulData(value){
+  return !!value && ((value.clients?.length||0)+(value.demands?.length||0)+(value.deletedDemands?.length||0)+(value.removedClientMonths?.length||0)>0 || Number(value.updatedAt)>0);
+}
+async function loadState(){
+  const local=readLocalCache();
+  try{
+    const {data,error}=await supabaseClient.from('app_state').select('data').eq('id',REMOTE_STATE_ID).maybeSingle();
+    if(error)throw error;
+    if(data?.data){
+      const remote=normalizeState(data.data);
+      // Primeira migração: se o Supabase ainda está zerado, leva os dados que já existiam neste navegador.
+      if(!hasMeaningfulData(remote)&&hasMeaningfulData(local)){
+        const migrated=normalizeState(local);
+        migrated.updatedAt=Date.now();
+        const {error:migrationError}=await supabaseClient.from('app_state').upsert({id:REMOTE_STATE_ID,data:migrated,updated_at:new Date().toISOString()},{onConflict:'id'});
+        if(!migrationError){writeLocalCache(migrated);return migrated}
+      }
+      writeLocalCache(remote);
+      return remote;
+    }
+    const initial=hasMeaningfulData(local)?normalizeState(local):seed();
+    initial.updatedAt=Date.now();
+    const {error:insertError}=await supabaseClient.from('app_state').upsert({id:REMOTE_STATE_ID,data:initial,updated_at:new Date().toISOString()},{onConflict:'id'});
+    if(insertError)throw insertError;
+    writeLocalCache(initial);
+    return initial;
+  }catch(e){
+    console.error('Falha ao carregar Supabase:',e);
+    return local||seed();
+  }
+}
+async function saveState(){
+  state.updatedAt=Date.now();
+  try{
+    const snapshot=typeof structuredClone==='function'?structuredClone(state):JSON.parse(JSON.stringify(state));
+    const {error}=await supabaseClient.from('app_state').upsert({id:REMOTE_STATE_ID,data:snapshot,updated_at:new Date().toISOString()},{onConflict:'id'});
+    if(error)throw error;
+    writeLocalCache(snapshot);
+    return true;
+  }catch(e){
+    console.error('Falha ao salvar no Supabase:',e);
+    toast('Não foi possível sincronizar agora. Confira a configuração do Supabase.');
+    return false;
+  }
+}
+function subscribeRealtime(){
+  if(realtimeChannel)return;
+  realtimeChannel=supabaseClient
+    .channel('oneway-demandas-tempo-real')
+    .on('postgres_changes',{event:'*',schema:'public',table:'app_state',filter:`id=eq.${REMOTE_STATE_ID}`},payload=>{
+      const raw=payload?.new?.data;
+      if(!raw)return;
+      const incoming=normalizeState(raw);
+      if(Number(incoming.updatedAt)&&Number(incoming.updatedAt)===Number(state.updatedAt))return;
+      state=incoming;
+      writeLocalCache(state);
+      if(currentUser)renderAll();
+    })
+    .subscribe(status=>console.log('Realtime:',status));
+}
+
+function ensureMonths(){const set=new Set([currentMonthKey(),addMonths(currentMonthKey(),1),addMonths(currentMonthKey(),2)]);for(const c of state.clients)set.add(c.startMonth);for(const d of [...state.demands,...state.deletedDemands])set.add(d.month);for(const r of state.removedClientMonths)set.add(r.month);return [...set].sort()}
+function clientVisibleInMonth(c,month,area=currentArea){if(!area||area==='deleted'||c.area!==area)return false;if(month<c.startMonth)return false;if(c.type==='oneoff'&&month!==c.startMonth)return false;return !state.removedClientMonths.some(r=>r.clientId===c.id&&r.month===month&&r.area===area)}
+function clientsForMonth(month=currentMonth,area=currentArea){return state.clients.filter(c=>clientVisibleInMonth(c,month,area)).sort((a,b)=>a.name.localeCompare(b.name,'pt-BR',{sensitivity:'base'}))}
+function demandsFor(clientId=null){if(!currentArea||currentArea==='deleted')return[];return state.demands.filter(d=>d.month===currentMonth&&d.area===currentArea&&(!clientId||d.clientId===clientId))}
+
+function toast(msg,actionLabel=null,action=null,type='default'){const el=document.getElementById('toast'),txt=document.getElementById('toastText'),btn=document.getElementById('toastAction'),icon=document.getElementById('toastIcon');txt.textContent=msg;icon.classList.toggle('hidden',type!=='success');btn.classList.toggle('hidden',!actionLabel);if(actionLabel){btn.textContent=actionLabel;btn.onclick=()=>{clearTimeout(toastTimer);el.classList.add('hidden');action?.()}}el.classList.remove('hidden');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.add('hidden'),4200)}
+
+function initLogin(){
+  const sel=document.getElementById('loginUser'),passwordField=document.getElementById('passwordField'),passwordInput=document.getElementById('adminPassword'),error=document.getElementById('loginError'),btn=document.getElementById('loginBtn');
+  const refreshLogin=()=>{const admin=sel.value==='Administrador';passwordField.classList.toggle('hidden',!admin);error.textContent='';if(!admin)passwordInput.value='';setTimeout(()=>admin&&passwordInput.focus(),0)};
+  const doLogin=()=>{const selected=sel.value;if(selected==='Administrador'&&passwordInput.value!==ADMIN_PASSWORD){error.textContent='Senha incorreta.';passwordInput.focus();passwordInput.select();return}currentUser=selected;try{sessionStorage.setItem('demanda-user-v7',currentUser)}catch{}enterApp()};
+  sel.onchange=refreshLogin;btn.onclick=doLogin;passwordInput.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+  refreshLogin();
+  let saved=null;try{saved=sessionStorage.getItem('demanda-user-v7')}catch{}if(saved&&USERS[saved]){currentUser=saved;enterApp()}
+}
+function enterApp(){document.getElementById('loginScreen').classList.add('hidden');document.getElementById('app').classList.remove('hidden');if(!isAdmin()&&!currentArea)currentArea='agenda';if(isAdmin()&&currentArea==='agenda')currentArea=null;renderAll()}
+function logout(){try{sessionStorage.removeItem('demanda-user-v7')}catch{}location.reload()}
+
+function renderTabs(){const agenda=!isAdmin()?`<button class="tab ${currentArea==='agenda'?'active':''}" data-area="agenda">Agenda</button>`:'';document.getElementById('tabs').innerHTML=agenda+Object.entries(AREAS).map(([k,v])=>`<button class="tab ${currentArea===k?'active':''}" data-area="${k}">${v}</button>`).join('');document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{currentArea=b.dataset.area;openClientId=null;openDemandId=null;document.getElementById('searchInput').value='';renderAll()});const trash=document.getElementById('trashTab');trash.classList.toggle('active',currentArea==='deleted');trash.onclick=()=>{currentArea='deleted';openClientId=null;openDemandId=null;document.getElementById('searchInput').value='';renderAll()}}
+function renderMonths(){const months=ensureMonths();if(!months.includes(currentMonth))currentMonth=currentMonthKey();const s=document.getElementById('monthSelect');s.innerHTML=months.map(m=>`<option value="${m}">${fmtMonth(m)}</option>`).join('');s.value=currentMonth;s.onchange=()=>{currentMonth=s.value;openClientId=null;openDemandId=null;renderAll()}}
+function renderAll(){document.getElementById('userName').textContent=currentUser;document.getElementById('userRole').textContent=isAdmin()?'Acesso total':'Visualização + status';document.getElementById('avatar').textContent=isAdmin()?'A':'V';renderTabs();renderMonths();const selected=!!currentArea,deleted=currentArea==='deleted',agenda=currentArea==='agenda';document.getElementById('heroControls').classList.toggle('hidden',!selected);document.getElementById('monthSelect').classList.toggle('hidden',agenda);document.getElementById('areaContent').classList.toggle('hidden',!selected||deleted||agenda);document.getElementById('agendaContent').classList.toggle('hidden',!agenda);document.getElementById('deletedContent').classList.toggle('hidden',!deleted);document.getElementById('newDemandTop').classList.toggle('hidden',!selected||deleted||agenda||!isAdmin());document.getElementById('addClientBtn').classList.toggle('hidden',!selected||deleted||agenda||!isAdmin());if(!selected){document.getElementById('pageTitle').textContent='Acompanhamento de Demandas';document.getElementById('pageSubtitle').textContent='Selecione Arte, Vídeo ou Tráfego.';return}if(agenda){document.getElementById('pageTitle').textContent='Agenda de demandas';document.getElementById('pageSubtitle').textContent='Todas as demandas organizadas pela data de postagem.';renderAgenda();return}if(deleted){document.getElementById('pageTitle').textContent='Excluídos';document.getElementById('pageSubtitle').textContent=`${fmtMonth(currentMonth)} · restaure o que precisar.`;renderDeleted();return}document.getElementById('pageTitle').textContent=`Demandas de ${AREAS[currentArea]}`;document.getElementById('pageSubtitle').textContent=`${fmtMonth(currentMonth)} · clientes desta área.`;renderStats();renderClients()}
+function renderStats(){const counts={green:0,red:0,yellow:0,purple:0};demandsFor().forEach(d=>counts[d.status]=(counts[d.status]||0)+1);document.getElementById('stats').innerHTML=[['green','Aprovadas'],['red','Não feitas'],['yellow','Em produção'],['purple','Aguardando aprovação']].map(([k,l])=>`<div class="stat"><span class="dot ${k}"></span><small>${l}</small><strong>${counts[k]||0}</strong></div>`).join('')}
+function searchFilteredClients(){const q=document.getElementById('searchInput').value.trim().toLocaleLowerCase('pt-BR');const cs=clientsForMonth();if(!q)return cs;return cs.filter(c=>c.name.toLocaleLowerCase('pt-BR').includes(q)||demandsFor(c.id).some(d=>String(d.title||'').toLocaleLowerCase('pt-BR').includes(q)||String(d.description||'').toLocaleLowerCase('pt-BR').includes(q)))}
+function renderClients(){const root=document.getElementById('clients');let cs=searchFilteredClients();if(openClientId){const selected=clientsForMonth().find(c=>c.id===openClientId);cs=selected?[selected]:[];root.classList.add('focus-mode')}else root.classList.remove('focus-mode');document.getElementById('clientCount').textContent=`${cs.length} cliente${cs.length===1?'':'s'} · ${fmtMonth(currentMonth)}`;if(!cs.length){root.innerHTML=`<div class="empty"><strong>Nenhum cliente nesta área e mês.</strong><span>${isAdmin()?'Use “Adicionar cliente” para começar.':'Aguardando cadastro.'}</span></div>`;return}root.innerHTML=cs.map((c,i)=>renderClient(c,i)).join('');[...root.children].forEach((el,i)=>el.style.animationDelay=`${Math.min(i*35,180)}ms`);bindClientEvents(root)}
+function renderClient(c){const ds=demandsFor(c.id),open=openClientId===c.id;return `<article class="client ${open?'open':''} ${lastAddedClientId===c.id?'just-added':''}" data-client-id="${c.id}"><div class="client-top"><button class="client-head"><div><span class="client-name">${esc(c.name)}</span><div class="client-meta"><span class="type-chip">${c.type==='fixed'?'Fixo':'Pontual'}</span><span class="demand-count">${ds.length} demanda${ds.length===1?'':'s'}</span></div></div><span class="client-arrow">⌄</span></button>${isAdmin()?`<button class="client-options" title="Opções">⋯</button><div class="client-menu hidden"><button class="remove-client">Remover deste mês</button></div>`:''}</div><div class="client-body"><div class="client-body-inner"><div class="client-toolbar"><span class="client-helper">Clique em uma demanda para abrir descrição e referências.</span>${isAdmin()?`<button class="ghost small add-demand-client">+ Demanda</button>`:''}</div><div class="demand-list">${ds.length?ds.map((d,i)=>renderDemand(d,i)).join(''):`<div class="empty"><strong>Nenhuma demanda.</strong><span>Adicione a primeira demanda deste cliente.</span></div>`}</div></div></div></article>`}
+function renderDemand(d,i){const expanded=openDemandId===d.id;return `<div class="demand ${expanded?'expanded':''}" data-demand-id="${d.id}"><button class="demand-row"><span class="demand-title"><span class="demand-index">${String(i+1).padStart(2,'0')}</span>${esc(d.title)}<span class="demand-date">${esc(fmtPostDate(d.postDate))}</span></span><span class="current-status ${d.status}">${STATUS[d.status]||STATUS.red}</span><span class="demand-caret">⌄</span></button><div class="demand-detail"><div class="detail-overflow"><div class="detail-panel"><div class="detail-grid"><div><div class="detail-label">Descrição</div><p class="description">${esc(d.description||'Sem descrição cadastrada.')}</p><div class="detail-label" style="margin-top:17px">Data da postagem</div><p class="description">${esc(fmtPostDate(d.postDate))}</p><div class="detail-label" style="margin-top:17px">Atualizar status</div><div class="status-edit">${Object.entries(STATUS).map(([k,v])=>`<button class="status-btn ${d.status===k?'active':''}" data-status="${k}">${v}</button>`).join('')}</div></div><div><div class="detail-label">Referências</div><div class="refs">${(d.links||[]).map((link,idx)=>`<div class="ref-item"><a href="${esc(safeUrl(link))}" target="_blank" rel="noopener">${esc(link)}</a>${isAdmin()?`<button class="mini-link danger remove-link" data-index="${idx}">Remover</button>`:''}</div>`).join('')}${(d.attachments||[]).map(f=>`<div class="ref-item"><span>${esc(f.name)}</span><div><button class="mini-link open-file" data-file-id="${f.id}">Abrir</button>${isAdmin()?`<button class="mini-link danger remove-file" data-file-id="${f.id}">Remover</button>`:''}</div></div>`).join('')||(!d.links?.length?'<span style="font-size:11px;color:#a0a5ae">Nenhuma referência adicionada.</span>':'')}</div>${isAdmin()?`<div class="ref-add"><input class="link-input" placeholder="Cole um link"><button class="soft-btn small add-link">Adicionar</button></div><div class="file-upload"><label>+ Adicionar arquivo<input class="file-input" type="file" multiple></label></div>`:''}</div></div>${isAdmin()?`<div class="detail-actions"><button class="ghost small edit-demand">Editar</button><button class="ghost small danger delete-demand">Excluir</button></div>`:''}</div></div></div></div>`}
+
+function renderAgenda(){
+  const q=document.getElementById('searchInput').value.trim().toLocaleLowerCase('pt-BR');
+  let items=state.demands.filter(d=>{const client=state.clients.find(c=>c.id===d.clientId),hay=[d.title,d.description,client?.name,AREAS[d.area],d.postDate,fmtPostDate(d.postDate)].join(' ').toLocaleLowerCase('pt-BR');return !q||hay.includes(q)});
+  items.sort((a,b)=>{if(a.postDate&&b.postDate)return a.postDate.localeCompare(b.postDate)||String(a.title).localeCompare(String(b.title),'pt-BR');if(a.postDate)return -1;if(b.postDate)return 1;return String(a.createdAt||'').localeCompare(String(b.createdAt||''))});
+  document.getElementById('agendaCount').textContent=`${items.length} demanda${items.length===1?'':'s'}`;
+  const root=document.getElementById('agendaList');
+  root.innerHTML=items.length?items.map(d=>{const c=state.clients.find(x=>x.id===d.clientId),parts=dateParts(d.postDate);return `<button class="agenda-item ${d.postDate?'':'agenda-undated'}" data-agenda-demand="${d.id}"><span class="agenda-date"><strong class="agenda-day">${parts.day}</strong><span class="agenda-month">${esc(parts.month)}</span></span><span class="agenda-info"><strong>${esc(d.title)}</strong><span>${esc(c?.name||'Cliente')} · ${esc(fmtMonth(d.month))}</span></span><span class="area-chip">${esc(AREAS[d.area]||d.area)}</span><span class="current-status ${d.status}">${STATUS[d.status]||STATUS.red}</span><span class="agenda-arrow">›</span></button>`}).join(''):`<div class="empty"><strong>Nenhuma demanda encontrada.</strong><span>As demandas cadastradas aparecerão aqui com a data de postagem.</span></div>`;
+  root.querySelectorAll('[data-agenda-demand]').forEach(b=>b.onclick=()=>{const d=state.demands.find(x=>x.id===b.dataset.agendaDemand);if(!d)return;currentArea=d.area;currentMonth=d.month;openClientId=d.clientId;openDemandId=d.id;document.getElementById('searchInput').value='';renderAll();setTimeout(()=>document.getElementById('clients').scrollIntoView({behavior:'smooth',block:'start'}),60)});
+}
+
+function bindClientEvents(root){root.querySelectorAll('.client-head').forEach(b=>b.onclick=()=>{const id=b.closest('.client').dataset.clientId;if(openClientId===id){openClientId=null;openDemandId=null}else{openClientId=id;openDemandId=null}renderClients();if(openClientId)setTimeout(()=>document.getElementById('clients').scrollIntoView({behavior:'smooth',block:'start'}),40)});root.querySelectorAll('.client-options').forEach(b=>b.onclick=e=>{e.stopPropagation();const menu=b.parentElement.querySelector('.client-menu');document.querySelectorAll('.client-menu').forEach(m=>{if(m!==menu)m.classList.add('hidden')});menu.classList.toggle('hidden')});root.querySelectorAll('.remove-client').forEach(b=>b.onclick=()=>removeClientForMonth(b.closest('.client').dataset.clientId));root.querySelectorAll('.add-demand-client').forEach(b=>b.onclick=()=>openDemandModal(null,b.closest('.client').dataset.clientId));root.querySelectorAll('.demand-row').forEach(row=>row.onclick=()=>{const id=row.closest('.demand').dataset.demandId;openDemandId=openDemandId===id?null:id;renderClients()});root.querySelectorAll('.status-btn').forEach(b=>b.onclick=e=>{e.stopPropagation();updateStatus(b.closest('.demand').dataset.demandId,b.dataset.status)});root.querySelectorAll('.edit-demand').forEach(b=>b.onclick=()=>openDemandModal(b.closest('.demand').dataset.demandId));root.querySelectorAll('.delete-demand').forEach(b=>b.onclick=()=>deleteDemand(b.closest('.demand').dataset.demandId));root.querySelectorAll('.add-link').forEach(b=>b.onclick=()=>addLink(b.closest('.demand').dataset.demandId,b.parentElement.querySelector('.link-input').value));root.querySelectorAll('.remove-link').forEach(b=>b.onclick=()=>removeLink(b.closest('.demand').dataset.demandId,Number(b.dataset.index)));root.querySelectorAll('.file-input').forEach(inp=>inp.onchange=()=>addFiles(inp.closest('.demand').dataset.demandId,inp.files));root.querySelectorAll('.open-file').forEach(b=>b.onclick=()=>openFile(b.dataset.fileId));root.querySelectorAll('.remove-file').forEach(b=>b.onclick=()=>removeFile(b.closest('.demand').dataset.demandId,b.dataset.fileId))}
+
+function recentClientNames(){return [...new Set((state.recentClients||[]).filter(Boolean))].slice(0,8)}
+function rememberClientName(name){const clean=String(name||'').trim();if(!clean)return;state.recentClients=[clean,...recentClientNames().filter(n=>n.localeCompare(clean,'pt-BR',{sensitivity:'base'})!==0)].slice(0,8)}
+function renderRecentClientSuggestions(filter=''){const wrap=document.getElementById('recentClientsWrap'),root=document.getElementById('recentClientChips');if(!wrap||!root)return;const q=String(filter||'').trim().toLocaleLowerCase('pt-BR');const names=recentClientNames().filter(n=>!q||n.toLocaleLowerCase('pt-BR').includes(q));wrap.classList.toggle('hidden',!names.length);root.innerHTML=names.map(n=>`<button type="button" class="recent-client-chip" data-recent-client="${esc(n)}">${esc(n)}</button>`).join('');root.querySelectorAll('[data-recent-client]').forEach(b=>b.onclick=()=>{const input=document.getElementById('clientNameInput');input.value=b.dataset.recentClient;renderRecentClientSuggestions(input.value);input.focus()})}
+function openClientModal(){if(!isAdmin()||!currentArea||currentArea==='deleted')return;const input=document.getElementById('clientNameInput');input.value='';renderRecentClientSuggestions();setClientType('fixed');document.getElementById('clientContextNote').textContent=`Será adicionado em ${AREAS[currentArea]} · ${fmtMonth(currentMonth)}. Cliente fixo se repete somente nesta área.`;document.getElementById('clientModal').classList.remove('hidden');setTimeout(()=>input.focus(),40)}
+function setClientType(type){document.getElementById('clientTypeInput').value=type;document.querySelectorAll('#clientTypeChoices .choice').forEach(b=>b.classList.toggle('active',b.dataset.type===type))}
+async function submitClient(e){
+  e.preventDefault();
+  if(!isAdmin())return;
+  const form=e.currentTarget;
+  const submitBtn=form.querySelector('button[type="submit"]');
+  const name=document.getElementById('clientNameInput').value.trim();
+  const type=document.getElementById('clientTypeInput').value;
+  const targetArea=currentArea;
+  const targetMonth=currentMonth;
+  if(!name){toast('Digite o nome do cliente.');document.getElementById('clientNameInput').focus();return}
+  if(!targetArea||targetArea==='deleted'){toast('Escolha Arte, Vídeo ou Tráfego antes de adicionar.');return}
+  const duplicate=state.clients.some(c=>c.area===targetArea&&c.name.localeCompare(name,'pt-BR',{sensitivity:'base'})===0&&clientVisibleInMonth(c,targetMonth,targetArea));
+  if(duplicate){toast('Esse cliente já está nesta área e mês.');return}
+  const c={id:uid(),name,type:type==='oneoff'?'oneoff':'fixed',area:targetArea,startMonth:targetMonth,createdAt:new Date().toISOString()};
+  if(submitBtn){submitBtn.disabled=true;submitBtn.textContent='Adicionando...'}
+  const previousRecent=[...(state.recentClients||[])];
+  state.clients.push(c);
+  rememberClientName(name);
+  const ok=await saveState();
+  if(!ok){state.clients=state.clients.filter(x=>x.id!==c.id);state.recentClients=previousRecent;if(submitBtn){submitBtn.disabled=false;submitBtn.textContent='Adicionar cliente'}return}
+  currentArea=targetArea;
+  currentMonth=targetMonth;
+  openClientId=null;
+  openDemandId=null;
+  lastAddedClientId=c.id;
+  document.getElementById('searchInput').value='';
+  closeModal('clientModal');
+  renderAll();
+  if(submitBtn){submitBtn.disabled=false;submitBtn.textContent='Adicionar cliente'}
+  toast(`${name} adicionado aos clientes.`,null,null,'success');
+  setTimeout(()=>{if(lastAddedClientId===c.id){lastAddedClientId=null;const el=document.querySelector(`[data-client-id="${c.id}"]`);el?.classList.remove('just-added')}},900);
+}
+async function removeClientForMonth(clientId){if(!isAdmin())return;const c=state.clients.find(x=>x.id===clientId);if(!c)return;const rec={id:uid(),clientId,area:currentArea,month:currentMonth,removedAt:new Date().toISOString()};if(state.removedClientMonths.some(r=>r.clientId===clientId&&r.month===currentMonth&&r.area===currentArea))return;state.removedClientMonths.push(rec);if(!await saveState()){state.removedClientMonths.pop();return}openClientId=null;openDemandId=null;renderClients();toast(`${c.name} removido deste mês.`,'Desfazer',()=>restoreClientMonth(rec.id))}
+async function restoreClientMonth(id){const idx=state.removedClientMonths.findIndex(r=>r.id===id&&!r.purged);if(idx<0)return;const rec=state.removedClientMonths.splice(idx,1)[0];if(!await saveState()){state.removedClientMonths.splice(idx,0,rec);return}currentArea==='deleted'?renderDeleted():renderClients();toast('Cliente restaurado.')}
+
+function setFormStatus(status){document.getElementById('formStatus').value=status;document.getElementById('formStatusButtons').innerHTML=Object.entries(STATUS).map(([k,v])=>`<button type="button" class="status-btn ${status===k?'active':''}" data-status="${k}">${v}</button>`).join('');document.querySelectorAll('#formStatusButtons .status-btn').forEach(b=>b.onclick=()=>setFormStatus(b.dataset.status))}
+function openDemandModal(id=null,clientId=null){if(!isAdmin()||!currentArea||currentArea==='deleted')return;const clients=clientsForMonth();if(!clients.length){toast('Adicione um cliente nesta área antes da demanda.');openClientModal();return}const d=id?state.demands.find(x=>x.id===id):null;document.getElementById('demandModalTitle').textContent=d?'Editar demanda':'Nova demanda';document.getElementById('editDemandId').value=d?.id||'';document.getElementById('formClient').innerHTML=clients.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');document.getElementById('formClient').value=d?.clientId||clientId||clients[0].id;document.getElementById('formTitle').value=d?.title||'';const postDate=document.getElementById('formPostDate'),bounds=monthBounds(currentMonth);postDate.min=bounds.min;postDate.max=bounds.max;postDate.value=d?.postDate||'';document.getElementById('formDescription').value=d?.description||'';setFormStatus(d?.status||'red');document.getElementById('demandModal').classList.remove('hidden')}
+async function submitDemand(e){
+  e.preventDefault();
+  if(!isAdmin())return;
+  const form=e.currentTarget,submitBtn=form.querySelector('button[type="submit"]');
+  const id=document.getElementById('editDemandId').value,clientId=document.getElementById('formClient').value,title=document.getElementById('formTitle').value.trim(),postDate=document.getElementById('formPostDate').value,description=document.getElementById('formDescription').value.trim(),status=document.getElementById('formStatus').value;
+  if(!clientId||!title||!postDate){toast('Preencha cliente, nome e data da postagem.');return}
+  if(postDate.slice(0,7)!==currentMonth){toast(`A data da postagem precisa estar em ${fmtMonth(currentMonth)}.`);return}
+  if(submitBtn){submitBtn.disabled=true;submitBtn.textContent='Salvando...'}
+  let rollback=null,newId=null;
+  if(id){
+    const d=state.demands.find(x=>x.id===id);if(!d){if(submitBtn){submitBtn.disabled=false;submitBtn.textContent='Salvar demanda'}return}
+    rollback={...d};Object.assign(d,{clientId,title,postDate,description,status});openClientId=clientId;openDemandId=id;
+  }else{
+    const d={id:uid(),clientId,month:currentMonth,area:currentArea,title,postDate,description,status,links:[],attachments:[],createdAt:new Date().toISOString()};
+    newId=d.id;state.demands.push(d);openClientId=clientId;openDemandId=d.id;
+  }
+  const ok=await saveState();
+  if(!ok){
+    if(id&&rollback)Object.assign(state.demands.find(x=>x.id===id),rollback);
+    if(newId)state.demands=state.demands.filter(x=>x.id!==newId);
+    if(submitBtn){submitBtn.disabled=false;submitBtn.textContent='Salvar demanda'}
+    return;
+  }
+  closeModal('demandModal');renderStats();renderClients();
+  if(submitBtn){submitBtn.disabled=false;submitBtn.textContent='Salvar demanda'}
+  toast('Demanda salva.');
+}
+async function updateStatus(id,status){const d=state.demands.find(x=>x.id===id);if(!d||!STATUS[status])return;const old=d.status;d.status=status;if(!await saveState()){d.status=old;return}renderStats();renderClients();toast('Status atualizado.')}
+async function deleteDemand(id){if(!isAdmin()||!confirm('Mover esta demanda para Excluídos?'))return;const idx=state.demands.findIndex(d=>d.id===id);if(idx<0)return;const d=state.demands.splice(idx,1)[0];d.deletedAt=new Date().toISOString();d.deletedBy=currentUser;state.deletedDemands.push(d);if(!await saveState()){state.deletedDemands.pop();delete d.deletedAt;delete d.deletedBy;state.demands.splice(idx,0,d);return}openDemandId=null;renderStats();renderClients();toast('Demanda movida para Excluídos.','Desfazer',()=>restoreDemand(id))}
+async function restoreDemand(id){const idx=state.deletedDemands.findIndex(d=>d.id===id);if(idx<0)return;const d=state.deletedDemands.splice(idx,1)[0];delete d.deletedAt;delete d.deletedBy;state.demands.push(d);if(!await saveState()){state.demands.pop();state.deletedDemands.splice(idx,0,d);return}currentArea==='deleted'?renderDeleted():(renderStats(),renderClients());toast('Demanda restaurada.')}
+async function purgeDemand(id){if(!isAdmin()||!confirm('Excluir definitivamente?'))return;const idx=state.deletedDemands.findIndex(d=>d.id===id);if(idx<0)return;const d=state.deletedDemands.splice(idx,1)[0];if(!await saveState()){state.deletedDemands.splice(idx,0,d);return}for(const f of d.attachments||[])await deleteStoredFile(f);renderDeleted();toast('Demanda excluída definitivamente.')}
+async function emptyTrashMonth(){
+  if(!isAdmin())return;
+  const deleted=state.deletedDemands.filter(d=>d.month===currentMonth);
+  const removed=state.removedClientMonths.filter(r=>r.month===currentMonth&&!r.purged);
+  const total=deleted.length+removed.length;
+  if(!total){toast('A lixeira deste mês já está vazia.');return}
+  if(!confirm(`Esvaziar a lixeira de ${fmtMonth(currentMonth)}?\n\n${deleted.length} demanda(s) e ${removed.length} cliente(s) removido(s) serão apagados da lixeira. Essa ação não pode ser desfeita.`))return;
+  const oldDeleted=[...state.deletedDemands];
+  const oldRemoved=state.removedClientMonths.map(r=>({...r}));
+  const files=deleted.flatMap(d=>d.attachments||[]);
+  state.deletedDemands=state.deletedDemands.filter(d=>d.month!==currentMonth);
+  state.removedClientMonths=state.removedClientMonths.map(r=>r.month===currentMonth&&!r.purged?{...r,purged:true,purgedAt:new Date().toISOString()}:r);
+  if(!await saveState()){
+    state.deletedDemands=oldDeleted;
+    state.removedClientMonths=oldRemoved;
+    return;
+  }
+  for(const f of files)try{await deleteStoredFile(f)}catch(e){}
+  renderDeleted();
+  toast(`Lixeira de ${fmtMonth(currentMonth)} esvaziada.`);
+}
+function renderDeleted(){
+  const q=document.getElementById('searchInput').value.trim().toLocaleLowerCase('pt-BR');
+  const allDs=state.deletedDemands.filter(d=>d.month===currentMonth);
+  const allRs=state.removedClientMonths.filter(r=>r.month===currentMonth&&!r.purged);
+  const ds=allDs.filter(d=>!q||d.title.toLocaleLowerCase('pt-BR').includes(q)||(state.clients.find(c=>c.id===d.clientId)?.name||'').toLocaleLowerCase('pt-BR').includes(q));
+  const rs=allRs.filter(r=>!q||(state.clients.find(c=>c.id===r.clientId)?.name||'').toLocaleLowerCase('pt-BR').includes(q));
+  const total=allDs.length+allRs.length;
+  document.getElementById('deletedWrap').innerHTML=`${isAdmin()?`<div class="trash-toolbar"><span>${total} item${total===1?'':'s'} na lixeira de ${fmtMonth(currentMonth)}</span><button class="empty-trash-btn" id="emptyTrashMonth" ${total?'':'disabled'}>Esvaziar lixeira deste mês</button></div>`:''}<div class="deleted-section"><h3>Demandas excluídas</h3><p>${isAdmin()?'Restaure ou exclua definitivamente.':'Visualização somente.'}</p><div class="deleted-list">${ds.length?ds.map(d=>`<div class="deleted-item"><div><strong>${esc(d.title)}</strong><div class="deleted-meta">${esc(state.clients.find(c=>c.id===d.clientId)?.name||'Cliente')} · ${esc(AREAS[d.area]||d.area)}</div></div>${isAdmin()?`<div class="deleted-actions"><button class="restore-btn" data-restore-demand="${d.id}">Restaurar</button><button class="permanent-btn" data-purge-demand="${d.id}">Excluir definitivamente</button></div>`:''}</div>`).join(''):`<div class="empty"><strong>Nenhuma demanda excluída.</strong></div>`}</div></div><div class="deleted-section"><h3>Clientes removidos do mês</h3><p>${isAdmin()?'Remover do mês não apaga o cadastro.':'Visualização somente.'}</p><div class="deleted-list">${rs.length?rs.map(r=>{const c=state.clients.find(x=>x.id===r.clientId);return `<div class="deleted-item"><div><strong>${esc(c?.name||'Cliente')}</strong><div class="deleted-meta">${esc(AREAS[r.area]||r.area)} · ${fmtMonth(r.month)}</div></div>${isAdmin()?`<div class="deleted-actions"><button class="restore-btn" data-restore-client="${r.id}">Restaurar</button></div>`:''}</div>`}).join(''):`<div class="empty"><strong>Nenhum cliente removido.</strong></div>`}</div></div>`;
+  if(isAdmin()){
+    const emptyBtn=document.getElementById('emptyTrashMonth');if(emptyBtn)emptyBtn.onclick=emptyTrashMonth;
+    document.querySelectorAll('[data-restore-demand]').forEach(b=>b.onclick=()=>restoreDemand(b.dataset.restoreDemand));
+    document.querySelectorAll('[data-purge-demand]').forEach(b=>b.onclick=()=>purgeDemand(b.dataset.purgeDemand));
+    document.querySelectorAll('[data-restore-client]').forEach(b=>b.onclick=()=>restoreClientMonth(b.dataset.restoreClient));
+  }
+}
+
+async function addLink(id,val){if(!isAdmin())return;val=val.trim();if(!val)return;const href=safeUrl(/^https?:\/\//i.test(val)?val:`https://${val}`);if(href==='#'){toast('Link inválido.');return}const d=state.demands.find(x=>x.id===id);d.links=d.links||[];d.links.push(href);if(!await saveState()){d.links.pop();return}openDemandId=id;renderClients();toast('Link adicionado.')}
+async function removeLink(id,index){const d=state.demands.find(x=>x.id===id);const old=d.links.splice(index,1)[0];if(!await saveState()){d.links.splice(index,0,old);return}openDemandId=id;renderClients()}
+function cleanFileName(name){return String(name||'arquivo').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9._-]+/g,'-').replace(/-+/g,'-').slice(0,120)||'arquivo'}
+function findAttachment(fileId){for(const d of [...state.demands,...state.deletedDemands]){const f=(d.attachments||[]).find(x=>x.id===fileId);if(f)return f}return null}
+async function deleteStoredFile(meta){
+  if(meta?.path){try{await supabaseClient.storage.from(STORAGE_BUCKET).remove([meta.path]);return true}catch{}}
+  if(meta?.id)try{return await dbDeleteFile(meta.id)}catch{}
+  return false;
+}
+async function addFiles(id,fileList){
+  if(!isAdmin()||!fileList?.length)return;
+  const d=state.demands.find(x=>x.id===id);if(!d)return;
+  d.attachments=d.attachments||[];
+  const added=[];
+  for(const file of [...fileList]){
+    if(file.size>20*1024*1024){toast(`${file.name}: máximo de 20 MB.`);continue}
+    const fileId=uid(),path=`${d.id}/${fileId}-${cleanFileName(file.name)}`;
+    try{
+      const {error}=await supabaseClient.storage.from(STORAGE_BUCKET).upload(path,file,{cacheControl:'3600',upsert:false,contentType:file.type||undefined});
+      if(error)throw error;
+      const meta={id:fileId,name:file.name,type:file.type,size:file.size,path};
+      d.attachments.push(meta);added.push(meta);
+    }catch(e){console.error(e);toast(`Não foi possível anexar ${file.name}.`)}
+  }
+  if(!added.length)return;
+  if(!await saveState()){
+    for(const f of added){d.attachments=d.attachments.filter(x=>x.id!==f.id);await deleteStoredFile(f)}
+    return;
+  }
+  openDemandId=id;renderClients();toast('Arquivo adicionado.');
+}
+async function openFile(fileId){
+  const w=window.open('','_blank');
+  const meta=findAttachment(fileId);
+  if(meta?.path){
+    const {data,error}=await supabaseClient.storage.from(STORAGE_BUCKET).createSignedUrl(meta.path,600);
+    if(!error&&data?.signedUrl){if(w)w.location.href=data.signedUrl;else window.open(data.signedUrl,'_blank');return}
+  }
+  // Compatibilidade com anexos antigos que estavam salvos apenas neste navegador.
+  const rec=await dbGetFile(fileId);
+  if(!rec?.blob){w?.close();toast('Arquivo não encontrado.');return}
+  const url=URL.createObjectURL(rec.blob);if(w)w.location.href=url;else window.open(url,'_blank');setTimeout(()=>URL.revokeObjectURL(url),60000)
+}
+async function removeFile(id,fileId){
+  const d=state.demands.find(x=>x.id===id),idx=d?.attachments?.findIndex(f=>f.id===fileId)??-1;if(idx<0)return;
+  const old=d.attachments.splice(idx,1)[0];
+  if(!await saveState()){d.attachments.splice(idx,0,old);return}
+  await deleteStoredFile(old);openDemandId=id;renderClients();
+}
+
+function closeModal(id){document.getElementById(id).classList.add('hidden')}
+function start(){document.getElementById('logoutBtn').onclick=logout;document.getElementById('newDemandTop').onclick=()=>openDemandModal();document.getElementById('addClientBtn').onclick=openClientModal;document.getElementById('demandForm').onsubmit=submitDemand;document.getElementById('clientForm').onsubmit=submitClient;document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>closeModal(b.dataset.close));document.querySelectorAll('.modal-backdrop').forEach(m=>m.onclick=e=>{if(e.target===m)closeModal(m.id)});document.querySelectorAll('#clientTypeChoices .choice').forEach(b=>b.onclick=()=>setClientType(b.dataset.type));document.getElementById('clientNameInput').oninput=e=>renderRecentClientSuggestions(e.target.value);document.getElementById('searchInput').oninput=()=>{openClientId=null;openDemandId=null;if(currentArea==='deleted')renderDeleted();else if(currentArea==='agenda')renderAgenda();else if(currentArea){renderStats();renderClients()}};document.addEventListener('click',e=>{if(!e.target.closest('.client-options')&&!e.target.closest('.client-menu'))document.querySelectorAll('.client-menu').forEach(m=>m.classList.add('hidden'))});initLogin()}
+
+(async()=>{state=await loadState();subscribeRealtime();start()})();
+</script>
+</body>
+</html>
