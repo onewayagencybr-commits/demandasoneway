@@ -313,6 +313,7 @@ body:before,body:after{content:"";position:fixed;pointer-events:none;z-index:0;b
 
 <div class="toast hidden" id="toast"><span class="toast-icon hidden" id="toastIcon">✓</span><span id="toastText"></span><button class="toast-action hidden" id="toastAction"></button></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
 const USERS={Administrador:'admin',Visitante:'status','Design Login':'design','Vídeos Login':'video'};
@@ -330,6 +331,12 @@ function monthKeyLabel(key){const [y,m]=String(key||currentMonth).split('-');ret
 function buildMonth12Select(selectedKey){const baseYear=Number(String(currentMonth||'').slice(0,4))||new Date().getFullYear();return MONTHS.map((name,i)=>{const key=`${baseYear}-${String(i+1).padStart(2,'0')}`;return `<option value="${key}" ${key===selectedKey?'selected':''}>${name} de ${baseYear}</option>`}).join('')}
 const STORAGE_KEY='demandas-neutro-v7';
 const DB_NAME='demandas-neutro-v7-db';
+const SUPABASE_URL='https://wreolbaiqfpoytfshmoz.supabase.co';
+const SUPABASE_KEY='sb_publishable_R7Umvf3iStv_e6xkIzKEyQ_YHFThLxe';
+const REMOTE_STATE_ID='main';
+const STORAGE_BUCKET='demand-files';
+const supabaseClient=window.supabase?.createClient?.(SUPABASE_URL,SUPABASE_KEY)||null;
+let realtimeChannel=null;
 let state=seed(),currentUser=null,currentArea=null,currentMonth=currentMonthKey(),openClientId=null,openDemandId=null,toastTimer=null,lastAddedClientId=null,activeAnalytics=null,bulkImportDrafts=[],bulkImportMeta={warnings:[],expected:{}};
 let bulkSpeechRecognition=null,bulkSpeechListening=false,bulkSpeechBaseText='',bulkSpeechCommitted='';
 
@@ -360,52 +367,90 @@ async function dbPutFile(rec){const db=await openDB();return new Promise((resolv
 async function dbGetFile(id){try{const db=await openDB();return await new Promise((resolve,reject)=>{const req=db.transaction('files').objectStore('files').get(id);req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(req.error)})}catch{return null}}
 async function dbDeleteFile(id){try{const db=await openDB();return await new Promise(resolve=>{const tx=db.transaction('files','readwrite');tx.objectStore('files').delete(id);tx.oncomplete=()=>resolve(true);tx.onerror=()=>resolve(false)})}catch{return false}}
 
-async function loadState(){
-  // Prioriza o localStorage: ele é instantâneo e funciona melhor quando o sistema é aberto como arquivo local.
+function readLocalCache(){
   try{
     const raw=localStorage.getItem(STORAGE_KEY);
-    if(raw) return normalizeState(JSON.parse(raw));
-  }catch{}
-  // IndexedDB fica apenas como fallback quando não houver estado local.
+    return raw?normalizeState(JSON.parse(raw)):null;
+  }catch{return null}
+}
+function writeLocalCache(value){
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(value))}catch{}
+  Promise.race([
+    dbWriteState(typeof structuredClone==='function'?structuredClone(value):JSON.parse(JSON.stringify(value))),
+    new Promise(resolve=>setTimeout(resolve,1000))
+  ]).catch(()=>{});
+}
+function hasMeaningfulData(value){
+  return !!value && ((value.clients?.length||0)+(value.demands?.length||0)+(value.deletedDemands?.length||0)+(value.removedClientMonths?.length||0)+(value.proposalHistory?.length||0)>0 || Number(value.updatedAt)>0);
+}
+function sharedStateSnapshot(source=state){
+  const snapshot=typeof structuredClone==='function'?structuredClone(source):JSON.parse(JSON.stringify(source));
+  // Financeiro fica somente no armazenamento local. Nunca vai para a tabela pública compartilhada.
+  delete snapshot.financeItems;
+  return snapshot;
+}
+function mergeRemoteWithLocalPrivate(remote,local){
+  const merged=normalizeState(remote);
+  merged.financeItems=Array.isArray(local?.financeItems)?local.financeItems:Array.isArray(state?.financeItems)?state.financeItems:[];
+  return merged;
+}
+async function loadState(){
+  let local=readLocalCache();
+  if(!local){
+    try{
+      const rawDb=await Promise.race([dbReadState(),new Promise(resolve=>setTimeout(()=>resolve(null),900))]);
+      if(rawDb)local=normalizeState(rawDb);
+    }catch{}
+  }
+  if(!supabaseClient)return local||seed();
   try{
-    const rawDb=await Promise.race([
-      dbReadState(),
-      new Promise(resolve=>setTimeout(()=>resolve(null),900))
-    ]);
-    if(rawDb) return normalizeState(rawDb);
-  }catch{}
-  return seed();
+    const {data,error}=await supabaseClient.from('app_state').select('data').eq('id',REMOTE_STATE_ID).maybeSingle();
+    if(error)throw error;
+    if(data?.data){
+      let remote=mergeRemoteWithLocalPrivate(data.data,local);
+      if(!hasMeaningfulData(remote)&&hasMeaningfulData(local)){
+        const migrated=normalizeState(local);migrated.updatedAt=Date.now();
+        const {error:migrationError}=await supabaseClient.from('app_state').upsert({id:REMOTE_STATE_ID,data:sharedStateSnapshot(migrated),updated_at:new Date().toISOString()},{onConflict:'id'});
+        if(!migrationError){writeLocalCache(migrated);return migrated}
+      }
+      writeLocalCache(remote);return remote;
+    }
+    const initial=hasMeaningfulData(local)?normalizeState(local):seed();initial.updatedAt=Date.now();
+    const {error:insertError}=await supabaseClient.from('app_state').upsert({id:REMOTE_STATE_ID,data:sharedStateSnapshot(initial),updated_at:new Date().toISOString()},{onConflict:'id'});
+    if(insertError)throw insertError;
+    writeLocalCache(initial);return initial;
+  }catch(e){
+    console.error('Falha ao carregar Supabase:',e);
+    return local||seed();
+  }
 }
 async function saveState(){
   state.updatedAt=Date.now();
-  let localSaved=false;
+  const localSnapshot=typeof structuredClone==='function'?structuredClone(state):JSON.parse(JSON.stringify(state));
+  writeLocalCache(localSnapshot);
+  if(!supabaseClient)return true;
   try{
-    const snapshot=JSON.stringify(state);
-    localStorage.setItem(STORAGE_KEY,snapshot);
-    localSaved=localStorage.getItem(STORAGE_KEY)===snapshot;
-  }catch{}
-
-  // Se o armazenamento local salvou, conclui a ação imediatamente.
-  // A cópia no IndexedDB é feita em segundo plano e nunca bloqueia o botão.
-  if(localSaved){
-    Promise.race([
-      dbWriteState(typeof structuredClone==='function' ? structuredClone(state) : JSON.parse(JSON.stringify(state))),
-      new Promise(resolve=>setTimeout(resolve,1000))
-    ]).catch(()=>{});
+    const {error}=await supabaseClient.from('app_state').upsert({id:REMOTE_STATE_ID,data:sharedStateSnapshot(localSnapshot),updated_at:new Date().toISOString()},{onConflict:'id'});
+    if(error)throw error;
+    return true;
+  }catch(e){
+    console.error('Falha ao sincronizar no Supabase:',e);
+    toast('Alteração salva neste navegador, mas não sincronizou com os outros usuários.');
     return true;
   }
-
-  // Fallback para navegadores onde localStorage não está disponível.
-  try{
-    await Promise.race([
-      dbWriteState(state),
-      new Promise((_,reject)=>setTimeout(()=>reject(new Error('timeout')),1200))
-    ]);
-    return true;
-  }catch{
-    toast('Não foi possível salvar neste navegador. Tente abrir o arquivo pelo Chrome ou Edge.');
-    return false;
-  }
+}
+function subscribeRealtime(){
+  if(!supabaseClient||realtimeChannel)return;
+  realtimeChannel=supabaseClient
+    .channel('oneway-demandas-tempo-real')
+    .on('postgres_changes',{event:'*',schema:'public',table:'app_state',filter:`id=eq.${REMOTE_STATE_ID}`},payload=>{
+      const raw=payload?.new?.data;if(!raw)return;
+      const incoming=mergeRemoteWithLocalPrivate(raw,state);
+      if(Number(incoming.updatedAt)&&Number(incoming.updatedAt)===Number(state.updatedAt))return;
+      state=incoming;writeLocalCache(state);
+      if(currentUser)renderAll();
+    })
+    .subscribe(status=>console.log('Realtime:',status));
 }
 
 function ensureMonths(){const set=new Set([currentMonthKey(),addMonths(currentMonthKey(),1),addMonths(currentMonthKey(),2)]);for(const c of state.clients)set.add(c.startMonth);for(const d of [...state.demands,...state.deletedDemands])set.add(d.month);for(const r of state.removedClientMonths)set.add(r.month);return [...set].sort()}
@@ -872,7 +917,7 @@ async function submitDemand(e){
 async function updateStatus(id,status){const d=state.demands.find(x=>x.id===id);if(!d||!statusesForArea(d.area)[status])return;const old=d.status;d.status=status;if(!await saveState()){d.status=old;return}if(currentArea==='agenda'){renderAgenda()}else{renderStats();renderClients()}toast('Status atualizado.')}
 async function deleteDemand(id){if(!isAdmin()||!confirm('Mover esta demanda para Excluídos?'))return;const idx=state.demands.findIndex(d=>d.id===id);if(idx<0)return;const d=state.demands.splice(idx,1)[0];d.deletedAt=new Date().toISOString();d.deletedBy=currentUser;state.deletedDemands.push(d);if(!await saveState()){state.deletedDemands.pop();delete d.deletedAt;delete d.deletedBy;state.demands.splice(idx,0,d);return}openDemandId=null;renderStats();renderClients();toast('Demanda movida para Excluídos.','Desfazer',()=>restoreDemand(id))}
 async function restoreDemand(id){const idx=state.deletedDemands.findIndex(d=>d.id===id);if(idx<0)return;const d=state.deletedDemands.splice(idx,1)[0];delete d.deletedAt;delete d.deletedBy;state.demands.push(d);if(!await saveState()){state.demands.pop();state.deletedDemands.splice(idx,0,d);return}currentArea==='deleted'?renderDeleted():(renderStats(),renderClients());toast('Demanda restaurada.')}
-async function purgeDemand(id){if(!isAdmin()||!confirm('Excluir definitivamente?'))return;const idx=state.deletedDemands.findIndex(d=>d.id===id);if(idx<0)return;const d=state.deletedDemands.splice(idx,1)[0];if(!await saveState()){state.deletedDemands.splice(idx,0,d);return}for(const f of d.attachments||[])await dbDeleteFile(f.id);renderDeleted();toast('Demanda excluída definitivamente.')}
+async function purgeDemand(id){if(!isAdmin()||!confirm('Excluir definitivamente?'))return;const idx=state.deletedDemands.findIndex(d=>d.id===id);if(idx<0)return;const d=state.deletedDemands.splice(idx,1)[0];if(!await saveState()){state.deletedDemands.splice(idx,0,d);return}for(const f of d.attachments||[])await deleteStoredFile(f);renderDeleted();toast('Demanda excluída definitivamente.')}
 async function emptyTrashMonth(){
   if(!isAdmin())return;
   const deleted=state.deletedDemands.filter(d=>d.month===currentMonth);
@@ -890,7 +935,7 @@ async function emptyTrashMonth(){
     state.removedClientMonths=oldRemoved;
     return;
   }
-  for(const f of files)try{await dbDeleteFile(f.id)}catch(e){}
+  for(const f of files)try{await deleteStoredFile(f)}catch(e){}
   renderDeleted();
   toast(`Lixeira de ${fmtMonth(currentMonth)} esvaziada.`);
 }
@@ -912,17 +957,47 @@ function renderDeleted(){
 
 async function addLink(id,val){if(!isAdmin())return;val=val.trim();if(!val)return;const href=safeUrl(/^https?:\/\//i.test(val)?val:`https://${val}`);if(href==='#'){toast('Link inválido.');return}const d=state.demands.find(x=>x.id===id);d.links=d.links||[];d.links.push(href);if(!await saveState()){d.links.pop();return}openDemandId=id;renderClients();toast('Link adicionado.')}
 async function removeLink(id,index){const d=state.demands.find(x=>x.id===id);const old=d.links.splice(index,1)[0];if(!await saveState()){d.links.splice(index,0,old);return}openDemandId=id;renderClients()}
-async function addFiles(id,fileList){if(!isAdmin()||!fileList?.length)return;const d=state.demands.find(x=>x.id===id);d.attachments=d.attachments||[];for(const file of [...fileList]){if(file.size>20*1024*1024){toast(`${file.name}: máximo de 20 MB.`);continue}const meta={id:uid(),name:file.name,type:file.type,size:file.size};try{await dbPutFile({...meta,blob:file});d.attachments.push(meta)}catch{toast(`Não foi possível anexar ${file.name}.`)}}if(!await saveState())return;openDemandId=id;renderClients();toast('Arquivo adicionado.')}
-async function openFile(fileId){const w=window.open('','_blank');const rec=await dbGetFile(fileId);if(!rec?.blob){w?.close();toast('Arquivo não encontrado neste navegador.');return}const url=URL.createObjectURL(rec.blob);if(w)w.location.href=url;else window.open(url,'_blank');setTimeout(()=>URL.revokeObjectURL(url),60000)}
-async function removeFile(id,fileId){const d=state.demands.find(x=>x.id===id),idx=d.attachments.findIndex(f=>f.id===fileId);if(idx<0)return;const old=d.attachments.splice(idx,1)[0];if(!await saveState()){d.attachments.splice(idx,0,old);return}await dbDeleteFile(fileId);openDemandId=id;renderClients()}
-
-
-function moneyNumber(v){
-  const s=String(v??'').trim().replace(/\s/g,'');if(!s)return 0;
-  if(s.includes(',')&&s.includes('.'))return Number(s.replace(/\./g,'').replace(',','.'))||0;
-  if(s.includes(','))return Number(s.replace(',','.'))||0;
-  return Number(s)||0;
+function cleanFileName(name){return String(name||'arquivo').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9._-]+/g,'-').replace(/-+/g,'-').slice(0,120)||'arquivo'}
+function findAttachment(fileId){for(const d of [...state.demands,...state.deletedDemands]){const f=(d.attachments||[]).find(x=>x.id===fileId);if(f)return f}return null}
+async function deleteStoredFile(meta){
+  if(meta?.path&&supabaseClient){try{const {error}=await supabaseClient.storage.from(STORAGE_BUCKET).remove([meta.path]);if(!error)return true}catch{}}
+  if(meta?.id)try{return await dbDeleteFile(meta.id)}catch{}
+  return false;
 }
+async function addFiles(id,fileList){
+  if(!isAdmin()||!fileList?.length)return;const d=state.demands.find(x=>x.id===id);if(!d)return;d.attachments=d.attachments||[];const added=[];
+  for(const file of [...fileList]){
+    if(file.size>20*1024*1024){toast(`${file.name}: máximo de 20 MB.`);continue}
+    const fileId=uid(),path=`${d.id}/${fileId}-${cleanFileName(file.name)}`;
+    try{
+      if(!supabaseClient)throw new Error('Supabase indisponível');
+      const {error}=await supabaseClient.storage.from(STORAGE_BUCKET).upload(path,file,{cacheControl:'3600',upsert:false,contentType:file.type||undefined});
+      if(error)throw error;
+      const meta={id:fileId,name:file.name,type:file.type,size:file.size,path};d.attachments.push(meta);added.push(meta);
+    }catch(e){
+      console.error(e);
+      // Fallback local para não perder o anexo se a rede estiver fora.
+      const meta={id:fileId,name:file.name,type:file.type,size:file.size};
+      try{await dbPutFile({...meta,blob:file});d.attachments.push(meta);added.push(meta)}catch{toast(`Não foi possível anexar ${file.name}.`)}
+    }
+  }
+  if(!added.length)return;
+  if(!await saveState()){for(const f of added){d.attachments=d.attachments.filter(x=>x.id!==f.id);await deleteStoredFile(f)}return}
+  openDemandId=id;renderClients();toast('Arquivo adicionado.');
+}
+async function openFile(fileId){
+  const w=window.open('','_blank'),meta=findAttachment(fileId);
+  if(meta?.path&&supabaseClient){
+    try{const {data,error}=await supabaseClient.storage.from(STORAGE_BUCKET).createSignedUrl(meta.path,600);if(!error&&data?.signedUrl){if(w)w.location.href=data.signedUrl;else window.open(data.signedUrl,'_blank');return}}catch{}
+  }
+  const rec=await dbGetFile(fileId);if(!rec?.blob){w?.close();toast('Arquivo não encontrado.');return}
+  const url=URL.createObjectURL(rec.blob);if(w)w.location.href=url;else window.open(url,'_blank');setTimeout(()=>URL.revokeObjectURL(url),60000)
+}
+async function removeFile(id,fileId){
+  const d=state.demands.find(x=>x.id===id),idx=d?.attachments?.findIndex(f=>f.id===fileId)??-1;if(idx<0)return;
+  const old=d.attachments.splice(idx,1)[0];if(!await saveState()){d.attachments.splice(idx,0,old);return}await deleteStoredFile(old);openDemandId=id;renderClients();
+}
+
 function moneyBR(v){const n=Number(v)||0;return n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
 function proposalRecentClients(){return [...new Set([...(state.recentClients||[]),...state.clients.map(c=>c.name)].filter(Boolean))].slice(0,6)}
 function renderProposalClientSuggestions(){const root=document.getElementById('proposalClientSuggestions');if(!root)return;root.innerHTML=proposalRecentClients().map(n=>`<button type="button" data-proposal-client="${esc(n)}">${esc(n)}</button>`).join('');root.querySelectorAll('[data-proposal-client]').forEach(b=>b.onclick=()=>{document.getElementById('proposalClient').value=b.dataset.proposalClient})}
@@ -998,7 +1073,7 @@ function handleGlobalEscape(e){
 }
 function start(){setTimeout(()=>document.body.classList.remove('booting'),900);document.getElementById('logoutBtn').onclick=logout;document.getElementById('trafficReportBtn').onclick=openTrafficAnalytics;document.getElementById('analyzePdfBtn').onclick=analyzeAnalyticsPdf;document.querySelectorAll('#analyticsSourceOptions [data-source]').forEach(b=>b.onclick=()=>setAnalyticsSource(b.dataset.source));document.getElementById('newProposalBtn').onclick=openProposalModal;document.getElementById('newProposalHistoryBtn').onclick=openProposalModal;document.getElementById('bulkImportBtn').onclick=openBulkDemandImport;document.getElementById('bulkMicBtn').onclick=toggleBulkSpeech;document.getElementById('bulkAnalyzeBtn').onclick=analyzeBulkDemandImport;document.getElementById('bulkConfirmBtn').onclick=confirmBulkDemandImport;document.getElementById('addFinanceIncomeBtn').onclick=()=>addFinanceItem('income');document.getElementById('addFinanceCostBtn').onclick=()=>addFinanceItem('cost');document.getElementById('newDemandTop').onclick=()=>openDemandModal();document.getElementById('addClientBtn').onclick=openClientModal;document.getElementById('demandForm').onsubmit=submitDemand;document.getElementById('clientForm').onsubmit=submitClient;document.getElementById('proposalForm').onsubmit=submitProposal;document.getElementById('addProposalItem').onclick=()=>addProposalItem();document.getElementById('proposalTotal').oninput=updateProposalTotals;document.getElementById('proposalJpegBtn').onclick=async()=>{const data=proposalData();if(validateProposal(data)){rememberClientName(data.client);const ok=await exportProposalJPEG(data);if(ok){await recordGeneratedProposal(data,'jpeg');toast('JPEG gerado e salvo no histórico.',null,null,'success')}}};document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>closeModal(b.dataset.close));document.querySelectorAll('.modal-backdrop').forEach(m=>m.onclick=e=>{if(e.target===m)closeModal(m.id)});document.querySelectorAll('#clientTypeChoices .choice').forEach(b=>b.onclick=()=>setClientType(b.dataset.type));document.getElementById('clientNameInput').oninput=e=>renderRecentClientSuggestions(e.target.value);document.getElementById('searchInput').oninput=()=>{openClientId=null;openDemandId=null;if(currentArea==='deleted')renderDeleted();else if(currentArea==='agenda')renderAgenda();else if(currentArea&&Object.keys(AREAS).includes(currentArea)){renderStats();renderClients()}};document.addEventListener('click',e=>{if(!e.target.closest('.client-options')&&!e.target.closest('.client-menu'))document.querySelectorAll('.client-menu').forEach(m=>m.classList.add('hidden'))});document.addEventListener('keydown',handleGlobalEscape);initLogin()}
 
-(async()=>{state=await loadState();start()})();
+(async()=>{state=await loadState();subscribeRealtime();start()})();
 </script>
 </body>
 </html>
