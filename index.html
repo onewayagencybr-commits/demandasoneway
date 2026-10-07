@@ -7,7 +7,7 @@
 <style>
 :root{
   --bg:#06101f;--bg-2:#0a1f47;--bg-3:#2153eb;--panel:#f8fbff;--panel-2:#eef4ff;--text:#0f172a;--muted:#5d6b85;--line:#d7e1f2;--soft:#f4f8ff;
-  --dark:#0d1b3d;--accent:#2f66ff;--accent-2:#4f84ff;--accent-soft:#dce8ff;--green:#16a34a;--red:#dc2626;--yellow:#eab308;--purple:#7c3aed;
+  --dark:#0d1b3d;--accent:#2f66ff;--accent-2:#4f84ff;--accent-soft:#dce8ff;--green:#16a34a;--red:#dc2626;--yellow:#eab308;--orange:#f97316;--purple:#7c3aed;
   --shadow:0 24px 70px rgba(2,8,23,.26);--shadow-soft:0 16px 40px rgba(6,17,38,.16);
   --ease:cubic-bezier(.22,.8,.28,1);
 }
@@ -34,10 +34,10 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .shell{max-width:1420px;margin:auto;padding:30px 24px 60px}.hero{display:grid;grid-template-columns:1fr auto;gap:20px;align-items:end;margin:10px 0 22px}.eyebrow{font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:.14em;color:rgba(229,238,255,.72)}.hero h1{font-size:34px;letter-spacing:-.05em;margin:7px 0 5px;color:#fff}.hero p{margin:0;color:rgba(234,241,255,.8)}.hero-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.search,.month-select{border:1px solid rgba(203,220,255,.22);background:rgba(255,255,255,.12)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;border-radius:12px;padding:10px 12px;outline:none;color-scheme:dark;backdrop-filter:blur(10px)}.search::placeholder{color:rgba(232,241,255,.72)}.month-select option{background:#0d1b3d;color:#fff}.search{min-width:250px}.month-select{min-width:178px;font-weight:680}
 
 /* area tabs */
-.nav-row{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px}.tabs{display:flex;gap:7px;background:rgba(255,255,255,.12);padding:5px;border-radius:14px;width:max-content;max-width:calc(100% - 52px);overflow:auto;margin:0;border:1px solid rgba(201,217,255,.16);backdrop-filter:blur(10px)}.tab{border:0;background:transparent;padding:9px 18px;border-radius:10px;color:rgba(233,240,255,.8);font-weight:790;white-space:nowrap;transition:all .22s var(--ease)}.tab:hover{color:#fff}.tab.active{background:linear-gradient(135deg,#f8fbff 0%,#dbe8ff 100%);color:#102040;box-shadow:0 8px 20px rgba(10,20,45,.18);transform:translateY(-1px)}.trash-tab{width:40px;height:40px;flex:0 0 40px;display:grid;place-items:center;border:1px solid rgba(201,217,255,.16);background:rgba(255,255,255,.08);color:rgba(233,240,255,.8);border-radius:11px;transition:all .2s var(--ease)}.trash-tab svg{width:16px;height:16px;stroke:currentColor}.trash-tab:hover{background:rgba(255,255,255,.14);color:#fff;border-color:rgba(201,217,255,.24);transform:translateY(-1px)}.trash-tab.active{background:#fff;color:#b42318;border-color:#f1d1cd;box-shadow:0 5px 14px rgba(17,24,39,.14)}
+.nav-row{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px}.tabs{display:flex;gap:7px;background:rgba(255,255,255,.12);padding:5px;border-radius:14px;width:max-content;max-width:calc(100% - 52px);overflow:auto;margin:0;border:1px solid rgba(201,217,255,.16);backdrop-filter:blur(10px)}.tab{border:0;background:transparent;padding:9px 18px;border-radius:10px;color:rgba(233,240,255,.8);font-weight:790;white-space:nowrap;transition:all .22s var(--ease)}.tab:hover{color:#fff}.tab.active{background:linear-gradient(135deg,#f8fbff 0%,#dbe8ff 100%);color:#102040;box-shadow:0 8px 20px rgba(10,20,45,.18);transform:translateY(-1px)}.tab[data-area="trafego"]{margin-left:13px;position:relative}.tab[data-area="trafego"]::before{content:"";position:absolute;left:-10px;top:7px;bottom:7px;width:1px;background:rgba(220,232,255,.28)}.trash-tab{width:40px;height:40px;flex:0 0 40px;display:grid;place-items:center;border:1px solid rgba(201,217,255,.16);background:rgba(255,255,255,.08);color:rgba(233,240,255,.8);border-radius:11px;transition:all .2s var(--ease)}.trash-tab svg{width:16px;height:16px;stroke:currentColor}.trash-tab:hover{background:rgba(255,255,255,.14);color:#fff;border-color:rgba(201,217,255,.24);transform:translateY(-1px)}.trash-tab.active{background:#fff;color:#b42318;border-color:#f1d1cd;box-shadow:0 5px 14px rgba(17,24,39,.14)}
 
 /* compact stats */
-.stats{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:18px;animation:fade .28s ease both}.stat{display:flex;align-items:center;gap:5px;border:1px solid rgba(201,217,255,.16);background:rgba(255,255,255,.1);backdrop-filter:blur(10px);border-radius:8px;padding:5px 7px;color:rgba(233,240,255,.82)}.stat small{font-size:9px;font-weight:650;white-space:nowrap}.stat strong{font-size:10px;color:#fff}.dot{width:6px;height:6px;border-radius:2px;display:inline-block}.green{background:var(--green)}.red{background:var(--red)}.yellow{background:var(--yellow)}.purple{background:var(--purple)}
+.stats{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:18px;animation:fade .28s ease both}.stat{display:flex;align-items:center;gap:5px;border:1px solid rgba(201,217,255,.16);background:rgba(255,255,255,.1);backdrop-filter:blur(10px);border-radius:8px;padding:5px 7px;color:rgba(233,240,255,.82)}.stat small{font-size:9px;font-weight:650;white-space:nowrap}.stat strong{font-size:10px;color:#fff}.dot{width:6px;height:6px;border-radius:2px;display:inline-block}.green{background:var(--green)}.red{background:var(--red)}.yellow{background:var(--yellow)}.orange{background:var(--orange)}.purple{background:var(--purple)}
 
 .section-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:19px 0 13px}.section-copy h2{margin:0;font-size:17px;letter-spacing:-.02em;color:#fff}.section-copy span{display:block;font-size:11px;color:rgba(229,238,255,.72);margin-top:3px}.section-actions{display:flex;gap:8px}
 
@@ -47,8 +47,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .client-body{display:grid;grid-template-rows:0fr;opacity:0;border-top:1px solid transparent;transition:grid-template-rows .32s var(--ease),opacity .24s ease,border-color .24s}.client-body-inner{overflow:hidden}.client.open .client-body{grid-template-rows:1fr;opacity:1;border-top-color:#eef0f3}.client-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:17px 28px 10px}.client-helper{font-size:11px;color:#999ea8}.demand-list{padding:0 28px 27px}
 
 /* simple demand list */
-.demand{border-top:1px solid #edf0f3}.demand:first-child{border-top:0}.demand-row{width:100%;border:0;background:transparent;padding:14px 1px;display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:13px;align-items:center;text-align:left;transition:padding .2s,background .2s}.demand-row:hover{padding-left:6px}.demand-title{font-size:13px;font-weight:600;line-height:1.4;color:#2d3138}.demand-index{display:inline-block;width:25px;color:#a4a9b2;font-size:11px}.current-status{font-size:9px;font-weight:820;padding:5px 7px;border-radius:7px;white-space:nowrap;border:1px solid transparent}.current-status.green{background:#ecfdf3;color:#027a48;border-color:#abefc6}.current-status.red{background:#fef3f2;color:#b42318;border-color:#fecdca}.current-status.yellow{background:#fefce8;color:#854d0e;border-color:#fde68a}.current-status.purple{background:#f5f3ff;color:#6d28d9;border-color:#ddd6fe}.demand-caret{color:#a3a8b1;font-size:14px;transition:transform .25s var(--ease)}.demand.expanded .demand-caret{transform:rotate(180deg)}
-.demand-detail{display:grid;grid-template-rows:0fr;opacity:0;transition:grid-template-rows .3s var(--ease),opacity .24s ease}.detail-overflow{overflow:hidden}.demand.expanded .demand-detail{grid-template-rows:1fr;opacity:1}.detail-panel{margin:1px 0 18px;background:#fafbfc;border:1px solid #e8ebef;border-radius:16px;padding:19px;animation:fade .25s ease both}.detail-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(270px,.75fr);gap:22px}.detail-label{font-size:9px;font-weight:850;text-transform:uppercase;letter-spacing:.11em;color:#9ca1aa;margin-bottom:8px}.description{margin:0;color:#5d636e;line-height:1.62;white-space:pre-wrap;font-size:13px}.status-edit{display:flex;gap:5px;flex-wrap:wrap}.status-btn{border:1px solid transparent;border-radius:8px;padding:6px 8px;font-size:9px;font-weight:820;line-height:1.1;white-space:nowrap;transition:transform .14s var(--ease),filter .14s}.status-btn:hover{transform:translateY(-1px);filter:brightness(.98)}.status-btn[data-status="green"]{background:#ecfdf3;color:#027a48;border-color:#abefc6}.status-btn[data-status="red"]{background:#fef3f2;color:#b42318;border-color:#fecdca}.status-btn[data-status="yellow"]{background:#fefce8;color:#854d0e;border-color:#fde68a}.status-btn[data-status="purple"]{background:#f5f3ff;color:#6d28d9;border-color:#ddd6fe}.status-btn.active[data-status="green"]{background:var(--green);color:#fff;border-color:var(--green)}.status-btn.active[data-status="red"]{background:var(--red);color:#fff;border-color:var(--red)}.status-btn.active[data-status="yellow"]{background:var(--yellow);color:#382800;border-color:var(--yellow)}.status-btn.active[data-status="purple"]{background:var(--purple);color:#fff;border-color:var(--purple)}
+.demand{border-top:1px solid #edf0f3}.demand:first-child{border-top:0}.demand-row{width:100%;border:0;background:transparent;padding:14px 1px;display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:13px;align-items:center;text-align:left;transition:padding .2s,background .2s}.demand-row:hover{padding-left:6px}.demand-title{font-size:13px;font-weight:600;line-height:1.4;color:#2d3138}.demand-index{display:inline-block;width:25px;color:#a4a9b2;font-size:11px}.current-status{font-size:9px;font-weight:820;padding:5px 7px;border-radius:7px;white-space:nowrap;border:1px solid transparent}.current-status.green{background:#ecfdf3;color:#027a48;border-color:#abefc6}.current-status.red{background:#fef3f2;color:#b42318;border-color:#fecdca}.current-status.yellow{background:#fefce8;color:#854d0e;border-color:#fde68a}.current-status.orange{background:#fff7ed;color:#c2410c;border-color:#fed7aa}.current-status.purple{background:#f5f3ff;color:#6d28d9;border-color:#ddd6fe}.demand-caret{color:#a3a8b1;font-size:14px;transition:transform .25s var(--ease)}.demand.expanded .demand-caret{transform:rotate(180deg)}
+.demand-detail{display:grid;grid-template-rows:0fr;opacity:0;transition:grid-template-rows .3s var(--ease),opacity .24s ease}.detail-overflow{overflow:hidden}.demand.expanded .demand-detail{grid-template-rows:1fr;opacity:1}.detail-panel{margin:1px 0 18px;background:#fafbfc;border:1px solid #e8ebef;border-radius:16px;padding:19px;animation:fade .25s ease both}.detail-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(270px,.75fr);gap:22px}.detail-label{font-size:9px;font-weight:850;text-transform:uppercase;letter-spacing:.11em;color:#9ca1aa;margin-bottom:8px}.description{margin:0;color:#5d636e;line-height:1.62;white-space:pre-wrap;font-size:13px}.status-edit{display:flex;gap:5px;flex-wrap:wrap}.status-btn{border:1px solid transparent;border-radius:8px;padding:6px 8px;font-size:9px;font-weight:820;line-height:1.1;white-space:nowrap;transition:transform .14s var(--ease),filter .14s}.status-btn:hover{transform:translateY(-1px);filter:brightness(.98)}.status-btn[data-status="green"]{background:#ecfdf3;color:#027a48;border-color:#abefc6}.status-btn[data-status="red"]{background:#fef3f2;color:#b42318;border-color:#fecdca}.status-btn[data-status="yellow"]{background:#fefce8;color:#854d0e;border-color:#fde68a}.status-btn[data-status="orange"]{background:#fff7ed;color:#c2410c;border-color:#fed7aa}.status-btn[data-status="purple"]{background:#f5f3ff;color:#6d28d9;border-color:#ddd6fe}.status-btn.active[data-status="green"]{background:var(--green);color:#fff;border-color:var(--green)}.status-btn.active[data-status="red"]{background:var(--red);color:#fff;border-color:var(--red)}.status-btn.active[data-status="yellow"]{background:var(--yellow);color:#382800;border-color:var(--yellow)}.status-btn.active[data-status="orange"]{background:var(--orange);color:#fff;border-color:var(--orange)}.status-btn.active[data-status="purple"]{background:var(--purple);color:#fff;border-color:var(--purple)}
 .refs{display:grid;gap:8px}.ref-item{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#fff;border:1px solid #e6e9ed;border-radius:10px;padding:8px 9px;font-size:11px}.ref-item a{color:#333842;text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ref-item a:hover{text-decoration:underline}.mini-link{border:0;background:transparent;color:#8a909a;font-size:10px;font-weight:760;padding:3px}.mini-link.danger{color:#b42318}.ref-add{display:flex;gap:6px;margin-top:8px}.ref-add input{min-width:0;flex:1;border:1px solid #dfe3e8;background:#fff;color:#222;border-radius:9px;padding:8px 9px;font-size:11px}.file-upload{margin-top:8px}.file-upload label{display:inline-flex;align-items:center;gap:6px;border:1px dashed #cfd4dc;background:#fff;border-radius:9px;padding:8px 10px;font-size:10px;font-weight:760;color:#656b75;cursor:pointer}.file-upload input{display:none}.detail-actions{display:flex;gap:7px;justify-content:flex-end;margin-top:16px;padding-top:14px;border-top:1px solid #e9ebef}
 .empty{grid-column:1/-1;padding:34px 20px;text-align:center;color:#8e949e;background:#fff;border:1px dashed #d7dbe2;border-radius:16px;animation:fade .25s ease both}.empty strong{display:block;color:#555b65;margin-bottom:4px;font-size:13px}.empty span{font-size:11px}
 
@@ -65,7 +65,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 @keyframes newClientPulse{0%{opacity:0;transform:translateY(8px) scale(.985);box-shadow:0 0 0 0 rgba(22,163,74,0)}45%{opacity:1;transform:none;box-shadow:0 0 0 4px rgba(22,163,74,.10)}100%{box-shadow:var(--shadow-soft)}}@keyframes fade{from{opacity:0}to{opacity:1}}@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}@keyframes cardIn{from{opacity:0;transform:translateY(8px) scale(.992)}to{opacity:1;transform:none}}@keyframes focusIn{from{opacity:.45;transform:scale(.985)}to{opacity:1;transform:scale(1)}}@keyframes menuIn{from{opacity:0;transform:translateY(-5px) scale(.98)}to{opacity:1;transform:none}}@keyframes modalIn{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:none}}@keyframes toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
 @media(max-width:850px){.hero{grid-template-columns:1fr}.hero-controls{justify-content:flex-start}.detail-grid{grid-template-columns:1fr}.clients{grid-template-columns:repeat(2,minmax(0,1fr))}.demand-row{grid-template-columns:minmax(0,1fr) auto auto}}
-@media(max-width:640px){.agenda-item{grid-template-columns:70px minmax(0,1fr) auto 14px;gap:9px;padding:11px}.agenda-item .area-chip{display:none}.agenda-day{font-size:18px}.agenda-summary{align-items:flex-start;flex-direction:column;gap:4px}.shell,.topbar-inner{padding-left:14px;padding-right:14px}.brand-copy span,.user-meta{display:none}.brand-logo{width:98px}.hero h1{font-size:27px}.hero-controls{display:grid;grid-template-columns:1fr;width:100%}.search,.month-select{min-width:0;width:100%}.nav-row{gap:8px}.tabs{width:auto;flex:1;max-width:none}.tab{flex:1;padding:9px 8px}.trash-tab{width:38px;height:38px;flex-basis:38px}.clients{grid-template-columns:1fr}.clients.focus-mode{margin-top:18px}.clients.focus-mode .client-head{padding:20px}.clients.focus-mode .client-name{font-size:19px}.client-toolbar,.demand-list{padding-left:17px;padding-right:17px}.section-head{align-items:flex-start;flex-direction:column}.section-actions{width:100%}.section-actions button{flex:1}.choice-grid{grid-template-columns:1fr}.demand-row{grid-template-columns:minmax(0,1fr) auto}.demand-caret{display:none}.deleted-item{grid-template-columns:1fr}.deleted-actions{justify-content:flex-start}.toast{left:14px;right:14px;bottom:14px}.top-actions .ghost{padding:8px}.current-status{justify-self:end}}
+@media(max-width:640px){.agenda-item{grid-template-columns:70px minmax(0,1fr) auto 14px;gap:9px;padding:11px}.agenda-item .area-chip{display:none}.agenda-day{font-size:18px}.agenda-summary{align-items:flex-start;flex-direction:column;gap:4px}.shell,.topbar-inner{padding-left:14px;padding-right:14px}.brand-copy span,.user-meta{display:none}.brand-logo{width:98px}.hero h1{font-size:27px}.hero-controls{display:grid;grid-template-columns:1fr;width:100%}.search,.month-select{min-width:0;width:100%}.nav-row{gap:8px}.tabs{width:auto;flex:1;max-width:none}.tab{flex:1;padding:9px 8px}.tab[data-area="trafego"]{margin-left:5px}.tab[data-area="trafego"]::before{left:-5px}.trash-tab{width:38px;height:38px;flex-basis:38px}.clients{grid-template-columns:1fr}.clients.focus-mode{margin-top:18px}.clients.focus-mode .client-head{padding:20px}.clients.focus-mode .client-name{font-size:19px}.client-toolbar,.demand-list{padding-left:17px;padding-right:17px}.section-head{align-items:flex-start;flex-direction:column}.section-actions{width:100%}.section-actions button{flex:1}.choice-grid{grid-template-columns:1fr}.demand-row{grid-template-columns:minmax(0,1fr) auto}.demand-caret{display:none}.deleted-item{grid-template-columns:1fr}.deleted-actions{justify-content:flex-start}.toast{left:14px;right:14px;bottom:14px}.top-actions .ghost{padding:8px}.current-status{justify-self:end}}
 </style>
 </head>
 <body>
@@ -131,20 +131,16 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 
 <div class="toast hidden" id="toast"><span class="toast-icon hidden" id="toastIcon">✓</span><span id="toastText"></span><button class="toast-action hidden" id="toastAction"></button></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const USERS={Administrador:'admin',Visitante:'status'};
 const ADMIN_PASSWORD='oneway4324';
 const AREAS={arte:'Arte',video:'Vídeo',trafego:'Tráfego'};
-const STATUS={green:'Aprovado',red:'Não feito',yellow:'Em produção',purple:'Aguardando aprovação'};
-const SUPABASE_URL='https://wreolbaiqfpoytfshmoz.supabase.co';
-const SUPABASE_KEY='sb_publishable_R7Umvf3iStv_e6xkIzKEyQ_YHFThLxe';
-const REMOTE_STATE_ID='main';
-const STORAGE_BUCKET='demand-files';
-const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const STATUS_DEFAULT={green:'Aprovado',red:'Não feito',yellow:'Em produção',purple:'Aguardando aprovação'};
+const STATUS_TRAFEGO={green:'Campanha ativa',red:'Campanha inativa',yellow:'Aguardando produção',orange:'Em montagem',purple:'Finalizada'};
+function statusesForArea(area){return area==='trafego'?STATUS_TRAFEGO:STATUS_DEFAULT}
+function statusLabel(d){const set=statusesForArea(d?.area);return set[d?.status]||set.red}
 const STORAGE_KEY='demandas-neutro-v7';
 const DB_NAME='demandas-neutro-v7-db';
-let realtimeChannel=null;
 let state=seed(),currentUser=null,currentArea=null,currentMonth=currentMonthKey(),openClientId=null,openDemandId=null,toastTimer=null,lastAddedClientId=null;
 
 function seed(){return {version:7,clients:[],demands:[],deletedDemands:[],removedClientMonths:[],recentClients:[],updatedAt:Date.now()}}
@@ -167,74 +163,52 @@ async function dbPutFile(rec){const db=await openDB();return new Promise((resolv
 async function dbGetFile(id){try{const db=await openDB();return await new Promise((resolve,reject)=>{const req=db.transaction('files').objectStore('files').get(id);req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(req.error)})}catch{return null}}
 async function dbDeleteFile(id){try{const db=await openDB();return await new Promise(resolve=>{const tx=db.transaction('files','readwrite');tx.objectStore('files').delete(id);tx.oncomplete=()=>resolve(true);tx.onerror=()=>resolve(false)})}catch{return false}}
 
-function readLocalCache(){
+async function loadState(){
+  // Prioriza o localStorage: ele é instantâneo e funciona melhor quando o sistema é aberto como arquivo local.
   try{
     const raw=localStorage.getItem(STORAGE_KEY);
-    return raw?normalizeState(JSON.parse(raw)):null;
-  }catch{return null}
-}
-function writeLocalCache(value){
-  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(value))}catch{}
-}
-function hasMeaningfulData(value){
-  return !!value && ((value.clients?.length||0)+(value.demands?.length||0)+(value.deletedDemands?.length||0)+(value.removedClientMonths?.length||0)>0 || Number(value.updatedAt)>0);
-}
-async function loadState(){
-  const local=readLocalCache();
+    if(raw) return normalizeState(JSON.parse(raw));
+  }catch{}
+  // IndexedDB fica apenas como fallback quando não houver estado local.
   try{
-    const {data,error}=await supabaseClient.from('app_state').select('data').eq('id',REMOTE_STATE_ID).maybeSingle();
-    if(error)throw error;
-    if(data?.data){
-      const remote=normalizeState(data.data);
-      // Primeira migração: se o Supabase ainda está zerado, leva os dados que já existiam neste navegador.
-      if(!hasMeaningfulData(remote)&&hasMeaningfulData(local)){
-        const migrated=normalizeState(local);
-        migrated.updatedAt=Date.now();
-        const {error:migrationError}=await supabaseClient.from('app_state').upsert({id:REMOTE_STATE_ID,data:migrated,updated_at:new Date().toISOString()},{onConflict:'id'});
-        if(!migrationError){writeLocalCache(migrated);return migrated}
-      }
-      writeLocalCache(remote);
-      return remote;
-    }
-    const initial=hasMeaningfulData(local)?normalizeState(local):seed();
-    initial.updatedAt=Date.now();
-    const {error:insertError}=await supabaseClient.from('app_state').upsert({id:REMOTE_STATE_ID,data:initial,updated_at:new Date().toISOString()},{onConflict:'id'});
-    if(insertError)throw insertError;
-    writeLocalCache(initial);
-    return initial;
-  }catch(e){
-    console.error('Falha ao carregar Supabase:',e);
-    return local||seed();
-  }
+    const rawDb=await Promise.race([
+      dbReadState(),
+      new Promise(resolve=>setTimeout(()=>resolve(null),900))
+    ]);
+    if(rawDb) return normalizeState(rawDb);
+  }catch{}
+  return seed();
 }
 async function saveState(){
   state.updatedAt=Date.now();
+  let localSaved=false;
   try{
-    const snapshot=typeof structuredClone==='function'?structuredClone(state):JSON.parse(JSON.stringify(state));
-    const {error}=await supabaseClient.from('app_state').upsert({id:REMOTE_STATE_ID,data:snapshot,updated_at:new Date().toISOString()},{onConflict:'id'});
-    if(error)throw error;
-    writeLocalCache(snapshot);
+    const snapshot=JSON.stringify(state);
+    localStorage.setItem(STORAGE_KEY,snapshot);
+    localSaved=localStorage.getItem(STORAGE_KEY)===snapshot;
+  }catch{}
+
+  // Se o armazenamento local salvou, conclui a ação imediatamente.
+  // A cópia no IndexedDB é feita em segundo plano e nunca bloqueia o botão.
+  if(localSaved){
+    Promise.race([
+      dbWriteState(typeof structuredClone==='function' ? structuredClone(state) : JSON.parse(JSON.stringify(state))),
+      new Promise(resolve=>setTimeout(resolve,1000))
+    ]).catch(()=>{});
     return true;
-  }catch(e){
-    console.error('Falha ao salvar no Supabase:',e);
-    toast('Não foi possível sincronizar agora. Confira a configuração do Supabase.');
+  }
+
+  // Fallback para navegadores onde localStorage não está disponível.
+  try{
+    await Promise.race([
+      dbWriteState(state),
+      new Promise((_,reject)=>setTimeout(()=>reject(new Error('timeout')),1200))
+    ]);
+    return true;
+  }catch{
+    toast('Não foi possível salvar neste navegador. Tente abrir o arquivo pelo Chrome ou Edge.');
     return false;
   }
-}
-function subscribeRealtime(){
-  if(realtimeChannel)return;
-  realtimeChannel=supabaseClient
-    .channel('oneway-demandas-tempo-real')
-    .on('postgres_changes',{event:'*',schema:'public',table:'app_state',filter:`id=eq.${REMOTE_STATE_ID}`},payload=>{
-      const raw=payload?.new?.data;
-      if(!raw)return;
-      const incoming=normalizeState(raw);
-      if(Number(incoming.updatedAt)&&Number(incoming.updatedAt)===Number(state.updatedAt))return;
-      state=incoming;
-      writeLocalCache(state);
-      if(currentUser)renderAll();
-    })
-    .subscribe(status=>console.log('Realtime:',status));
 }
 
 function ensureMonths(){const set=new Set([currentMonthKey(),addMonths(currentMonthKey(),1),addMonths(currentMonthKey(),2)]);for(const c of state.clients)set.add(c.startMonth);for(const d of [...state.demands,...state.deletedDemands])set.add(d.month);for(const r of state.removedClientMonths)set.add(r.month);return [...set].sort()}
@@ -258,11 +232,11 @@ function logout(){try{sessionStorage.removeItem('demanda-user-v7')}catch{}locati
 function renderTabs(){const agenda=!isAdmin()?`<button class="tab ${currentArea==='agenda'?'active':''}" data-area="agenda">Agenda</button>`:'';document.getElementById('tabs').innerHTML=agenda+Object.entries(AREAS).map(([k,v])=>`<button class="tab ${currentArea===k?'active':''}" data-area="${k}">${v}</button>`).join('');document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{currentArea=b.dataset.area;openClientId=null;openDemandId=null;document.getElementById('searchInput').value='';renderAll()});const trash=document.getElementById('trashTab');trash.classList.toggle('active',currentArea==='deleted');trash.onclick=()=>{currentArea='deleted';openClientId=null;openDemandId=null;document.getElementById('searchInput').value='';renderAll()}}
 function renderMonths(){const months=ensureMonths();if(!months.includes(currentMonth))currentMonth=currentMonthKey();const s=document.getElementById('monthSelect');s.innerHTML=months.map(m=>`<option value="${m}">${fmtMonth(m)}</option>`).join('');s.value=currentMonth;s.onchange=()=>{currentMonth=s.value;openClientId=null;openDemandId=null;renderAll()}}
 function renderAll(){document.getElementById('userName').textContent=currentUser;document.getElementById('userRole').textContent=isAdmin()?'Acesso total':'Visualização + status';document.getElementById('avatar').textContent=isAdmin()?'A':'V';renderTabs();renderMonths();const selected=!!currentArea,deleted=currentArea==='deleted',agenda=currentArea==='agenda';document.getElementById('heroControls').classList.toggle('hidden',!selected);document.getElementById('monthSelect').classList.toggle('hidden',agenda);document.getElementById('areaContent').classList.toggle('hidden',!selected||deleted||agenda);document.getElementById('agendaContent').classList.toggle('hidden',!agenda);document.getElementById('deletedContent').classList.toggle('hidden',!deleted);document.getElementById('newDemandTop').classList.toggle('hidden',!selected||deleted||agenda||!isAdmin());document.getElementById('addClientBtn').classList.toggle('hidden',!selected||deleted||agenda||!isAdmin());if(!selected){document.getElementById('pageTitle').textContent='Acompanhamento de Demandas';document.getElementById('pageSubtitle').textContent='Selecione Arte, Vídeo ou Tráfego.';return}if(agenda){document.getElementById('pageTitle').textContent='Agenda de demandas';document.getElementById('pageSubtitle').textContent='Todas as demandas organizadas pela data de postagem.';renderAgenda();return}if(deleted){document.getElementById('pageTitle').textContent='Excluídos';document.getElementById('pageSubtitle').textContent=`${fmtMonth(currentMonth)} · restaure o que precisar.`;renderDeleted();return}document.getElementById('pageTitle').textContent=`Demandas de ${AREAS[currentArea]}`;document.getElementById('pageSubtitle').textContent=`${fmtMonth(currentMonth)} · clientes desta área.`;renderStats();renderClients()}
-function renderStats(){const counts={green:0,red:0,yellow:0,purple:0};demandsFor().forEach(d=>counts[d.status]=(counts[d.status]||0)+1);document.getElementById('stats').innerHTML=[['green','Aprovadas'],['red','Não feitas'],['yellow','Em produção'],['purple','Aguardando aprovação']].map(([k,l])=>`<div class="stat"><span class="dot ${k}"></span><small>${l}</small><strong>${counts[k]||0}</strong></div>`).join('')}
+function renderStats(){const set=statusesForArea(currentArea),counts={};Object.keys(set).forEach(k=>counts[k]=0);demandsFor().forEach(d=>counts[d.status]=(counts[d.status]||0)+1);document.getElementById('stats').innerHTML=Object.entries(set).map(([k,l])=>`<div class="stat"><span class="dot ${k}"></span><small>${l}</small><strong>${counts[k]||0}</strong></div>`).join('')}
 function searchFilteredClients(){const q=document.getElementById('searchInput').value.trim().toLocaleLowerCase('pt-BR');const cs=clientsForMonth();if(!q)return cs;return cs.filter(c=>c.name.toLocaleLowerCase('pt-BR').includes(q)||demandsFor(c.id).some(d=>String(d.title||'').toLocaleLowerCase('pt-BR').includes(q)||String(d.description||'').toLocaleLowerCase('pt-BR').includes(q)))}
 function renderClients(){const root=document.getElementById('clients');let cs=searchFilteredClients();if(openClientId){const selected=clientsForMonth().find(c=>c.id===openClientId);cs=selected?[selected]:[];root.classList.add('focus-mode')}else root.classList.remove('focus-mode');document.getElementById('clientCount').textContent=`${cs.length} cliente${cs.length===1?'':'s'} · ${fmtMonth(currentMonth)}`;if(!cs.length){root.innerHTML=`<div class="empty"><strong>Nenhum cliente nesta área e mês.</strong><span>${isAdmin()?'Use “Adicionar cliente” para começar.':'Aguardando cadastro.'}</span></div>`;return}root.innerHTML=cs.map((c,i)=>renderClient(c,i)).join('');[...root.children].forEach((el,i)=>el.style.animationDelay=`${Math.min(i*35,180)}ms`);bindClientEvents(root)}
 function renderClient(c){const ds=demandsFor(c.id),open=openClientId===c.id;return `<article class="client ${open?'open':''} ${lastAddedClientId===c.id?'just-added':''}" data-client-id="${c.id}"><div class="client-top"><button class="client-head"><div><span class="client-name">${esc(c.name)}</span><div class="client-meta"><span class="type-chip">${c.type==='fixed'?'Fixo':'Pontual'}</span><span class="demand-count">${ds.length} demanda${ds.length===1?'':'s'}</span></div></div><span class="client-arrow">⌄</span></button>${isAdmin()?`<button class="client-options" title="Opções">⋯</button><div class="client-menu hidden"><button class="remove-client">Remover deste mês</button></div>`:''}</div><div class="client-body"><div class="client-body-inner"><div class="client-toolbar"><span class="client-helper">Clique em uma demanda para abrir descrição e referências.</span>${isAdmin()?`<button class="ghost small add-demand-client">+ Demanda</button>`:''}</div><div class="demand-list">${ds.length?ds.map((d,i)=>renderDemand(d,i)).join(''):`<div class="empty"><strong>Nenhuma demanda.</strong><span>Adicione a primeira demanda deste cliente.</span></div>`}</div></div></div></article>`}
-function renderDemand(d,i){const expanded=openDemandId===d.id;return `<div class="demand ${expanded?'expanded':''}" data-demand-id="${d.id}"><button class="demand-row"><span class="demand-title"><span class="demand-index">${String(i+1).padStart(2,'0')}</span>${esc(d.title)}<span class="demand-date">${esc(fmtPostDate(d.postDate))}</span></span><span class="current-status ${d.status}">${STATUS[d.status]||STATUS.red}</span><span class="demand-caret">⌄</span></button><div class="demand-detail"><div class="detail-overflow"><div class="detail-panel"><div class="detail-grid"><div><div class="detail-label">Descrição</div><p class="description">${esc(d.description||'Sem descrição cadastrada.')}</p><div class="detail-label" style="margin-top:17px">Data da postagem</div><p class="description">${esc(fmtPostDate(d.postDate))}</p><div class="detail-label" style="margin-top:17px">Atualizar status</div><div class="status-edit">${Object.entries(STATUS).map(([k,v])=>`<button class="status-btn ${d.status===k?'active':''}" data-status="${k}">${v}</button>`).join('')}</div></div><div><div class="detail-label">Referências</div><div class="refs">${(d.links||[]).map((link,idx)=>`<div class="ref-item"><a href="${esc(safeUrl(link))}" target="_blank" rel="noopener">${esc(link)}</a>${isAdmin()?`<button class="mini-link danger remove-link" data-index="${idx}">Remover</button>`:''}</div>`).join('')}${(d.attachments||[]).map(f=>`<div class="ref-item"><span>${esc(f.name)}</span><div><button class="mini-link open-file" data-file-id="${f.id}">Abrir</button>${isAdmin()?`<button class="mini-link danger remove-file" data-file-id="${f.id}">Remover</button>`:''}</div></div>`).join('')||(!d.links?.length?'<span style="font-size:11px;color:#a0a5ae">Nenhuma referência adicionada.</span>':'')}</div>${isAdmin()?`<div class="ref-add"><input class="link-input" placeholder="Cole um link"><button class="soft-btn small add-link">Adicionar</button></div><div class="file-upload"><label>+ Adicionar arquivo<input class="file-input" type="file" multiple></label></div>`:''}</div></div>${isAdmin()?`<div class="detail-actions"><button class="ghost small edit-demand">Editar</button><button class="ghost small danger delete-demand">Excluir</button></div>`:''}</div></div></div></div>`}
+function renderDemand(d,i){const expanded=openDemandId===d.id;return `<div class="demand ${expanded?'expanded':''}" data-demand-id="${d.id}"><button class="demand-row"><span class="demand-title"><span class="demand-index">${String(i+1).padStart(2,'0')}</span>${esc(d.title)}<span class="demand-date">${esc(fmtPostDate(d.postDate))}</span></span><span class="current-status ${d.status}">${statusLabel(d)}</span><span class="demand-caret">⌄</span></button><div class="demand-detail"><div class="detail-overflow"><div class="detail-panel"><div class="detail-grid"><div><div class="detail-label">Descrição</div><p class="description">${esc(d.description||'Sem descrição cadastrada.')}</p><div class="detail-label" style="margin-top:17px">Data da postagem</div><p class="description">${esc(fmtPostDate(d.postDate))}</p><div class="detail-label" style="margin-top:17px">Atualizar status</div><div class="status-edit">${Object.entries(statusesForArea(d.area)).map(([k,v])=>`<button class="status-btn ${d.status===k?'active':''}" data-status="${k}">${v}</button>`).join('')}</div></div><div><div class="detail-label">Referências</div><div class="refs">${(d.links||[]).map((link,idx)=>`<div class="ref-item"><a href="${esc(safeUrl(link))}" target="_blank" rel="noopener">${esc(link)}</a>${isAdmin()?`<button class="mini-link danger remove-link" data-index="${idx}">Remover</button>`:''}</div>`).join('')}${(d.attachments||[]).map(f=>`<div class="ref-item"><span>${esc(f.name)}</span><div><button class="mini-link open-file" data-file-id="${f.id}">Abrir</button>${isAdmin()?`<button class="mini-link danger remove-file" data-file-id="${f.id}">Remover</button>`:''}</div></div>`).join('')||(!d.links?.length?'<span style="font-size:11px;color:#a0a5ae">Nenhuma referência adicionada.</span>':'')}</div>${isAdmin()?`<div class="ref-add"><input class="link-input" placeholder="Cole um link"><button class="soft-btn small add-link">Adicionar</button></div><div class="file-upload"><label>+ Adicionar arquivo<input class="file-input" type="file" multiple></label></div>`:''}</div></div>${isAdmin()?`<div class="detail-actions"><button class="ghost small edit-demand">Editar</button><button class="ghost small danger delete-demand">Excluir</button></div>`:''}</div></div></div></div>`}
 
 function renderAgenda(){
   const q=document.getElementById('searchInput').value.trim().toLocaleLowerCase('pt-BR');
@@ -270,7 +244,7 @@ function renderAgenda(){
   items.sort((a,b)=>{if(a.postDate&&b.postDate)return a.postDate.localeCompare(b.postDate)||String(a.title).localeCompare(String(b.title),'pt-BR');if(a.postDate)return -1;if(b.postDate)return 1;return String(a.createdAt||'').localeCompare(String(b.createdAt||''))});
   document.getElementById('agendaCount').textContent=`${items.length} demanda${items.length===1?'':'s'}`;
   const root=document.getElementById('agendaList');
-  root.innerHTML=items.length?items.map(d=>{const c=state.clients.find(x=>x.id===d.clientId),parts=dateParts(d.postDate);return `<button class="agenda-item ${d.postDate?'':'agenda-undated'}" data-agenda-demand="${d.id}"><span class="agenda-date"><strong class="agenda-day">${parts.day}</strong><span class="agenda-month">${esc(parts.month)}</span></span><span class="agenda-info"><strong>${esc(d.title)}</strong><span>${esc(c?.name||'Cliente')} · ${esc(fmtMonth(d.month))}</span></span><span class="area-chip">${esc(AREAS[d.area]||d.area)}</span><span class="current-status ${d.status}">${STATUS[d.status]||STATUS.red}</span><span class="agenda-arrow">›</span></button>`}).join(''):`<div class="empty"><strong>Nenhuma demanda encontrada.</strong><span>As demandas cadastradas aparecerão aqui com a data de postagem.</span></div>`;
+  root.innerHTML=items.length?items.map(d=>{const c=state.clients.find(x=>x.id===d.clientId),parts=dateParts(d.postDate);return `<button class="agenda-item ${d.postDate?'':'agenda-undated'}" data-agenda-demand="${d.id}"><span class="agenda-date"><strong class="agenda-day">${parts.day}</strong><span class="agenda-month">${esc(parts.month)}</span></span><span class="agenda-info"><strong>${esc(d.title)}</strong><span>${esc(c?.name||'Cliente')} · ${esc(fmtMonth(d.month))}</span></span><span class="area-chip">${esc(AREAS[d.area]||d.area)}</span><span class="current-status ${d.status}">${statusLabel(d)}</span><span class="agenda-arrow">›</span></button>`}).join(''):`<div class="empty"><strong>Nenhuma demanda encontrada.</strong><span>As demandas cadastradas aparecerão aqui com a data de postagem.</span></div>`;
   root.querySelectorAll('[data-agenda-demand]').forEach(b=>b.onclick=()=>{const d=state.demands.find(x=>x.id===b.dataset.agendaDemand);if(!d)return;currentArea=d.area;currentMonth=d.month;openClientId=d.clientId;openDemandId=d.id;document.getElementById('searchInput').value='';renderAll();setTimeout(()=>document.getElementById('clients').scrollIntoView({behavior:'smooth',block:'start'}),60)});
 }
 
@@ -316,8 +290,8 @@ async function submitClient(e){
 async function removeClientForMonth(clientId){if(!isAdmin())return;const c=state.clients.find(x=>x.id===clientId);if(!c)return;const rec={id:uid(),clientId,area:currentArea,month:currentMonth,removedAt:new Date().toISOString()};if(state.removedClientMonths.some(r=>r.clientId===clientId&&r.month===currentMonth&&r.area===currentArea))return;state.removedClientMonths.push(rec);if(!await saveState()){state.removedClientMonths.pop();return}openClientId=null;openDemandId=null;renderClients();toast(`${c.name} removido deste mês.`,'Desfazer',()=>restoreClientMonth(rec.id))}
 async function restoreClientMonth(id){const idx=state.removedClientMonths.findIndex(r=>r.id===id&&!r.purged);if(idx<0)return;const rec=state.removedClientMonths.splice(idx,1)[0];if(!await saveState()){state.removedClientMonths.splice(idx,0,rec);return}currentArea==='deleted'?renderDeleted():renderClients();toast('Cliente restaurado.')}
 
-function setFormStatus(status){document.getElementById('formStatus').value=status;document.getElementById('formStatusButtons').innerHTML=Object.entries(STATUS).map(([k,v])=>`<button type="button" class="status-btn ${status===k?'active':''}" data-status="${k}">${v}</button>`).join('');document.querySelectorAll('#formStatusButtons .status-btn').forEach(b=>b.onclick=()=>setFormStatus(b.dataset.status))}
-function openDemandModal(id=null,clientId=null){if(!isAdmin()||!currentArea||currentArea==='deleted')return;const clients=clientsForMonth();if(!clients.length){toast('Adicione um cliente nesta área antes da demanda.');openClientModal();return}const d=id?state.demands.find(x=>x.id===id):null;document.getElementById('demandModalTitle').textContent=d?'Editar demanda':'Nova demanda';document.getElementById('editDemandId').value=d?.id||'';document.getElementById('formClient').innerHTML=clients.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');document.getElementById('formClient').value=d?.clientId||clientId||clients[0].id;document.getElementById('formTitle').value=d?.title||'';const postDate=document.getElementById('formPostDate'),bounds=monthBounds(currentMonth);postDate.min=bounds.min;postDate.max=bounds.max;postDate.value=d?.postDate||'';document.getElementById('formDescription').value=d?.description||'';setFormStatus(d?.status||'red');document.getElementById('demandModal').classList.remove('hidden')}
+function setFormStatus(status,area=currentArea){const set=statusesForArea(area);if(!set[status])status='red';document.getElementById('formStatus').value=status;document.getElementById('formStatusButtons').innerHTML=Object.entries(set).map(([k,v])=>`<button type="button" class="status-btn ${status===k?'active':''}" data-status="${k}">${v}</button>`).join('');document.querySelectorAll('#formStatusButtons .status-btn').forEach(b=>b.onclick=()=>setFormStatus(b.dataset.status,area))}
+function openDemandModal(id=null,clientId=null){if(!isAdmin()||!currentArea||currentArea==='deleted')return;const clients=clientsForMonth();if(!clients.length){toast('Adicione um cliente nesta área antes da demanda.');openClientModal();return}const d=id?state.demands.find(x=>x.id===id):null;document.getElementById('demandModalTitle').textContent=d?'Editar demanda':'Nova demanda';document.getElementById('editDemandId').value=d?.id||'';document.getElementById('formClient').innerHTML=clients.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');document.getElementById('formClient').value=d?.clientId||clientId||clients[0].id;document.getElementById('formTitle').value=d?.title||'';const postDate=document.getElementById('formPostDate'),bounds=monthBounds(currentMonth);postDate.min=bounds.min;postDate.max=bounds.max;postDate.value=d?.postDate||'';document.getElementById('formDescription').value=d?.description||'';setFormStatus(d?.status||'red',d?.area||currentArea);document.getElementById('demandModal').classList.remove('hidden')}
 async function submitDemand(e){
   e.preventDefault();
   if(!isAdmin())return;
@@ -345,10 +319,10 @@ async function submitDemand(e){
   if(submitBtn){submitBtn.disabled=false;submitBtn.textContent='Salvar demanda'}
   toast('Demanda salva.');
 }
-async function updateStatus(id,status){const d=state.demands.find(x=>x.id===id);if(!d||!STATUS[status])return;const old=d.status;d.status=status;if(!await saveState()){d.status=old;return}renderStats();renderClients();toast('Status atualizado.')}
+async function updateStatus(id,status){const d=state.demands.find(x=>x.id===id);if(!d||!statusesForArea(d.area)[status])return;const old=d.status;d.status=status;if(!await saveState()){d.status=old;return}if(currentArea==='agenda'){renderAgenda()}else{renderStats();renderClients()}toast('Status atualizado.')}
 async function deleteDemand(id){if(!isAdmin()||!confirm('Mover esta demanda para Excluídos?'))return;const idx=state.demands.findIndex(d=>d.id===id);if(idx<0)return;const d=state.demands.splice(idx,1)[0];d.deletedAt=new Date().toISOString();d.deletedBy=currentUser;state.deletedDemands.push(d);if(!await saveState()){state.deletedDemands.pop();delete d.deletedAt;delete d.deletedBy;state.demands.splice(idx,0,d);return}openDemandId=null;renderStats();renderClients();toast('Demanda movida para Excluídos.','Desfazer',()=>restoreDemand(id))}
 async function restoreDemand(id){const idx=state.deletedDemands.findIndex(d=>d.id===id);if(idx<0)return;const d=state.deletedDemands.splice(idx,1)[0];delete d.deletedAt;delete d.deletedBy;state.demands.push(d);if(!await saveState()){state.demands.pop();state.deletedDemands.splice(idx,0,d);return}currentArea==='deleted'?renderDeleted():(renderStats(),renderClients());toast('Demanda restaurada.')}
-async function purgeDemand(id){if(!isAdmin()||!confirm('Excluir definitivamente?'))return;const idx=state.deletedDemands.findIndex(d=>d.id===id);if(idx<0)return;const d=state.deletedDemands.splice(idx,1)[0];if(!await saveState()){state.deletedDemands.splice(idx,0,d);return}for(const f of d.attachments||[])await deleteStoredFile(f);renderDeleted();toast('Demanda excluída definitivamente.')}
+async function purgeDemand(id){if(!isAdmin()||!confirm('Excluir definitivamente?'))return;const idx=state.deletedDemands.findIndex(d=>d.id===id);if(idx<0)return;const d=state.deletedDemands.splice(idx,1)[0];if(!await saveState()){state.deletedDemands.splice(idx,0,d);return}for(const f of d.attachments||[])await dbDeleteFile(f.id);renderDeleted();toast('Demanda excluída definitivamente.')}
 async function emptyTrashMonth(){
   if(!isAdmin())return;
   const deleted=state.deletedDemands.filter(d=>d.month===currentMonth);
@@ -366,7 +340,7 @@ async function emptyTrashMonth(){
     state.removedClientMonths=oldRemoved;
     return;
   }
-  for(const f of files)try{await deleteStoredFile(f)}catch(e){}
+  for(const f of files)try{await dbDeleteFile(f.id)}catch(e){}
   renderDeleted();
   toast(`Lixeira de ${fmtMonth(currentMonth)} esvaziada.`);
 }
@@ -388,58 +362,14 @@ function renderDeleted(){
 
 async function addLink(id,val){if(!isAdmin())return;val=val.trim();if(!val)return;const href=safeUrl(/^https?:\/\//i.test(val)?val:`https://${val}`);if(href==='#'){toast('Link inválido.');return}const d=state.demands.find(x=>x.id===id);d.links=d.links||[];d.links.push(href);if(!await saveState()){d.links.pop();return}openDemandId=id;renderClients();toast('Link adicionado.')}
 async function removeLink(id,index){const d=state.demands.find(x=>x.id===id);const old=d.links.splice(index,1)[0];if(!await saveState()){d.links.splice(index,0,old);return}openDemandId=id;renderClients()}
-function cleanFileName(name){return String(name||'arquivo').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9._-]+/g,'-').replace(/-+/g,'-').slice(0,120)||'arquivo'}
-function findAttachment(fileId){for(const d of [...state.demands,...state.deletedDemands]){const f=(d.attachments||[]).find(x=>x.id===fileId);if(f)return f}return null}
-async function deleteStoredFile(meta){
-  if(meta?.path){try{await supabaseClient.storage.from(STORAGE_BUCKET).remove([meta.path]);return true}catch{}}
-  if(meta?.id)try{return await dbDeleteFile(meta.id)}catch{}
-  return false;
-}
-async function addFiles(id,fileList){
-  if(!isAdmin()||!fileList?.length)return;
-  const d=state.demands.find(x=>x.id===id);if(!d)return;
-  d.attachments=d.attachments||[];
-  const added=[];
-  for(const file of [...fileList]){
-    if(file.size>20*1024*1024){toast(`${file.name}: máximo de 20 MB.`);continue}
-    const fileId=uid(),path=`${d.id}/${fileId}-${cleanFileName(file.name)}`;
-    try{
-      const {error}=await supabaseClient.storage.from(STORAGE_BUCKET).upload(path,file,{cacheControl:'3600',upsert:false,contentType:file.type||undefined});
-      if(error)throw error;
-      const meta={id:fileId,name:file.name,type:file.type,size:file.size,path};
-      d.attachments.push(meta);added.push(meta);
-    }catch(e){console.error(e);toast(`Não foi possível anexar ${file.name}.`)}
-  }
-  if(!added.length)return;
-  if(!await saveState()){
-    for(const f of added){d.attachments=d.attachments.filter(x=>x.id!==f.id);await deleteStoredFile(f)}
-    return;
-  }
-  openDemandId=id;renderClients();toast('Arquivo adicionado.');
-}
-async function openFile(fileId){
-  const w=window.open('','_blank');
-  const meta=findAttachment(fileId);
-  if(meta?.path){
-    const {data,error}=await supabaseClient.storage.from(STORAGE_BUCKET).createSignedUrl(meta.path,600);
-    if(!error&&data?.signedUrl){if(w)w.location.href=data.signedUrl;else window.open(data.signedUrl,'_blank');return}
-  }
-  // Compatibilidade com anexos antigos que estavam salvos apenas neste navegador.
-  const rec=await dbGetFile(fileId);
-  if(!rec?.blob){w?.close();toast('Arquivo não encontrado.');return}
-  const url=URL.createObjectURL(rec.blob);if(w)w.location.href=url;else window.open(url,'_blank');setTimeout(()=>URL.revokeObjectURL(url),60000)
-}
-async function removeFile(id,fileId){
-  const d=state.demands.find(x=>x.id===id),idx=d?.attachments?.findIndex(f=>f.id===fileId)??-1;if(idx<0)return;
-  const old=d.attachments.splice(idx,1)[0];
-  if(!await saveState()){d.attachments.splice(idx,0,old);return}
-  await deleteStoredFile(old);openDemandId=id;renderClients();
-}
+async function addFiles(id,fileList){if(!isAdmin()||!fileList?.length)return;const d=state.demands.find(x=>x.id===id);d.attachments=d.attachments||[];for(const file of [...fileList]){if(file.size>20*1024*1024){toast(`${file.name}: máximo de 20 MB.`);continue}const meta={id:uid(),name:file.name,type:file.type,size:file.size};try{await dbPutFile({...meta,blob:file});d.attachments.push(meta)}catch{toast(`Não foi possível anexar ${file.name}.`)}}if(!await saveState())return;openDemandId=id;renderClients();toast('Arquivo adicionado.')}
+async function openFile(fileId){const w=window.open('','_blank');const rec=await dbGetFile(fileId);if(!rec?.blob){w?.close();toast('Arquivo não encontrado neste navegador.');return}const url=URL.createObjectURL(rec.blob);if(w)w.location.href=url;else window.open(url,'_blank');setTimeout(()=>URL.revokeObjectURL(url),60000)}
+async function removeFile(id,fileId){const d=state.demands.find(x=>x.id===id),idx=d.attachments.findIndex(f=>f.id===fileId);if(idx<0)return;const old=d.attachments.splice(idx,1)[0];if(!await saveState()){d.attachments.splice(idx,0,old);return}await dbDeleteFile(fileId);openDemandId=id;renderClients()}
 
 function closeModal(id){document.getElementById(id).classList.add('hidden')}
 function start(){document.getElementById('logoutBtn').onclick=logout;document.getElementById('newDemandTop').onclick=()=>openDemandModal();document.getElementById('addClientBtn').onclick=openClientModal;document.getElementById('demandForm').onsubmit=submitDemand;document.getElementById('clientForm').onsubmit=submitClient;document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>closeModal(b.dataset.close));document.querySelectorAll('.modal-backdrop').forEach(m=>m.onclick=e=>{if(e.target===m)closeModal(m.id)});document.querySelectorAll('#clientTypeChoices .choice').forEach(b=>b.onclick=()=>setClientType(b.dataset.type));document.getElementById('clientNameInput').oninput=e=>renderRecentClientSuggestions(e.target.value);document.getElementById('searchInput').oninput=()=>{openClientId=null;openDemandId=null;if(currentArea==='deleted')renderDeleted();else if(currentArea==='agenda')renderAgenda();else if(currentArea){renderStats();renderClients()}};document.addEventListener('click',e=>{if(!e.target.closest('.client-options')&&!e.target.closest('.client-menu'))document.querySelectorAll('.client-menu').forEach(m=>m.classList.add('hidden'))});initLogin()}
 
-(async()=>{state=await loadState();subscribeRealtime();start()})();
+(async()=>{state=await loadState();start()})();
 </script>
 </body>
 </html>
