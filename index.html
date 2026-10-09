@@ -1142,7 +1142,176 @@ function openClientReport(clientId){
 
 
 function drawCanvasRoundRect(ctx,x,y,w,h,r,fillStyle,strokeStyle){ctx.save();if(fillStyle)ctx.fillStyle=fillStyle;if(strokeStyle)ctx.strokeStyle=strokeStyle;ctx.beginPath();if(ctx.roundRect){ctx.roundRect(x,y,w,h,r)}else{ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r)}if(fillStyle)ctx.fill();if(strokeStyle)ctx.stroke();ctx.restore()}
-function blueDocHTML(opts){const logo=LOGO_DATA_URI,metricHtml=(opts.metrics||[]).map(m=>`<div class="metric"><span>${esc(m.label)}</span><strong>${esc(String(m.value))}</strong></div>`).join(''),sectionHtml=(opts.sections||[]).map(sec=>`<section class="sec"><div class="secHead"><h2>${esc(sec.title)}</h2><b>${esc(sec.countLabel||'')}</b></div>${sec.items?.length?sec.items.map(item=>`<div class="item"><strong>${esc(item.title)}</strong>${item.date?`<small>${esc(item.date)}</small>`:''}${item.description?`<p>${esc(item.description)}</p>`:''}</div>`).join(''):`<p class="empty">${esc(sec.emptyText||'Nenhum item registrado.')}</p>`}</section>`).join('');return `<!doctype html><html><head><meta charset="utf-8"><title>${esc(opts.docTitle||opts.title||'Documento')}</title><style>@page{size:A4;margin:0}*{box-sizing:border-box}html,body{margin:0;padding:0;font-family:Arial,sans-serif;background:#061128;color:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}.page{min-height:100vh;padding:18mm;background:linear-gradient(135deg,#061128 0%,#0a1f47 48%,#2153eb 100%);position:relative;overflow:visible}.page:before,.page:after{content:"";position:absolute;border-radius:50%;filter:blur(70px);opacity:.32}.page:before{width:120mm;height:120mm;left:-25mm;top:10mm;background:rgba(59,130,246,.45)}.page:after{width:100mm;height:100mm;right:-20mm;bottom:15mm;background:rgba(96,165,250,.30)}.wrap{position:relative;z-index:1}.topbar{display:flex;align-items:center;justify-content:space-between;gap:14mm}.tag{font-size:8pt;letter-spacing:.22em;text-transform:uppercase;color:#cbe0ff;font-weight:700}.hero h1{margin:4mm 0 2mm;font-size:28pt;letter-spacing:-.05em}.hero .sub{font-size:13pt;color:#ffffff;font-weight:700;margin:0 0 3mm}.hero p{margin:0;color:rgba(238,244,255,.82);font-size:9.6pt;line-height:1.55;max-width:150mm}.logo{width:50mm;max-width:50mm;height:auto;max-height:22mm;object-fit:contain;display:block;flex:0 0 auto}.glass{margin-top:10mm;background:rgba(255,255,255,.10);border:1px solid rgba(220,233,255,.16);border-radius:6mm;padding:7mm 8mm;backdrop-filter:blur(14px)}.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:4mm;margin-bottom:8mm}.metric{background:rgba(255,255,255,.08);border:1px solid rgba(220,233,255,.14);border-radius:4mm;padding:4mm 4.4mm}.metric span{display:block;font-size:7pt;letter-spacing:.12em;text-transform:uppercase;color:#d7e5ff}.metric strong{display:block;margin-top:1.7mm;font-size:17pt;color:#fff}.sections{display:grid;grid-template-columns:1fr 1fr;gap:5mm}.sec{background:rgba(255,255,255,.05);border:1px solid rgba(220,233,255,.12);border-radius:4mm;padding:5mm}.secHead{display:flex;justify-content:space-between;align-items:center;padding-bottom:3mm;border-bottom:1px solid rgba(220,233,255,.12)}.secHead h2{margin:0;font-size:12pt}.secHead b{font-size:7pt;color:#d7e5ff}.item{padding:3.2mm 0;border-top:1px solid rgba(220,233,255,.09)}.item:first-of-type{border-top:0}.item strong{display:block;font-size:9pt;color:#fff}.item small{display:block;margin-top:1.2mm;font-size:7pt;color:#d6e5ff}.item p{margin:1.8mm 0 0;font-size:8.5pt;line-height:1.55;color:rgba(237,243,255,.92);white-space:pre-wrap;overflow-wrap:anywhere;word-break:normal}.empty{font-size:8pt;color:rgba(237,243,255,.76)}.foot{margin-top:7mm;color:rgba(237,243,255,.72);font-size:7pt}.closing{margin-top:5mm;padding-top:4mm;border-top:1px solid rgba(220,233,255,.12);font-size:8pt;color:rgba(237,243,255,.8)}@media print{@page{size:A4;margin:12mm}html,body{overflow:visible!important;height:auto!important;margin:0;background:#061128!important}.page{overflow:visible!important;min-height:0;padding:5mm;background:#061128!important}.page:before,.page:after{display:none}.wrap,.glass{overflow:visible!important}.sections{display:block!important}.sec{display:block!important;break-inside:auto!important;page-break-inside:auto!important;margin:0 0 5mm}.item{break-inside:auto!important;page-break-inside:auto!important}.item strong,.item small{overflow-wrap:anywhere}.item p{white-space:pre-wrap;overflow-wrap:anywhere}.metrics{break-inside:avoid}.topbar{break-inside:avoid}.foot,.closing{break-inside:avoid}}</style></head><body><div class="page"><div class="wrap"><div class="topbar"><div class="hero"><div class="tag">One Way Agency</div><h1>${esc(opts.title)}</h1><div class="sub">${esc(opts.monthYear)} — ${esc(opts.clientName)}</div><p>${esc(opts.intro)}</p></div><img class="logo" src="${logo}" alt="One Way Agency"></div><div class="glass">${metricHtml?`<div class="metrics">${metricHtml}</div>`:''}<div class="sections">${sectionHtml}</div>${opts.closing?`<div class="closing">${esc(opts.closing)}</div>`:''}<div class="foot">${esc(opts.foot||'One Way Agency')}</div></div></div></div><script>window.onload=()=>setTimeout(()=>window.print(),280)<\/script></body></html>`}
+function blueDocHTML(opts){
+  const config={...opts,logo:LOGO_DATA_URI,sections:(opts.sections||[]).map(sec=>({title:String(sec.title||''),countLabel:String(sec.countLabel||''),items:(sec.items||[]).map(it=>({title:String(it.title||''),date:String(it.date||''),description:String(it.description||'')})),emptyText:String(sec.emptyText||'Nenhuma entrega registrada.')}))};
+  // Escapa inclusive tags de fechamento para não permitir que descrições encerrem o JSON.
+  const payload=JSON.stringify(config).replace(/</g,'\\u003c').replace(/>/g,'\\u003e').replace(/&/g,'\\u0026');
+  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(opts.docTitle||opts.title||'Relatório One Way')}</title><style>
+  @page{size:A4 portrait;margin:0}
+  *{box-sizing:border-box}
+  html,body{padding:0;margin:0;min-width:210mm;background:#071532;color:#fff;font-family:Arial,"Helvetica Neue",sans-serif;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  .pdf-sheet{position:relative;width:210mm;height:296.85mm;margin:0 auto;overflow:hidden;break-after:page;page-break-after:always;isolation:isolate}
+  .pdf-sheet:last-child{break-after:auto;page-break-after:auto}
+  .pdf-bg{position:absolute;inset:0;width:100%;height:100%;z-index:-1;display:block;pointer-events:none}
+  .pdf-inner{position:relative;z-index:1;display:flex;flex-direction:column;height:100%;padding:14mm 14mm 12mm;min-height:0}
+  .pdf-hero{display:flex;align-items:center;justify-content:space-between;gap:9mm;padding:6mm 7mm;min-height:40mm;background:rgba(255,255,255,.092);border:1px solid rgba(222,235,255,.20);border-radius:5mm;box-shadow:inset 0 1px 0 rgba(255,255,255,.045)}
+  .pdf-hero-copy{flex:1;min-width:0}
+  .pdf-kicker{font-size:7.4pt;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#c4d6f7}
+  .pdf-hero h1{font-size:24pt;line-height:1.06;letter-spacing:-.045em;font-weight:760;color:#fff;margin:2.4mm 0 2mm;overflow-wrap:anywhere}
+  .pdf-month{font-size:10.8pt;line-height:1.38;font-weight:700;color:#dae7ff;overflow-wrap:anywhere}
+  .pdf-intro{font-size:8pt;line-height:1.5;margin:1.5mm 0 0;color:rgba(239,246,255,.78)}
+  .pdf-logo{width:29mm;max-height:18mm;object-fit:contain;flex-shrink:0;display:block}
+  .pdf-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3mm;margin-top:5mm}
+  .pdf-kpi{min-height:17mm;border:1px solid rgba(218,233,255,.17);background:rgba(255,255,255,.095);border-radius:4mm;padding:3.2mm 4mm}
+  .pdf-kpi span{display:block;font-size:7.1pt;color:#d3e2fd;text-transform:uppercase;letter-spacing:.025em;font-weight:700}
+  .pdf-kpi strong{display:block;font-size:17pt;line-height:1.15;margin-top:1.5mm;font-weight:750}
+  .pdf-hero.is-continued{min-height:24mm;padding:4.8mm 6mm}
+  .is-continued .pdf-hero h1{font-size:16pt;margin:1mm 0}
+  .is-continued .pdf-month{font-size:8.7pt}
+  .is-continued .pdf-logo{width:26mm;max-height:15mm}
+  .pdf-columns{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:3.5mm;flex:1;min-height:0;margin-top:5mm;margin-bottom:9mm}
+  .pdf-section{min-width:0;min-height:0;display:flex;flex-direction:column;border:1px solid rgba(220,233,255,.16);background:rgba(255,255,255,.075);border-radius:4.6mm;padding:4.7mm 4.5mm 3mm;overflow:hidden}
+  .pdf-section-head{display:flex;align-items:baseline;justify-content:space-between;gap:3mm;padding-bottom:3mm;flex:0 0 auto}
+  .pdf-section-head h2{font-size:14pt;letter-spacing:-.02em;line-height:1.15;margin:0;color:#fff}
+  .pdf-section-head span{font-size:6.7pt;color:#d5e4ff;white-space:nowrap}
+  .pdf-items{flex:1;min-height:0;overflow:hidden}
+  .pdf-item{min-width:0;padding:3.6mm 0;border-top:1px solid rgba(222,235,255,.115)}
+  .pdf-item:first-child{border-top:0;padding-top:1.2mm}
+  .pdf-item strong{display:block;font-size:9.4pt;line-height:1.36;letter-spacing:-.01em;color:#fff;font-weight:750;overflow-wrap:anywhere}
+  .pdf-item small{display:block;margin-top:1.8mm;font-size:7.1pt;color:#bfd2f3;line-height:1.3}
+  .pdf-item p{margin:3mm 0 0;font-size:8.2pt;line-height:1.49;color:rgba(239,245,255,.91);white-space:pre-wrap;overflow-wrap:anywhere;word-break:normal}
+  .pdf-empty{font-size:8pt;line-height:1.55;color:rgba(225,237,255,.71);margin:3mm 0}
+  .pdf-footer{position:absolute;bottom:9mm;left:14mm;right:14mm;display:flex;justify-content:space-between;align-items:center;gap:5mm;font-size:7pt;color:rgba(223,234,255,.73);border-top:1px solid rgba(222,235,255,.14);padding-top:3mm}
+  .pdf-footer b{font-weight:700;color:rgba(223,234,255,.80)}
+  #pdf-output{padding:18px 0 24px}
+  .pdf-print-action{position:fixed;bottom:25px;right:25px;z-index:1000;padding:13px 18px;background:#e5efff;color:#0b2d77;border:1px solid #adc9ff;border-radius:11px;font:700 12px Arial;cursor:pointer;box-shadow:0 12px 28px rgba(0,0,0,.30)}
+  @media print{html,body{min-width:0;width:210mm;background:#071532!important}#pdf-output{padding:0}.pdf-sheet{margin:0;box-shadow:none}.pdf-print-action{display:none!important}}
+  @media screen{.pdf-sheet{box-shadow:0 20px 70px rgba(0,0,0,.4);margin-bottom:20px}}
+  </style></head><body><div id="pdf-output"></div><button type="button" class="pdf-print-action" onclick="window.print()">Imprimir / Salvar PDF</button><script id="pdf-payload" type="application/json">${payload}<\/script><script>(${blueDocPaginate.toString()})();<\/script></body></html>`;
+}
+function blueDocPaginate(){
+  'use strict';
+  const cfg=JSON.parse(document.getElementById('pdf-payload').textContent);
+  const host=document.getElementById('pdf-output');
+  const pages=[];
+  const sections=cfg.sections||[];
+  const svgBackground=`<svg class="pdf-bg" viewBox="0 0 794 1123" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><linearGradient id="pg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#061128"/><stop offset=".47" stop-color="#0b214b"/><stop offset="1" stop-color="#275ee9"/></linearGradient><radialGradient id="g1"><stop stop-color="#2152a8" stop-opacity=".57"/><stop offset="1" stop-color="#2152a8" stop-opacity="0"/></radialGradient><radialGradient id="g2"><stop stop-color="#3f79ff" stop-opacity=".40"/><stop offset="1" stop-color="#3f79ff" stop-opacity="0"/></radialGradient><radialGradient id="g3"><stop stop-color="#2d5aff" stop-opacity=".23"/><stop offset="1" stop-color="#2d5aff" stop-opacity="0"/></radialGradient></defs><rect width="794" height="1123" fill="url(#pg)"/><ellipse cx="91" cy="184" rx="350" ry="350" fill="url(#g1)"/><ellipse cx="707" cy="976" rx="390" ry="460" fill="url(#g2)"/><ellipse cx="600" cy="650" rx="390" ry="400" fill="url(#g3)"/></svg>`;
+  const el=(tag,cls,text)=>{const node=document.createElement(tag);if(cls)node.className=cls;if(text!==undefined)node.textContent=String(text);return node};
+  function makePage(number){
+    const first=number===0;
+    const page=el('article','pdf-sheet');page.innerHTML=svgBackground;
+    const inner=el('div','pdf-inner');
+    const hero=el('header','pdf-hero'+(first?'':' is-continued'));
+    const hCopy=el('div','pdf-hero-copy');
+    hCopy.append(el('div','pdf-kicker',first?'ONE WAY · RELATÓRIO MENSAL':'ONE WAY · CONTINUAÇÃO'),el('h1','',cfg.title));
+    hCopy.append(el('div','pdf-month',String(cfg.monthYear||'')+' — '+String(cfg.clientName||'')));
+    if(first&&cfg.intro)hCopy.append(el('p','pdf-intro',cfg.intro));
+    hero.append(hCopy);
+    if(cfg.logo){const logo=el('img','pdf-logo');logo.src=cfg.logo;logo.alt='One Way Agency';hero.append(logo)}
+    inner.append(hero);
+    if(first&&(cfg.metrics||[]).length){const metrics=el('div','pdf-kpis');for(const metric of cfg.metrics){const kpi=el('div','pdf-kpi');kpi.append(el('span','',metric.label),el('strong','',metric.value));metrics.append(kpi)}inner.append(metrics)}
+    const cols=el('div','pdf-columns');
+    for(let col=0;col<2;col++){
+      const sec=sections[col]||{title:col?'Vídeo':'Arte',countLabel:'',items:[]};
+      const panel=el('section','pdf-section');
+      const heading=el('div','pdf-section-head');
+      heading.append(el('h2','',sec.title+(first?'':' · cont.')),el('span','',first?sec.countLabel:''));
+      const items=el('div','pdf-items');
+      panel.append(heading,items);cols.append(panel);
+    }
+    inner.append(cols);
+    const footer=el('footer','pdf-footer');footer.append(el('span','',cfg.foot||'One Way Agency'),el('b','',`ONE WAY AGENCY   ·   ${String(number+1).padStart(2,'0')}`));
+    inner.append(footer);page.append(inner);host.append(page);
+    const pageState={node:page,items:[...cols.querySelectorAll('.pdf-items')]};pages.push(pageState);
+    return pageState;
+  }
+  function getPage(index){while(pages.length<=index)makePage(pages.length);return pages[index]}
+  function makeItem(item,desc,continued){
+    const block=el('div','pdf-item');
+    block.append(el('strong','',item.title+(continued?' (continuação)':'')));
+    if(item.date&&!continued)block.append(el('small','',item.date));
+    else if(continued)block.append(el('small','','Continuação da descrição'));
+    if(desc)block.append(el('p','',desc));
+    return block;
+  }
+  function fits(target){return target.scrollHeight<=target.clientHeight+1}
+  function putSection(col,pacePages=0){
+    let pageIndex=0;
+    const sec=sections[col]||{items:[],emptyText:'Nenhum item registrado.'};
+    if(!sec.items||!sec.items.length){const target=getPage(0).items[col];target.append(el('p','pdf-empty',sec.emptyText));return}
+    for(let itemIndex=0;itemIndex<sec.items.length;itemIndex++){
+      const item=sec.items[itemIndex];
+      if(pacePages>1)pageIndex=Math.max(pageIndex,Math.floor(itemIndex*pacePages/sec.items.length));
+      let remaining=String(item.description||'');
+      let continued=false;
+      // Cada entrega curta é indivisível. Uma descrição maior do que uma folha é quebrada entre palavras.
+      for(let guard=0;guard<500;guard++){
+        const target=getPage(pageIndex).items[col];
+        const node=makeItem(item,remaining,continued);
+        target.append(node);
+        if(fits(target))break;
+        node.remove();
+        if(target.children.length){pageIndex++;continue}
+        if(!remaining){ // Título excepcionalmente grande: preservar texto sem loop de paginação.
+          target.append(makeItem(item,'',continued));break;
+        }
+        const chunks=remaining.match(/\S+\s*|\s+/g)||[remaining];
+        let lo=0,hi=chunks.length-1,best=0;
+        while(lo<=hi){
+          const mid=Math.floor((lo+hi)/2);
+          const candidate=makeItem(item,chunks.slice(0,mid+1).join(''),continued);
+          target.append(candidate);
+          const ok=fits(target);candidate.remove();
+          if(ok){best=mid+1;lo=mid+1}else hi=mid-1;
+        }
+        if(!best){ // Caso raríssimo de palavras gigantes: cortar por caracteres, não por linha gráfica.
+          let left=1,right=remaining.length,cnt=0;
+          while(left<=right){let mid=Math.floor((left+right)/2);const candidate=makeItem(item,remaining.slice(0,mid),continued);target.append(candidate);const ok=fits(target);candidate.remove();if(ok){cnt=mid;left=mid+1}else right=mid-1}
+          if(!cnt){target.append(makeItem(item,remaining.slice(0,1),continued));remaining=remaining.slice(1)}
+          else{target.append(makeItem(item,remaining.slice(0,cnt),continued));remaining=remaining.slice(cnt)}
+        }else{
+          const used=chunks.slice(0,best).join('');target.append(makeItem(item,used,continued));remaining=remaining.slice(used.length);
+        }
+        if(!remaining)break;
+        continued=true;pageIndex++;
+      }
+    }
+  }
+  getPage(0);
+  putSection(0);
+  putSection(1);
+  // Se uma área ocupa duas ou três páginas e a outra cabe toda na primeira,
+  // distribui a área menor pelas páginas existentes, evitando folhas desproporcionais.
+  if(pages.length>=2&&pages.length<=3){
+    for(let col=0;col<2;col++){
+      const section=sections[col];
+      if(!section||section.items.length<pages.length)continue;
+      const occupied=pages.filter(pg=>pg.items[col].querySelector('.pdf-item')).length;
+      if(occupied===1){
+        const targetPages=pages.length;
+        pages.forEach(pg=>pg.items[col].replaceChildren());
+        putSection(col,targetPages);
+      }
+    }
+  }
+  // Uma página nunca é criada com meia entrega ou descrição cortada verticalmente.
+  for(let p=1;p<pages.length;p++)for(let col=0;col<2;col++){
+    if(!pages[p].items[col].children.length)pages[p].items[col].append(el('p','pdf-empty','Sem novas entregas nesta seção.'));
+  }
+  // Sem entregas de um dos dois tipos: a coluna disponível vira editorial de largura total.
+  for(let p=1;p<pages.length;p++){
+    const occupied=pages[p].items.map(node=>!!node.querySelector('.pdf-item'));
+    if(occupied.filter(Boolean).length===1){
+      const cols=pages[p].node.querySelector('.pdf-columns');
+      cols.style.gridTemplateColumns='1fr';
+      const empty=occupied.indexOf(false);
+      pages[p].items[empty].closest('.pdf-section').remove();
+    }
+  }
+  pages.forEach((page,index)=>{page.node.querySelector('.pdf-footer b').textContent='ONE WAY AGENCY   ·   '+String(index+1).padStart(2,'0')+' / '+String(pages.length).padStart(2,'0')});
+  document.documentElement.dataset.pages=String(pages.length);
+  if(!location.search.includes('preview=1'))window.setTimeout(()=>window.print(),650);
+}
 function fileSafeName(value){return String(value||'relatorio').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9_-]+/g,'-').replace(/^-+|-+$/g,'').toLowerCase()||'relatorio'}
 function canvasWrap(ctx,text,maxWidth){
   const lines=[];for(const paragraph of String(text??'').replace(/\r\n?/g,'\n').split('\n')){
