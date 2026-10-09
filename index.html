@@ -92,7 +92,7 @@ body:before,body:after{content:"";position:fixed;pointer-events:none;z-index:0;b
 .home-mode .hero{text-align:center;display:block;margin-top:7vh;transition:all .68s var(--ease)}.home-mode .hero h1{font-size:clamp(34px,4.4vw,58px)}.home-mode .hero p{font-size:14px}.home-mode .nav-row{min-height:230px;margin-top:5vh;justify-content:center}.home-mode .tabs{transform:scale(1.22);padding:8px;background:rgba(255,255,255,.10);box-shadow:0 28px 70px rgba(0,10,40,.18)}.home-mode .tab{font-size:14px;padding:15px 30px;animation:homeTabIn .72s var(--ease) both}.home-mode .tab:nth-child(1){animation-delay:.05s}.home-mode .tab:nth-child(2){animation-delay:.12s}.home-mode .tab:nth-child(3){animation-delay:.19s}.home-mode .tab:nth-child(4){animation-delay:.26s}.home-mode .secondary-nav{position:absolute;right:0;top:50%;transform:translateY(-50%);opacity:.58}.home-mode.leaving-home .tabs{transform:scale(.97) translateY(-18px);opacity:.82}
 .area-nav-cluster{display:flex;align-items:center;gap:8px;max-width:100%;width:max-content;transition:transform .62s var(--ease),opacity .42s ease}.area-nav-cluster.role-limited .tabs{display:grid;grid-template-columns:repeat(2,minmax(132px,1fr));width:292px;max-width:none;overflow:visible;gap:6px}.area-nav-cluster.role-limited .tab{width:100%;min-width:0;padding:11px 16px;text-align:center}.home-mode .area-nav-cluster{transform:scale(1.22)}.home-mode .tabs{transform:none!important}.home-mode .admin-agenda-tab{position:absolute;right:0;top:50%;margin-left:0;transform:translateY(-50%);opacity:.72}.home-mode .admin-agenda-tab:hover{transform:translateY(calc(-50% - 1px));opacity:1}.top-actions .proposal-history-tab{margin-left:0;height:auto;padding:8px 10px;border-radius:9px;font-size:10px;background:rgba(255,255,255,.10);border-color:rgba(210,224,255,.22);box-shadow:none}.top-actions .proposal-history-tab:hover,.top-actions .proposal-history-tab.active{background:rgba(255,255,255,.16);transform:none}.home-mode .trash-tab{background:rgba(255,255,255,.10);border-color:rgba(220,233,255,.16)}
 @media(max-width:640px){.area-nav-cluster{width:100%;align-items:flex-start}.home-mode .area-nav-cluster{transform:none}.area-nav-cluster .tabs{flex:1}.area-nav-cluster.role-limited .tabs{width:100%;grid-template-columns:repeat(2,minmax(0,1fr));overflow:hidden}.area-nav-cluster.role-limited .tab{padding:11px 10px}.admin-agenda-tab{height:38px;padding:0 11px;flex:0 0 auto}.home-mode .admin-agenda-tab{position:absolute;right:0;bottom:-18px;top:auto;transform:none}.home-mode .admin-agenda-tab:hover{transform:translateY(-1px)}.top-actions .proposal-history-tab{padding:8px 9px;font-size:10px}}
-.home-mode.leaving-home .hero{opacity:.58;transform:translateY(-12px)}.returning-home #areaContent,.returning-home #agendaContent,.returning-home #commemorativeDatesContent,.returning-home #deletedContent,.returning-home #proposalHistoryContent,.returning-home #contractsContent,.returning-home #financeContent{opacity:0!important;transform:translateY(14px) scale(.985)!important;transition:opacity .22s ease,transform .28s var(--ease)!important}.returning-home .hero-controls{opacity:0;transform:translateY(-5px);transition:opacity .18s ease,transform .22s var(--ease)}.returning-home .nav-row{transform:translateY(4px)}
+.home-mode.leaving-home .hero{opacity:.58;transform:translateY(-12px)}.returning-home #weekCalendarContent,.returning-home #areaContent,.returning-home #agendaContent,.returning-home #commemorativeDatesContent,.returning-home #deletedContent,.returning-home #proposalHistoryContent,.returning-home #contractsContent,.returning-home #financeContent{opacity:0!important;transform:translateY(14px) scale(.985)!important;transition:opacity .22s ease,transform .28s var(--ease)!important}.returning-home .hero-controls{opacity:0;transform:translateY(-5px);transition:opacity .18s ease,transform .22s var(--ease)}.returning-home .nav-row{transform:translateY(4px)}
 #areaContent:not(.hidden),#agendaContent:not(.hidden),#deletedContent:not(.hidden),#proposalHistoryContent:not(.hidden),#contractsContent:not(.hidden){animation:contentReveal .62s var(--ease) .13s both}.client{background:linear-gradient(145deg,rgba(10,28,68,.72),rgba(20,54,123,.48));border-color:rgba(214,228,255,.16);box-shadow:0 20px 48px rgba(0,8,30,.16)}.client:hover{box-shadow:0 26px 62px rgba(0,8,30,.22);border-color:rgba(214,228,255,.26)}.client-head,.client-options{background:transparent}.client-options{border-left-color:rgba(230,239,255,.12);color:rgba(238,245,255,.72)}.client-options:hover{background:rgba(255,255,255,.08);color:#fff}.client-name,.demand-title{color:#fff}.type-chip,.demand-count,.client-helper,.demand-index,.demand-date,.detail-label{color:rgba(226,236,255,.62)}.client-arrow,.demand-caret{color:rgba(226,236,255,.66)}.client.open .client-arrow{color:#fff}.client.open .client-body{border-top-color:rgba(230,239,255,.12)}.demand{border-top-color:rgba(230,239,255,.10)}.demand-row:hover{background:rgba(255,255,255,.03);border-radius:10px}.detail-panel{background:rgba(255,255,255,.07);border-color:rgba(230,239,255,.12)}.description{color:rgba(242,247,255,.88)}.ref-item,.file-upload label,.ref-add input{background:rgba(255,255,255,.08);border-color:rgba(230,239,255,.14);color:#fff}.ref-item a,.mini-link,.file-upload label{color:rgba(242,247,255,.86)}.detail-actions{border-top-color:rgba(230,239,255,.10)}.client-toolbar .ghost,.section-actions .ghost{background:rgba(255,255,255,.10);border-color:rgba(224,236,255,.18);color:#fff}.client-toolbar .ghost:hover,.section-actions .ghost:hover{background:rgba(255,255,255,.17)}
 .agenda-summary h2,.agenda-summary span{color:#fff}.agenda-item{background:rgba(8,27,65,.58);border-color:rgba(220,233,255,.15);box-shadow:0 12px 34px rgba(0,8,30,.11)}.agenda-item:hover{border-color:rgba(220,233,255,.26);box-shadow:0 20px 44px rgba(0,8,30,.18)}.agenda-day,.agenda-info strong{color:#fff}.agenda-month,.agenda-info span,.agenda-arrow{color:rgba(232,241,255,.7)}.area-chip{color:#dce9ff;background:rgba(255,255,255,.09);border-color:rgba(220,233,255,.14)}.empty{color:rgba(232,241,255,.76);background:rgba(8,27,65,.45);border-color:rgba(220,233,255,.18)}.empty strong{color:#fff}.deleted-section{background:rgba(8,27,65,.50);border-color:rgba(220,233,255,.16);color:#fff}.deleted-section>p,.trash-toolbar span,.deleted-meta{color:rgba(232,241,255,.68)}.deleted-item{background:rgba(255,255,255,.07);border-color:rgba(220,233,255,.12)}.deleted-item strong{color:#fff}
 .proposal-history-wrap{max-width:1080px;margin:18px auto 0}.proposal-history-head{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:14px;color:#fff}.proposal-history-head h2{margin:0;font-size:20px;letter-spacing:-.03em}.proposal-history-head p{margin:5px 0 0;color:rgba(232,241,255,.7);font-size:11px}.proposal-history-list{display:grid;gap:10px}.proposal-history-card{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,.9fr) auto;gap:18px;align-items:center;padding:16px 18px;border:1px solid rgba(220,233,255,.15);background:rgba(8,27,65,.54);border-radius:16px;backdrop-filter:blur(18px);animation:cardIn .42s var(--ease) both;transition:transform .2s var(--ease),background .2s,border-color .2s}.proposal-history-card:hover{transform:translateY(-2px);background:rgba(12,37,84,.66);border-color:rgba(220,233,255,.25)}.proposal-history-main strong{display:block;color:#fff;font-size:13px}.proposal-history-main span,.proposal-history-meta span{display:block;color:rgba(232,241,255,.68);font-size:10px;margin-top:4px}.proposal-history-meta strong{display:block;color:#fff;font-size:12px}.proposal-format{display:inline-flex!important;width:max-content;margin-top:6px!important;padding:4px 7px;border:1px solid rgba(220,233,255,.15);border-radius:7px;color:#cfe0ff!important;font-weight:800!important;letter-spacing:.06em}.proposal-history-actions{display:flex;gap:7px;align-items:center;justify-content:flex-end}.proposal-history-actions button{white-space:nowrap}.proposal-download{min-width:48px}.proposal-history-delete{width:34px;height:34px;display:grid;place-items:center;border:1px solid rgba(248,113,113,.25);background:rgba(239,68,68,.08);color:#fecaca;border-radius:9px;transition:all .18s var(--ease)}.proposal-history-delete:hover{background:rgba(239,68,68,.16);border-color:rgba(248,113,113,.42);transform:translateY(-1px)}.proposal-history-delete svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8}
@@ -419,6 +419,43 @@ input::placeholder,textarea::placeholder{font-weight:300!important;letter-spacin
 .report-modal .report-item{min-width:0;overflow:visible}
 .report-modal .report-item strong,.report-modal .report-item p{white-space:pre-wrap;overflow-wrap:anywhere;word-break:normal;text-overflow:clip;max-height:none;max-width:100%;-webkit-line-clamp:unset;line-clamp:unset;display:block}
 .report-modal .report-item p{opacity:.9;line-height:1.65;font-size:11px;margin:8px 0 3px}
+
+/* WEEK CALENDAR · ONE WAY — ADMIN */
+body.calendar-view{background-attachment:scroll!important}
+.admin-week-calendar-tab{margin-left:13px!important;border-color:rgba(151,192,255,.35)!important;background:linear-gradient(130deg,rgba(47,102,255,.21),rgba(255,255,255,.07))!important}
+.admin-week-calendar-tab.active{background:linear-gradient(135deg,#f8fbff,#dbe8ff)!important;color:#102040!important}
+.demand-area-switch{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;padding:5px;background:#edf3ff;border:1px solid #dbe6f7;border-radius:13px}
+.demand-area-switch button{min-height:40px;background:transparent;border:1px solid transparent;color:#496283;font-size:11px;font-weight:750;border-radius:9px;transition:.18s}
+.demand-area-switch button.active{background:#173f97;color:#fff;border-color:#527fec;box-shadow:0 6px 17px rgba(47,102,255,.2)}
+.demand-area-helper,.demand-retro-hint{font-size:9px;line-height:1.55;color:#8491a5}
+.wk-shell{max-width:1250px;margin:12px auto 0;animation:contentReveal .55s var(--ease) both}
+.wk-toolbar{padding:24px 26px;display:flex;justify-content:space-between;gap:24px;align-items:center;border:1px solid rgba(220,233,255,.16);border-radius:22px;background:linear-gradient(145deg,rgba(42,80,163,.25),rgba(255,255,255,.055));box-shadow:0 18px 38px rgba(0,9,35,.10)}
+.wk-overline,.wk-form-eyebrow{display:block;color:#9bbcf9;font-size:9px;letter-spacing:.15em;font-weight:800;margin-bottom:9px}
+.wk-toolbar h2{color:#fff;font-size:22px;margin:0 0 7px;letter-spacing:-.035em}.wk-toolbar p{margin:0;color:rgba(229,238,255,.72);font-size:11px;line-height:1.5}
+.wk-toolbar-buttons{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;max-width:570px}
+.wk-btn{border:1px solid rgba(220,233,255,.22);border-radius:11px;padding:11px 12px;background:rgba(255,255,255,.075);color:#fff;font:700 10px Montserrat,sans-serif;white-space:nowrap;transition:.18s}
+.wk-btn:hover,.wk-nav-btn:hover{background:rgba(255,255,255,.16);transform:translateY(-1px)}.wk-btn-glow{background:#ecf3ff;color:#163d83;border-color:#fff}
+.wk-btn-glow:hover{background:#fff}.wk-navigator{display:flex;gap:12px;align-items:center;margin:18px 0;padding:16px 19px;border-radius:17px;border:1px solid rgba(220,233,255,.12);background:rgba(6,24,65,.46)}
+.wk-nav-btn{height:42px;min-width:42px;border:1px solid rgba(220,233,255,.22);border-radius:11px;background:rgba(255,255,255,.07);color:#fff;font-size:19px;transition:.18s}
+.wk-date-head{flex:1;min-width:0}.wk-date-head strong{display:block;color:#fff;font-size:16px;letter-spacing:-.025em}.wk-date-head span{display:block;color:rgba(225,237,255,.56);font-size:9px;margin-top:4px}
+#wkPickDate{border:1px solid rgba(220,233,255,.23);background:rgba(255,255,255,.095);color:#fff;border-radius:10px;padding:9px 11px;min-height:42px;color-scheme:dark;font:600 11px Montserrat,sans-serif}
+.wk-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:17px}.wk-stat{padding:15px 18px;background:rgba(248,251,255,.085);border:1px solid rgba(220,233,255,.14);border-radius:15px}.wk-stat span{display:block;color:#bed1f4;font-size:9px;text-transform:uppercase;letter-spacing:.09em;font-weight:780}.wk-stat strong{display:block;color:#fff;font-size:25px;margin-top:6px;letter-spacing:-.055em}
+.wk-week-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;align-items:start}
+.wk-day{border:1px solid rgba(220,233,255,.17);background:linear-gradient(142deg,rgba(21,53,111,.67),rgba(14,33,76,.58));border-radius:19px;padding:20px;min-width:0;box-shadow:0 12px 30px rgba(0,11,40,.07)}
+.wk-day.is-today{border-color:rgba(156,199,255,.68);box-shadow:0 0 0 1px rgba(96,165,250,.20),0 16px 38px rgba(0,13,48,.14)}
+.wk-day-head{display:flex;gap:12px;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(220,233,255,.12);padding-bottom:14px;margin-bottom:15px}
+.wk-day-number{font-size:29px;color:#fff;font-weight:720;line-height:1;letter-spacing:-.06em}.wk-day-label{flex:1}.wk-day-label strong{display:block;color:#fff;font-size:12px}.wk-day-label span{display:block;color:rgba(216,231,255,.53);font-size:9px;margin-top:4px}
+.wk-day-create{height:32px;width:32px;display:grid;place-items:center;border:1px solid rgba(220,233,255,.20);border-radius:9px;background:rgba(255,255,255,.075);color:#e9f2ff;font-size:18px}
+.wk-day-section{margin-top:14px}.wk-section-caption{font-size:9px;color:#a9c5f7;font-weight:850;text-transform:uppercase;letter-spacing:.10em;margin-bottom:8px}
+.wk-line{padding:11px 12px;margin:7px 0;border:1px solid rgba(220,233,255,.10);border-radius:11px;background:rgba(255,255,255,.055);min-width:0;overflow-wrap:anywhere}
+.wk-line.wk-line-action{cursor:pointer;transition:background .15s}.wk-line.wk-line-action:hover{background:rgba(255,255,255,.105)}
+.wk-line strong{display:block;color:#fff;font-size:11px;font-weight:700;line-height:1.45}.wk-line small{display:block;color:rgba(230,240,255,.59);font-size:9px;line-height:1.5;margin-top:4px}.wk-line p{font-size:9px;color:rgba(237,245,255,.82);white-space:pre-wrap;margin:8px 0 0;line-height:1.55}
+.wk-type-pill{display:inline-block;margin-right:5px;padding:3px 7px;background:rgba(101,160,255,.19);border:1px solid rgba(141,187,255,.17);color:#d8eaff;font-size:8px;font-weight:760;border-radius:5px}
+.wk-empty{text-align:left;color:rgba(228,238,255,.4);font-size:10px;line-height:1.5;padding:6px 0 2px}
+.wk-footer-note{color:rgba(224,235,255,.55);font-size:9px;line-height:1.7;margin:17px 3px 0}
+.wk-event-modal .field{margin:15px 0}.wk-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.wk-event-actions .spacer{flex:1}.wk-event-actions{align-items:center}.wk-form-eyebrow{color:#6385bd;margin:0 0 8px}
+@media(max-width:1040px){.wk-toolbar{flex-direction:column;align-items:flex-start}.wk-toolbar-buttons{max-width:none;justify-content:flex-start}}
+@media(max-width:700px){.admin-utility-tabs{display:flex;flex-wrap:wrap;justify-content:center}.admin-utility-tabs .admin-agenda-tab{flex:1 1 auto}.admin-week-calendar-tab{margin-left:0!important}.wk-toolbar{padding:19px}.wk-week-grid{grid-template-columns:1fr}.wk-navigator{flex-wrap:wrap;padding:12px;gap:8px}.wk-date-head{flex:1 1 160px}.wk-stats{gap:7px}.wk-stat{padding:11px}.wk-stat strong{font-size:21px}.wk-form-grid{grid-template-columns:1fr}.wk-toolbar-buttons{width:100%}.wk-toolbar-buttons .wk-btn{flex:1 1 calc(50% - 8px)}.wk-day{padding:16px}}
 </style>
 </head>
 <body class="booting">
@@ -450,7 +487,7 @@ input::placeholder,textarea::placeholder{font-weight:300!important;letter-spacin
       <div class="hero-controls hidden" id="heroControls"><input class="search" id="searchInput" placeholder="Buscar cliente ou demanda"><input class="month-select" id="monthSelect" type="month" aria-label="Selecionar mês das demandas"><button class="primary" id="newDemandTop">+ Nova demanda</button></div>
     </section>
 
-    <div class="nav-row"><div class="area-nav-cluster"><nav class="tabs" id="tabs"></nav><button class="trash-tab" id="trashTab" title="Excluídos" aria-label="Abrir excluídos"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v5M14 11v5"/></svg></button></div><div class="admin-utility-tabs"><button type="button" class="admin-agenda-tab hidden" id="adminAgendaTab">Agenda</button><button type="button" class="admin-agenda-tab admin-calendar-tab hidden" id="commemorativeDatesTab">Datas Comemorativas</button></div></div>
+    <div class="nav-row"><div class="area-nav-cluster"><nav class="tabs" id="tabs"></nav><button class="trash-tab" id="trashTab" title="Excluídos" aria-label="Abrir excluídos"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v5M14 11v5"/></svg></button></div><div class="admin-utility-tabs"><button type="button" class="admin-agenda-tab admin-week-calendar-tab hidden" id="weekCalendarTab">Calendário</button><button type="button" class="admin-agenda-tab hidden" id="adminAgendaTab">Agenda</button><button type="button" class="admin-agenda-tab admin-calendar-tab hidden" id="commemorativeDatesTab">Datas Comemorativas</button></div></div>
 
     <section id="areaContent" class="hidden">
       <div class="stats" id="stats"></div>
@@ -459,6 +496,19 @@ input::placeholder,textarea::placeholder{font-weight:300!important;letter-spacin
     </section>
 
     <section id="agendaContent" class="hidden"><div class="agenda-wrap"><div class="agenda-summary"><div><h2>Agenda de postagens</h2><span>Demandas em andamento organizadas por prazo.</span></div><span id="agendaCount"></span></div><div class="agenda-view-tabs" id="agendaViewTabs"><button type="button" class="agenda-view-tab active" data-agenda-view="active">Agenda</button><button type="button" class="agenda-view-tab" data-agenda-view="finished">Finalizadas <span id="agendaFinishedCount">0</span></button></div><div class="agenda-list" id="agendaList"></div></div></section>
+
+    <section id="weekCalendarContent" class="hidden">
+      <div class="wk-shell">
+        <div class="wk-toolbar">
+          <div><span class="wk-overline">ONE WAY · PLANEJAMENTO SEMANAL</span><h2>Calendário da equipe</h2><p>Demandas de postagem e compromissos planejados em um só lugar.</p></div>
+          <div class="wk-toolbar-buttons"><button type="button" class="wk-btn wk-btn-glow" id="wkAddEventBtn">+ Novo compromisso</button><button type="button" class="wk-btn" id="wkExportJpegBtn">Baixar JPEG</button><button type="button" class="wk-btn" id="wkCopyTextBtn">Copiar resumo</button><button type="button" class="wk-btn" id="wkDownloadTextBtn">Baixar TXT</button></div>
+        </div>
+        <div class="wk-navigator"><button type="button" class="wk-nav-btn" id="wkPreviousBtn" aria-label="Semana anterior">←</button><div class="wk-date-head"><strong id="wkWeekTitle"></strong><span id="wkWeekSubtitle">Segunda a domingo</span></div><button type="button" class="wk-nav-btn" id="wkNextBtn" aria-label="Próxima semana">→</button><input type="date" id="wkPickDate" aria-label="Ir para semana da data"><button type="button" class="wk-btn" id="wkCurrentBtn">Semana atual</button></div>
+        <div class="wk-stats" id="wkStats"></div>
+        <div class="wk-week-grid" id="wkDays"></div>
+        <p class="wk-footer-note">A agenda reúne automaticamente todas as demandas com data de postagem na semana. Compromissos podem ser cadastrados e editados separadamente. Visível apenas no painel administrativo.</p>
+      </div>
+    </section>
 
     <section id="commemorativeDatesContent" class="hidden"><div class="commemorative-wrap">
       <div class="commemorative-head"><div><h2>Datas Comemorativas</h2><p>Calendário editorial pensado para os segmentos atendidos pela agência: arquitetura e interiores, agro e pecuária, agronomia, leilões, infantil/família e principais oportunidades comerciais do ano.</p></div><div class="commemorative-year-tabs" id="commemorativeYearTabs"></div></div>
@@ -492,9 +542,10 @@ input::placeholder,textarea::placeholder{font-weight:300!important;letter-spacin
 <div class="modal-backdrop hidden" id="demandModal"><div class="modal">
   <div class="modal-head"><div><h3 id="demandModalTitle">Nova demanda</h3><p>Cadastre briefing, prazo, referências e arquivos para produção em um só lugar.</p></div><button class="x" data-close="demandModal">×</button></div>
   <form id="demandForm"><input type="hidden" id="editDemandId">
-    <div class="field"><label>Cliente</label><select id="formClient" required></select></div>
+    <div class="field"><label>Área da demanda</label><div class="demand-area-switch" id="formDemandAreas"><button type="button" data-demand-area="arte">Arte</button><button type="button" data-demand-area="video">Vídeo</button><button type="button" data-demand-area="trafego">Tráfego</button></div><small class="demand-area-helper">Escolha o setor que receberá esta demanda, independentemente da aba atual.</small></div>
+    <div class="field"><label>Cliente</label><select id="formClient" required></select><small class="demand-area-helper">Você pode selecionar um cliente de qualquer área. Se necessário, o sistema vincula esse cliente ao setor escolhido.</small></div>
     <div class="field"><label>Nome da demanda</label><input id="formTitle" required placeholder="Ex.: Carrossel — lançamento"></div>
-    <div class="field"><label>Data da postagem</label><input id="formPostDate" type="date" required><small class="demand-retro-hint">É possível cadastrar demandas de dias anteriores. Para outro mês, selecione-o primeiro no painel.</small></div>
+    <div class="field"><label>Data da postagem</label><input id="formPostDate" type="date" required><small class="demand-retro-hint">Você pode escolher qualquer data, inclusive de meses anteriores. O sistema organiza automaticamente a demanda no mês escolhido.</small></div>
     <div class="field"><label>Descrição</label><textarea id="formDescription" placeholder="Briefing, observações, entregáveis..."></textarea></div>
     <div class="demand-reference-card">
       <div class="demand-reference-head"><div><strong>Referências</strong><span>Adicione o link de inspiração/briefing e arquivos que a equipe precisa receber.</span></div><span class="demand-reference-badge">Opcional</span></div>
@@ -516,6 +567,18 @@ input::placeholder,textarea::placeholder{font-weight:300!important;letter-spacin
     </div>
     <div class="field"><label>Status</label><input type="hidden" id="formStatus" value="red"><div class="form-status-wrap" id="formStatusButtons"></div></div>
     <div class="modal-actions"><button type="button" class="ghost" data-close="demandModal">Cancelar</button><button type="submit" class="primary">Salvar demanda</button></div>
+  </form>
+</div></div>
+
+<div class="modal-backdrop hidden" id="weekEventModal"><div class="modal wk-event-modal">
+  <div class="modal-head"><div><span class="wk-form-eyebrow">CALENDÁRIO · ONE WAY</span><h3 id="wkEventModalTitle">Novo compromisso</h3><p>Gravações, reuniões, agendamentos e anotações da semana.</p></div><button class="x" data-close="weekEventModal">×</button></div>
+  <form id="wkEventForm"><input type="hidden" id="wkEventId">
+    <div class="field"><label>Tipo de compromisso</label><select id="wkEventType" required><option>Gravação</option><option>Reunião</option><option>Agendamento</option><option>Evento</option><option>Anotação</option></select></div>
+    <div class="field"><label>Nome / assunto</label><input id="wkEventTitle" maxlength="220" required placeholder="Ex.: Gravação da Boreal"></div>
+    <div class="wk-form-grid"><div class="field"><label>Data</label><input type="date" id="wkEventDate" required></div><div class="field"><label>Horário (opcional)</label><input type="time" id="wkEventTime"></div></div>
+    <div class="field"><label>Cliente (opcional)</label><select id="wkEventClient"><option value="">Sem cliente vinculado</option></select></div>
+    <div class="field"><label>Detalhes / observações</label><textarea id="wkEventDescription" placeholder="Local, orientações, participantes ou anotações da equipe..."></textarea></div>
+    <div class="modal-actions wk-event-actions"><button type="button" class="ghost danger hidden" id="wkDeleteEventBtn">Excluir</button><span class="spacer"></span><button type="button" class="ghost" data-close="weekEventModal">Cancelar</button><button type="submit" class="primary">Salvar compromisso</button></div>
   </form>
 </div></div>
 
@@ -783,10 +846,10 @@ const supabaseClient=window.supabase?.createClient?.(SUPABASE_URL,SUPABASE_KEY,{
 let supabaseAdminAuthenticated=false,supabaseAdminEmail='';
 let realtimeChannel=null,financeRealtimeChannel=null,financeCryptoKey=null,financeUnlocked=false,financeUpdatedAt=0,legacyFinanceItems=[];
 let contractsRealtimeChannel=null,contractsCryptoKey=null,contractsUnlocked=false,contractsUpdatedAt=0,secureContracts=[],hiddenContractClientProfiles=[],savedContractAgencyProfiles=[],contractView='active',activeContractId=null;
-let state=seed(),currentUser=null,currentArea=null,currentMonth=currentMonthKey(),openClientId=null,openDemandId=null,toastTimer=null,lastAddedClientId=null,activeAnalytics=null,bulkImportDrafts=[],bulkImportMeta={warnings:[],expected:{}},agendaView="active",commemorativeYear=2026,commemorativeMonth=10,commemorativeCategory='all';
+let state=seed(),currentUser=null,currentArea=null,currentMonth=currentMonthKey(),openClientId=null,openDemandId=null,toastTimer=null,lastAddedClientId=null,activeAnalytics=null,bulkImportDrafts=[],bulkImportMeta={warnings:[],expected:{}},agendaView="active",commemorativeYear=2026,commemorativeMonth=10,commemorativeCategory='all',formDemandArea='arte',calendarWeekStart=calendarMonday(calendarLocalISO(new Date()));
 let bulkSpeechRecognition=null,bulkSpeechListening=false,bulkSpeechBaseText='',bulkSpeechCommitted='';
 
-function seed(){return {version:7,clients:[],demands:[],deletedDemands:[],removedClientMonths:[],recentClients:[],proposalHistory:[],analyticsReports:{},financeItems:[],updatedAt:Date.now()}}
+function seed(){return {version:7,clients:[],demands:[],deletedDemands:[],removedClientMonths:[],recentClients:[],proposalHistory:[],analyticsReports:{},financeItems:[],calendarEvents:[],updatedAt:Date.now()}}
 function uid(){return 'id_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,10)}
 function esc(v=''){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function currentMonthKey(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}
@@ -804,7 +867,7 @@ function allowedAreaKeys(){if(isAdmin()||userAccess()==='status')return Object.k
 function agendaAreaFilter(){return isDesign()?'arte':isVideoUser()?'video':null}
 function canAccessArea(area){return allowedAreaKeys().includes(area)}
 function safeUrl(v){try{const u=new URL(v);return ['http:','https:'].includes(u.protocol)?u.href:'#'}catch{return '#'}}
-function normalizeState(s){if(!s||typeof s!=='object')return seed();const clients=Array.isArray(s.clients)?s.clients:[];const derivedRecent=[...clients].sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||''))).map(c=>c.name).filter(Boolean);const recent=Array.isArray(s.recentClients)?s.recentClients:derivedRecent;return {version:7,clients,demands:Array.isArray(s.demands)?s.demands:[],deletedDemands:Array.isArray(s.deletedDemands)?s.deletedDemands:[],removedClientMonths:Array.isArray(s.removedClientMonths)?s.removedClientMonths:[],recentClients:[...new Set(recent)].slice(0,8),proposalHistory:Array.isArray(s.proposalHistory)?s.proposalHistory:[],analyticsReports:s.analyticsReports&&typeof s.analyticsReports==='object'?s.analyticsReports:{},financeItems:Array.isArray(s.financeItems)?s.financeItems:[],updatedAt:Number(s.updatedAt)||0}}
+function normalizeState(s){if(!s||typeof s!=='object')return seed();const clients=Array.isArray(s.clients)?s.clients:[];const derivedRecent=[...clients].sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||''))).map(c=>c.name).filter(Boolean);const recent=Array.isArray(s.recentClients)?s.recentClients:derivedRecent;return {version:7,clients,demands:Array.isArray(s.demands)?s.demands:[],deletedDemands:Array.isArray(s.deletedDemands)?s.deletedDemands:[],removedClientMonths:Array.isArray(s.removedClientMonths)?s.removedClientMonths:[],recentClients:[...new Set(recent)].slice(0,8),proposalHistory:Array.isArray(s.proposalHistory)?s.proposalHistory:[],analyticsReports:s.analyticsReports&&typeof s.analyticsReports==='object'?s.analyticsReports:{},financeItems:Array.isArray(s.financeItems)?s.financeItems:[],calendarEvents:Array.isArray(s.calendarEvents)?s.calendarEvents:[],updatedAt:Number(s.updatedAt)||0}}
 
 function openDB(){return new Promise((resolve,reject)=>{try{const req=indexedDB.open(DB_NAME,1);req.onupgradeneeded=()=>{const db=req.result;if(!db.objectStoreNames.contains('app'))db.createObjectStore('app',{keyPath:'key'});if(!db.objectStoreNames.contains('files'))db.createObjectStore('files',{keyPath:'id'})};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)}catch(e){reject(e)}})}
 async function dbReadState(){try{const db=await openDB();return await new Promise((resolve,reject)=>{const req=db.transaction('app').objectStore('app').get('state');req.onsuccess=()=>resolve(req.result?.value||null);req.onerror=()=>reject(req.error)})}catch{return null}}
@@ -936,7 +999,7 @@ async function loadState(){
     if(insertError)throw insertError;writeLocalCache(initial);return initial;
   }catch(e){console.error('Falha ao carregar Supabase:',e);return publicLocal||seed()}
 }
-async function saveState(){
+async function saveState({strictRemote=false}={}){
   state.updatedAt=Date.now();
   const localSnapshot=typeof structuredClone==='function'?structuredClone(state):JSON.parse(JSON.stringify(state));
   writeLocalCache(localSnapshot);
@@ -947,6 +1010,7 @@ async function saveState(){
     return true;
   }catch(e){
     console.error('Falha ao sincronizar no Supabase:',e);
+    if(strictRemote)return false;
     toast('Alteração salva neste navegador, mas não sincronizou com os outros usuários.');
     return true;
   }
@@ -1008,6 +1072,7 @@ function renderTabs(){
     const wasHome=isAdmin()&&!currentArea,go=()=>{currentArea=target;if(target==='agenda')agendaView='active';openClientId=null;openDemandId=null;document.getElementById('searchInput').value='';document.getElementById('app').classList.remove('leaving-home');renderAll()};
     if(wasHome){document.getElementById('app').classList.add('leaving-home');setTimeout(go,420)}else go();
   });
+  const weekCalendarTab=document.getElementById('weekCalendarTab');weekCalendarTab.classList.toggle('hidden',!isAdmin());weekCalendarTab.classList.toggle('active',currentArea==='weekCalendar');weekCalendarTab.onclick=()=>{if(!isAdmin())return;currentArea='weekCalendar';openClientId=null;openDemandId=null;renderAll()};
   const adminAgenda=document.getElementById('adminAgendaTab');adminAgenda.classList.toggle('hidden',!isAdmin());adminAgenda.classList.toggle('active',currentArea==='agenda');adminAgenda.onclick=()=>{if(!isAdmin())return;currentArea='agenda';agendaView='active';openClientId=null;openDemandId=null;document.getElementById('searchInput').value='';renderAll()};
   const datesTab=document.getElementById('commemorativeDatesTab');datesTab.classList.toggle('hidden',!isAdmin());datesTab.classList.toggle('active',currentArea==='commemorativeDates');datesTab.onclick=()=>{if(!isAdmin())return;currentArea='commemorativeDates';openClientId=null;openDemandId=null;document.getElementById('searchInput').value='';renderAll()};
   const proposalTab=document.getElementById('proposalHistoryTab');proposalTab.classList.toggle('hidden',!isAdmin());proposalTab.classList.toggle('active',currentArea==='proposals');proposalTab.onclick=()=>{if(!isAdmin())return;currentArea='proposals';openClientId=null;openDemandId=null;document.getElementById('searchInput').value='';renderAll()};
@@ -1015,15 +1080,16 @@ function renderTabs(){
 }
 function renderMonths(){const s=document.getElementById('monthSelect');const year=currentMonthKey().slice(0,4),finance=currentArea==='finance';if(finance&&currentMonth.slice(0,4)!==year)currentMonth=currentMonthKey();s.min=finance?`${year}-01`:'';s.max=finance?`${year}-12`:'';s.value=/^\d{4}-(0[1-9]|1[0-2])$/.test(currentMonth)?currentMonth:currentMonthKey();s.onchange=()=>{if(!s.value)return;currentMonth=s.value;openClientId=null;openDemandId=null;renderAll()}}
 function renderAll(){
-  if(currentArea&&!['agenda','deleted','proposals','finance','contracts','commemorativeDates'].includes(currentArea)&&!canAccessArea(currentArea))currentArea=isDesign()?'arte':isVideoUser()?'video':'agenda';
-  const app=document.getElementById('app');app.classList.toggle('home-mode',isAdmin()&&!currentArea);
+  if(currentArea&&!['agenda','deleted','proposals','finance','contracts','commemorativeDates','weekCalendar'].includes(currentArea)&&!canAccessArea(currentArea))currentArea=isDesign()?'arte':isVideoUser()?'video':'agenda';
+  const app=document.getElementById('app');document.body.classList.toggle('calendar-view',isAdmin()&&currentArea==='weekCalendar');app.classList.toggle('home-mode',isAdmin()&&!currentArea);
   document.getElementById('userName').textContent=currentUser;document.getElementById('userRole').textContent=isAdmin()?'Acesso total':isDesign()?'Arte + Agenda':isVideoUser()?'Vídeo + Agenda':'Visualização + status';document.getElementById('avatar').textContent=isAdmin()?'A':isDesign()?'D':isVideoUser()?'V':'G';document.getElementById('newProposalBtn').classList.toggle('hidden',!isAdmin());document.getElementById('bulkImportBtn').classList.toggle('hidden',!isAdmin());document.getElementById('newContractBtn').classList.toggle('hidden',!isAdmin());document.getElementById('contractsTab').classList.toggle('hidden',!isAdmin());const contractAlertBtn=document.getElementById('contractAlertBtn');contractAlertBtn.classList.toggle('hidden',!isAdmin());contractAlertBtn.style.display=isAdmin()?'':'none';contractAlertBtn.setAttribute('aria-hidden',isAdmin()?'false':'true');document.getElementById('contractsTab').classList.toggle('active',currentArea==='contracts');renderContractAlert();renderTabs();renderMonths();
-  const selected=!!currentArea,deleted=currentArea==='deleted',agenda=currentArea==='agenda',proposals=currentArea==='proposals',finance=currentArea==='finance',contracts=currentArea==='contracts',commemorativeDates=currentArea==='commemorativeDates';
-  document.getElementById('heroControls').classList.toggle('hidden',!selected||proposals||contracts||commemorativeDates);document.getElementById('searchInput').classList.toggle('hidden',finance||contracts||commemorativeDates);document.getElementById('monthSelect').classList.toggle('hidden',agenda||proposals||contracts||commemorativeDates);document.getElementById('areaContent').classList.toggle('hidden',!selected||deleted||agenda||proposals||finance||contracts||commemorativeDates);document.getElementById('agendaContent').classList.toggle('hidden',!agenda);document.getElementById('commemorativeDatesContent').classList.toggle('hidden',!commemorativeDates);document.getElementById('deletedContent').classList.toggle('hidden',!deleted);document.getElementById('proposalHistoryContent').classList.toggle('hidden',!proposals);document.getElementById('contractsContent').classList.toggle('hidden',!contracts);document.getElementById('financeContent').classList.toggle('hidden',!finance);document.getElementById('newDemandTop').classList.toggle('hidden',!selected||deleted||agenda||proposals||finance||contracts||commemorativeDates||!isAdmin());document.getElementById('addClientBtn').classList.toggle('hidden',!selected||deleted||agenda||proposals||finance||contracts||commemorativeDates||!isAdmin());document.getElementById('trafficReportBtn').classList.toggle('hidden',!(isAdmin()&&currentArea==='trafego'));
+  const selected=!!currentArea,deleted=currentArea==='deleted',agenda=currentArea==='agenda',proposals=currentArea==='proposals',finance=currentArea==='finance',contracts=currentArea==='contracts',commemorativeDates=currentArea==='commemorativeDates',weekCalendar=currentArea==='weekCalendar';
+  document.getElementById('heroControls').classList.toggle('hidden',!selected||proposals||contracts||commemorativeDates||weekCalendar);document.getElementById('searchInput').classList.toggle('hidden',finance||contracts||commemorativeDates||weekCalendar);document.getElementById('monthSelect').classList.toggle('hidden',agenda||proposals||contracts||commemorativeDates||weekCalendar);document.getElementById('areaContent').classList.toggle('hidden',!selected||deleted||agenda||proposals||finance||contracts||commemorativeDates||weekCalendar);document.getElementById('agendaContent').classList.toggle('hidden',!agenda);document.getElementById('commemorativeDatesContent').classList.toggle('hidden',!commemorativeDates);document.getElementById('weekCalendarContent').classList.toggle('hidden',!weekCalendar||!isAdmin());document.getElementById('deletedContent').classList.toggle('hidden',!deleted);document.getElementById('proposalHistoryContent').classList.toggle('hidden',!proposals);document.getElementById('contractsContent').classList.toggle('hidden',!contracts);document.getElementById('financeContent').classList.toggle('hidden',!finance);document.getElementById('newDemandTop').classList.toggle('hidden',!selected||deleted||agenda||proposals||finance||contracts||commemorativeDates||weekCalendar||!isAdmin());document.getElementById('addClientBtn').classList.toggle('hidden',!selected||deleted||agenda||proposals||finance||contracts||commemorativeDates||weekCalendar||!isAdmin());document.getElementById('trafficReportBtn').classList.toggle('hidden',!(isAdmin()&&currentArea==='trafego'));
   if(!selected){document.getElementById('pageTitle').textContent='Acompanhamento de Demandas';document.getElementById('pageSubtitle').textContent='Escolha uma área para começar.';return}
   if(finance){document.getElementById('pageTitle').textContent='Financeiro da Agência';document.getElementById('pageSubtitle').textContent=`Entradas, custos e saldo de ${fmtMonth(currentMonth)}.`;renderFinance();return}
   if(proposals){document.getElementById('pageTitle').textContent='Propostas';document.getElementById('pageSubtitle').textContent='Histórico das propostas realmente geradas.';renderProposalHistory();return}
   if(contracts){document.getElementById('pageTitle').textContent='Contratos';document.getElementById('pageSubtitle').textContent='Contratos em vigência, vencimentos e arquivos assinados.';renderContracts();return}
+  if(weekCalendar){if(!isAdmin()){currentArea=null;renderAll();return}document.getElementById('pageTitle').textContent='Calendário';document.getElementById('pageSubtitle').textContent='Planejamento semanal de postagens, gravações e reuniões.';renderWeekCalendar();return}
   if(commemorativeDates){document.getElementById('pageTitle').textContent='Datas Comemorativas';document.getElementById('pageSubtitle').textContent='Calendário editorial de oportunidades para os clientes da agência.';renderCommemorativeDates();return}
   if(agenda){document.getElementById('pageTitle').textContent='Agenda de demandas';const f=agendaAreaFilter();document.getElementById('pageSubtitle').textContent=f?`Somente demandas de ${AREAS[f]}, organizadas pela data de postagem.`:'Todas as demandas organizadas pela data de postagem.';renderAgenda();return}
   if(deleted){document.getElementById('pageTitle').textContent='Excluídos';document.getElementById('pageSubtitle').textContent=`${fmtMonth(currentMonth)} · restaure o que precisar.`;renderDeleted();return}
@@ -1688,7 +1754,49 @@ function setFormStatus(status,area=currentArea){const set=statusesForArea(area);
 function renderDemandReferenceFileSelection(){const input=document.getElementById('formReferenceFiles'),root=document.getElementById('formReferenceFileList');if(!input||!root)return;const files=[...(input.files||[])];root.innerHTML=files.length?files.map(f=>`<span class="reference-file-chip"><span>↥</span><b title="${esc(f.name)}">${esc(f.name)}</b><span>${(f.size/1024/1024).toLocaleString('pt-BR',{maximumFractionDigits:1})} MB</span></span>`).join(''):'<span class="reference-file-empty">Nenhum arquivo selecionado.</span>'}
 function renderDemandProductionFileSelection(){const input=document.getElementById('formProductionFiles'),root=document.getElementById('formProductionFileList');if(!input||!root)return;const files=[...(input.files||[])];root.innerHTML=files.length?files.map(f=>`<span class="reference-file-chip"><span>↓</span><b title="${esc(f.name)}">${esc(f.name)}</b><span>${(f.size/1024/1024).toLocaleString('pt-BR',{maximumFractionDigits:1})} MB</span></span>`).join(''):'<span class="reference-file-empty">Nenhum arquivo selecionado.</span>'}
 function normalizeReferenceLinkValue(val){const clean=String(val||'').trim();if(!clean)return '';const href=safeUrl(/^https?:\/\//i.test(clean)?clean:`https://${clean}`);return href==='#'?'':href}
-function openDemandModal(id=null,clientId=null){if(!isAdmin()||!currentArea||currentArea==='deleted')return;const clients=state.clients.filter(c=>c.area===currentArea&&(clientVisibleInMonth(c,currentMonth,currentArea)||(currentMonth<currentMonthKey()&&!state.removedClientMonths.some(r=>r.clientId===c.id&&r.month===currentMonth&&r.area===currentArea)))).sort((a,b)=>a.name.localeCompare(b.name,'pt-BR',{sensitivity:'base'}));if(!clients.length){toast('Adicione um cliente nesta área antes da demanda.');openClientModal();return}const d=id?state.demands.find(x=>x.id===id):null;document.getElementById('demandModalTitle').textContent=d?'Editar demanda':'Nova demanda';document.getElementById('editDemandId').value=d?.id||'';document.getElementById('formClient').innerHTML=clients.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');document.getElementById('formClient').value=d?.clientId||clientId||clients[0].id;document.getElementById('formTitle').value=d?.title||'';const postDate=document.getElementById('formPostDate'),bounds=monthBounds(currentMonth);postDate.min=bounds.min;postDate.max=bounds.max;postDate.value=d?.postDate||'';document.getElementById('formDescription').value=d?.description||'';document.getElementById('formReferenceLink').value='';const fileInput=document.getElementById('formReferenceFiles');fileInput.value='';renderDemandReferenceFileSelection();const existing=document.getElementById('formExistingReferences'),linkCount=d?.links?.length||0,fileCount=d?.attachments?.length||0,totalRefs=linkCount+fileCount;existing.classList.toggle('hidden',!d||!totalRefs);existing.textContent=d&&totalRefs?`Esta demanda já possui ${linkCount} link${linkCount===1?'':'s'} e ${fileCount} arquivo${fileCount===1?'':'s'} de referência. Novos itens serão acrescentados sem apagar os atuais.`:'';document.getElementById('formProductionLink').value='';const productionInput=document.getElementById('formProductionFiles');productionInput.value='';renderDemandProductionFileSelection();const existingProduction=document.getElementById('formExistingProduction'),productionLinkCount=d?.productionLinks?.length||0,productionFileCount=d?.productionAttachments?.length||0,totalProduction=productionLinkCount+productionFileCount;existingProduction.classList.toggle('hidden',!d||!totalProduction);existingProduction.textContent=d&&totalProduction?`Esta demanda já possui ${productionLinkCount} link${productionLinkCount===1?'':'s'} e ${productionFileCount} arquivo${productionFileCount===1?'':'s'} para produção. Novos itens serão acrescentados sem apagar os atuais.`:'';setFormStatus(d?.status||'red',d?.area||currentArea);document.getElementById('demandModal').classList.remove('hidden')}
+function demandClientOptions(area,selectedId=null){
+ const select=document.getElementById('formClient');
+ const names=new Map();
+ [...state.clients].sort((a,b)=>a.name.localeCompare(b.name,'pt-BR',{sensitivity:'base'})).forEach(c=>{
+   const key=String(c.name||'').trim().toLocaleLowerCase('pt-BR');
+   if(!key)return;
+   const old=names.get(key);
+   if(!old || (c.area===area&&old.area!==area))names.set(key,c);
+ });
+ const clients=[...names.values()].sort((a,b)=>a.name.localeCompare(b.name,'pt-BR',{sensitivity:'base'}));
+ select.innerHTML=clients.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}${c.area===area?'':` · ${esc(AREAS[c.area]||c.area)}`}</option>`).join('');
+ if(selectedId){const existing=state.clients.find(c=>c.id===selectedId),match=clients.find(c=>c.id===selectedId)||clients.find(c=>existing&&c.name.trim().toLocaleLowerCase('pt-BR')===existing.name.trim().toLocaleLowerCase('pt-BR'));if(match)select.value=match.id}
+ if(!select.value && clients.length)select.value=clients[0].id;
+}
+function setDemandArea(area,preferredClientId=null){
+ if(!AREAS[area]||!isAdmin())return;
+ const select=document.getElementById('formClient');const previousId=preferredClientId||select.value;
+ formDemandArea=area;
+ document.querySelectorAll('[data-demand-area]').forEach(b=>{const on=b.dataset.demandArea===area;b.classList.toggle('active',on);b.setAttribute('aria-pressed',on?'true':'false')});
+ demandClientOptions(area,previousId);
+ const oldStatus=document.getElementById('formStatus').value;
+ setFormStatus(oldStatus,area);
+}
+function openDemandModal(id=null,clientId=null){
+ if(!isAdmin()||!Object.keys(AREAS).includes(currentArea))return;
+ const d=id?state.demands.find(x=>x.id===id):null;
+ if(!state.clients.length){toast('Adicione pelo menos um cliente antes da demanda.');openClientModal();return}
+ document.getElementById('demandModalTitle').textContent=d?'Editar demanda':'Nova demanda';
+ document.getElementById('editDemandId').value=d?.id||'';
+ setDemandArea(d?.area||currentArea,d?.clientId||clientId);
+ document.getElementById('formTitle').value=d?.title||'';
+ const postDate=document.getElementById('formPostDate');postDate.removeAttribute('min');postDate.removeAttribute('max');postDate.value=d?.postDate||'';
+ document.getElementById('formDescription').value=d?.description||'';
+ document.getElementById('formReferenceLink').value='';
+ const fileInput=document.getElementById('formReferenceFiles');fileInput.value='';renderDemandReferenceFileSelection();
+ const existing=document.getElementById('formExistingReferences'),linkCount=d?.links?.length||0,fileCount=d?.attachments?.length||0,totalRefs=linkCount+fileCount;existing.classList.toggle('hidden',!d||!totalRefs);existing.textContent=d&&totalRefs?`Esta demanda já possui ${linkCount} link${linkCount===1?'':'s'} e ${fileCount} arquivo${fileCount===1?'':'s'} de referência. Novos itens serão acrescentados sem apagar os atuais.`:'';
+ document.getElementById('formProductionLink').value='';
+ const productionInput=document.getElementById('formProductionFiles');productionInput.value='';renderDemandProductionFileSelection();
+ const existingProduction=document.getElementById('formExistingProduction'),productionLinkCount=d?.productionLinks?.length||0,productionFileCount=d?.productionAttachments?.length||0,totalProduction=productionLinkCount+productionFileCount;existingProduction.classList.toggle('hidden',!d||!totalProduction);existingProduction.textContent=d&&totalProduction?`Esta demanda já possui ${productionLinkCount} link${productionLinkCount===1?'':'s'} e ${productionFileCount} arquivo${productionFileCount===1?'':'s'} para produção. Novos itens serão acrescentados sem apagar os atuais.`:'';
+ setFormStatus(d?.status||'red',formDemandArea);
+ document.getElementById('demandModal').classList.remove('hidden');
+}
+
 async function stageDemandFiles(d,fileList,kind='reference'){if(!d||!fileList?.length)return [];const field=kind==='production'?'productionAttachments':'attachments';d[field]=d[field]||[];const added=[];for(const file of [...fileList]){if(file.size>20*1024*1024){toast(`${file.name}: máximo de 20 MB.`);continue}const fileId=uid(),path=`${d.id}/${kind}/${fileId}-${cleanFileName(file.name)}`;try{if(!supabaseClient)throw new Error('Supabase indisponível');const {error}=await supabaseClient.storage.from(STORAGE_BUCKET).upload(path,file,{cacheControl:'3600',upsert:false,contentType:file.type||undefined});if(error)throw error;const meta={id:fileId,name:file.name,type:file.type,size:file.size,path,kind};d[field].push(meta);added.push(meta)}catch(e){console.error(e);const meta={id:fileId,name:file.name,type:file.type,size:file.size,kind};try{await dbPutFile({...meta,blob:file});d[field].push(meta);added.push(meta)}catch{toast(`Não foi possível anexar ${file.name}.`)}}}return added}
 async function submitDemand(e){
   e.preventDefault();
@@ -1696,18 +1804,23 @@ async function submitDemand(e){
   const form=e.currentTarget,submitBtn=form.querySelector('button[type="submit"]');
   const id=document.getElementById('editDemandId').value,clientId=document.getElementById('formClient').value,title=document.getElementById('formTitle').value.trim(),postDate=document.getElementById('formPostDate').value,description=document.getElementById('formDescription').value.trim(),status=document.getElementById('formStatus').value,referenceRaw=document.getElementById('formReferenceLink').value.trim(),referenceLink=normalizeReferenceLinkValue(referenceRaw),referenceFiles=document.getElementById('formReferenceFiles').files,productionRaw=document.getElementById('formProductionLink').value.trim(),productionLink=normalizeReferenceLinkValue(productionRaw),productionFiles=document.getElementById('formProductionFiles').files;
   if(!clientId||!title||!postDate){toast('Preencha cliente, nome e data da postagem.');return}
-  if(postDate.slice(0,7)!==currentMonth){toast(`A data da postagem precisa estar em ${fmtMonth(currentMonth)}.`);return}
+   const destinationArea=formDemandArea,destinationMonth=postDate.slice(0,7),selectedClient=state.clients.find(c=>c.id===clientId);
+   if(!AREAS[destinationArea]||!selectedClient){toast('Selecione uma área e um cliente válido.');return}
   if(referenceRaw&&!referenceLink){toast('O link de referência parece inválido.');document.getElementById('formReferenceLink').focus();return}
   if(productionRaw&&!productionLink){toast('O link dos arquivos para produção parece inválido.');document.getElementById('formProductionLink').focus();return}
   const hasUpload=(referenceFiles?.length||0)+(productionFiles?.length||0)>0;
   if(submitBtn){submitBtn.disabled=true;submitBtn.textContent=hasUpload?'Salvando e enviando...':'Salvando...'}
-  let rollback=null,newId=null,d=null,addedFiles=[],addedProductionFiles=[];
+   let rollback=null,newId=null,d=null,addedFiles=[],addedProductionFiles=[],createdAreaClientId=null;
+   const normalizedClientName=selectedClient.name.trim().toLocaleLowerCase('pt-BR');
+   let targetClient=state.clients.find(c=>c.area===destinationArea&&c.name.trim().toLocaleLowerCase('pt-BR')===normalizedClientName);
+   if(!targetClient){targetClient={id:uid(),name:selectedClient.name,area:destinationArea,type:'fixed',startMonth:destinationMonth,createdAt:new Date().toISOString()};state.clients.push(targetClient);createdAreaClientId=targetClient.id}
+   const targetClientId=targetClient.id;
   if(id){
     d=state.demands.find(x=>x.id===id);if(!d){if(submitBtn){submitBtn.disabled=false;submitBtn.textContent='Salvar demanda'}return}
-    rollback={...d,links:[...(d.links||[])],attachments:[...(d.attachments||[])],productionLinks:[...(d.productionLinks||[])],productionAttachments:[...(d.productionAttachments||[])]};Object.assign(d,{clientId,title,postDate,description,status});d.links=d.links||[];d.attachments=d.attachments||[];d.productionLinks=d.productionLinks||[];d.productionAttachments=d.productionAttachments||[];openClientId=clientId;openDemandId=id;
+    rollback={...d,links:[...(d.links||[])],attachments:[...(d.attachments||[])],productionLinks:[...(d.productionLinks||[])],productionAttachments:[...(d.productionAttachments||[])]};Object.assign(d,{clientId:targetClientId,area:destinationArea,month:destinationMonth,title,postDate,description,status:statusesForArea(destinationArea)[status]?status:'red'});d.links=d.links||[];d.attachments=d.attachments||[];d.productionLinks=d.productionLinks||[];d.productionAttachments=d.productionAttachments||[];openClientId=targetClientId;openDemandId=id;
   }else{
-    d={id:uid(),clientId,month:currentMonth,area:currentArea,title,postDate,description,status,links:[],attachments:[],productionLinks:[],productionAttachments:[],createdAt:new Date().toISOString()};
-    newId=d.id;state.demands.push(d);openClientId=clientId;openDemandId=d.id;
+    d={id:uid(),clientId:targetClientId,month:destinationMonth,area:destinationArea,title,postDate,description,status:statusesForArea(destinationArea)[status]?status:'red',links:[],attachments:[],productionLinks:[],productionAttachments:[],createdAt:new Date().toISOString()};
+    newId=d.id;state.demands.push(d);openClientId=targetClientId;openDemandId=d.id;
   }
   if(referenceLink&&!d.links.includes(referenceLink))d.links.push(referenceLink);
   if(productionLink&&!d.productionLinks.includes(productionLink))d.productionLinks.push(productionLink);
@@ -1717,11 +1830,12 @@ async function submitDemand(e){
   if(!ok){
     for(const f of [...addedFiles,...addedProductionFiles])await deleteStoredFile(f);
     if(id&&rollback)Object.assign(state.demands.find(x=>x.id===id),rollback);
-    if(newId)state.demands=state.demands.filter(x=>x.id!==newId);
+     if(newId)state.demands=state.demands.filter(x=>x.id!==newId);
+     if(createdAreaClientId)state.clients=state.clients.filter(c=>c.id!==createdAreaClientId);
     if(submitBtn){submitBtn.disabled=false;submitBtn.textContent='Salvar demanda'}
     return;
   }
-  closeModal('demandModal');renderStats();renderClients();
+   closeModal('demandModal');currentArea=destinationArea;currentMonth=destinationMonth;renderAll();
   if(submitBtn){submitBtn.disabled=false;submitBtn.textContent='Salvar demanda'}
   const refCount=(referenceLink?1:0)+addedFiles.length,productionCount=(productionLink?1:0)+addedProductionFiles.length;
   const extras=[refCount?`${refCount} referência${refCount===1?'':'s'}`:'',productionCount?`${productionCount} item${productionCount===1?'':'s'} para produção`:''].filter(Boolean).join(' · ');
@@ -1989,7 +2103,140 @@ function handleGlobalEscape(e){
   if(openModals.length){e.preventDefault();e.stopPropagation();const modal=openModals[openModals.length-1];closeModal(modal.id);return}
   if(isAdmin()&&currentArea){e.preventDefault();returnToHome()}
 }
-function start(){setTimeout(()=>document.body.classList.remove('booting'),900);document.getElementById('logoutBtn').onclick=logout;document.getElementById('trafficReportBtn').onclick=openTrafficAnalytics;document.getElementById('analyzePdfBtn').onclick=analyzeAnalyticsPdf;document.querySelectorAll('#analyticsSourceOptions [data-source]').forEach(b=>b.onclick=()=>setAnalyticsSource(b.dataset.source));document.getElementById('newProposalBtn').onclick=e=>{e.preventDefault();openProposalModal()};document.getElementById('newProposalHistoryBtn').onclick=e=>{e.preventDefault();openProposalModal()};document.getElementById('newContractBtn').onclick=e=>{e.preventDefault();openContractModal()};document.getElementById('contractsTab').onclick=e=>{e.preventDefault();if(!isAdmin())return;currentArea='contracts';contractView='active';renderAll()};document.getElementById('contractAlertBtn').onclick=e=>{e.preventDefault();if(!isAdmin())return;currentArea='contracts';contractView='ending';renderAll()};document.getElementById('newContractListBtn').onclick=()=>openContractModal();document.getElementById('bulkImportBtn').onclick=openBulkDemandImport;document.getElementById('bulkMicBtn').onclick=toggleBulkSpeech;document.getElementById('bulkAnalyzeBtn').onclick=analyzeBulkDemandImport;document.getElementById('bulkConfirmBtn').onclick=confirmBulkDemandImport;document.getElementById('addFinanceIncomeBtn').onclick=()=>addFinanceItem('income');document.getElementById('addFinanceCostBtn').onclick=()=>addFinanceItem('cost');document.getElementById('financeJpegBtn').onclick=exportFinanceJPEG;document.getElementById('newDemandTop').onclick=()=>openDemandModal();document.getElementById('addClientBtn').onclick=openClientModal;document.getElementById('demandForm').onsubmit=submitDemand;document.getElementById('formReferenceFiles').onchange=renderDemandReferenceFileSelection;document.getElementById('formProductionFiles').onchange=renderDemandProductionFileSelection;document.getElementById('clientForm').onsubmit=submitClient;document.getElementById('proposalForm').onsubmit=submitProposal;document.getElementById('contractForm').onsubmit=e=>{e.preventDefault();saveContractFromForm(true)};document.getElementById('contractSaveBtn').onclick=()=>saveContractFromForm(false);document.getElementById('contractStartDate').onchange=recalcContractEnd;document.getElementById('contractDurationMonths').oninput=recalcContractEnd;document.getElementById('contractPdfBtn').onclick=()=>{const c=secureContracts.find(x=>x.id===activeContractId);if(c)exportContractPDF(c)};document.getElementById('contractEditBtn').onclick=()=>{const id=activeContractId;closeModal('contractDetailModal');openContractModal(id)};document.getElementById('contractSignedFile').onchange=uploadSignedContract;document.getElementById('contractDeleteBtn').onclick=()=>{if(activeContractId)deleteContractRecord(activeContractId)};document.getElementById('addProposalItem').onclick=()=>addProposalItem();document.getElementById('proposalTotal').oninput=updateProposalTotals;document.getElementById('proposalJpegBtn').onclick=async()=>{const data=proposalData();if(validateProposal(data)){rememberClientName(data.client);const ok=await exportProposalJPEG(data);if(ok){await recordGeneratedProposal(data,'jpeg');toast('JPEG gerado e salvo no histórico.',null,null,'success')}}};document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>closeModal(b.dataset.close));document.querySelectorAll('.modal-backdrop').forEach(m=>m.onclick=e=>{if(e.target===m){e.preventDefault();signalModalCloseHint(m)}});document.querySelectorAll('#clientTypeChoices .choice').forEach(b=>b.onclick=()=>setClientType(b.dataset.type));document.querySelectorAll('#clientAreaChoices [data-client-area]').forEach(b=>b.onclick=()=>toggleClientArea(b.dataset.clientArea));document.getElementById('clientNameInput').oninput=e=>renderRecentClientSuggestions(e.target.value);document.getElementById('searchInput').oninput=()=>{openClientId=null;openDemandId=null;if(currentArea==='deleted')renderDeleted();else if(currentArea==='agenda')renderAgenda();else if(currentArea&&Object.keys(AREAS).includes(currentArea)){renderStats();renderClients()}};document.addEventListener('click',e=>{if(!e.target.closest('.client-options')&&!e.target.closest('.client-menu'))document.querySelectorAll('.client-menu').forEach(m=>m.classList.add('hidden'))});document.addEventListener('keydown',handleGlobalEscape);initLogin()}
+
+// ========================== CALENDÁRIO SEMANAL (ADMIN) ==========================
+function calendarLocalISO(date){const d=date instanceof Date?date:new Date(date+'T12:00:00');return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function calendarAddDays(iso,number){const date=new Date(`${iso}T12:00:00`);date.setDate(date.getDate()+number);return calendarLocalISO(date)}
+function calendarMonday(iso){const date=new Date(`${iso}T12:00:00`);return calendarAddDays(iso,-((date.getDay()+6)%7))}
+function calendarDays(){return Array.from({length:7},(_,i)=>calendarAddDays(calendarWeekStart,i))}
+function calendarWeekTitle(){const start=new Date(`${calendarWeekStart}T12:00:00`),end=new Date(`${calendarAddDays(calendarWeekStart,6)}T12:00:00`);const short=d=>d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}).replace('.','');return `${short(start)} — ${short(end)} de ${end.getFullYear()}`}
+function calendarClientName(id){return state.clients.find(c=>c.id===id)?.name||''}
+function calendarItemsByDate(iso){
+ const posts=state.demands.filter(d=>d.postDate===iso).sort((a,b)=>`${a.area} ${a.title}`.localeCompare(`${b.area} ${b.title}`,'pt-BR'));
+ const events=(state.calendarEvents||[]).filter(e=>e.date===iso).sort((a,b)=>String(a.time||'99:99').localeCompare(String(b.time||'99:99'))||String(a.title||'').localeCompare(String(b.title||''),'pt-BR'));
+ return {posts,events};
+}
+function calendarWeekStats(){const days=calendarDays(),all=days.map(calendarItemsByDate);return {posts:all.reduce((n,d)=>n+d.posts.length,0),events:all.reduce((n,d)=>n+d.events.length,0),days:all.filter(d=>d.posts.length||d.events.length).length}}
+function shiftCalendarWeek(delta){if(!isAdmin())return;calendarWeekStart=calendarAddDays(calendarWeekStart,delta*7);renderWeekCalendar()}
+function calendarNavigateToDemand(id){if(!isAdmin())return;const d=state.demands.find(v=>v.id===id);if(!d)return;currentArea=d.area;currentMonth=d.month;openClientId=d.clientId;openDemandId=d.id;renderAll()}
+function renderWeekCalendar(){
+ if(!isAdmin())return;
+ const title=document.getElementById('wkWeekTitle'),pick=document.getElementById('wkPickDate');if(!title)return;
+ title.textContent=calendarWeekTitle();pick.value=calendarWeekStart;
+ const stats=calendarWeekStats();
+ document.getElementById('wkStats').innerHTML=[['Postagens previstas',stats.posts],['Compromissos',stats.events],['Dias com programação',stats.days+' / 7']].map(([label,value])=>`<div class="wk-stat"><span>${label}</span><strong>${value}</strong></div>`).join('');
+ const today=calendarLocalISO(new Date());
+ document.getElementById('wkDays').innerHTML=calendarDays().map(date=>{
+  const {posts,events}=calendarItemsByDate(date),day=new Date(date+'T12:00:00'),dayLabel=day.toLocaleDateString('pt-BR',{weekday:'long'}),month=day.toLocaleDateString('pt-BR',{month:'long'});
+  const postHtml=posts.map(d=>`<div class="wk-line wk-line-action" tabindex="0" role="button" data-wk-demand="${esc(d.id)}"><strong><span class="wk-type-pill">${esc(AREAS[d.area]||d.area)}</span>${esc(d.title)}</strong><small>${esc(calendarClientName(d.clientId)||'Cliente não encontrado')} · ${esc(statusLabel(d))}</small></div>`).join('');
+  const eventHtml=events.map(e=>`<div class="wk-line wk-line-action" tabindex="0" role="button" data-wk-event="${esc(e.id)}"><strong><span class="wk-type-pill">${esc(e.type)}</span>${esc(e.title)}</strong><small>${e.time?esc(e.time+' · '):''}${esc(calendarClientName(e.clientId)||'Equipe One Way')}</small>${e.description?`<p>${esc(e.description)}</p>`:''}</div>`).join('');
+  return `<article class="wk-day ${date===today?'is-today':''}"><header class="wk-day-head"><span class="wk-day-number">${String(day.getDate()).padStart(2,'0')}</span><div class="wk-day-label"><strong>${esc(dayLabel.charAt(0).toUpperCase()+dayLabel.slice(1))}</strong><span>${esc(month)} · ${day.getFullYear()}${date===today?' · Hoje':''}</span></div><button type="button" class="wk-day-create" data-wk-create="${date}" title="Adicionar compromisso neste dia">+</button></header><section class="wk-day-section"><div class="wk-section-caption">Postagens · ${posts.length}</div>${postHtml||'<div class="wk-empty">Nenhuma demanda prevista.</div>'}</section><section class="wk-day-section"><div class="wk-section-caption">Compromissos · ${events.length}</div>${eventHtml||'<div class="wk-empty">Nenhum compromisso agendado.</div>'}</section></article>`;
+ }).join('');
+ const area=document.getElementById('wkDays');
+ area.querySelectorAll('[data-wk-create]').forEach(b=>b.onclick=()=>openWeekEventModal(null,b.dataset.wkCreate));
+ area.querySelectorAll('[data-wk-event]').forEach(b=>{b.onclick=()=>openWeekEventModal(b.dataset.wkEvent);b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();b.click()}}});
+ area.querySelectorAll('[data-wk-demand]').forEach(b=>{b.onclick=()=>calendarNavigateToDemand(b.dataset.wkDemand);b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();b.click()}}});
+}
+function openWeekEventModal(id=null,date=null){
+ if(!isAdmin())return;
+ const e=id?(state.calendarEvents||[]).find(x=>x.id===id):null;
+ document.getElementById('wkEventId').value=e?.id||'';
+ document.getElementById('wkEventModalTitle').textContent=e?'Editar compromisso':'Novo compromisso';
+ document.getElementById('wkEventType').value=e?.type||'Gravação';
+ document.getElementById('wkEventTitle').value=e?.title||'';
+ document.getElementById('wkEventDate').value=e?.date||date||calendarWeekStart;
+ document.getElementById('wkEventTime').value=e?.time||'';
+ document.getElementById('wkEventDescription').value=e?.description||'';
+ const clientOptions=new Map();state.clients.forEach(c=>{const key=String(c.name||'').trim().toLocaleLowerCase('pt-BR');if(key&&!clientOptions.has(key))clientOptions.set(key,c)});
+ const clients=[...clientOptions.values()].sort((a,b)=>a.name.localeCompare(b.name,'pt-BR'));
+ const clientSelect=document.getElementById('wkEventClient');clientSelect.innerHTML='<option value="">Sem cliente vinculado</option>'+clients.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
+ if(e?.clientId){const linked=state.clients.find(c=>c.id===e.clientId),option=clients.find(c=>linked&&c.name.trim().toLocaleLowerCase('pt-BR')===linked.name.trim().toLocaleLowerCase('pt-BR'));clientSelect.value=option?.id||''}else clientSelect.value='';
+ document.getElementById('wkDeleteEventBtn').classList.toggle('hidden',!e);
+ document.getElementById('weekEventModal').classList.remove('hidden');
+}
+async function saveCalendarAdminState(){
+ if(!isAdmin()||!adminAuthReady()){toast('Para sincronizar o calendário, entre no login administrativo do Supabase.');return false}
+ const ok=await saveState({strictRemote:true});
+ if(!ok){toast('Falha na sincronização. O calendário não foi confirmado no Supabase.');return false}
+ return true;
+}
+async function submitWeekEvent(evt){
+ evt.preventDefault();if(!isAdmin())return;
+ const id=document.getElementById('wkEventId').value,title=document.getElementById('wkEventTitle').value.trim(),date=document.getElementById('wkEventDate').value,time=document.getElementById('wkEventTime').value,type=document.getElementById('wkEventType').value,clientId=document.getElementById('wkEventClient').value,description=document.getElementById('wkEventDescription').value.trim();
+ if(!title||!/^\d{4}-\d{2}-\d{2}$/.test(date)){toast('Preencha o nome e uma data válida.');return}
+ const allowedTypes=['Gravação','Reunião','Agendamento','Evento','Anotação'];if(!allowedTypes.includes(type))return;
+ const before=(state.calendarEvents||[]).map(x=>({...x}));const oldWeek=calendarWeekStart;
+ state.calendarEvents=state.calendarEvents||[];
+ const record={id:id||uid(),title,date,time,type,clientId,description,updatedAt:new Date().toISOString()};
+ const i=state.calendarEvents.findIndex(x=>x.id===id);if(i>=0)state.calendarEvents[i]={...state.calendarEvents[i],...record};else state.calendarEvents.push(record);
+ if(!await saveCalendarAdminState()){state.calendarEvents=before;writeLocalCache(state);return}
+ calendarWeekStart=calendarMonday(date);closeModal('weekEventModal');renderWeekCalendar();toast('Compromisso salvo e sincronizado.',null,null,'success');
+}
+async function deleteWeekEvent(){
+ if(!isAdmin())return;
+ const id=document.getElementById('wkEventId').value;if(!id||!confirm('Excluir este compromisso do calendário?'))return;
+ const before=[...(state.calendarEvents||[])];state.calendarEvents=before.filter(e=>e.id!==id);
+ if(!await saveCalendarAdminState()){state.calendarEvents=before;writeLocalCache(state);return}
+ closeModal('weekEventModal');renderWeekCalendar();toast('Compromisso excluído.',null,null,'success');
+}
+function weekCalendarText(){
+ if(!isAdmin())return '';
+ const lines=['ONE WAY AGENCY · PLANEJAMENTO SEMANAL',calendarWeekTitle().toUpperCase(),''];
+ const stats=calendarWeekStats();lines.push(`${stats.posts} postagens previstas · ${stats.events} compromissos`,'');
+ for(const date of calendarDays()){
+  const {posts,events}=calendarItemsByDate(date),day=new Date(date+'T12:00:00');
+  lines.push(`${day.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit',year:'numeric'}).toUpperCase()}`);
+  lines.push('POSTAGENS');if(!posts.length)lines.push('  Sem postagens previstas.');
+  posts.forEach(d=>lines.push(`  - [${AREAS[d.area]||d.area}] ${d.title} — ${calendarClientName(d.clientId)||'Cliente não encontrado'} (${statusLabel(d)})`));
+  lines.push('COMPROMISSOS');if(!events.length)lines.push('  Sem compromissos agendados.');
+  events.forEach(e=>{lines.push(`  - ${e.time?e.time+' · ':''}${e.type}: ${e.title}${e.clientId?' — '+calendarClientName(e.clientId):''}`);if(e.description)lines.push(...e.description.split('\n').map(t=>'    '+t))});lines.push('');
+ }
+ return lines.join('\n');
+}
+async function copyWeekCalendarText(){if(!isAdmin())return;const value=weekCalendarText();try{await navigator.clipboard.writeText(value);toast('Resumo da semana copiado para compartilhar.',null,null,'success')}catch{const t=document.createElement('textarea');t.value=value;document.body.append(t);t.select();const ok=document.execCommand('copy');t.remove();toast(ok?'Resumo copiado.':'Não foi possível copiar. Use Baixar TXT.')}}
+function downloadWeekCalendarText(){if(!isAdmin())return;const blob=new Blob(['\ufeff'+weekCalendarText()],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`oneway-semana-${calendarWeekStart}.txt`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+async function exportWeekCalendarJPEG(){
+ if(!isAdmin())return;
+ const W=1400,pad=75,usable=W-2*pad,ctxm=document.createElement('canvas').getContext('2d');
+ const entries=calendarDays().map(date=>({date,...calendarItemsByDate(date)}));
+ function wrap(text,font,width){ctxm.font=font;return canvasWrap(ctxm,String(text||''),width)}
+ function linesForCard(card){const width=usable-84;return card.posts.map(d=>({kind:'post',label:`${AREAS[d.area]||d.area} · ${calendarClientName(d.clientId)||'Cliente não encontrado'}`,title:wrap(d.title,'700 21px Arial',width),detail:[]})).concat(card.events.map(e=>({kind:'event',label:`${e.time?e.time+' · ':''}${e.type}${e.clientId?' · '+calendarClientName(e.clientId):''}`,title:wrap(e.title,'700 21px Arial',width),detail:wrap(e.description,'400 17px Arial',width)})))}
+ const computed=entries.map(card=>{const content=linesForCard(card),h=100+Math.max(32,content.reduce((n,item)=>n+45+item.title.length*27+(item.detail.length?9+item.detail.length*23:0)+12,0));return {...card,content,h}});
+ const H=425+computed.reduce((n,x)=>n+x.h+15,0)+94;if(H>16000){toast('Semana extensa demais para um único JPEG. Use Copiar resumo ou Baixar TXT.');return}
+ const canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;const ctx=canvas.getContext('2d');
+ const bg=ctx.createLinearGradient(0,0,W,H);bg.addColorStop(0,'#061128');bg.addColorStop(.52,'#0a204a');bg.addColorStop(1,'#2153eb');ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+ const glow=ctx.createRadialGradient(W*.85,H*.82,0,W*.85,H*.82,600);glow.addColorStop(0,'rgba(121,163,255,.19)');glow.addColorStop(1,'rgba(121,163,255,0)');ctx.fillStyle=glow;ctx.fillRect(0,0,W,H);
+ drawCanvasRoundRect(ctx,pad,58,usable,220,26,'rgba(255,255,255,.085)','rgba(222,234,255,.18)');ctx.fillStyle='#d8e8ff';ctx.font='700 17px Arial';ctx.fillText('ONE WAY · PLANEJAMENTO SEMANAL',pad+32,101);ctx.fillStyle='#fff';ctx.font='700 49px Arial';ctx.fillText('Calendário da equipe',pad+32,162);ctx.fillStyle='#dce8ff';ctx.font='600 26px Arial';ctx.fillText(calendarWeekTitle(),pad+32,216);
+ try{const logo=await loadImage(LOGO_DATA_URI),height=100,width=logo.width*(height/logo.height);ctx.drawImage(logo,W-pad-width-32,118,width,height)}catch{}
+ const stats=calendarWeekStats(),cardW=(usable-24)/3;[['POSTAGENS',stats.posts],['COMPROMISSOS',stats.events],['DIAS PROGRAMADOS',`${stats.days} / 7`]].forEach((c,i)=>{const x=pad+i*(cardW+12);drawCanvasRoundRect(ctx,x,297,cardW,106,19,'rgba(255,255,255,.075)','rgba(218,232,255,.13)');ctx.fillStyle='#bcd5fa';ctx.font='700 15px Arial';ctx.fillText(c[0],x+21,332);ctx.fillStyle='#fff';ctx.font='700 34px Arial';ctx.fillText(String(c[1]),x+21,377)});
+ let y=425;
+ computed.forEach(card=>{
+  drawCanvasRoundRect(ctx,pad,y,usable,card.h,21,'rgba(255,255,255,.075)','rgba(218,232,255,.14)');const day=new Date(card.date+'T12:00:00'),dayStr=day.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'});
+  ctx.fillStyle='#fff';ctx.font='700 27px Arial';ctx.fillText(dayStr.charAt(0).toUpperCase()+dayStr.slice(1),pad+30,y+48);
+  ctx.textAlign='right';ctx.fillStyle='#b6d1fa';ctx.font='700 15px Arial';ctx.fillText(`${card.posts.length} postagens  ·  ${card.events.length} compromissos`,W-pad-30,y+46);ctx.textAlign='left';
+  ctx.fillStyle='rgba(220,233,255,.16)';ctx.fillRect(pad+30,y+65,usable-60,1);
+  let lineY=y+96;
+  if(!card.content.length){ctx.fillStyle='rgba(235,242,255,.58)';ctx.font='400 18px Arial';ctx.fillText('Sem programação registrada.',pad+32,lineY+3)}
+  for(const item of card.content){ctx.fillStyle='#a8cafa';ctx.font='700 14px Arial';ctx.fillText((item.kind==='post'?'POSTAGEM · ':'AGENDA · ')+item.label.toUpperCase(),pad+32,lineY);lineY+=30;ctx.fillStyle='#fff';ctx.font='700 21px Arial';for(const line of item.title){ctx.fillText(line,pad+32,lineY);lineY+=27}if(item.detail.length){lineY+=9;ctx.fillStyle='rgba(238,245,255,.8)';ctx.font='400 17px Arial';for(const line of item.detail){ctx.fillText(line,pad+32,lineY);lineY+=23}}lineY+=27}
+  y+=card.h+15;
+ });
+ ctx.fillStyle='rgba(229,239,255,.66)';ctx.font='400 17px Arial';ctx.fillText(`One Way Agency · Semana de ${calendarWeekStart}`,pad,H-52);
+ const a=document.createElement('a');a.download=`oneway-calendario-semana-${calendarWeekStart}.jpg`;a.href=canvas.toDataURL('image/jpeg',.94);a.click();toast('Calendário semanal exportado em JPEG.',null,null,'success');
+}
+
+function start(){
+ document.querySelectorAll('[data-demand-area]').forEach(b=>b.onclick=()=>setDemandArea(b.dataset.demandArea));
+ document.getElementById('wkAddEventBtn').onclick=()=>openWeekEventModal();
+ document.getElementById('wkEventForm').onsubmit=submitWeekEvent;
+ document.getElementById('wkDeleteEventBtn').onclick=deleteWeekEvent;
+ document.getElementById('wkPreviousBtn').onclick=()=>shiftCalendarWeek(-1);
+ document.getElementById('wkNextBtn').onclick=()=>shiftCalendarWeek(1);
+ document.getElementById('wkCurrentBtn').onclick=()=>{calendarWeekStart=calendarMonday(calendarLocalISO(new Date()));renderWeekCalendar()};
+ document.getElementById('wkPickDate').onchange=e=>{if(e.target.value){calendarWeekStart=calendarMonday(e.target.value);renderWeekCalendar()}};
+ document.getElementById('wkCopyTextBtn').onclick=copyWeekCalendarText;
+ document.getElementById('wkDownloadTextBtn').onclick=downloadWeekCalendarText;
+ document.getElementById('wkExportJpegBtn').onclick=exportWeekCalendarJPEG;
+ setTimeout(()=>document.body.classList.remove('booting'),900);document.getElementById('logoutBtn').onclick=logout;document.getElementById('trafficReportBtn').onclick=openTrafficAnalytics;document.getElementById('analyzePdfBtn').onclick=analyzeAnalyticsPdf;document.querySelectorAll('#analyticsSourceOptions [data-source]').forEach(b=>b.onclick=()=>setAnalyticsSource(b.dataset.source));document.getElementById('newProposalBtn').onclick=e=>{e.preventDefault();openProposalModal()};document.getElementById('newProposalHistoryBtn').onclick=e=>{e.preventDefault();openProposalModal()};document.getElementById('newContractBtn').onclick=e=>{e.preventDefault();openContractModal()};document.getElementById('contractsTab').onclick=e=>{e.preventDefault();if(!isAdmin())return;currentArea='contracts';contractView='active';renderAll()};document.getElementById('contractAlertBtn').onclick=e=>{e.preventDefault();if(!isAdmin())return;currentArea='contracts';contractView='ending';renderAll()};document.getElementById('newContractListBtn').onclick=()=>openContractModal();document.getElementById('bulkImportBtn').onclick=openBulkDemandImport;document.getElementById('bulkMicBtn').onclick=toggleBulkSpeech;document.getElementById('bulkAnalyzeBtn').onclick=analyzeBulkDemandImport;document.getElementById('bulkConfirmBtn').onclick=confirmBulkDemandImport;document.getElementById('addFinanceIncomeBtn').onclick=()=>addFinanceItem('income');document.getElementById('addFinanceCostBtn').onclick=()=>addFinanceItem('cost');document.getElementById('financeJpegBtn').onclick=exportFinanceJPEG;document.getElementById('newDemandTop').onclick=()=>openDemandModal();document.getElementById('addClientBtn').onclick=openClientModal;document.getElementById('demandForm').onsubmit=submitDemand;document.getElementById('formReferenceFiles').onchange=renderDemandReferenceFileSelection;document.getElementById('formProductionFiles').onchange=renderDemandProductionFileSelection;document.getElementById('clientForm').onsubmit=submitClient;document.getElementById('proposalForm').onsubmit=submitProposal;document.getElementById('contractForm').onsubmit=e=>{e.preventDefault();saveContractFromForm(true)};document.getElementById('contractSaveBtn').onclick=()=>saveContractFromForm(false);document.getElementById('contractStartDate').onchange=recalcContractEnd;document.getElementById('contractDurationMonths').oninput=recalcContractEnd;document.getElementById('contractPdfBtn').onclick=()=>{const c=secureContracts.find(x=>x.id===activeContractId);if(c)exportContractPDF(c)};document.getElementById('contractEditBtn').onclick=()=>{const id=activeContractId;closeModal('contractDetailModal');openContractModal(id)};document.getElementById('contractSignedFile').onchange=uploadSignedContract;document.getElementById('contractDeleteBtn').onclick=()=>{if(activeContractId)deleteContractRecord(activeContractId)};document.getElementById('addProposalItem').onclick=()=>addProposalItem();document.getElementById('proposalTotal').oninput=updateProposalTotals;document.getElementById('proposalJpegBtn').onclick=async()=>{const data=proposalData();if(validateProposal(data)){rememberClientName(data.client);const ok=await exportProposalJPEG(data);if(ok){await recordGeneratedProposal(data,'jpeg');toast('JPEG gerado e salvo no histórico.',null,null,'success')}}};document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>closeModal(b.dataset.close));document.querySelectorAll('.modal-backdrop').forEach(m=>m.onclick=e=>{if(e.target===m){e.preventDefault();signalModalCloseHint(m)}});document.querySelectorAll('#clientTypeChoices .choice').forEach(b=>b.onclick=()=>setClientType(b.dataset.type));document.querySelectorAll('#clientAreaChoices [data-client-area]').forEach(b=>b.onclick=()=>toggleClientArea(b.dataset.clientArea));document.getElementById('clientNameInput').oninput=e=>renderRecentClientSuggestions(e.target.value);document.getElementById('searchInput').oninput=()=>{openClientId=null;openDemandId=null;if(currentArea==='deleted')renderDeleted();else if(currentArea==='agenda')renderAgenda();else if(currentArea&&Object.keys(AREAS).includes(currentArea)){renderStats();renderClients()}};document.addEventListener('click',e=>{if(!e.target.closest('.client-options')&&!e.target.closest('.client-menu'))document.querySelectorAll('.client-menu').forEach(m=>m.classList.add('hidden'))});document.addEventListener('keydown',handleGlobalEscape);initLogin()}
 
 (async()=>{state=await loadState();subscribeRealtime();start()})();
 </script>
