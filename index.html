@@ -432,7 +432,7 @@ body.calendar-view{background-attachment:scroll!important}
 .wk-toolbar{padding:24px 26px;display:flex;justify-content:space-between;gap:24px;align-items:center;border:1px solid rgba(220,233,255,.16);border-radius:22px;background:linear-gradient(145deg,rgba(42,80,163,.25),rgba(255,255,255,.055));box-shadow:0 18px 38px rgba(0,9,35,.10)}
 .wk-overline,.wk-form-eyebrow{display:block;color:#9bbcf9;font-size:9px;letter-spacing:.15em;font-weight:800;margin-bottom:9px}
 .wk-toolbar h2{color:#fff;font-size:22px;margin:0 0 7px;letter-spacing:-.035em}.wk-toolbar p{margin:0;color:rgba(229,238,255,.72);font-size:11px;line-height:1.5}
-.wk-toolbar-buttons{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;max-width:570px}
+.wk-toolbar-buttons{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;max-width:760px}
 .wk-btn{border:1px solid rgba(220,233,255,.22);border-radius:11px;padding:11px 12px;background:rgba(255,255,255,.075);color:#fff;font:700 10px Montserrat,sans-serif;white-space:nowrap;transition:.18s}
 .wk-btn:hover,.wk-nav-btn:hover{background:rgba(255,255,255,.16);transform:translateY(-1px)}.wk-btn-glow{background:#ecf3ff;color:#163d83;border-color:#fff}
 .wk-btn-glow:hover{background:#fff}.wk-navigator{display:flex;gap:12px;align-items:center;margin:18px 0;padding:16px 19px;border-radius:17px;border:1px solid rgba(220,233,255,.12);background:rgba(6,24,65,.46)}
@@ -501,7 +501,7 @@ body.calendar-view{background-attachment:scroll!important}
       <div class="wk-shell">
         <div class="wk-toolbar">
           <div><span class="wk-overline">ONE WAY · PLANEJAMENTO SEMANAL</span><h2>Calendário da equipe</h2><p>Demandas de postagem e compromissos planejados em um só lugar.</p></div>
-          <div class="wk-toolbar-buttons"><button type="button" class="wk-btn wk-btn-glow" id="wkAddEventBtn">+ Novo compromisso</button><button type="button" class="wk-btn" id="wkExportJpegBtn">Baixar JPEG</button><button type="button" class="wk-btn" id="wkCopyTextBtn">Copiar resumo</button><button type="button" class="wk-btn" id="wkDownloadTextBtn">Baixar TXT</button></div>
+          <div class="wk-toolbar-buttons"><button type="button" class="wk-btn wk-btn-glow" id="wkAddEventBtn">+ Novo compromisso</button><button type="button" class="wk-btn" id="wkExportJpegBtn">Baixar JPEG HD</button><button type="button" class="wk-btn" id="wkExportPdfBtn">Salvar PDF</button><button type="button" class="wk-btn" id="wkCopyTextBtn">Copiar resumo</button><button type="button" class="wk-btn" id="wkDownloadTextBtn">Baixar TXT</button></div>
         </div>
         <div class="wk-navigator"><button type="button" class="wk-nav-btn" id="wkPreviousBtn" aria-label="Semana anterior">←</button><div class="wk-date-head"><strong id="wkWeekTitle"></strong><span id="wkWeekSubtitle">Segunda a domingo</span></div><button type="button" class="wk-nav-btn" id="wkNextBtn" aria-label="Próxima semana">→</button><input type="date" id="wkPickDate" aria-label="Ir para semana da data"><button type="button" class="wk-btn" id="wkCurrentBtn">Semana atual</button></div>
         <div class="wk-stats" id="wkStats"></div>
@@ -2179,49 +2179,162 @@ async function deleteWeekEvent(){
  if(!await saveCalendarAdminState()){state.calendarEvents=before;writeLocalCache(state);return}
  closeModal('weekEventModal');renderWeekCalendar();toast('Compromisso excluído.',null,null,'success');
 }
+function calendarExportSchedule(){
+ if(!isAdmin())return [];
+ return calendarDays().map(date=>({date,...calendarItemsByDate(date)})).filter(day=>day.posts.length||day.events.length);
+}
+function calendarDateLabel(iso,style='long'){
+ const date=new Date(iso+'T12:00:00');
+ if(style==='short')return date.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+ const label=date.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'});
+ return label.charAt(0).toUpperCase()+label.slice(1);
+}
 function weekCalendarText(){
  if(!isAdmin())return '';
- const lines=['ONE WAY AGENCY · PLANEJAMENTO SEMANAL',calendarWeekTitle().toUpperCase(),''];
- const stats=calendarWeekStats();lines.push(`${stats.posts} postagens previstas · ${stats.events} compromissos`,'');
- for(const date of calendarDays()){
-  const {posts,events}=calendarItemsByDate(date),day=new Date(date+'T12:00:00');
-  lines.push(`${day.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit',year:'numeric'}).toUpperCase()}`);
-  lines.push('POSTAGENS');if(!posts.length)lines.push('  Sem postagens previstas.');
-  posts.forEach(d=>lines.push(`  - [${AREAS[d.area]||d.area}] ${d.title} — ${calendarClientName(d.clientId)||'Cliente não encontrado'} (${statusLabel(d)})`));
-  lines.push('COMPROMISSOS');if(!events.length)lines.push('  Sem compromissos agendados.');
-  events.forEach(e=>{lines.push(`  - ${e.time?e.time+' · ':''}${e.type}: ${e.title}${e.clientId?' — '+calendarClientName(e.clientId):''}`);if(e.description)lines.push(...e.description.split('\n').map(t=>'    '+t))});lines.push('');
+ const stats=calendarWeekStats(),scheduled=calendarExportSchedule();
+ const lines=['ONE WAY AGENCY | PROGRAMAÇÃO SEMANAL',calendarWeekTitle(),''];
+ lines.push(`${stats.posts} ${stats.posts===1?'postagem':'postagens'}  |  ${stats.events} ${stats.events===1?'compromisso':'compromissos'}`);
+ if(!scheduled.length){lines.push('','Nenhuma atividade programada para esta semana.');return lines.join('\n')}
+ for(const day of scheduled){
+  lines.push('','────────────────────────',calendarDateLabel(day.date).toUpperCase());
+  if(day.posts.length){
+   lines.push('POSTAGENS');
+   day.posts.forEach(d=>lines.push(`• ${String(d.title||'Sem título').replace(/\s+/g,' ').trim()}`));
+  }
+  if(day.events.length){
+   if(day.posts.length)lines.push('');
+   lines.push('AGENDA');
+   day.events.forEach(e=>{
+    const time=e.time?`${e.time} · `:'';
+    const type=e.type?`${e.type} · `:'';
+    lines.push(`• ${time}${type}${String(e.title||'Compromisso').replace(/\s+/g,' ').trim()}`);
+   });
+  }
  }
+ lines.push('','────────────────────────');
  return lines.join('\n');
 }
 async function copyWeekCalendarText(){if(!isAdmin())return;const value=weekCalendarText();try{await navigator.clipboard.writeText(value);toast('Resumo da semana copiado para compartilhar.',null,null,'success')}catch{const t=document.createElement('textarea');t.value=value;document.body.append(t);t.select();const ok=document.execCommand('copy');t.remove();toast(ok?'Resumo copiado.':'Não foi possível copiar. Use Baixar TXT.')}}
 function downloadWeekCalendarText(){if(!isAdmin())return;const blob=new Blob(['\ufeff'+weekCalendarText()],{type:'text/plain;charset=utf-8'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`oneway-semana-${calendarWeekStart}.txt`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 async function exportWeekCalendarJPEG(){
  if(!isAdmin())return;
- const W=1400,pad=75,usable=W-2*pad,ctxm=document.createElement('canvas').getContext('2d');
- const entries=calendarDays().map(date=>({date,...calendarItemsByDate(date)}));
- function wrap(text,font,width){ctxm.font=font;return canvasWrap(ctxm,String(text||''),width)}
- function linesForCard(card){const width=usable-84;return card.posts.map(d=>({kind:'post',label:`${AREAS[d.area]||d.area} · ${calendarClientName(d.clientId)||'Cliente não encontrado'}`,title:wrap(d.title,'700 21px Arial',width),detail:[]})).concat(card.events.map(e=>({kind:'event',label:`${e.time?e.time+' · ':''}${e.type}${e.clientId?' · '+calendarClientName(e.clientId):''}`,title:wrap(e.title,'700 21px Arial',width),detail:wrap(e.description,'400 17px Arial',width)})))}
- const computed=entries.map(card=>{const content=linesForCard(card),h=100+Math.max(32,content.reduce((n,item)=>n+45+item.title.length*27+(item.detail.length?9+item.detail.length*23:0)+12,0));return {...card,content,h}});
- const H=425+computed.reduce((n,x)=>n+x.h+15,0)+94;if(H>16000){toast('Semana extensa demais para um único JPEG. Use Copiar resumo ou Baixar TXT.');return}
- const canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;const ctx=canvas.getContext('2d');
- const bg=ctx.createLinearGradient(0,0,W,H);bg.addColorStop(0,'#061128');bg.addColorStop(.52,'#0a204a');bg.addColorStop(1,'#2153eb');ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
- const glow=ctx.createRadialGradient(W*.85,H*.82,0,W*.85,H*.82,600);glow.addColorStop(0,'rgba(121,163,255,.19)');glow.addColorStop(1,'rgba(121,163,255,0)');ctx.fillStyle=glow;ctx.fillRect(0,0,W,H);
- drawCanvasRoundRect(ctx,pad,58,usable,220,26,'rgba(255,255,255,.085)','rgba(222,234,255,.18)');ctx.fillStyle='#d8e8ff';ctx.font='700 17px Arial';ctx.fillText('ONE WAY · PLANEJAMENTO SEMANAL',pad+32,101);ctx.fillStyle='#fff';ctx.font='700 49px Arial';ctx.fillText('Calendário da equipe',pad+32,162);ctx.fillStyle='#dce8ff';ctx.font='600 26px Arial';ctx.fillText(calendarWeekTitle(),pad+32,216);
- try{const logo=await loadImage(LOGO_DATA_URI),height=100,width=logo.width*(height/logo.height);ctx.drawImage(logo,W-pad-width-32,118,width,height)}catch{}
- const stats=calendarWeekStats(),cardW=(usable-24)/3;[['POSTAGENS',stats.posts],['COMPROMISSOS',stats.events],['DIAS PROGRAMADOS',`${stats.days} / 7`]].forEach((c,i)=>{const x=pad+i*(cardW+12);drawCanvasRoundRect(ctx,x,297,cardW,106,19,'rgba(255,255,255,.075)','rgba(218,232,255,.13)');ctx.fillStyle='#bcd5fa';ctx.font='700 15px Arial';ctx.fillText(c[0],x+21,332);ctx.fillStyle='#fff';ctx.font='700 34px Arial';ctx.fillText(String(c[1]),x+21,377)});
- let y=425;
- computed.forEach(card=>{
-  drawCanvasRoundRect(ctx,pad,y,usable,card.h,21,'rgba(255,255,255,.075)','rgba(218,232,255,.14)');const day=new Date(card.date+'T12:00:00'),dayStr=day.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'});
-  ctx.fillStyle='#fff';ctx.font='700 27px Arial';ctx.fillText(dayStr.charAt(0).toUpperCase()+dayStr.slice(1),pad+30,y+48);
-  ctx.textAlign='right';ctx.fillStyle='#b6d1fa';ctx.font='700 15px Arial';ctx.fillText(`${card.posts.length} postagens  ·  ${card.events.length} compromissos`,W-pad-30,y+46);ctx.textAlign='left';
-  ctx.fillStyle='rgba(220,233,255,.16)';ctx.fillRect(pad+30,y+65,usable-60,1);
-  let lineY=y+96;
-  if(!card.content.length){ctx.fillStyle='rgba(235,242,255,.58)';ctx.font='400 18px Arial';ctx.fillText('Sem programação registrada.',pad+32,lineY+3)}
-  for(const item of card.content){ctx.fillStyle='#a8cafa';ctx.font='700 14px Arial';ctx.fillText((item.kind==='post'?'POSTAGEM · ':'AGENDA · ')+item.label.toUpperCase(),pad+32,lineY);lineY+=30;ctx.fillStyle='#fff';ctx.font='700 21px Arial';for(const line of item.title){ctx.fillText(line,pad+32,lineY);lineY+=27}if(item.detail.length){lineY+=9;ctx.fillStyle='rgba(238,245,255,.8)';ctx.font='400 17px Arial';for(const line of item.detail){ctx.fillText(line,pad+32,lineY);lineY+=23}}lineY+=27}
-  y+=card.h+15;
+ const days=calendarExportSchedule(),W=2000,pad=104,inside=W-2*pad;
+ const scratch=document.createElement('canvas').getContext('2d');if(!scratch)return;
+ const titleFont='700 30px Arial',metaFont='600 22px Arial';
+ function wrap(text,font,width){scratch.font=font;return canvasWrap(scratch,String(text||'').replace(/\s+/g,' ').trim(),width)}
+ // O cabeçalho de cada dia já mostra a data, então as demandas exibem apenas o título.
+ const cards=days.map(day=>{
+  const rows=[...day.posts.map(d=>({type:'post',title:wrap(d.title||'Sem título',titleFont,inside-525)})),
+   ...day.events.map(e=>({type:'event',title:wrap([e.time,e.title].filter(Boolean).join(' · '),titleFont,inside-525),extra:String(e.type||'Compromisso')}))];
+  let height=94;let old='';
+  for(const row of rows){if(row.type!==old){height+=39;old=row.type}height+=row.title.length*41+15}
+  return {day,rows,height:Math.max(130,height)};
  });
- ctx.fillStyle='rgba(229,239,255,.66)';ctx.font='400 17px Arial';ctx.fillText(`One Way Agency · Semana de ${calendarWeekStart}`,pad,H-52);
- const a=document.createElement('a');a.download=`oneway-calendario-semana-${calendarWeekStart}.jpg`;a.href=canvas.toDataURL('image/jpeg',.94);a.click();toast('Calendário semanal exportado em JPEG.',null,null,'success');
+ const intro=305,footer=84,space=18,H=intro+(cards.length?cards.reduce((sum,c)=>sum+c.height+space,0):186)+footer;
+ if(H>16000){toast('Semana muito extensa para um único JPEG. Use Salvar PDF, que divide o conteúdo em páginas.');return}
+ const canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;
+ const ctx=canvas.getContext('2d');if(!ctx){toast('Não foi possível preparar o JPEG.');return}
+ const bg=ctx.createLinearGradient(0,0,W,H);bg.addColorStop(0,'#061128');bg.addColorStop(.53,'#0b2250');bg.addColorStop(1,'#2153eb');ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+ const glow=ctx.createRadialGradient(W*.81,H*.83,0,W*.81,H*.83,710);glow.addColorStop(0,'rgba(126,169,255,.16)');glow.addColorStop(1,'rgba(126,169,255,0)');ctx.fillStyle=glow;ctx.fillRect(0,0,W,H);
+ ctx.fillStyle='#a7c9ff';ctx.font='700 24px Arial';ctx.fillText('ONE WAY  /  PLANEJAMENTO SEMANAL',pad,92);
+ ctx.fillStyle='#fff';ctx.font='700 61px Arial';ctx.fillText('Programação da semana',pad,169);
+ ctx.fillStyle='#dce9ff';ctx.font='500 35px Arial';ctx.fillText(calendarWeekTitle(),pad,224);
+ const stat=calendarWeekStats();ctx.fillStyle='#b9d1f6';ctx.font='600 23px Arial';ctx.fillText(`${stat.posts} postagens   ·   ${stat.events} compromissos`,pad,270);
+ try{const logo=await loadImage(LOGO_DATA_URI);const h=94,w=logo.width*h/logo.height;ctx.drawImage(logo,W-pad-w,105,w,h)}catch{}
+ let y=intro;
+ if(!cards.length){drawCanvasRoundRect(ctx,pad,y,inside,160,23,'rgba(255,255,255,.075)','rgba(220,235,255,.14)');ctx.fillStyle='#dbe9ff';ctx.font='500 28px Arial';ctx.fillText('Nenhuma atividade programada nesta semana.',pad+42,y+93)}
+ for(const card of cards){
+  drawCanvasRoundRect(ctx,pad,y,inside,card.height,23,'rgba(255,255,255,.075)','rgba(220,235,255,.16)');
+  const date=new Date(card.day.date+'T12:00:00'),shortDay=date.toLocaleDateString('pt-BR',{weekday:'long'}).replace('-feira',''),dayNumber=String(date.getDate()).padStart(2,'0');
+  ctx.fillStyle='#b8d4ff';ctx.font='700 21px Arial';ctx.fillText(shortDay.toUpperCase(),pad+37,y+47);
+  ctx.fillStyle='#fff';ctx.font='700 45px Arial';ctx.fillText(dayNumber+'/'+String(date.getMonth()+1).padStart(2,'0'),pad+37,y+107);
+  const left=pad+390,dividerX=pad+341;
+  ctx.fillStyle='rgba(219,233,255,.16)';ctx.fillRect(dividerX,y+32,2,card.height-64);
+  let cy=y+45,previous='';
+  for(const row of card.rows){
+   if(previous!==row.type){ctx.fillStyle='#a8c8fa';ctx.font='700 19px Arial';ctx.fillText(row.type==='post'?'POSTAGENS':'AGENDA',left,cy);cy+=41;previous=row.type}
+   ctx.fillStyle='#fff';ctx.font=titleFont;
+   for(const line of row.title){ctx.fillText(line,left+22,cy);cy+=41}
+   ctx.fillStyle='#75a6f1';ctx.fillRect(left,cy-43,6,6);
+   cy+=15;
+  }
+  y+=card.height+space;
+ }
+ ctx.fillStyle='rgba(230,239,255,.65)';ctx.font='400 20px Arial';ctx.fillText('ONE WAY AGENCY',pad,H-43);
+ ctx.textAlign='right';ctx.fillText(calendarWeekTitle(),W-pad,H-43);ctx.textAlign='left';
+ // JPEG de 2000 px, qualidade máxima, sem passar por captura em baixa resolução.
+ const save=blob=>{if(!blob){toast('Não foi possível gerar o JPEG.');return}const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`oneway-calendario-semana-${calendarWeekStart}-HD.jpg`;a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);toast('JPEG em alta qualidade exportado.',null,null,'success')};
+ canvas.toBlob(save,'image/jpeg',.98);
+}
+function weekCalendarPDFHTML(){
+ if(!isAdmin())return '';
+ const stats=calendarWeekStats();
+ const payload=JSON.stringify({week:calendarWeekTitle(),start:calendarWeekStart,stats,days:calendarExportSchedule().map(d=>({date:d.date,posts:d.posts.map(p=>({title:String(p.title||'Sem título')})),events:d.events.map(e=>({title:String(e.title||'Compromisso'),time:String(e.time||''),type:String(e.type||'')}))}))}).replace(/</g,'\\u003c');
+ return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Programação semanal · One Way</title><style>
+ @page{size:A4;margin:0}
+ *{box-sizing:border-box}html,body{margin:0;padding:0;background:#061128;color:#fff;font-family:Arial,Helvetica,sans-serif;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+ .sheet{width:210mm;height:297mm;position:relative;overflow:hidden;padding:15mm 15mm 13mm;background:linear-gradient(142deg,#061128 0%,#0a214e 52%,#2456e8 100%);break-after:page;page-break-after:always}
+ .sheet:last-child{break-after:auto;page-break-after:auto}.sheet:before{content:'';position:absolute;width:125mm;height:125mm;right:-50mm;bottom:-25mm;border-radius:50%;background:radial-gradient(circle,rgba(116,161,255,.2),transparent 68%);pointer-events:none}
+ .inner{position:relative;z-index:1;height:100%;display:flex;flex-direction:column}.pdf-head{padding-bottom:6mm;border-bottom:1px solid rgba(219,235,255,.2)}
+ .pdf-overline{font-size:7.2pt;color:#b9d4ff;font-weight:700;letter-spacing:.11em}.head-top{display:flex;align-items:center;justify-content:space-between;gap:6mm}.pdf-logo{max-width:29mm;max-height:15mm;object-fit:contain}
+ h1{font-size:25pt;line-height:1.06;margin:5mm 0 2.5mm;font-weight:750;letter-spacing:-.04em}.pdf-week{font-size:12pt;color:#e6efff;font-weight:600;margin:0}.pdf-summary{margin:4mm 0 0;color:#bed6ff;font-size:8.5pt}.pdf-head.secondary{display:flex;justify-content:space-between;align-items:center;padding-bottom:4mm}.secondary strong{font-size:10.5pt}.secondary span{font-size:8pt;color:#c7daf9}
+ .pdf-content{flex:1;min-height:0;overflow:hidden;margin-top:6mm}.pdf-day{padding:5mm 5.5mm;border:1px solid rgba(221,234,255,.18);background:rgba(255,255,255,.07);border-radius:4mm;margin-bottom:3.2mm;overflow-wrap:anywhere}.pdf-day-head{font-size:12pt;font-weight:750;margin:0 0 3mm;color:#fff;padding-bottom:2mm;border-bottom:1px solid rgba(224,237,255,.15)}
+ .pdf-group{margin-top:2.7mm}.pdf-group-title{color:#9fc5ff;font-size:7pt;font-weight:750;letter-spacing:.1em;margin-bottom:1.4mm}.pdf-item{display:flex;gap:2mm;align-items:flex-start;margin:1.45mm 0;font-size:9.3pt;line-height:1.35;color:#f8fbff;break-inside:avoid;page-break-inside:avoid}.pdf-dot{color:#88bcff;font-size:10pt;line-height:1.3;flex:none}.pdf-item span:last-child{flex:1;min-width:0}.pdf-footer{margin-top:auto;padding-top:3mm;display:flex;justify-content:space-between;color:rgba(231,241,255,.7);font-size:7pt;border-top:1px solid rgba(222,235,255,.15)}
+ .pdf-empty{border:1px solid rgba(221,234,255,.18);background:rgba(255,255,255,.07);border-radius:4mm;padding:8mm;color:#dae9ff;font-size:10pt}.pdf-print{position:fixed;z-index:20;right:18px;top:15px;border:0;background:#fff;color:#153674;font:700 12px Arial;padding:11px 15px;border-radius:9px;cursor:pointer;box-shadow:0 6px 24px #0004}
+ @media print{.pdf-print{display:none!important}html,body{width:210mm}.sheet{margin:0!important;box-shadow:none!important}}
+ </style></head><body><button class="pdf-print" onclick="window.print()">Imprimir / salvar PDF</button><div id="pdfPages"></div><script type="application/json" id="weekData">${payload}<\/script><script>
+ (function(){
+ const data=JSON.parse(document.getElementById('weekData').textContent),root=document.getElementById('pdfPages');
+ let current=null,content=null,card=null,group=null,kindNow='',cardHasItems=0;
+ function el(tag,cls,txt){const n=document.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n}
+ function page(first){
+  const sheet=el('section','sheet'),inner=el('div','inner'),head=el('header','pdf-head'+(first?'':' secondary'));
+  if(first){const top=el('div','head-top');top.append(el('div','pdf-overline','ONE WAY / PLANEJAMENTO SEMANAL'));const img=el('img','pdf-logo');img.src='${LOGO_DATA_URI}';top.append(img);head.append(top,el('h1','','Programação da semana'),el('p','pdf-week',data.week),el('p','pdf-summary',data.stats.posts+' postagens   ·   '+data.stats.events+' compromissos'))}
+  else{head.append(el('strong','','PROGRAMAÇÃO SEMANAL'),el('span','',data.week))}
+  content=el('main','pdf-content');const foot=el('footer','pdf-footer');foot.append(el('span','','ONE WAY AGENCY'),el('span','pdf-page-count',''));
+  inner.append(head,content,foot);sheet.append(inner);root.append(sheet);current=sheet;
+  card=null;group=null;kindNow='';cardHasItems=0;
+ }
+ function overflowing(){return content.scrollHeight>content.clientHeight+1}
+ function newCard(date){
+  card=el('article','pdf-day');const d=new Date(date+'T12:00:00');let name=d.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'});name=name[0].toUpperCase()+name.slice(1);
+  card.append(el('h2','pdf-day-head',name));content.append(card);group=null;kindNow='';cardHasItems=0;
+ }
+ function item(kind,entry,date){
+  if(!card)newCard(date);
+  let madeGroup=false;
+  if(kindNow!==kind){group=el('div','pdf-group');group.append(el('div','pdf-group-title',kind==='post'?'POSTAGENS':'AGENDA'));card.append(group);kindNow=kind;madeGroup=true}
+  const text=kind==='post'?entry.title:[entry.time,entry.type,entry.title].filter(Boolean).join(' · ');
+  const row=el('div','pdf-item');row.append(el('span','pdf-dot','•'),el('span','',text));group.append(row);
+  if(overflowing()){
+   group.removeChild(row);
+   if(madeGroup){group.remove();group=null;kindNow=''}
+   if(cardHasItems===0){card.remove()}
+   page(false);newCard(date);
+   group=el('div','pdf-group');group.append(el('div','pdf-group-title',kind==='post'?'POSTAGENS':'AGENDA'));card.append(group);kindNow=kind;
+   group.append(row);
+  }
+  cardHasItems++;
+ }
+ page(true);
+ if(!data.days.length){content.append(el('div','pdf-empty','Nenhuma atividade programada para esta semana.'))}
+ for(const day of data.days){
+  card=null;group=null;kindNow='';cardHasItems=0;
+  newCard(day.date);
+  if(overflowing()){card.remove();page(false);newCard(day.date)}
+  for(const entry of day.posts)item('post',entry,day.date);
+  for(const entry of day.events)item('event',entry,day.date);
+ }
+ const sheets=[...root.querySelectorAll('.sheet')];sheets.forEach((s,i)=>s.querySelector('.pdf-page-count').textContent=(i+1)+' / '+sheets.length);
+ if(!location.search.includes('preview=1')){window.addEventListener('load',()=>setTimeout(()=>window.print(),450))}
+ })();<\/script></body></html>`;
+}
+function exportWeekCalendarPDF(){
+ if(!isAdmin())return;
+ const printWindow=window.open('','_blank');
+ if(!printWindow){toast('Permita a abertura de pop-ups para salvar o calendário em PDF.');return}
+ printWindow.document.open();printWindow.document.write(weekCalendarPDFHTML());printWindow.document.close();
+ toast('PDF pronto. Na janela de impressão, escolha Salvar como PDF.',null,null,'success');
 }
 
 function start(){
@@ -2235,7 +2348,7 @@ function start(){
  document.getElementById('wkPickDate').onchange=e=>{if(e.target.value){calendarWeekStart=calendarMonday(e.target.value);renderWeekCalendar()}};
  document.getElementById('wkCopyTextBtn').onclick=copyWeekCalendarText;
  document.getElementById('wkDownloadTextBtn').onclick=downloadWeekCalendarText;
- document.getElementById('wkExportJpegBtn').onclick=exportWeekCalendarJPEG;
+ document.getElementById('wkExportJpegBtn').onclick=exportWeekCalendarJPEG;document.getElementById('wkExportPdfBtn').onclick=exportWeekCalendarPDF;
  setTimeout(()=>document.body.classList.remove('booting'),900);document.getElementById('logoutBtn').onclick=logout;document.getElementById('trafficReportBtn').onclick=openTrafficAnalytics;document.getElementById('analyzePdfBtn').onclick=analyzeAnalyticsPdf;document.querySelectorAll('#analyticsSourceOptions [data-source]').forEach(b=>b.onclick=()=>setAnalyticsSource(b.dataset.source));document.getElementById('newProposalBtn').onclick=e=>{e.preventDefault();openProposalModal()};document.getElementById('newProposalHistoryBtn').onclick=e=>{e.preventDefault();openProposalModal()};document.getElementById('newContractBtn').onclick=e=>{e.preventDefault();openContractModal()};document.getElementById('contractsTab').onclick=e=>{e.preventDefault();if(!isAdmin())return;currentArea='contracts';contractView='active';renderAll()};document.getElementById('contractAlertBtn').onclick=e=>{e.preventDefault();if(!isAdmin())return;currentArea='contracts';contractView='ending';renderAll()};document.getElementById('newContractListBtn').onclick=()=>openContractModal();document.getElementById('bulkImportBtn').onclick=openBulkDemandImport;document.getElementById('bulkMicBtn').onclick=toggleBulkSpeech;document.getElementById('bulkAnalyzeBtn').onclick=analyzeBulkDemandImport;document.getElementById('bulkConfirmBtn').onclick=confirmBulkDemandImport;document.getElementById('addFinanceIncomeBtn').onclick=()=>addFinanceItem('income');document.getElementById('addFinanceCostBtn').onclick=()=>addFinanceItem('cost');document.getElementById('financeJpegBtn').onclick=exportFinanceJPEG;document.getElementById('newDemandTop').onclick=()=>openDemandModal();document.getElementById('addClientBtn').onclick=openClientModal;document.getElementById('demandForm').onsubmit=submitDemand;document.getElementById('formReferenceFiles').onchange=renderDemandReferenceFileSelection;document.getElementById('formProductionFiles').onchange=renderDemandProductionFileSelection;document.getElementById('clientForm').onsubmit=submitClient;document.getElementById('proposalForm').onsubmit=submitProposal;document.getElementById('contractForm').onsubmit=e=>{e.preventDefault();saveContractFromForm(true)};document.getElementById('contractSaveBtn').onclick=()=>saveContractFromForm(false);document.getElementById('contractStartDate').onchange=recalcContractEnd;document.getElementById('contractDurationMonths').oninput=recalcContractEnd;document.getElementById('contractPdfBtn').onclick=()=>{const c=secureContracts.find(x=>x.id===activeContractId);if(c)exportContractPDF(c)};document.getElementById('contractEditBtn').onclick=()=>{const id=activeContractId;closeModal('contractDetailModal');openContractModal(id)};document.getElementById('contractSignedFile').onchange=uploadSignedContract;document.getElementById('contractDeleteBtn').onclick=()=>{if(activeContractId)deleteContractRecord(activeContractId)};document.getElementById('addProposalItem').onclick=()=>addProposalItem();document.getElementById('proposalTotal').oninput=updateProposalTotals;document.getElementById('proposalJpegBtn').onclick=async()=>{const data=proposalData();if(validateProposal(data)){rememberClientName(data.client);const ok=await exportProposalJPEG(data);if(ok){await recordGeneratedProposal(data,'jpeg');toast('JPEG gerado e salvo no histórico.',null,null,'success')}}};document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>closeModal(b.dataset.close));document.querySelectorAll('.modal-backdrop').forEach(m=>m.onclick=e=>{if(e.target===m){e.preventDefault();signalModalCloseHint(m)}});document.querySelectorAll('#clientTypeChoices .choice').forEach(b=>b.onclick=()=>setClientType(b.dataset.type));document.querySelectorAll('#clientAreaChoices [data-client-area]').forEach(b=>b.onclick=()=>toggleClientArea(b.dataset.clientArea));document.getElementById('clientNameInput').oninput=e=>renderRecentClientSuggestions(e.target.value);document.getElementById('searchInput').oninput=()=>{openClientId=null;openDemandId=null;if(currentArea==='deleted')renderDeleted();else if(currentArea==='agenda')renderAgenda();else if(currentArea&&Object.keys(AREAS).includes(currentArea)){renderStats();renderClients()}};document.addEventListener('click',e=>{if(!e.target.closest('.client-options')&&!e.target.closest('.client-menu'))document.querySelectorAll('.client-menu').forEach(m=>m.classList.add('hidden'))});document.addEventListener('keydown',handleGlobalEscape);initLogin()}
 
 (async()=>{state=await loadState();subscribeRealtime();start()})();
