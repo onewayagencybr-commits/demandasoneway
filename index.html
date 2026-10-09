@@ -1165,10 +1165,9 @@ function blueDocHTML(opts){
   .pdf-kpi{min-height:17mm;border:1px solid rgba(218,233,255,.17);background:rgba(255,255,255,.095);border-radius:4mm;padding:3.2mm 4mm}
   .pdf-kpi span{display:block;font-size:7.1pt;color:#d3e2fd;text-transform:uppercase;letter-spacing:.025em;font-weight:700}
   .pdf-kpi strong{display:block;font-size:17pt;line-height:1.15;margin-top:1.5mm;font-weight:750}
-  .pdf-hero.is-continued{min-height:24mm;padding:4.8mm 6mm}
-  .is-continued .pdf-hero h1{font-size:16pt;margin:1mm 0}
-  .is-continued .pdf-month{font-size:8.7pt}
-  .is-continued .pdf-logo{width:26mm;max-height:15mm}
+  /* Nas páginas seguintes, só o conteúdo: sem repetir a capa/cabeçalho. */
+  .pdf-sheet:not(.pdf-first) .pdf-columns{margin-top:0}
+  .pdf-sheet.pdf-short .pdf-columns{flex:0 0 auto}
   .pdf-columns{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:3.5mm;flex:1;min-height:0;margin-top:5mm;margin-bottom:9mm}
   .pdf-section{min-width:0;min-height:0;display:flex;flex-direction:column;border:1px solid rgba(220,233,255,.16);background:rgba(255,255,255,.075);border-radius:4.6mm;padding:4.7mm 4.5mm 3mm;overflow:hidden}
   .pdf-section-head{display:flex;align-items:baseline;justify-content:space-between;gap:3mm;padding-bottom:3mm;flex:0 0 auto}
@@ -1183,6 +1182,7 @@ function blueDocHTML(opts){
   .pdf-empty{font-size:8pt;line-height:1.55;color:rgba(225,237,255,.71);margin:3mm 0}
   .pdf-footer{position:absolute;bottom:9mm;left:14mm;right:14mm;display:flex;justify-content:space-between;align-items:center;gap:5mm;font-size:7pt;color:rgba(223,234,255,.73);border-top:1px solid rgba(222,235,255,.14);padding-top:3mm}
   .pdf-footer b{font-weight:700;color:rgba(223,234,255,.80)}
+  .pdf-footer-minimal{justify-content:flex-end}
   #pdf-output{padding:18px 0 24px}
   .pdf-print-action{position:fixed;bottom:25px;right:25px;z-index:1000;padding:13px 18px;background:#e5efff;color:#0b2d77;border:1px solid #adc9ff;border-radius:11px;font:700 12px Arial;cursor:pointer;box-shadow:0 12px 28px rgba(0,0,0,.30)}
   @media print{html,body{min-width:0;width:210mm;background:#071532!important}#pdf-output{padding:0}.pdf-sheet{margin:0;box-shadow:none}.pdf-print-action{display:none!important}}
@@ -1199,28 +1199,31 @@ function blueDocPaginate(){
   const el=(tag,cls,text)=>{const node=document.createElement(tag);if(cls)node.className=cls;if(text!==undefined)node.textContent=String(text);return node};
   function makePage(number){
     const first=number===0;
-    const page=el('article','pdf-sheet');page.innerHTML=svgBackground;
+    const page=el('article','pdf-sheet'+(first?' pdf-first':''));page.innerHTML=svgBackground;
     const inner=el('div','pdf-inner');
-    const hero=el('header','pdf-hero'+(first?'':' is-continued'));
-    const hCopy=el('div','pdf-hero-copy');
-    hCopy.append(el('div','pdf-kicker',first?'ONE WAY · RELATÓRIO MENSAL':'ONE WAY · CONTINUAÇÃO'),el('h1','',cfg.title));
-    hCopy.append(el('div','pdf-month',String(cfg.monthYear||'')+' — '+String(cfg.clientName||'')));
-    if(first&&cfg.intro)hCopy.append(el('p','pdf-intro',cfg.intro));
-    hero.append(hCopy);
-    if(cfg.logo){const logo=el('img','pdf-logo');logo.src=cfg.logo;logo.alt='One Way Agency';hero.append(logo)}
-    inner.append(hero);
+    // Apresentação, logo e informações gerais aparecem apenas na primeira página.
+    if(first){
+      const hero=el('header','pdf-hero');
+      const hCopy=el('div','pdf-hero-copy');
+      hCopy.append(el('div','pdf-kicker','ONE WAY · RELATÓRIO MENSAL'),el('h1','',cfg.title));
+      hCopy.append(el('div','pdf-month',String(cfg.monthYear||'')+' — '+String(cfg.clientName||'')));
+      if(cfg.intro)hCopy.append(el('p','pdf-intro',cfg.intro));
+      hero.append(hCopy);
+      if(cfg.logo){const logo=el('img','pdf-logo');logo.src=cfg.logo;logo.alt='One Way Agency';hero.append(logo)}
+      inner.append(hero);
+    }
     if(first&&(cfg.metrics||[]).length){const metrics=el('div','pdf-kpis');for(const metric of cfg.metrics){const kpi=el('div','pdf-kpi');kpi.append(el('span','',metric.label),el('strong','',metric.value));metrics.append(kpi)}inner.append(metrics)}
     const cols=el('div','pdf-columns');
     for(let col=0;col<2;col++){
       const sec=sections[col]||{title:col?'Vídeo':'Arte',countLabel:'',items:[]};
       const panel=el('section','pdf-section');
       const heading=el('div','pdf-section-head');
-      heading.append(el('h2','',sec.title+(first?'':' · cont.')),el('span','',first?sec.countLabel:''));
+      heading.append(el('h2','',sec.title),el('span','',first?sec.countLabel:''));
       const items=el('div','pdf-items');
       panel.append(heading,items);cols.append(panel);
     }
     inner.append(cols);
-    const footer=el('footer','pdf-footer');footer.append(el('span','',cfg.foot||'One Way Agency'),el('b','',`ONE WAY AGENCY   ·   ${String(number+1).padStart(2,'0')}`));
+    const footer=el('footer',first?'pdf-footer':'pdf-footer pdf-footer-minimal');if(first)footer.append(el('span','',cfg.foot||'One Way Agency'));footer.append(el('b','',String(number+1).padStart(2,'0')));
     inner.append(footer);page.append(inner);host.append(page);
     const pageState={node:page,items:[...cols.querySelectorAll('.pdf-items')]};pages.push(pageState);
     return pageState;
@@ -1228,9 +1231,8 @@ function blueDocPaginate(){
   function getPage(index){while(pages.length<=index)makePage(pages.length);return pages[index]}
   function makeItem(item,desc,continued){
     const block=el('div','pdf-item');
-    block.append(el('strong','',item.title+(continued?' (continuação)':'')));
-    if(item.date&&!continued)block.append(el('small','',item.date));
-    else if(continued)block.append(el('small','','Continuação da descrição'));
+    block.append(el('strong','',item.title));
+    if(item.date)block.append(el('small','',item.date));
     if(desc)block.append(el('p','',desc));
     return block;
   }
@@ -1308,7 +1310,14 @@ function blueDocPaginate(){
       pages[p].items[empty].closest('.pdf-section').remove();
     }
   }
-  pages.forEach((page,index)=>{page.node.querySelector('.pdf-footer b').textContent='ONE WAY AGENCY   ·   '+String(index+1).padStart(2,'0')+' / '+String(pages.length).padStart(2,'0')});
+  // Ao finalizar uma página com poucas entregas, cartões acompanham o conteúdo
+  // em vez de criar colunas vazias até o rodapé. Só ocorre após paginar.
+  pages.slice(1).forEach(page=>{
+    const available=Math.max(...page.items.map(node=>node.clientHeight));
+    const used=Math.max(...page.items.map(node=>[...node.children].reduce((sum,child)=>sum+child.getBoundingClientRect().height,0)));
+    if(available>0&&used<available*.65)page.node.classList.add('pdf-short');
+  });
+  pages.forEach((page,index)=>{page.node.querySelector('.pdf-footer b').textContent=(index===0?'ONE WAY AGENCY   ·   ':'')+String(index+1).padStart(2,'0')+' / '+String(pages.length).padStart(2,'0')});
   document.documentElement.dataset.pages=String(pages.length);
   if(!location.search.includes('preview=1'))window.setTimeout(()=>window.print(),650);
 }
