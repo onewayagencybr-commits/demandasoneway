@@ -547,7 +547,7 @@ input::placeholder,textarea::placeholder{font-weight:300!important;letter-spacin
     <div class="proposal-section-title"><div><h4>Itens da proposta</h4><span>Informe a quantidade, o serviço e o valor unitário. O subtotal é automático.</span></div></div>
     <div class="proposal-items" id="proposalItems"></div>
     <div class="proposal-add-row"><button type="button" class="ghost small" id="addProposalItem">+ Adicionar item</button></div>
-    <div class="proposal-total-wrap"><p><strong id="proposalAutoTotal">Total calculado: R$ 0,00</strong><br>Se quiser fechar um pacote com outro valor, preencha o investimento final. Caso contrário, será usada a soma dos subtotais.</p><div class="field money-prefix"><label>Investimento final (opcional)</label><input id="proposalTotal" inputmode="decimal" placeholder="Usar total calculado"></div></div>
+    <div class="proposal-total-wrap"><p><strong id="proposalAutoTotal">Total calculado: R$ 0,00</strong><br><strong id="proposalEffectiveTotal">Investimento final: R$ 0,00</strong><br>Se quiser fechar um pacote com outro valor, preencha o investimento final. Caso contrário, será usada a soma dos subtotais.</p><div class="field money-prefix"><label>Investimento final (opcional)</label><input id="proposalTotal" inputmode="decimal" placeholder="Usar total calculado"></div></div>
     <div class="proposal-footer-actions"><button type="button" class="ghost" data-close="proposalModal">Cancelar</button><button type="button" class="ghost" id="proposalJpegBtn">Gerar JPEG</button><button type="submit" class="primary">Gerar PDF</button></div>
     <div class="proposal-preview-note">Só entra no histórico depois que um PDF ou JPEG for realmente gerado.</div>
   </form>
@@ -1596,22 +1596,66 @@ async function removeFile(id,fileId){
   const old=d.attachments.splice(idx,1)[0];if(!await saveState()){d.attachments.splice(idx,0,old);return}await deleteStoredFile(old);openDemandId=id;renderClients();
 }
 
+// Converte valores escritos como R$ 1.350,50, 1350,50, 1350.50 ou 1.350.
+// A antiga função moneyNumber era chamada nas propostas, mas não estava definida.
+function moneyNumber(value){
+  if(typeof value==='number')return Number.isFinite(value)?Math.max(0,Math.round((value+Number.EPSILON)*100)/100):0;
+  let raw=String(value??'').trim().replace(/\s/g,'').replace(/R\$/gi,'').replace(/[^0-9.,-]/g,'');
+  if(!raw||raw.includes('-'))return 0;
+  const comma=raw.lastIndexOf(','),dot=raw.lastIndexOf('.');
+  if(comma>=0&&dot>=0){
+    raw=comma>dot?raw.replace(/\./g,'').replace(',','.'):raw.replace(/,/g,'');
+  }else if(comma>=0){
+    raw=raw.replace(/\./g,'').replace(',','.');
+  }else if(dot>=0){
+    if(raw.split('.').length>2||/^\d{1,3}(\.\d{3})+$/.test(raw))raw=raw.replace(/\./g,'');
+  }
+  const num=Number(raw);
+  return Number.isFinite(num)?Math.max(0,Math.round((num+Number.EPSILON)*100)/100):0;
+}
+function proposalQuantity(value){const n=Number(value);return Number.isFinite(n)?Math.max(0,Math.trunc(n)):0}
+function proposalLineSubtotal(quantity,unitValue){return (quantity>0?quantity:1)*Math.round(moneyNumber(unitValue)*100)/100}
 function moneyBR(v){const n=Number(v)||0;return n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
 function proposalRecentClients(){return [...new Set([...(state.recentClients||[]),...state.clients.map(c=>c.name)].filter(Boolean))].slice(0,6)}
 function renderProposalClientSuggestions(){const root=document.getElementById('proposalClientSuggestions');if(!root)return;root.innerHTML=proposalRecentClients().map(n=>`<button type="button" data-proposal-client="${esc(n)}">${esc(n)}</button>`).join('');root.querySelectorAll('[data-proposal-client]').forEach(b=>b.onclick=()=>{document.getElementById('proposalClient').value=b.dataset.proposalClient})}
 function addProposalItem(data={}){
   const root=document.getElementById('proposalItems'),el=document.createElement('div');el.className='proposal-item';
-  const qty=data.quantity===0?0:Math.max(1,Number(data.quantity)||1),unit=data.unitValue??data.value??'';
+  const qty=data.quantity===0?0:Math.max(1,proposalQuantity(data.quantity)||1),unit=data.unitValue??data.value??'';
   el.innerHTML=`<div class="proposal-mini-field qty"><label>Quantidade · 0 = ocultar</label><input class="proposal-item-qty" type="number" min="0" step="1" value="${qty}"></div><div class="proposal-mini-field"><label>Item / serviço</label><input class="proposal-item-title" required placeholder="Ex.: Produção de Reels Institucionais" value="${esc(data.title||'')}"></div><div class="proposal-mini-field desc"><label>Descrição</label><textarea class="proposal-item-desc" placeholder="Detalhes do que está incluso...">${esc(data.description||'')}</textarea></div><div class="proposal-mini-field unit money-prefix"><label>Valor unitário</label><input class="proposal-item-value" inputmode="decimal" placeholder="0,00" value="${esc(unit)}"></div><div class="proposal-subtotal"><label>Subtotal</label><strong>R$ 0,00</strong></div><button type="button" class="proposal-remove" title="Remover item">×</button>`;
   el.querySelector('.proposal-remove').onclick=()=>{el.remove();if(!root.children.length)addProposalItem();updateProposalTotals()};el.querySelector('.proposal-item-qty').oninput=updateProposalTotals;el.querySelector('.proposal-item-value').oninput=updateProposalTotals;root.appendChild(el);updateProposalTotals();if(!data.title)el.querySelector('.proposal-item-title').focus();
 }
-function updateProposalTotals(){let sum=0;document.querySelectorAll('.proposal-item').forEach(el=>{const raw=Number(el.querySelector('.proposal-item-qty').value),q=Number.isFinite(raw)?Math.max(0,raw):0,u=moneyNumber(el.querySelector('.proposal-item-value').value),sub=(q>0?q:1)*u;sum+=sub;el.classList.toggle('quantity-optional',q===0);el.querySelector('.proposal-subtotal label').textContent=q>0?'Subtotal':'Valor';el.querySelector('.proposal-subtotal strong').textContent=moneyBR(sub)});const auto=document.getElementById('proposalAutoTotal');if(auto)auto.textContent=`Total calculado: ${moneyBR(sum)}`;return sum}
+function updateProposalTotals(){
+  let sumCents=0;
+  document.querySelectorAll('#proposalItems .proposal-item').forEach(el=>{
+    const q=proposalQuantity(el.querySelector('.proposal-item-qty').value);
+    const unitValue=moneyNumber(el.querySelector('.proposal-item-value').value);
+    const subtotal=proposalLineSubtotal(q,unitValue);
+    sumCents+=Math.round(subtotal*100);
+    el.classList.toggle('quantity-optional',q===0);
+    el.querySelector('.proposal-subtotal label').textContent=q>0?'Subtotal':'Valor';
+    el.querySelector('.proposal-subtotal strong').textContent=moneyBR(subtotal);
+  });
+  const sum=sumCents/100;
+  const manualRaw=(document.getElementById('proposalTotal')?.value||'').trim();
+  const finalTotal=manualRaw?moneyNumber(manualRaw):sum;
+  const auto=document.getElementById('proposalAutoTotal');
+  const effective=document.getElementById('proposalEffectiveTotal');
+  if(auto)auto.textContent=`Total calculado: ${moneyBR(sum)}`;
+  if(effective)effective.textContent=`Investimento final: ${moneyBR(finalTotal)}${manualRaw?' (personalizado)':''}`;
+  return sum;
+}
 function resetProposal(){document.getElementById('proposalForm').reset();document.getElementById('proposalItems').innerHTML='';addProposalItem();renderProposalClientSuggestions();updateProposalTotals()}
 function openProposalModal(prefill=null){if(prefill&&typeof Event!=='undefined'&&prefill instanceof Event)prefill=null;if(!isAdmin()){toast('Apenas o Administrador pode criar propostas.');return}const modal=document.getElementById('proposalModal');if(!modal){console.error('Modal de proposta não encontrado.');toast('Não foi possível abrir Nova Proposta.');return}modal.classList.remove('hidden');try{resetProposal();if(prefill&&typeof prefill==='object'){document.getElementById('proposalClient').value=prefill.client||'';document.getElementById('proposalItems').innerHTML='';(Array.isArray(prefill.items)?prefill.items:[]).forEach(addProposalItem);if(!Array.isArray(prefill.items)||!prefill.items.length)addProposalItem();document.getElementById('proposalTotal').value=prefill.manualTotal||'';updateProposalTotals()}}catch(e){console.error('Erro ao preparar Nova Proposta:',e);toast('A proposta abriu, mas houve um erro ao preparar os campos.')}requestAnimationFrame(()=>setTimeout(()=>document.getElementById('proposalClient')?.focus(),40))}
 function proposalData(){
   const client=document.getElementById('proposalClient').value.trim();
-  const items=[...document.querySelectorAll('.proposal-item')].map((el,i)=>{const raw=Number(el.querySelector('.proposal-item-qty').value),quantity=Number.isFinite(raw)?Math.max(0,raw):0,unitValue=moneyNumber(el.querySelector('.proposal-item-value').value);return {index:i+1,quantity,title:el.querySelector('.proposal-item-title').value.trim(),description:el.querySelector('.proposal-item-desc').value.trim(),unitValue,subtotal:(quantity>0?quantity:1)*unitValue}}).filter(x=>x.title);
-  const sum=items.reduce((a,b)=>a+b.subtotal,0),manualRaw=document.getElementById('proposalTotal').value.trim(),manual=manualRaw?moneyNumber(manualRaw):null,total=manualRaw?manual:sum;
+  const items=[...document.querySelectorAll('#proposalItems .proposal-item')].map((el,i)=>{
+    const quantity=proposalQuantity(el.querySelector('.proposal-item-qty').value);
+    const unitValue=moneyNumber(el.querySelector('.proposal-item-value').value);
+    return {index:i+1,quantity,title:el.querySelector('.proposal-item-title').value.trim(),description:el.querySelector('.proposal-item-desc').value.trim(),unitValue,subtotal:proposalLineSubtotal(quantity,unitValue)};
+  }).filter(x=>x.title);
+  const sum=items.reduce((cents,item)=>cents+Math.round(item.subtotal*100),0)/100;
+  const manualRaw=document.getElementById('proposalTotal').value.trim();
+  const total=manualRaw?moneyNumber(manualRaw):sum;
   const summary=items.length===1?`${items[0].quantity>0?items[0].quantity+'× ':''}${items[0].title}`:(items.length?`${items.length} itens comerciais`:'Proposta comercial');
   return {client,title:'Proposta Comercial',summary,items,total,sum,manualTotal:manualRaw,date:new Date().toISOString()};
 }
