@@ -450,13 +450,14 @@ body.calendar-view{background-attachment:scroll!important}
 .wk-filter:focus-visible{outline:2px solid #9cc5ff;outline-offset:2px}
 @media(max-width:700px){.wk-filters{gap:7px;padding:12px}.wk-filters-label{flex:1 0 100%;margin:0 0 2px}.wk-filter{flex:1 1 auto;padding:8px 10px}}
 .wk-week-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:11px;align-items:start}
-.wk-day{border:1px solid rgba(220,233,255,.15);background:linear-gradient(115deg,rgba(21,53,111,.59),rgba(14,33,76,.48));border-radius:17px;padding:17px 21px;min-width:0;box-shadow:0 9px 24px rgba(0,11,40,.06)}.wk-day.is-empty{background:linear-gradient(115deg,rgba(251,252,255,.96),rgba(230,235,243,.93));border-color:rgba(255,255,255,.76);box-shadow:0 9px 24px rgba(0,11,40,.045)}
-.wk-day.is-empty .wk-day-label strong{color:#344055}
-.wk-day.is-empty .wk-day-label span{color:#778397}
-.wk-day.is-empty .wk-day-empty-note{color:#7b8799}
-.wk-day.is-empty .wk-day-create{background:rgba(255,255,255,.74);border-color:rgba(97,116,144,.18);color:#526580}
-.wk-day.is-empty .wk-day-create:hover{background:#fff;border-color:rgba(77,105,155,.38)}
-.wk-day.is-empty .wk-today-mark{background:rgba(57,104,181,.10);color:#315fa1}
+.wk-day{border:1px solid rgba(220,233,255,.15);background:linear-gradient(115deg,rgba(21,53,111,.59),rgba(14,33,76,.48));border-radius:17px;padding:17px 21px;min-width:0;box-shadow:0 9px 24px rgba(0,11,40,.06)}.wk-day.is-empty{background:linear-gradient(115deg,rgba(50,57,72,.32),rgba(28,37,55,.31));border-color:rgba(202,215,236,.09);box-shadow:none}
+.wk-day.is-empty .wk-day-label strong{color:rgba(219,226,238,.58)}
+.wk-day.is-empty .wk-day-label span{color:rgba(192,205,226,.40)}
+.wk-day.is-empty .wk-day-empty-note{color:rgba(182,196,218,.37)}
+.wk-day.is-empty .wk-day-create{background:rgba(210,220,239,.035);border-color:rgba(202,215,236,.09);color:rgba(188,203,226,.42)}
+.wk-day.is-empty .wk-day-create:hover{background:rgba(220,233,255,.12);border-color:rgba(202,215,236,.22);color:rgba(230,240,255,.86)}
+.wk-day.is-empty .wk-today-mark{background:rgba(214,226,244,.06);color:rgba(210,222,240,.56)}
+.wk-day.is-empty.is-today{border-color:rgba(202,215,236,.15);box-shadow:none}
 .wk-day.is-today{border-color:rgba(156,199,255,.68);box-shadow:0 0 0 1px rgba(96,165,250,.20),0 16px 38px rgba(0,13,48,.14)}
 .wk-day-head{display:flex;gap:14px;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(220,233,255,.11);padding-bottom:12px;margin-bottom:12px}.wk-day.is-empty .wk-day-head{border-bottom:0;padding-bottom:0;margin-bottom:0}
 .wk-day-label{flex:1;min-width:0;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}.wk-day-label strong{color:#fff;font-size:16px;font-weight:720;letter-spacing:-.02em}.wk-day-label span{color:rgba(216,231,255,.59);font-size:10px;font-weight:500;white-space:nowrap}.wk-today-mark{display:inline-block;padding:3px 8px;border-radius:20px;background:rgba(142,192,255,.16);color:#dcecff;font-size:9px;font-weight:650}.wk-day-empty-note{color:rgba(222,235,255,.43);font-size:10px;font-weight:500;margin:8px 0 0;line-height:1.4}.wk-day.is-empty .wk-day-empty-note{padding-left:0}
