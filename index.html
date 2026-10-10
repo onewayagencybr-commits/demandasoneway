@@ -440,7 +440,7 @@ body.calendar-view{background-attachment:scroll!important}
 .wk-nav-btn{height:42px;min-width:42px;border:1px solid rgba(220,233,255,.22);border-radius:11px;background:rgba(255,255,255,.07);color:#fff;font-size:19px;transition:.18s}
 .wk-date-head{flex:1;min-width:0}.wk-date-head strong{display:block;color:#fff;font-size:16px;letter-spacing:-.025em}.wk-date-head span{display:block;color:rgba(225,237,255,.56);font-size:9px;margin-top:4px}
 #wkPickDate{border:1px solid rgba(220,233,255,.23);background:rgba(255,255,255,.095);color:#fff;border-radius:10px;padding:9px 11px;min-height:42px;color-scheme:dark;font:600 11px Montserrat,sans-serif}
-.wk-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:17px}.wk-stat{padding:15px 18px;background:rgba(248,251,255,.085);border:1px solid rgba(220,233,255,.14);border-radius:15px}.wk-stat span{display:block;color:#bed1f4;font-size:9px;text-transform:uppercase;letter-spacing:.09em;font-weight:780}.wk-stat strong{display:block;color:#fff;font-size:25px;margin-top:6px;letter-spacing:-.055em}
+.wk-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin-bottom:17px}.wk-stat{padding:15px 18px;background:rgba(248,251,255,.085);border:1px solid rgba(220,233,255,.14);border-radius:15px}.wk-stat span{display:block;color:#bed1f4;font-size:9px;text-transform:uppercase;letter-spacing:.09em;font-weight:780}.wk-stat strong{display:block;color:#fff;font-size:25px;margin-top:6px;letter-spacing:-.055em}
 /* Filtros de visualização do planejamento semanal — exclusivos do administrador */
 .wk-filters{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:-2px 0 17px;padding:13px 16px;border:1px solid rgba(220,233,255,.14);border-radius:16px;background:rgba(6,24,65,.38)}
 .wk-filters-label{color:rgba(223,238,255,.72);font-size:10px;font-weight:700;margin-right:7px}
@@ -460,6 +460,7 @@ body.calendar-view{background-attachment:scroll!important}
 .wk-line.wk-line-action{cursor:pointer;transition:background .15s}.wk-line.wk-line-action:hover{background:rgba(255,255,255,.105)}
 .wk-line strong{display:block;color:#fff;font-size:11px;font-weight:700;line-height:1.45}.wk-line small{display:block;color:rgba(230,240,255,.59);font-size:9px;line-height:1.5;margin-top:4px}.wk-line p{font-size:9px;color:rgba(237,245,255,.82);white-space:pre-wrap;margin:8px 0 0;line-height:1.55}
 .wk-type-pill{display:inline-block;margin-right:5px;padding:3px 7px;background:rgba(101,160,255,.19);border:1px solid rgba(141,187,255,.17);color:#d8eaff;font-size:8px;font-weight:760;border-radius:5px}
+.wk-date-suggestion{border-color:rgba(191,181,255,.21);background:linear-gradient(130deg,rgba(131,101,232,.13),rgba(255,255,255,.045))}.wk-date-suggestion .wk-type-pill{background:rgba(167,139,250,.16);border-color:rgba(196,181,253,.26);color:#e9ddff}.wk-date-suggestion small{color:rgba(222,213,255,.68)}.commemorative-to-calendar{display:inline-flex;align-items:center;margin:9px 0 0;padding:6px 8px;border:1px solid rgba(190,213,255,.2);border-radius:7px;background:rgba(110,151,244,.10);color:#d7e7ff;font:700 9px Montserrat,sans-serif}.commemorative-to-calendar:hover{background:rgba(110,151,244,.2)}.commemorative-date-card.is-highlighted{border-color:rgba(177,206,255,.55);background:linear-gradient(145deg,rgba(117,159,250,.18),rgba(255,255,255,.06))}
 .wk-empty{text-align:left;color:rgba(228,238,255,.4);font-size:10px;line-height:1.5;padding:6px 0 2px}
 .wk-footer-note{color:rgba(224,235,255,.55);font-size:9px;line-height:1.7;margin:17px 3px 0}
 .wk-event-modal .field{margin:15px 0}.wk-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.wk-event-actions .spacer{flex:1}.wk-event-actions{align-items:center}.wk-form-eyebrow{color:#6385bd;margin:0 0 8px}
@@ -586,10 +587,11 @@ body.calendar-view{background-attachment:scroll!important}
           <button type="button" class="wk-filter" data-wk-filter="artes" aria-pressed="false">Artes</button>
           <button type="button" class="wk-filter" data-wk-filter="videos" aria-pressed="false">Vídeos</button>
           <button type="button" class="wk-filter" data-wk-filter="compromissos" aria-pressed="false">Compromissos</button>
+          <button type="button" class="wk-filter" data-wk-filter="datas" aria-pressed="false">Datas comemorativas</button>
         </div>
         <div class="wk-stats" id="wkStats"></div>
         <div class="wk-week-grid" id="wkDays"></div>
-        <p class="wk-footer-note">A agenda reúne automaticamente todas as demandas com data de postagem na semana. Compromissos podem ser cadastrados e editados separadamente. Visível apenas no painel administrativo.</p>
+        <p class="wk-footer-note">O calendário integra demandas, compromissos e as oportunidades da aba Datas Comemorativas. As datas comemorativas são sugestões de pauta, não postagens automaticamente cadastradas. Visível apenas ao administrador.</p>
       </div>
     </section>
 
@@ -1232,7 +1234,8 @@ function renderCommemorativeDates(){
   document.getElementById('commemorativeMonthSubtitle').textContent=commemorativeCategory==='all'?'Todas as oportunidades selecionadas para este mês.':`Filtro: ${COMMEMORATIVE_CATEGORIES[commemorativeCategory]}.`;
   document.getElementById('commemorativeCount').textContent=`${items.length} data${items.length===1?'':'s'}`;
   const list=document.getElementById('commemorativeDateList');if(!items.length){list.innerHTML='<div class="commemorative-empty">Nenhuma data deste segmento neste mês.</div>';return}
-  list.innerHTML=items.map(item=>`<div class="commemorative-date-card"><div class="commemorative-date-day"><strong>${String(item.day).padStart(2,'0')}</strong><span>${commemorativeDateLabel(item.date)}</span></div><div class="commemorative-date-copy"><strong>${esc(item.title)}</strong><p>${esc(item.note||'Oportunidade para conteúdo institucional ou comercial.')}</p></div><div class="commemorative-tags">${item.cats.map(cat=>`<span class="commemorative-tag" data-cat="${cat}">${esc(COMMEMORATIVE_CATEGORIES[cat]||cat)}</span>`).join('')}</div></div>`).join('')
+  list.innerHTML=items.map(item=>`<div class="commemorative-date-card" data-comm-date="${esc(item.date)}"><div class="commemorative-date-day"><strong>${String(item.day).padStart(2,'0')}</strong><span>${commemorativeDateLabel(item.date)}</span></div><div class="commemorative-date-copy"><strong>${esc(item.title)}</strong><p>${esc(item.note||'Oportunidade para conteúdo institucional ou comercial.')}</p><button type="button" class="commemorative-to-calendar" data-comm-calendar="${esc(item.date)}">Ver no calendário →</button></div><div class="commemorative-tags">${item.cats.map(cat=>`<span class="commemorative-tag" data-cat="${cat}">${esc(COMMEMORATIVE_CATEGORIES[cat]||cat)}</span>`).join('')}</div></div>`).join('');
+  list.querySelectorAll('[data-comm-calendar]').forEach(button=>button.onclick=()=>calendarOpenWeekForDate(button.dataset.commCalendar));
 }
 function agendaDateInfo(d){if(!d?.postDate)return {valid:false,days:null,target:null};const parts=String(d.postDate).split('-').map(Number);if(parts.length!==3||parts.some(n=>!Number.isFinite(n)))return {valid:false,days:null,target:null};const now=new Date(),today=new Date(now.getFullYear(),now.getMonth(),now.getDate()),target=new Date(parts[0],parts[1]-1,parts[2]);return {valid:true,target,days:Math.round((target-today)/86400000)}}
 function agendaDemandIsFinalized(d){if(!d)return false;return d.area==='trafego'?d.status==='purple':d.status==='green'}
@@ -2393,21 +2396,45 @@ function calendarMonday(iso){const date=new Date(`${iso}T12:00:00`);return calen
 function calendarDays(){return Array.from({length:7},(_,i)=>calendarAddDays(calendarWeekStart,i))}
 function calendarWeekTitle(){const start=new Date(`${calendarWeekStart}T12:00:00`),end=new Date(`${calendarAddDays(calendarWeekStart,6)}T12:00:00`);const short=d=>d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}).replace('.','');return `${short(start)} — ${short(end)} de ${end.getFullYear()}`}
 function calendarClientName(id){return state.clients.find(c=>c.id===id)?.name||''}
-const CALENDAR_FILTER_LABELS={todos:'Todos',postagens:'Postagens',artes:'Artes',videos:'Vídeos',compromissos:'Compromissos'};
+const CALENDAR_FILTER_LABELS={todos:'Todos',postagens:'Postagens',artes:'Artes',videos:'Vídeos',compromissos:'Compromissos',datas:'Datas comemorativas'};
 function calendarPostsLabel(){return calendarViewFilter==='artes'?'ARTES':calendarViewFilter==='videos'?'VÍDEOS':'POSTAGENS'}
 function calendarFilterSummary(stats){
  if(calendarViewFilter==='artes')return `${stats.posts} ${stats.posts===1?'arte prevista':'artes previstas'}`;
  if(calendarViewFilter==='videos')return `${stats.posts} ${stats.posts===1?'vídeo previsto':'vídeos previstos'}`;
  if(calendarViewFilter==='postagens')return `${stats.posts} ${stats.posts===1?'postagem prevista':'postagens previstas'}`;
  if(calendarViewFilter==='compromissos')return `${stats.events} ${stats.events===1?'compromisso':'compromissos'}`;
- return `${stats.posts} postagens   ·   ${stats.events} compromissos`;
+ if(calendarViewFilter==='datas')return `${stats.dates} ${stats.dates===1?'data comemorativa':'datas comemorativas'}`;
+ return `${stats.posts} postagens   ·   ${stats.events} compromissos   ·   ${stats.dates} datas comemorativas`;
+}
+function calendarCommemorativeDatesByISO(iso){
+ const parts=String(iso||'').split('-').map(Number);
+ if(parts.length!==3||parts.some(v=>!Number.isInteger(v)))return [];
+ const [year,month]=parts;
+ // A curadoria existente só inclui out-dez/2026 e os meses de 2027.
+ if(!(COMMEMORATIVE_YEAR_MONTHS[year]||[]).includes(month))return [];
+ return commemorativeDatesFor(year,month).filter(item=>item.date===iso);
+}
+function calendarOpenWeekForDate(iso){
+ if(!isAdmin()||!/^\d{4}-\d{2}-\d{2}$/.test(iso))return;
+ calendarWeekStart=calendarMonday(iso);calendarViewFilter='datas';currentArea='weekCalendar';
+ openClientId=null;openDemandId=null;renderAll();
+}
+function calendarOpenDateList(iso){
+ if(!isAdmin()||!/^\d{4}-\d{2}-\d{2}$/.test(iso))return;
+ const [year,month]=iso.split('-').map(Number);
+ if(!(COMMEMORATIVE_YEAR_MONTHS[year]||[]).includes(month))return;
+ commemorativeYear=year;commemorativeMonth=month;commemorativeCategory='all';currentArea='commemorativeDates';
+ openClientId=null;openDemandId=null;renderAll();
+ const targets=document.querySelectorAll('[data-comm-date="'+iso+'"]');targets.forEach(node=>node.classList.add('is-highlighted'));
+ if(targets[0])targets[0].scrollIntoView({behavior:'smooth',block:'center'});
 }
 function calendarItemsByDate(iso){
  const posts=calendarViewFilter==='compromissos'?[]:state.demands.filter(d=>d.postDate===iso&&(calendarViewFilter==='todos'||calendarViewFilter==='postagens'||(calendarViewFilter==='artes'&&d.area==='arte')||(calendarViewFilter==='videos'&&d.area==='video'))).sort((a,b)=>`${a.area} ${a.title}`.localeCompare(`${b.area} ${b.title}`,'pt-BR'));
  const events=calendarViewFilter!=='todos'&&calendarViewFilter!=='compromissos'?[]:(state.calendarEvents||[]).filter(e=>e.date===iso).sort((a,b)=>String(a.time||'99:99').localeCompare(String(b.time||'99:99'))||String(a.title||'').localeCompare(String(b.title||''),'pt-BR'));
- return {posts,events};
+ const dates=(calendarViewFilter==='todos'||calendarViewFilter==='datas')?calendarCommemorativeDatesByISO(iso):[];
+ return {posts,events,dates};
 }
-function calendarWeekStats(){const days=calendarDays(),all=days.map(calendarItemsByDate);return {posts:all.reduce((n,d)=>n+d.posts.length,0),events:all.reduce((n,d)=>n+d.events.length,0),days:all.filter(d=>d.posts.length||d.events.length).length}}
+function calendarWeekStats(){const days=calendarDays(),all=days.map(calendarItemsByDate);return {posts:all.reduce((n,d)=>n+d.posts.length,0),events:all.reduce((n,d)=>n+d.events.length,0),dates:all.reduce((n,d)=>n+d.dates.length,0),days:all.filter(d=>d.posts.length||d.events.length||d.dates.length).length}}
 function setCalendarViewFilter(value){if(!isAdmin()||!(value in CALENDAR_FILTER_LABELS))return;calendarViewFilter=value;renderWeekCalendar()}
 function shiftCalendarWeek(delta){if(!isAdmin())return;calendarWeekStart=calendarAddDays(calendarWeekStart,delta*7);renderWeekCalendar()}
 function calendarNavigateToDemand(id){if(!isAdmin())return;const d=state.demands.find(v=>v.id===id);if(!d)return;currentArea=d.area;currentMonth=d.month;openClientId=d.clientId;openDemandId=d.id;renderAll()}
@@ -2418,21 +2445,24 @@ function renderWeekCalendar(){
  document.querySelectorAll('#wkFilters [data-wk-filter]').forEach(btn=>{const active=btn.dataset.wkFilter===calendarViewFilter;btn.classList.toggle('active',active);btn.setAttribute('aria-pressed',String(active))});
  const stats=calendarWeekStats();
  const firstLabel=calendarViewFilter==='artes'?'Artes previstas':calendarViewFilter==='videos'?'Vídeos previstos':'Postagens previstas';
- const summary=calendarViewFilter==='todos'?[['Postagens previstas',stats.posts],['Compromissos',stats.events],['Dias com programação',stats.days+' / 7']]:calendarViewFilter==='compromissos'?[['Compromissos',stats.events],['Dias com compromissos',stats.days+' / 7']]:[[firstLabel,stats.posts],['Dias com programação',stats.days+' / 7']];
+ const summary=calendarViewFilter==='todos'?[['Postagens previstas',stats.posts],['Compromissos',stats.events],['Datas comemorativas',stats.dates],['Dias com programação',stats.days+' / 7']]:calendarViewFilter==='compromissos'?[['Compromissos',stats.events],['Dias com compromissos',stats.days+' / 7']]:calendarViewFilter==='datas'?[['Datas comemorativas',stats.dates],['Dias com oportunidades',stats.days+' / 7']]:[[firstLabel,stats.posts],['Dias com programação',stats.days+' / 7']];
  document.getElementById('wkStats').innerHTML=summary.map(([label,value])=>`<div class="wk-stat"><span>${label}</span><strong>${value}</strong></div>`).join('');
  const today=calendarLocalISO(new Date());
  document.getElementById('wkDays').innerHTML=calendarDays().map(date=>{
-  const {posts,events}=calendarItemsByDate(date),day=new Date(date+'T12:00:00'),dayLabel=day.toLocaleDateString('pt-BR',{weekday:'long'}),month=day.toLocaleDateString('pt-BR',{month:'long'});
+  const {posts,events,dates}=calendarItemsByDate(date),day=new Date(date+'T12:00:00'),dayLabel=day.toLocaleDateString('pt-BR',{weekday:'long'}),month=day.toLocaleDateString('pt-BR',{month:'long'});
   const postHtml=posts.map(d=>`<div class="wk-line wk-line-action" tabindex="0" role="button" data-wk-demand="${esc(d.id)}"><strong><span class="wk-type-pill">${esc(AREAS[d.area]||d.area)}</span>${esc(d.title)}</strong><small>${esc(calendarClientName(d.clientId)||'Cliente não encontrado')} · ${esc(statusLabel(d))}</small></div>`).join('');
   const eventHtml=events.map(e=>`<div class="wk-line wk-line-action" tabindex="0" role="button" data-wk-event="${esc(e.id)}"><strong><span class="wk-type-pill">${esc(e.type)}</span>${esc(e.title)}</strong><small>${e.time?esc(e.time+' · '):''}${esc(calendarClientName(e.clientId)||'Equipe One Way')}</small>${e.description?`<p>${esc(e.description)}</p>`:''}</div>`).join('');
-  const postSection=calendarViewFilter==='compromissos'?'':`<section class="wk-day-section"><div class="wk-section-caption">${esc(calendarPostsLabel())} · ${posts.length}</div>${postHtml||'<div class="wk-empty">Nenhuma demanda prevista.</div>'}</section>`;
+  const dateHtml=dates.map(item=>`<div class="wk-line wk-line-action wk-date-suggestion" tabindex="0" role="button" data-wk-commemorative="${esc(item.date)}" title="Ver esta data na curadoria"><strong><span class="wk-type-pill">Data especial</span>${esc(item.title)}</strong><small>${item.cats.map(cat=>esc(COMMEMORATIVE_CATEGORIES[cat]||cat)).join(' · ')}</small></div>`).join('');
+  const dateSection=calendarViewFilter==='todos'||calendarViewFilter==='datas'?`<section class="wk-day-section"><div class="wk-section-caption">Datas comemorativas · ${dates.length}</div>${dateHtml||'<div class="wk-empty">Nenhuma data comemorativa cadastrada.</div>'}</section>`:'';
+  const postSection=calendarViewFilter==='compromissos'||calendarViewFilter==='datas'?'':`<section class="wk-day-section"><div class="wk-section-caption">${esc(calendarPostsLabel())} · ${posts.length}</div>${postHtml||'<div class="wk-empty">Nenhuma demanda prevista.</div>'}</section>`;
   const eventSection=!['todos','compromissos'].includes(calendarViewFilter)?'':`<section class="wk-day-section"><div class="wk-section-caption">Compromissos · ${events.length}</div>${eventHtml||'<div class="wk-empty">Nenhum compromisso agendado.</div>'}</section>`;
-  return `<article class="wk-day ${date===today?'is-today':''}"><header class="wk-day-head"><span class="wk-day-number">${String(day.getDate()).padStart(2,'0')}</span><div class="wk-day-label"><strong>${esc(dayLabel.charAt(0).toUpperCase()+dayLabel.slice(1))}</strong><span>${esc(month)} · ${day.getFullYear()}${date===today?' · Hoje':''}</span></div><button type="button" class="wk-day-create" data-wk-create="${date}" title="Adicionar compromisso neste dia">+</button></header>${postSection}${eventSection}</article>`;
+  return `<article class="wk-day ${date===today?'is-today':''}"><header class="wk-day-head"><span class="wk-day-number">${String(day.getDate()).padStart(2,'0')}</span><div class="wk-day-label"><strong>${esc(dayLabel.charAt(0).toUpperCase()+dayLabel.slice(1))}</strong><span>${esc(month)} · ${day.getFullYear()}${date===today?' · Hoje':''}</span></div><button type="button" class="wk-day-create" data-wk-create="${date}" title="Adicionar compromisso neste dia">+</button></header>${postSection}${eventSection}${dateSection}</article>`;
  }).join('');
  const area=document.getElementById('wkDays');
  area.querySelectorAll('[data-wk-create]').forEach(b=>b.onclick=()=>openWeekEventModal(null,b.dataset.wkCreate));
  area.querySelectorAll('[data-wk-event]').forEach(b=>{b.onclick=()=>openWeekEventModal(b.dataset.wkEvent);b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();b.click()}}});
  area.querySelectorAll('[data-wk-demand]').forEach(b=>{b.onclick=()=>calendarNavigateToDemand(b.dataset.wkDemand);b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();b.click()}}});
+ area.querySelectorAll('[data-wk-commemorative]').forEach(b=>{b.onclick=()=>calendarOpenDateList(b.dataset.wkCommemorative);b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();b.click()}}});
 }
 function openWeekEventModal(id=null,date=null){
  if(!isAdmin())return;
@@ -2478,7 +2508,7 @@ async function deleteWeekEvent(){
 }
 function calendarExportSchedule(){
  if(!isAdmin())return [];
- return calendarDays().map(date=>({date,...calendarItemsByDate(date)})).filter(day=>day.posts.length||day.events.length);
+ return calendarDays().map(date=>({date,...calendarItemsByDate(date)})).filter(day=>day.posts.length||day.events.length||day.dates.length);
 }
 function calendarDateLabel(iso,style='long'){
  const date=new Date(iso+'T12:00:00');
@@ -2508,6 +2538,11 @@ function weekCalendarText(){
     lines.push(`• ${time}${type}${String(e.title||'Compromisso').replace(/\s+/g,' ').trim()}`);
    });
   }
+  if(day.dates.length){
+   if(day.posts.length||day.events.length)lines.push('');
+   lines.push('DATAS COMEMORATIVAS');
+   day.dates.forEach(item=>lines.push(`• ${String(item.title||'Data comemorativa').replace(/\s+/g,' ').trim()}`));
+  }
  }
  lines.push('','────────────────────────');
  return lines.join('\n');
@@ -2523,7 +2558,8 @@ async function exportWeekCalendarJPEG(){
  // O cabeçalho de cada dia já mostra a data, então as demandas exibem apenas o título.
  const cards=days.map(day=>{
   const rows=[...day.posts.map(d=>({type:'post',title:wrap(d.title||'Sem título',titleFont,inside-525)})),
-   ...day.events.map(e=>({type:'event',title:wrap([e.time,e.title].filter(Boolean).join(' · '),titleFont,inside-525),extra:String(e.type||'Compromisso')}))];
+   ...day.events.map(e=>({type:'event',title:wrap([e.time,e.title].filter(Boolean).join(' · '),titleFont,inside-525),extra:String(e.type||'Compromisso')})),
+   ...day.dates.map(item=>({type:'date',title:wrap(item.title||'Data comemorativa',titleFont,inside-525)}))];
   let height=94;let old='';
   for(const row of rows){if(row.type!==old){height+=39;old=row.type}height+=row.title.length*41+15}
   return {day,rows,height:Math.max(130,height)};
@@ -2550,7 +2586,7 @@ async function exportWeekCalendarJPEG(){
   ctx.fillStyle='rgba(219,233,255,.16)';ctx.fillRect(dividerX,y+32,2,card.height-64);
   let cy=y+45,previous='';
   for(const row of card.rows){
-   if(previous!==row.type){ctx.fillStyle='#a8c8fa';ctx.font='700 19px Arial';ctx.fillText(row.type==='post'?calendarPostsLabel():'COMPROMISSOS',left,cy);cy+=41;previous=row.type}
+   if(previous!==row.type){ctx.fillStyle='#a8c8fa';ctx.font='700 19px Arial';ctx.fillText(row.type==='post'?calendarPostsLabel():row.type==='date'?'DATAS COMEMORATIVAS':'COMPROMISSOS',left,cy);cy+=41;previous=row.type}
    ctx.fillStyle='#fff';ctx.font=titleFont;
    for(const line of row.title){ctx.fillText(line,left+22,cy);cy+=41}
    ctx.fillStyle='#75a6f1';ctx.fillRect(left,cy-43,6,6);
@@ -2567,7 +2603,7 @@ async function exportWeekCalendarJPEG(){
 function weekCalendarPDFHTML(){
  if(!isAdmin())return '';
  const stats=calendarWeekStats();
- const payload=JSON.stringify({week:calendarWeekTitle(),start:calendarWeekStart,stats,filter:calendarViewFilter,filterLabel:CALENDAR_FILTER_LABELS[calendarViewFilter],postsLabel:calendarPostsLabel(),summary:calendarFilterSummary(stats),days:calendarExportSchedule().map(d=>({date:d.date,posts:d.posts.map(p=>({title:String(p.title||'Sem título')})),events:d.events.map(e=>({title:String(e.title||'Compromisso'),time:String(e.time||''),type:String(e.type||'')}))}))}).replace(/</g,'\\u003c');
+ const payload=JSON.stringify({week:calendarWeekTitle(),start:calendarWeekStart,stats,filter:calendarViewFilter,filterLabel:CALENDAR_FILTER_LABELS[calendarViewFilter],postsLabel:calendarPostsLabel(),summary:calendarFilterSummary(stats),days:calendarExportSchedule().map(d=>({date:d.date,posts:d.posts.map(p=>({title:String(p.title||'Sem título')})),events:d.events.map(e=>({title:String(e.title||'Compromisso'),time:String(e.time||''),type:String(e.type||'')})),dates:d.dates.map(item=>({title:String(item.title||'Data comemorativa')}))}))}).replace(/</g,'\\u003c');
  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Programação semanal · One Way</title><style>
  @page{size:A4;margin:0}
  *{box-sizing:border-box}html,body{margin:0;padding:0;background:#061128;color:#fff;font-family:Arial,Helvetica,sans-serif;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
@@ -2601,15 +2637,15 @@ function weekCalendarPDFHTML(){
  function item(kind,entry,date){
   if(!card)newCard(date);
   let madeGroup=false;
-  if(kindNow!==kind){group=el('div','pdf-group');group.append(el('div','pdf-group-title',kind==='post'?data.postsLabel:'COMPROMISSOS'));card.append(group);kindNow=kind;madeGroup=true}
-  const text=kind==='post'?entry.title:[entry.time,entry.type,entry.title].filter(Boolean).join(' · ');
+  if(kindNow!==kind){group=el('div','pdf-group');group.append(el('div','pdf-group-title',kind==='post'?data.postsLabel:kind==='date'?'DATAS COMEMORATIVAS':'COMPROMISSOS'));card.append(group);kindNow=kind;madeGroup=true}
+  const text=kind==='event'?[entry.time,entry.type,entry.title].filter(Boolean).join(' · '):entry.title;
   const row=el('div','pdf-item');row.append(el('span','pdf-dot','•'),el('span','',text));group.append(row);
   if(overflowing()){
    group.removeChild(row);
    if(madeGroup){group.remove();group=null;kindNow=''}
    if(cardHasItems===0){card.remove()}
    page(false);newCard(date);
-   group=el('div','pdf-group');group.append(el('div','pdf-group-title',kind==='post'?data.postsLabel:'COMPROMISSOS'));card.append(group);kindNow=kind;
+   group=el('div','pdf-group');group.append(el('div','pdf-group-title',kind==='post'?data.postsLabel:kind==='date'?'DATAS COMEMORATIVAS':'COMPROMISSOS'));card.append(group);kindNow=kind;
    group.append(row);
   }
   cardHasItems++;
@@ -2622,6 +2658,7 @@ function weekCalendarPDFHTML(){
   if(overflowing()){card.remove();page(false);newCard(day.date)}
   for(const entry of day.posts)item('post',entry,day.date);
   for(const entry of day.events)item('event',entry,day.date);
+  for(const entry of day.dates)item('date',entry,day.date);
  }
  const sheets=[...root.querySelectorAll('.sheet')];sheets.forEach((s,i)=>s.querySelector('.pdf-page-count').textContent=(i+1)+' / '+sheets.length);
  if(!location.search.includes('preview=1')){window.addEventListener('load',()=>setTimeout(()=>window.print(),450))}
