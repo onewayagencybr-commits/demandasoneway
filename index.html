@@ -500,6 +500,37 @@ body.calendar-view{background-attachment:scroll!important}
 .product-editor-foot .product-export{padding:12px 19px}
 .product-busy-indicator{font-size:10px;color:#6381a7;margin-top:10px;min-height:12px;text-align:right}
 @media(max-width:640px){.modal.product-editor-modal,.modal.proposal-choice-modal{background:#fff;color:#16305f;border:1px solid #dfe6f3}.proposal-choice-grid,.product-select-grid,.product-field-grid{grid-template-columns:1fr}.proposal-choice-main,.product-editor-body{padding:20px}.product-scopes{grid-template-columns:1fr 1fr}.product-editor-head,.proposal-choice-header{padding:22px 20px}.product-editor-foot{flex-direction:column-reverse;align-items:stretch}.product-editor-foot .product-export{width:100%}}
+
+/* ONE WAY · Navegacao padronizada | Outubro 2026
+   Somente tipografia e dimensoes dos botoes; sem alteracao nas acoes. */
+.top-actions #proposalHistoryTab{
+  font-size:12px;
+  font-weight:500!important;
+  letter-spacing:-.004em!important;
+  line-height:1.48;
+  min-height:36px;
+  padding:8px 10px;
+  border-radius:12px;
+}
+.admin-utility-tabs .admin-agenda-tab{
+  font-family:"Montserrat",ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:16px;
+  font-weight:500!important;
+  letter-spacing:-.004em!important;
+  line-height:1.48;
+  height:42px;
+  padding:0 15px;
+  border-radius:10px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+/* Na pagina inicial, acompanhar o tamanho das abas Arte, Video e Trafego. */
+.home-mode .admin-utility-tabs .admin-agenda-tab{font-size:14px}
+@media(max-width:640px){
+  .home-mode .admin-utility-tabs .admin-agenda-tab{font-size:15px}
+  .admin-utility-tabs .admin-agenda-tab{max-width:100%;white-space:normal;text-align:center}
+}
 </style>
 </head>
 <body class="booting">
