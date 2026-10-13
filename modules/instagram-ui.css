@@ -21,3 +21,11 @@
 .ig-saved-actions .ig-delete{border-color:rgba(235,177,191,.22);color:#e9bac7}
 .ig-saved-actions button:disabled{opacity:.4}
 @media(max-width:760px){.ig-saved-item{display:grid}.ig-saved-actions{justify-content:flex-start;flex-wrap:wrap}.ig-library-heading{display:grid}}
+
+/* Apify budget, real-time usage and per-analysis cost */
+.ig-budget-title h3{font-size:21px;font-weight:500;letter-spacing:-.04em;margin:9px 0 7px}
+.ig-budget-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:17px 0 12px}
+.ig-budget-metrics .ig-card{background:rgba(53,88,145,.43)}
+.ig-budget-metrics .ig-card strong{font-size:22px;line-height:1.4;overflow-wrap:anywhere}
+@media(max-width:1000px){.ig-budget-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.ig-budget-title{display:grid;gap:12px}.ig-budget-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.ig-budget-metrics .ig-card strong{font-size:17px}}
