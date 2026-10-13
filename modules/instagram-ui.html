@@ -1,0 +1,30 @@
+<!-- One Way | Relatórios Instagram. Administradores apenas. -->
+<section id="instagramReportsContent" class="hidden" aria-label="Relatórios Instagram">
+  <div class="ig-shell">
+    <div class="ig-panel">
+      <div class="ig-head">
+        <div><span class="ig-eyebrow">ONE WAY · INTELIGÊNCIA DE CONTEÚDO</span><h2>Relatórios Instagram</h2><p>Escolha um cliente, informe o perfil e o intervalo. A One Way consulta o Apify e monta a apresentação pronta para compartilhar, com a mesma identidade visual da agência.</p></div>
+        <div class="ig-counter"><strong>IG</strong><span>Análises</span></div>
+      </div>
+      <div class="ig-form">
+        <label>Cliente <input id="igClient" list="igClientList" placeholder="Selecione o cliente" maxlength="100"><datalist id="igClientList"></datalist></label>
+        <label>Perfil Instagram <input id="igUsername" placeholder="@usuario" maxlength="31" spellcheck="false" autocomplete="off"></label>
+        <label>Data inicial <input id="igFrom" type="date"></label>
+        <label>Data final <input id="igTo" type="date"></label>
+      </div>
+      <div class="ig-actions">
+        <button type="button" class="ig-primary" id="igGenerate">Solicitar análise</button>
+        <button type="button" class="ig-secondary" id="igDownload" disabled>Gerar PDF</button>
+        <button type="button" class="ig-quick" id="igLast30">Últimos 30 dias</button>
+        <button type="button" class="ig-quick" id="igSinceJuly">Desde 1º de julho</button>
+      </div>
+      <p class="ig-status" id="igStatus" role="status" aria-live="polite">Pronto para analisar um perfil público.</p>
+    </div>
+    <div class="ig-metrics hidden" id="igMetrics"></div>
+    <div class="ig-panel hidden" id="igRankingPanel">
+      <div class="ig-results-head"><h3>Conteúdos de destaque</h3><span class="ig-muted" id="igCount"></span></div>
+      <div class="ig-table-wrap"><table class="ig-table"><thead><tr><th>Postagem</th><th>Formato</th><th>Interações</th><th>Reproduções</th><th>Link</th></tr></thead><tbody id="igRanking"></tbody></table></div>
+      <p id="igCoverage" class="ig-muted"></p>
+    </div>
+  </div>
+</section>
