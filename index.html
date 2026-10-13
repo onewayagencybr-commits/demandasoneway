@@ -592,6 +592,20 @@ body.calendar-view{background-attachment:scroll!important}
 @media(max-width:900px){.sm-layout{grid-template-columns:1fr}.sm-client-list{max-height:250px;grid-template-columns:repeat(auto-fill,minmax(145px,1fr))}.sm-top{padding:20px}.sm-work-title{padding:18px}}
 @media(max-width:640px){.social-media-tab{margin-left:4px!important}.social-media-tab::before{display:none}.sm-top{align-items:stretch;flex-direction:column;gap:14px}.sm-top h2{font-size:22px}.sm-top .primary{width:100%}.sm-toolbar-left{width:100%}.sm-toolbar input{min-width:0!important;flex:1;width:100%}.sm-task-head{flex-direction:column}.sm-task-actions{width:100%}.sm-task-actions button{flex:1}}
 
+
+/* Home com Social Media + utilitarios administrativos sem sobreposicao */
+.sm-enabled.home-mode .nav-row{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:16px;min-height:auto;margin-top:28px}
+.sm-enabled.home-mode .area-nav-cluster{transform:scale(1.06);max-width:100%;width:max-content}
+.sm-enabled.home-mode .tabs{transform:none!important}
+.sm-enabled.home-mode .admin-utility-tabs{position:static;left:auto;right:auto;top:auto;bottom:auto;transform:none;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin:0;opacity:1}
+.sm-enabled.home-mode .admin-utility-tabs .admin-agenda-tab{position:static;right:auto;top:auto;bottom:auto;transform:none;margin:0;font-size:13px;height:40px;padding:0 14px}
+.sm-enabled.home-mode .admin-utility-tabs .admin-agenda-tab:hover{transform:translateY(-1px)}
+@media(max-width:1100px){
+ .sm-enabled.home-mode .area-nav-cluster{transform:none;width:100%;justify-content:center}
+ .sm-enabled.home-mode .tabs{max-width:100%;overflow-x:auto;overflow-y:hidden}
+ .sm-enabled.home-mode .tab{padding:13px 18px}
+}
+
 /* Navegacao das quatro frentes no celular, sem corte lateral */
 @media(max-width:700px){
  .sm-enabled .nav-row{display:flex;flex-direction:column;align-items:stretch;gap:9px}
@@ -606,21 +620,92 @@ body.calendar-view{background-attachment:scroll!important}
  .sm-enabled.home-mode .tabs{transform:none!important}
  .sm-enabled.home-mode .tab{animation:none;font-size:12px;padding:9px 10px}
 }
+
+/* Login horizontal: evita rolagem para acessar e-mail e senha no desktop */
+@media(min-width:721px){
+  #loginScreen{padding:24px}
+  #loginScreen .login-card,#loginScreen .login-card.login-choice-active{width:min(940px,100%);display:grid;grid-template-columns:minmax(0,.93fr) minmax(0,1.07fr);gap:0;padding:0;min-height:525px;overflow:hidden;align-items:stretch}
+  #loginScreen .login-intro{display:flex;flex-direction:column;justify-content:space-between;gap:25px;padding:44px 40px 47px;border-right:1px solid rgba(214,231,255,.10);background:radial-gradient(circle at 15% 12%,rgba(79,132,255,.14),transparent 45%),linear-gradient(155deg,rgba(11,34,84,.73),rgba(9,26,64,.24))}
+  #loginScreen .login-intro .brand{gap:16px}
+  #loginScreen .login-intro .brand-logo{width:125px}
+  #loginScreen .login-intro-message{padding-bottom:7px}
+  #loginScreen .login-eyebrow{font-size:9px;letter-spacing:.16em;font-weight:600;color:#9db8ea}
+  #loginScreen .login-intro h1{font-size:34px;line-height:1.14;margin:15px 0 12px;letter-spacing:-.045em}
+  #loginScreen .login-intro p{font-size:12px;max-width:310px;margin:0;color:rgba(226,238,255,.65);line-height:1.75}
+  #loginScreen .login-panel{display:flex;flex-direction:column;justify-content:center;min-width:0;padding:32px 37px 29px}
+  #loginScreen .login-panel-label{font-size:12px;font-weight:600;color:#f2f7ff;margin:0 0 14px}
+  #loginScreen .login-access-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:0}
+  #loginScreen .login-access-btn,#loginScreen .login-access-btn.admin{grid-column:auto;min-height:67px;padding:12px 13px;border-radius:13px}
+  #loginScreen .login-access-btn strong{font-size:12px}
+  #loginScreen .login-access-btn span{font-size:8.5px}
+  #loginScreen .admin-login-box{margin:13px 0 0;padding:17px 17px 15px;border-radius:14px}
+  #loginScreen .admin-login-box .field{margin:0 0 11px;gap:5px}
+  #loginScreen .admin-login-box .field input{height:41px!important}
+  #loginScreen .admin-login-box .primary{min-height:42px}
+  #loginScreen .login-error{margin:9px 0 0;min-height:13px}
+}
+@media(min-width:721px) and (max-height:670px){
+  #loginScreen .login-card{min-height:auto!important}
+  #loginScreen .login-intro{padding:27px 35px}
+  #loginScreen .login-panel{padding:18px 30px}
+  #loginScreen .login-intro h1{font-size:29px}
+  #loginScreen .login-access-btn,#loginScreen .login-access-btn.admin{min-height:57px;padding:9px 12px}
+  #loginScreen .login-panel-label{margin-bottom:9px}
+  #loginScreen .admin-login-box{padding:12px 14px;margin-top:9px}
+  #loginScreen .admin-login-box .field{margin-bottom:8px}
+}
+@media(max-width:720px){
+  #loginScreen{padding:15px;align-items:start}
+  #loginScreen .login-card,#loginScreen .login-card.login-choice-active{width:min(490px,100%);padding:0;display:block;overflow:hidden;margin:auto}
+  #loginScreen .login-intro{padding:24px 25px 8px}
+  #loginScreen .login-intro .brand-logo{width:104px}
+  #loginScreen .login-intro-message{margin-top:12px}
+  #loginScreen .login-eyebrow{display:none}
+  #loginScreen .login-intro h1{font-size:24px;margin:16px 0 5px}
+  #loginScreen .login-intro p{font-size:10px;margin:0;color:rgba(230,239,255,.6)}
+  #loginScreen .login-panel{padding:15px 25px 22px}
+  #loginScreen .login-panel-label{font-size:11px;font-weight:600;color:#fff;margin:0 0 10px}
+  #loginScreen .login-access-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:0}
+  #loginScreen .login-access-btn,#loginScreen .login-access-btn.admin{min-height:62px;padding:10px 12px}
+  #loginScreen .admin-login-box{margin-top:11px;padding:14px}
+  #loginScreen .admin-login-box .field{margin:0 0 11px}
+}
+@media(max-width:355px){#loginScreen .login-panel{padding:12px 18px 20px}#loginScreen .login-intro{padding:20px 18px 5px}#loginScreen .login-access-grid{grid-template-columns:1fr}#loginScreen .login-access-btn,#loginScreen .login-access-btn.admin{min-height:49px}}
+
+
+/* Gerenciar Clientes · central administrativo */
+.cm-shell{display:grid;gap:17px;animation:contentReveal .4s var(--ease) both}
+.cm-top{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:23px 26px;border:1px solid rgba(218,232,255,.15);border-radius:20px;background:linear-gradient(130deg,rgba(15,43,102,.7),rgba(10,30,73,.4))}
+.cm-top h2{color:#fff;font-size:24px;letter-spacing:-.03em;margin:0 0 6px}.cm-top p{color:rgba(226,237,255,.67);font-size:11px;margin:0;line-height:1.65}
+.cm-top button{white-space:nowrap}.cm-filters{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.cm-filters input[type=search]{background:rgba(255,255,255,.085);color:#fff;border:1px solid rgba(220,235,255,.18);border-radius:11px;padding:11px 14px;min-width:260px;font-size:12px}.cm-filters input::placeholder{color:rgba(220,235,255,.52)}.cm-filters>span{margin-left:auto;font-size:10px;color:rgba(232,242,255,.65)}
+.cm-check{display:inline-flex;align-items:center;gap:7px;font-size:11px;color:rgba(234,243,255,.7)}.cm-check input{accent-color:#5290ff}.cm-similar,.cm-table-wrap{border:1px solid rgba(220,234,255,.15);border-radius:19px;overflow:hidden;background:rgba(9,27,66,.52)}
+.cm-panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:16px 19px;border-bottom:1px solid rgba(220,235,255,.10)}.cm-panel-head strong{font-size:13px;color:#fff}.cm-panel-head span{font-size:10px;color:rgba(229,240,255,.58)}
+.cm-suggestions{padding:14px 18px;display:flex;flex-wrap:wrap;gap:8px}.cm-suggestion{border:1px solid rgba(172,201,255,.22);background:rgba(105,147,220,.11);border-radius:11px;color:#f1f6ff;text-align:left;padding:10px 12px;line-height:1.5;font-size:11px}.cm-suggestion:hover{background:rgba(105,147,220,.21)}.cm-suggestion span{display:block;color:rgba(222,235,255,.54);font-size:9px;margin-top:3px}.cm-none{padding:11px 0;color:rgba(230,241,255,.57);font-size:11px}
+.cm-list{display:grid;gap:0}.cm-item{display:grid;grid-template-columns:minmax(0,1fr) minmax(180px,.7fr) auto;align-items:center;gap:15px;padding:15px 19px;border-bottom:1px solid rgba(219,234,255,.09)}.cm-item:last-child{border-bottom:none}.cm-item.archived{opacity:.55}.cm-name strong{display:block;color:#fff;font-size:13px;font-weight:650;overflow-wrap:anywhere}.cm-name span{display:block;margin-top:5px;color:rgba(228,239,255,.55);font-size:10px}.cm-tags{display:flex;gap:5px;flex-wrap:wrap}.cm-tag{color:#d6e5ff;font-size:9px;border:1px solid rgba(225,238,255,.14);background:rgba(255,255,255,.065);padding:5px 8px;border-radius:7px}.cm-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.cm-actions button{border:1px solid rgba(220,235,255,.17);color:#e3eeff;background:rgba(255,255,255,.08);padding:8px 10px;border-radius:9px;font-size:10px}.cm-actions button:hover{background:rgba(255,255,255,.14)}.cm-actions .cm-archive{color:#ffd8d8;border-color:rgba(251,162,162,.2)}.cm-footnote{font-size:10px;color:rgba(225,237,255,.58);line-height:1.6;margin:0}.cm-area-choices{display:flex;gap:8px;flex-wrap:wrap}.cm-area-choices label{display:flex;gap:7px;align-items:center;padding:10px 13px;border:1px solid #d7e1ef;border-radius:10px;background:#f7faff;color:#283f65;font-size:11px}.cm-area-choices input{accent-color:#2f66ff}.cm-note{display:block;font-size:10px;color:#72839d;line-height:1.5;margin-top:5px}.cm-merge-info{padding:13px 15px;background:#f1f6ff;color:#405a81;border:1px solid #dce8fa;border-radius:11px;font-size:11px;line-height:1.65}
+.sm-enabled .nav-row{flex-wrap:wrap;row-gap:12px}.sm-enabled .admin-utility-tabs{flex-wrap:wrap;justify-content:flex-end}
+@media(max-width:1050px){.sm-enabled .nav-row:not(.home-mode .nav-row){flex-direction:column;align-items:stretch}.sm-enabled .admin-utility-tabs{justify-content:flex-start;margin-left:0}}
+@media(max-width:760px){.cm-top{flex-direction:column;align-items:stretch;padding:19px}.cm-top button{width:100%}.cm-filters input[type=search]{width:100%;min-width:0}.cm-item{grid-template-columns:1fr;gap:10px}.cm-actions{justify-content:flex-start}.cm-panel-head{align-items:flex-start}.cm-area-choices label{flex:1}.cm-similar,.cm-table-wrap{border-radius:15px}}
+
 </style>
 </head>
 <body class="booting">
 <section class="login" id="loginScreen">
   <div class="login-card">
-    <div class="brand"><img class="brand-logo" src="oneway-logo.png" alt="One Way Agency"><div class="brand-copy"><strong>Acompanhamento de Demandas</strong><span>Painel interno</span></div></div>
-    <h1>Acesso ao painel</h1><p>Escolha seu acesso.</p>
-    <div class="login-access-grid" id="loginAccessGrid">
+    <div class="login-intro">
+      <div class="brand"><img class="brand-logo" src="oneway-logo.png" alt="One Way Agency"><div class="brand-copy"><strong>Acompanhamento de Demandas</strong><span>Painel interno</span></div></div>
+      <div class="login-intro-message"><span class="login-eyebrow">ONE WAY · PAINEL INTERNO</span><h1>Acesso ao painel</h1><p>Organização, planejamento e produção em um só lugar.</p></div>
+    </div>
+    <div class="login-panel">
+      <p class="login-panel-label">Escolha seu acesso</p>
+      <div class="login-access-grid" id="loginAccessGrid">
       <button type="button" class="login-access-btn" data-login-user="Visitante"><strong>Visitante</strong><span>Visualização geral e atualização de status</span></button>
       <button type="button" class="login-access-btn" data-login-user="Design Login"><strong>Design</strong><span>Demandas de Arte + Agenda</span></button>
       <button type="button" class="login-access-btn" data-login-user="Vídeos Login"><strong>Vídeos</strong><span>Demandas de Vídeo + Agenda</span></button>
       <button type="button" class="login-access-btn admin" data-login-user="Administrador"><strong>Administrador</strong><span>Acesso completo ao sistema</span></button>
     </div>
     <div class="admin-login-box hidden" id="passwordField"><div class="field"><label>E-mail do administrador</label><input id="adminEmail" type="email" autocomplete="username" placeholder="E-mail cadastrado no Supabase Auth"></div><div class="field"><label>Senha do administrador</label><input id="adminPassword" type="password" autocomplete="current-password" placeholder="Digite a senha"></div><div style="font-size:8.5px;line-height:1.55;color:rgba(232,241,255,.50);margin:1px 0 16px">Acesso administrativo protegido por autenticação do Supabase + RLS.</div><button class="primary full" id="loginBtn">Entrar como Administrador</button></div>
-    <div class="login-error" id="loginError"></div>
+      <div class="login-error" id="loginError"></div>
+    </div>
   </div>
 </section>
 
@@ -637,7 +722,7 @@ body.calendar-view{background-attachment:scroll!important}
       <div class="hero-controls hidden" id="heroControls"><input class="search" id="searchInput" placeholder="Buscar cliente ou demanda"><input class="month-select" id="monthSelect" type="month" aria-label="Selecionar mês das demandas"><button class="primary" id="newDemandTop">+ Nova demanda</button></div>
     </section>
 
-    <div class="nav-row"><div class="area-nav-cluster"><nav class="tabs" id="tabs"></nav><button class="trash-tab" id="trashTab" title="Excluídos" aria-label="Abrir excluídos"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v5M14 11v5"/></svg></button></div><div class="admin-utility-tabs"><button type="button" class="admin-agenda-tab admin-week-calendar-tab hidden" id="weekCalendarTab">Calendário</button><button type="button" class="admin-agenda-tab hidden" id="adminAgendaTab">Agenda</button><button type="button" class="admin-agenda-tab admin-calendar-tab hidden" id="commemorativeDatesTab">Datas Comemorativas</button></div></div>
+    <div class="nav-row"><div class="area-nav-cluster"><nav class="tabs" id="tabs"></nav><button class="trash-tab" id="trashTab" title="Excluídos" aria-label="Abrir excluídos"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v5M14 11v5"/></svg></button></div><div class="admin-utility-tabs"><button type="button" class="admin-agenda-tab hidden" id="manageClientsTab">Clientes</button><button type="button" class="admin-agenda-tab admin-week-calendar-tab hidden" id="weekCalendarTab">Calendário</button><button type="button" class="admin-agenda-tab hidden" id="adminAgendaTab">Agenda</button><button type="button" class="admin-agenda-tab admin-calendar-tab hidden" id="commemorativeDatesTab">Datas Comemorativas</button></div></div>
 
     <section id="areaContent" class="hidden">
       <div class="stats" id="stats"></div>
@@ -656,6 +741,18 @@ body.calendar-view{background-attachment:scroll!important}
         <div class="sm-layout"><aside class="sm-clients"><div class="sm-panel-heading"><strong>Clientes</strong><span id="smClientsCount"></span></div><div class="sm-client-list" id="smClientList"></div></aside><div class="sm-work"><div class="sm-work-title"><div><h3 id="smSelectedTitle">Demandas de Social Media</h3><p id="smSelectedSubtitle">Selecione um cliente ou visualize todos.</p></div></div><div class="sm-task-list" id="smTaskList"></div></div></div>
       </div>
     </section>
+
+    <section id="manageClientsContent" class="hidden" aria-label="Gerenciar Clientes">
+      <div class="cm-shell">
+        <div class="cm-top"><div><span class="sm-eyebrow">ONE WAY · ADMINISTRADOR</span><h2>Gestão de Clientes</h2><p>Uma lista centralizada para toda a agência. Os cadastros por área continuam vinculados às respectivas demandas.</p></div><button type="button" class="primary" id="cmAddBtn">+ Novo cliente</button></div>
+        <div class="cm-filters"><input type="search" id="cmSearch" placeholder="Buscar cliente ou empresa" aria-label="Buscar clientes"><label class="cm-check"><input type="checkbox" id="cmShowArchived"> Mostrar arquivados</label><span id="cmCount"></span></div>
+        <section class="cm-similar"><div class="cm-panel-head"><strong>Possíveis duplicados</strong><span>Revise antes de mesclar — nomes semelhantes não são unidos automaticamente.</span></div><div class="cm-suggestions" id="cmSuggestions"></div></section>
+        <div class="cm-table-wrap"><div class="cm-panel-head"><strong>Cadastro geral</strong><span id="cmSummary">Clientes cadastrados</span></div><div class="cm-list" id="cmList"></div></div>
+        <p class="cm-footnote">Arquivar oculta o cliente das listas de trabalho, sem apagar demandas ou documentos. A mesclagem exige confirmação e mantém o histórico das demandas. Propostas, contratos e pagamentos já emitidos continuam como documentos históricos.</p>
+      </div>
+    </section>
+    <div class="modal-backdrop hidden" id="cmEditorModal"><div class="modal cm-modal"><div class="modal-head"><div><h3 id="cmModalTitle">Cliente</h3><p>Gestão centralizada · somente administrador</p></div><button type="button" class="x" data-close="cmEditorModal">×</button></div><form id="cmEditorForm"><input type="hidden" id="cmOriginalName"><div class="field"><label>Nome do cliente</label><input id="cmNameInput" maxlength="120" required placeholder="Nome da empresa ou do cliente"></div><div class="field"><label>Vincular às áreas (opcional)</label><div class="cm-area-choices" id="cmAreaChoices"><label><input type="checkbox" value="arte"> Arte</label><label><input type="checkbox" value="video"> Vídeo</label><label><input type="checkbox" value="trafego"> Tráfego</label></div><small class="cm-note">As áreas marcadas serão adicionadas, sem remover vínculos que já possuem demandas. Sem marcar nenhuma, o cliente ficará apenas no cadastro geral e disponível para Social Media.</small></div><div class="field"><label>Tipo para os novos vínculos</label><select id="cmClientType"><option value="fixed">Fixo</option><option value="oneoff">Pontual</option></select></div><div class="modal-actions"><button type="button" class="ghost" data-close="cmEditorModal">Cancelar</button><button type="submit" class="primary" id="cmSaveBtn">Salvar cliente</button></div></form></div></div>
+    <div class="modal-backdrop hidden" id="cmMergeModal"><div class="modal cm-modal"><div class="modal-head"><div><h3>Mesclar cadastros</h3><p>Unifique nomes e vínculos sem perder demandas.</p></div><button type="button" class="x" data-close="cmMergeModal">×</button></div><form id="cmMergeForm"><div class="field"><label>Cadastro duplicado (origem)</label><select id="cmMergeSource" required></select></div><div class="field"><label>Cadastro principal (destino)</label><select id="cmMergeTarget" required></select></div><div class="cm-merge-info" id="cmMergeInfo"></div><div class="modal-actions"><button type="button" class="ghost" data-close="cmMergeModal">Cancelar</button><button type="submit" class="primary" id="cmMergeSubmit">Confirmar mesclagem</button></div></form></div></div>
 
     <section id="weekCalendarContent" class="hidden">
       <div class="wk-shell">
@@ -1071,7 +1168,7 @@ let smCryptoKey=null,smUnlocked=false,smItems=[],smUpdatedAt=0,smSelectedClient=
 let state=seed(),currentUser=null,currentArea=null,currentMonth=currentMonthKey(),openClientId=null,openDemandId=null,toastTimer=null,lastAddedClientId=null,activeAnalytics=null,bulkImportDrafts=[],bulkImportMeta={warnings:[],expected:{}},agendaView="active",commemorativeYear=2026,commemorativeMonth=10,commemorativeCategory='all',formDemandArea='arte',calendarWeekStart=calendarMonday(calendarLocalISO(new Date())),calendarViewFilter='todos';
 let bulkSpeechRecognition=null,bulkSpeechListening=false,bulkSpeechBaseText='',bulkSpeechCommitted='';
 
-function seed(){return {version:7,clients:[],demands:[],deletedDemands:[],removedClientMonths:[],recentClients:[],proposalHistory:[],analyticsReports:{},financeItems:[],calendarEvents:[],socialMediaSecure:null,updatedAt:Date.now()}}
+function seed(){return {version:7,clients:[],demands:[],deletedDemands:[],removedClientMonths:[],recentClients:[],proposalHistory:[],analyticsReports:{},financeItems:[],calendarEvents:[],socialMediaSecure:null,clientDirectory:[],archivedClientKeys:[],clientMergeRecordBackups:[],updatedAt:Date.now()}}
 function uid(){return 'id_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,10)}
 function esc(v=''){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function currentMonthKey(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}
@@ -1089,7 +1186,7 @@ function allowedAreaKeys(){if(isAdmin()||userAccess()==='status')return Object.k
 function agendaAreaFilter(){return isDesign()?'arte':isVideoUser()?'video':null}
 function canAccessArea(area){return allowedAreaKeys().includes(area)}
 function safeUrl(v){try{const u=new URL(v);return ['http:','https:'].includes(u.protocol)?u.href:'#'}catch{return '#'}}
-function normalizeState(s){if(!s||typeof s!=='object')return seed();const clients=Array.isArray(s.clients)?s.clients:[];const derivedRecent=[...clients].sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||''))).map(c=>c.name).filter(Boolean);const recent=Array.isArray(s.recentClients)?s.recentClients:derivedRecent;return {version:7,clients,demands:Array.isArray(s.demands)?s.demands:[],deletedDemands:Array.isArray(s.deletedDemands)?s.deletedDemands:[],removedClientMonths:Array.isArray(s.removedClientMonths)?s.removedClientMonths:[],recentClients:[...new Set(recent)].slice(0,8),proposalHistory:Array.isArray(s.proposalHistory)?s.proposalHistory:[],analyticsReports:s.analyticsReports&&typeof s.analyticsReports==='object'?s.analyticsReports:{},financeItems:Array.isArray(s.financeItems)?s.financeItems:[],calendarEvents:Array.isArray(s.calendarEvents)?s.calendarEvents:[],socialMediaSecure:s.socialMediaSecure&&typeof s.socialMediaSecure==='object'?s.socialMediaSecure:null,updatedAt:Number(s.updatedAt)||0}}
+function normalizeState(s){if(!s||typeof s!=='object')return seed();const clients=Array.isArray(s.clients)?s.clients:[];const derivedRecent=[...clients].sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||''))).map(c=>c.name).filter(Boolean);const recent=Array.isArray(s.recentClients)?s.recentClients:derivedRecent;return {version:7,clients,demands:Array.isArray(s.demands)?s.demands:[],deletedDemands:Array.isArray(s.deletedDemands)?s.deletedDemands:[],removedClientMonths:Array.isArray(s.removedClientMonths)?s.removedClientMonths:[],recentClients:[...new Set(recent)].slice(0,8),proposalHistory:Array.isArray(s.proposalHistory)?s.proposalHistory:[],analyticsReports:s.analyticsReports&&typeof s.analyticsReports==='object'?s.analyticsReports:{},financeItems:Array.isArray(s.financeItems)?s.financeItems:[],calendarEvents:Array.isArray(s.calendarEvents)?s.calendarEvents:[],socialMediaSecure:s.socialMediaSecure&&typeof s.socialMediaSecure==='object'?s.socialMediaSecure:null,clientDirectory:Array.isArray(s.clientDirectory)?s.clientDirectory:[],archivedClientKeys:Array.isArray(s.archivedClientKeys)?s.archivedClientKeys:[],clientMergeRecordBackups:Array.isArray(s.clientMergeRecordBackups)?s.clientMergeRecordBackups:[],updatedAt:Number(s.updatedAt)||0}}
 
 function openDB(){return new Promise((resolve,reject)=>{try{const req=indexedDB.open(DB_NAME,1);req.onupgradeneeded=()=>{const db=req.result;if(!db.objectStoreNames.contains('app'))db.createObjectStore('app',{keyPath:'key'});if(!db.objectStoreNames.contains('files'))db.createObjectStore('files',{keyPath:'id'})};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)}catch(e){reject(e)}})}
 async function dbReadState(){try{const db=await openDB();return await new Promise((resolve,reject)=>{const req=db.transaction('app').objectStore('app').get('state');req.onsuccess=()=>resolve(req.result?.value||null);req.onerror=()=>reject(req.error)})}catch{return null}}
@@ -1253,7 +1350,7 @@ function subscribeRealtime(){
 }
 
 function ensureMonths(){const set=new Set([currentMonthKey(),addMonths(currentMonthKey(),1),addMonths(currentMonthKey(),2)]);for(const c of state.clients)set.add(c.startMonth);for(const d of [...state.demands,...state.deletedDemands])set.add(d.month);for(const r of state.removedClientMonths)set.add(r.month);return [...set].sort()}
-function clientVisibleInMonth(c,month,area=currentArea){if(!area||area==='deleted'||c.area!==area)return false;if(state.removedClientMonths.some(r=>r.clientId===c.id&&r.month===month&&r.area===area))return false;const hasDemand=state.demands.some(d=>d.clientId===c.id&&d.month===month&&d.area===area);return hasDemand||(month>=c.startMonth&&(c.type!=='oneoff'||month===c.startMonth))}
+function clientVisibleInMonth(c,month,area=currentArea){if(c?.mergedInto||(state.archivedClientKeys||[]).includes(cmKey(c?.name)))return false;if(!area||area==='deleted'||c.area!==area)return false;if(state.removedClientMonths.some(r=>r.clientId===c.id&&r.month===month&&r.area===area))return false;const hasDemand=state.demands.some(d=>d.clientId===c.id&&d.month===month&&d.area===area);return hasDemand||(month>=c.startMonth&&(c.type!=='oneoff'||month===c.startMonth))}
 function clientsForMonth(month=currentMonth,area=currentArea){return state.clients.filter(c=>clientVisibleInMonth(c,month,area)).sort((a,b)=>a.name.localeCompare(b.name,'pt-BR',{sensitivity:'base'}))}
 function demandsFor(clientId=null){if(!currentArea||currentArea==='deleted')return[];return state.demands.filter(d=>d.month===currentMonth&&d.area===currentArea&&(!clientId||d.clientId===clientId))}
 
@@ -1296,6 +1393,7 @@ function renderTabs(){
     const wasHome=isAdmin()&&!currentArea,go=()=>{currentArea=target;if(target==='agenda')agendaView='active';openClientId=null;openDemandId=null;document.getElementById('searchInput').value='';document.getElementById('app').classList.remove('leaving-home');renderAll()};
     if(wasHome){document.getElementById('app').classList.add('leaving-home');setTimeout(go,420)}else go();
   });
+  const clientsManageTab=document.getElementById('manageClientsTab');clientsManageTab.classList.toggle('hidden',!isAdmin());clientsManageTab.classList.toggle('active',currentArea==='manageClients');clientsManageTab.onclick=()=>{if(!isAdmin())return;currentArea='manageClients';openClientId=null;openDemandId=null;renderAll()};
   const weekCalendarTab=document.getElementById('weekCalendarTab');weekCalendarTab.classList.toggle('hidden',!isAdmin());weekCalendarTab.classList.toggle('active',currentArea==='weekCalendar');weekCalendarTab.onclick=()=>{if(!isAdmin())return;currentArea='weekCalendar';openClientId=null;openDemandId=null;renderAll()};
   const adminAgenda=document.getElementById('adminAgendaTab');adminAgenda.classList.toggle('hidden',!isAdmin());adminAgenda.classList.toggle('active',currentArea==='agenda');adminAgenda.onclick=()=>{if(!isAdmin())return;currentArea='agenda';agendaView='active';openClientId=null;openDemandId=null;document.getElementById('searchInput').value='';renderAll()};
   const datesTab=document.getElementById('commemorativeDatesTab');datesTab.classList.toggle('hidden',!isAdmin());datesTab.classList.toggle('active',currentArea==='commemorativeDates');datesTab.onclick=()=>{if(!isAdmin())return;currentArea='commemorativeDates';openClientId=null;openDemandId=null;document.getElementById('searchInput').value='';renderAll()};
@@ -1304,12 +1402,14 @@ function renderTabs(){
 }
 function renderMonths(){const s=document.getElementById('monthSelect');const year=currentMonthKey().slice(0,4),finance=currentArea==='finance';if(finance&&currentMonth.slice(0,4)!==year)currentMonth=currentMonthKey();s.min=finance?`${year}-01`:'';s.max=finance?`${year}-12`:'';s.value=/^\d{4}-(0[1-9]|1[0-2])$/.test(currentMonth)?currentMonth:currentMonthKey();s.onchange=()=>{if(!s.value)return;currentMonth=s.value;openClientId=null;openDemandId=null;renderAll()}}
 function renderAll(){
-  if(currentArea&&!['agenda','deleted','proposals','finance','contracts','commemorativeDates','weekCalendar','socialMedia'].includes(currentArea)&&!canAccessArea(currentArea))currentArea=isDesign()?'arte':isVideoUser()?'video':'agenda';
+  if(currentArea==='manageClients'&&!isAdmin())currentArea=null;
+  if(currentArea&&!['agenda','deleted','proposals','finance','contracts','commemorativeDates','weekCalendar','socialMedia','manageClients'].includes(currentArea)&&!canAccessArea(currentArea))currentArea=isDesign()?'arte':isVideoUser()?'video':'agenda';
   const app=document.getElementById('app');app.classList.toggle('sm-enabled',isAdmin());document.body.classList.toggle('calendar-view',isAdmin()&&currentArea==='weekCalendar');app.classList.toggle('home-mode',isAdmin()&&!currentArea);
   document.getElementById('userName').textContent=currentUser;document.getElementById('userRole').textContent=isAdmin()?'Acesso total':isDesign()?'Arte + Agenda':isVideoUser()?'Vídeo + Agenda':'Visualização + status';document.getElementById('avatar').textContent=isAdmin()?'A':isDesign()?'D':isVideoUser()?'V':'G';document.getElementById('newProposalBtn').classList.toggle('hidden',!isAdmin());document.getElementById('bulkImportBtn').classList.toggle('hidden',!isAdmin());document.getElementById('newContractBtn').classList.toggle('hidden',!isAdmin());document.getElementById('contractsTab').classList.toggle('hidden',!isAdmin());const contractAlertBtn=document.getElementById('contractAlertBtn');contractAlertBtn.classList.toggle('hidden',!isAdmin());contractAlertBtn.style.display=isAdmin()?'':'none';contractAlertBtn.setAttribute('aria-hidden',isAdmin()?'false':'true');document.getElementById('contractsTab').classList.toggle('active',currentArea==='contracts');renderContractAlert();renderTabs();renderMonths();
-  const selected=!!currentArea,deleted=currentArea==='deleted',agenda=currentArea==='agenda',proposals=currentArea==='proposals',finance=currentArea==='finance',contracts=currentArea==='contracts',commemorativeDates=currentArea==='commemorativeDates',weekCalendar=currentArea==='weekCalendar',socialMedia=currentArea==='socialMedia'&&isAdmin();
-  document.getElementById('heroControls').classList.toggle('hidden',!selected||proposals||contracts||commemorativeDates||weekCalendar||socialMedia);document.getElementById('searchInput').classList.toggle('hidden',finance||contracts||commemorativeDates||weekCalendar||socialMedia);document.getElementById('monthSelect').classList.toggle('hidden',agenda||proposals||contracts||commemorativeDates||weekCalendar||socialMedia);document.getElementById('areaContent').classList.toggle('hidden',!selected||deleted||agenda||proposals||finance||contracts||commemorativeDates||weekCalendar||socialMedia);document.getElementById('agendaContent').classList.toggle('hidden',!agenda);document.getElementById('commemorativeDatesContent').classList.toggle('hidden',!commemorativeDates);document.getElementById('weekCalendarContent').classList.toggle('hidden',!weekCalendar||!isAdmin());document.getElementById('socialMediaContent').classList.toggle('hidden',!socialMedia);document.getElementById('deletedContent').classList.toggle('hidden',!deleted);document.getElementById('proposalHistoryContent').classList.toggle('hidden',!proposals);document.getElementById('contractsContent').classList.toggle('hidden',!contracts);document.getElementById('financeContent').classList.toggle('hidden',!finance);document.getElementById('newDemandTop').classList.toggle('hidden',!selected||deleted||agenda||proposals||finance||contracts||commemorativeDates||weekCalendar||socialMedia||!isAdmin());document.getElementById('addClientBtn').classList.toggle('hidden',!selected||deleted||agenda||proposals||finance||contracts||commemorativeDates||weekCalendar||socialMedia||!isAdmin());document.getElementById('trafficReportBtn').classList.toggle('hidden',!(isAdmin()&&currentArea==='trafego'));
+  const manageClients=currentArea==='manageClients'&&isAdmin();const selected=!!currentArea,deleted=currentArea==='deleted',agenda=currentArea==='agenda',proposals=currentArea==='proposals',finance=currentArea==='finance',contracts=currentArea==='contracts',commemorativeDates=currentArea==='commemorativeDates',weekCalendar=currentArea==='weekCalendar',socialMedia=currentArea==='socialMedia'&&isAdmin();
+  document.getElementById('heroControls').classList.toggle('hidden',!selected||proposals||contracts||commemorativeDates||weekCalendar||socialMedia||manageClients);document.getElementById('searchInput').classList.toggle('hidden',finance||contracts||commemorativeDates||weekCalendar||socialMedia||manageClients);document.getElementById('monthSelect').classList.toggle('hidden',agenda||proposals||contracts||commemorativeDates||weekCalendar||socialMedia||manageClients);document.getElementById('areaContent').classList.toggle('hidden',!selected||deleted||agenda||proposals||finance||contracts||commemorativeDates||weekCalendar||socialMedia||manageClients);document.getElementById('agendaContent').classList.toggle('hidden',!agenda);document.getElementById('commemorativeDatesContent').classList.toggle('hidden',!commemorativeDates);document.getElementById('weekCalendarContent').classList.toggle('hidden',!weekCalendar||!isAdmin());document.getElementById('socialMediaContent').classList.toggle('hidden',!socialMedia);document.getElementById('manageClientsContent').classList.toggle('hidden',!manageClients);document.getElementById('deletedContent').classList.toggle('hidden',!deleted);document.getElementById('proposalHistoryContent').classList.toggle('hidden',!proposals);document.getElementById('contractsContent').classList.toggle('hidden',!contracts);document.getElementById('financeContent').classList.toggle('hidden',!finance);document.getElementById('newDemandTop').classList.toggle('hidden',!selected||deleted||agenda||proposals||finance||contracts||commemorativeDates||weekCalendar||socialMedia||manageClients||!isAdmin());document.getElementById('addClientBtn').classList.toggle('hidden',!selected||deleted||agenda||proposals||finance||contracts||commemorativeDates||weekCalendar||socialMedia||manageClients||!isAdmin());document.getElementById('trafficReportBtn').classList.toggle('hidden',!(isAdmin()&&currentArea==='trafego'));
   if(!selected){document.getElementById('pageTitle').textContent='Acompanhamento de Demandas';document.getElementById('pageSubtitle').textContent='Escolha uma área para começar.';return}
+  if(manageClients){document.getElementById('pageTitle').textContent='Gerenciar Clientes';document.getElementById('pageSubtitle').textContent='Cadastro unificado, edição, arquivamento e revisão de possíveis duplicados.';cmRender();return}
   if(finance){document.getElementById('pageTitle').textContent='Financeiro da Agência';document.getElementById('pageSubtitle').textContent=`Entradas, custos e saldo de ${fmtMonth(currentMonth)}.`;renderFinance();return}
   if(proposals){document.getElementById('pageTitle').textContent='Propostas';document.getElementById('pageSubtitle').textContent='Histórico das propostas realmente geradas.';renderProposalHistory();return}
   if(contracts){document.getElementById('pageTitle').textContent='Contratos';document.getElementById('pageSubtitle').textContent='Contratos em vigência, vencimentos e arquivos assinados.';renderContracts();return}
@@ -2515,12 +2615,7 @@ async function smDeriveKey(password){
   return crypto.subtle.deriveKey({name:'PBKDF2',salt:new TextEncoder().encode(SM_KDF_SALT),iterations:SM_KDF_ITERATIONS,hash:'SHA-256'},raw,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
 }
 function smNormalizeName(name){return String(name||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toLocaleLowerCase('pt-BR')}
-function smAllClients(){
-  const byKey=new Map();
-  for(const c of (state.clients||[])){const name=String(c.name||'').trim(),key=smNormalizeName(name);if(key&&!byKey.has(key))byKey.set(key,name)}
-  if(smUnlocked)for(const task of smItems){const name=String(task.client||'').trim(),key=smNormalizeName(name);if(key&&!byKey.has(key))byKey.set(key,name)}
-  return [...byKey.values()].sort((a,b)=>a.localeCompare(b,'pt-BR',{sensitivity:'base'}));
-}
+function smAllClients(){return cmAllNames().filter(n=>!cmIsArchived(n))}
 async function smDecrypt(pack){
   if(!smCryptoKey||!pack?.cipher||!pack?.iv)throw new Error('Dados protegidos de Social Media indisponíveis');
   const raw=await crypto.subtle.decrypt({name:'AES-GCM',iv:base64ToBytes(pack.iv)},smCryptoKey,base64ToBytes(pack.cipher));
@@ -2928,8 +3023,190 @@ function exportWeekCalendarPDF(){
  toast('PDF pronto. Na janela de impressão, escolha Salvar como PDF.',null,null,'success');
 }
 
+
+// Cadastro centralizado: todas as ações exigem login administrativo.
+let cmSearchText='',cmShowArchived=false,cmBusy=false;
+function cmKey(name){return String(name||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR').replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' ')}
+function cmIsArchived(name){return (state.archivedClientKeys||[]).includes(cmKey(name))}
+function cmAllNames(){
+ const seen=new Map();
+ for(const n of [...(state.clientDirectory||[]),...state.clients.filter(c=>!c.mergedInto).map(c=>c.name),...(smUnlocked?smItems.map(i=>i.client):[])]){
+  const name=String(n||'').trim(),key=cmKey(name);if(key&&!seen.has(key))seen.set(key,name);
+ }
+ return [...seen.values()].sort((a,b)=>a.localeCompare(b,'pt-BR',{sensitivity:'base'}));
+}
+function cmNamesSimilar(a,b){
+ const x=cmKey(a),y=cmKey(b);if(!x||!y||x===y)return false;
+ const stripped=v=>v.replace(/\s/g,'');if(stripped(x)===stripped(y))return true;
+ if(Math.min(stripped(x).length,stripped(y).length)<5)return false;
+ const sa=stripped(x),sb=stripped(y);if(sa.includes(sb)&&sb.length>=6||sb.includes(sa)&&sa.length>=6)return true;
+ if(Math.abs(sa.length-sb.length)>2)return false;
+ let row=Array.from({length:sb.length+1},(_,i)=>i);
+ for(let i=1;i<=sa.length;i++){let next=[i];for(let j=1;j<=sb.length;j++)next[j]=Math.min(next[j-1]+1,row[j]+1,row[j-1]+(sa[i-1]===sb[j-1]?0:1));row=next}
+ return row[sb.length]<=(sa.length>12?2:1);
+}
+function cmGroupCounts(name){const key=cmKey(name);const linked=state.clients.filter(c=>!c.mergedInto&&cmKey(c.name)===key),ids=new Set(linked.map(c=>c.id)),areas=[...new Set(linked.map(c=>c.area))];return {linked,areas,duplicates:linked.length-areas.length,demands:state.demands.filter(d=>ids.has(d.clientId)).length,deleted:state.deletedDemands.filter(d=>ids.has(d.clientId)).length,social:smUnlocked?smItems.filter(i=>cmKey(i.client)===key).length:0}}
+function cmRender(){
+ if(!isAdmin()||!adminAuthReady())return;
+ const names=cmAllNames(),show=cmShowArchived,q=cmKey(cmSearchText);
+ const filtered=names.filter(n=>(show||!cmIsArchived(n))&&(!q||cmKey(n).includes(q)));
+ document.getElementById('cmCount').textContent=`${filtered.length} cliente${filtered.length===1?'':'s'}`;
+ document.getElementById('cmSummary').textContent=`${names.length} nomes no cadastro · ${names.filter(n=>cmIsArchived(n)).length} arquivados`;
+ const root=document.getElementById('cmList');
+ root.innerHTML=filtered.length?filtered.map(n=>{const g=cmGroupCounts(n),archived=cmIsArchived(n),areas=g.areas.map(a=>`<span class="cm-tag">${esc(AREAS[a]||a)}</span>`).join('')||'<span class="cm-tag">Cadastro geral / Social Media</span>';
+ return `<article class="cm-item ${archived?'archived':''}"><div class="cm-name"><strong>${esc(n)}</strong><span>${g.demands+g.deleted} demandas de produção · ${g.social} de Social Media${archived?' · Arquivado':''}</span></div><div class="cm-tags">${areas}</div><div class="cm-actions"><button type="button" data-cm-edit="${esc(n)}">Editar</button><button type="button" data-cm-merge="${esc(n)}">Mesclar</button>${g.duplicates>0?`<button type="button" data-cm-consolidate="${esc(n)}">Consolidar ${g.duplicates} repetido${g.duplicates>1?'s':''}</button>`:''}<button type="button" class="${archived?'':'cm-archive'}" data-cm-archive="${esc(n)}">${archived?'Restaurar':'Arquivar'}</button></div></article>`}).join(''):'<div class="cm-none" style="padding:20px">Nenhum cliente encontrado.</div>';
+ root.querySelectorAll('[data-cm-edit]').forEach(b=>b.onclick=()=>cmOpenEditor(b.dataset.cmEdit));
+ root.querySelectorAll('[data-cm-merge]').forEach(b=>b.onclick=()=>cmOpenMerge(b.dataset.cmMerge));
+ root.querySelectorAll('[data-cm-archive]').forEach(b=>b.onclick=()=>cmToggleArchive(b.dataset.cmArchive));
+ root.querySelectorAll('[data-cm-consolidate]').forEach(b=>b.onclick=()=>cmConsolidate(b.dataset.cmConsolidate));
+ const pairs=[];for(let i=0;i<names.length;i++)for(let j=i+1;j<names.length;j++)if(!cmIsArchived(names[i])&&!cmIsArchived(names[j])&&cmNamesSimilar(names[i],names[j]))pairs.push([names[i],names[j]]);
+ const suggestions=document.getElementById('cmSuggestions');suggestions.innerHTML=pairs.length?pairs.slice(0,24).map(([a,b])=>`<button class="cm-suggestion" type="button" data-cm-from="${esc(a)}" data-cm-to="${esc(b)}">${esc(a)} <span>↔ ${esc(b)} · Revisar mesclagem</span></button>`).join(''):'<span class="cm-none">Nenhum nome muito semelhante encontrado. Você ainda pode mesclar manualmente.</span>';
+ suggestions.querySelectorAll('[data-cm-from]').forEach(b=>b.onclick=()=>cmOpenMerge(b.dataset.cmFrom,b.dataset.cmTo));
+}
+function cmOpenEditor(name=''){
+ if(!isAdmin()||!adminAuthReady())return;
+ const n=cmAllNames().find(x=>cmKey(x)===cmKey(name))||'';const counts=cmGroupCounts(n);
+ document.getElementById('cmModalTitle').textContent=n?'Editar cliente':'Adicionar cliente';
+ document.getElementById('cmOriginalName').value=n;document.getElementById('cmNameInput').value=n;
+ document.querySelectorAll('#cmAreaChoices input').forEach(e=>{e.checked=counts.areas.includes(e.value)});
+ document.getElementById('cmClientType').value='fixed';document.getElementById('cmEditorModal').classList.remove('hidden');
+}
+async function cmCommit(nextState,nextSocial,oldState,oldItems){
+ const oldTime=smUpdatedAt;try{
+  if(nextSocial){const pack=await smEncrypt(nextSocial);pack.updatedAt=Math.max(pack.updatedAt,oldTime+1);nextState.socialMediaSecure=pack;}
+  state=nextState;
+  if(!await saveState({strictRemote:true}))throw new Error('Supabase não confirmou a gravação');
+  if(nextSocial){smItems=nextSocial;smUpdatedAt=state.socialMediaSecure.updatedAt;}
+  renderAll();return true;
+ }catch(e){state=oldState;smItems=oldItems;smUpdatedAt=oldTime;writeLocalCache(state);console.error('Gestão de clientes:',e);toast('Não foi possível confirmar a atualização no Supabase. Os dados anteriores foram mantidos.');return false}
+}
+function cmUpdateAnalytics(snapshot,oldName,newName){
+ const prev=cmKey(oldName),target=smNormalizeName(newName);
+ const updated={};
+ for(const [key,entry] of Object.entries(snapshot.analyticsReports||{})){
+  const hasClient=cmKey(entry?.clientName)===prev;
+  const prefix=key.split('|');const renameKey=prefix.length>=3&&cmKey(prefix[1])===prev;
+  const dest=renameKey?`${prefix[0]}|${target}|${prefix.slice(2).join('|')}`:key;
+  if(dest!==key&&updated[dest]){snapshot.clientMergeRecordBackups.push({date:new Date().toISOString(),source:key,record:entry});continue}
+  if(dest!==key&&snapshot.analyticsReports?.[dest]){snapshot.clientMergeRecordBackups.push({date:new Date().toISOString(),source:key,record:entry});continue}
+  updated[dest]=hasClient?{...entry,clientName:newName}:entry;
+ }
+ snapshot.analyticsReports=updated;
+}
+function cmChangeName(snapshot,oldName,newName){
+ const key=cmKey(oldName);snapshot.clients.forEach(c=>{if(cmKey(c.name)===key)c.name=newName});
+ snapshot.clientDirectory=(snapshot.clientDirectory||[]).filter(n=>cmKey(n)!==key);
+ snapshot.clientDirectory.push(newName);
+ snapshot.recentClients=(snapshot.recentClients||[]).map(n=>cmKey(n)===key?newName:n);
+ (snapshot.calendarEvents||[]).forEach(e=>{if(cmKey(e.client)===key)e.client=newName});
+ snapshot.archivedClientKeys=(snapshot.archivedClientKeys||[]).map(k=>k===key?cmKey(newName):k);
+ cmUpdateAnalytics(snapshot,oldName,newName);
+}
+async function cmSaveEditor(e){
+ e.preventDefault();if(!isAdmin()||!adminAuthReady()||cmBusy)return;
+ const oldName=document.getElementById('cmOriginalName').value,requested=document.getElementById('cmNameInput').value.trim().replace(/\s+/g,' ');
+ if(!requested)return toast('Informe o nome do cliente.');
+ const others=cmAllNames().filter(n=>cmKey(n)!==cmKey(oldName));
+ if(others.some(n=>cmKey(n)===cmKey(requested))){toast('Esse nome já está cadastrado. Use Mesclar para unir os registros.');return}
+ const chosen=[...document.querySelectorAll('#cmAreaChoices input:checked')].map(c=>c.value);
+ if(!smUnlocked&&state.socialMediaSecure?.cipher&&oldName&&oldName!==requested){toast('Desbloqueie o Social Media com o login administrativo antes de renomear este cliente.');return}
+ const oldState=state,oldItems=smItems;const next=structuredClone(state),nextSocial=smUnlocked?structuredClone(smItems):null;
+ if(oldName&&oldName!==requested){
+  cmChangeName(next,oldName,requested);if(nextSocial)nextSocial.forEach(t=>{if(cmKey(t.client)===cmKey(oldName))t.client=requested});
+ }else if(!oldName){next.clientDirectory=(next.clientDirectory||[]).concat([requested])}
+ if(!(next.clientDirectory||[]).some(n=>cmKey(n)===cmKey(requested)))next.clientDirectory.push(requested);
+ const currentAreas=new Set(next.clients.filter(c=>!c.mergedInto&&cmKey(c.name)===cmKey(requested)).map(c=>c.area));
+ for(const area of chosen)if(!currentAreas.has(area))next.clients.push({id:uid(),name:requested,type:document.getElementById('cmClientType').value,area,startMonth:currentMonth,createdAt:new Date().toISOString()});
+ next.archivedClientKeys=(next.archivedClientKeys||[]).filter(k=>k!==cmKey(requested));
+ cmBusy=true;const btn=document.getElementById('cmSaveBtn');btn.disabled=true;
+ const ok=await cmCommit(next,nextSocial,oldState,oldItems);
+ cmBusy=false;btn.disabled=false;if(ok){closeModal('cmEditorModal');toast('Cliente salvo e sincronizado.',null,null,'success')}
+}
+async function cmToggleArchive(name){
+ if(!isAdmin()||!adminAuthReady()||cmBusy)return;
+ const archived=cmIsArchived(name);
+ if(!archived&&!confirm(`Arquivar ${name}? As demandas e históricos serão preservados e poderão ser restaurados.`))return;
+ const old=state,prevItems=smItems,next=structuredClone(state),key=cmKey(name);
+ next.archivedClientKeys=archived?(next.archivedClientKeys||[]).filter(k=>k!==key):[...new Set([...(next.archivedClientKeys||[]),key])];
+ cmBusy=true;const ok=await cmCommit(next,null,old,prevItems);cmBusy=false;if(ok)toast(archived?'Cliente restaurado.':'Cliente arquivado. Nenhuma demanda foi excluída.',null,null,'success');
+}
+
+async function cmConsolidate(name){
+ if(!isAdmin()||!adminAuthReady()||cmBusy)return;
+ const group=cmGroupCounts(name);if(!group.duplicates)return;
+ if(!confirm(`Consolidar os ${group.duplicates} registros duplicados de "${name}" dentro das mesmas áreas?
+
+As demandas serão transferidas para o vínculo principal e nenhuma demanda será excluída.`))return;
+ const old=state,oldItems=smItems,next=structuredClone(state),key=cmKey(name),byArea=new Map();
+ for(const c of next.clients.filter(c=>!c.mergedInto&&cmKey(c.name)===key)){
+  const keeper=byArea.get(c.area);
+  if(!keeper){byArea.set(c.area,c);continue}
+  for(const d of [...next.demands,...next.deletedDemands])if(d.clientId===c.id)d.clientId=keeper.id;
+  c.mergedInto=keeper.id;
+ }
+ cmBusy=true;const ok=await cmCommit(next,null,old,oldItems);cmBusy=false;
+ if(ok)toast('Registros repetidos consolidados. Todas as demandas foram mantidas.',null,null,'success');
+}
+
+function cmOpenMerge(source='',target=''){
+ if(!isAdmin()||!adminAuthReady())return;
+ const names=cmAllNames();if(names.length<2){toast('É necessário ter pelo menos dois cadastros para mesclar.');return}
+ const sourceEl=document.getElementById('cmMergeSource'),targetEl=document.getElementById('cmMergeTarget');
+ const options='<option value="">Selecione</option>'+names.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');sourceEl.innerHTML=options;targetEl.innerHTML=options;
+ sourceEl.value=names.find(n=>cmKey(n)===cmKey(source))||'';targetEl.value=names.find(n=>cmKey(n)===cmKey(target))||'';
+ if(sourceEl.value&&sourceEl.value===targetEl.value)targetEl.value='';
+ cmRenderMergeInfo();document.getElementById('cmMergeModal').classList.remove('hidden');
+}
+function cmRenderMergeInfo(){
+ const src=document.getElementById('cmMergeSource').value,dst=document.getElementById('cmMergeTarget').value,note=document.getElementById('cmMergeInfo');
+ if(!src||!dst){note.textContent='Selecione dois clientes diferentes. As demandas serão vinculadas ao cadastro principal; nada será apagado automaticamente.';return}
+ if(cmKey(src)===cmKey(dst)){note.textContent='Escolha dois cadastros diferentes.';return}
+ const a=cmGroupCounts(src),b=cmGroupCounts(dst);
+ note.textContent=`Origem: ${a.linked.length} vínculos, ${a.demands+a.deleted} demandas de produção e ${a.social} de Social Media. Destino: ${b.linked.length} vínculos. A união preserva as demandas antigas e os vínculos nas áreas.`;
+}
+async function cmSubmitMerge(e){
+ e.preventDefault();if(!isAdmin()||!adminAuthReady()||cmBusy)return;
+ const src=document.getElementById('cmMergeSource').value,dst=document.getElementById('cmMergeTarget').value;
+ if(!src||!dst||cmKey(src)===cmKey(dst))return toast('Escolha cadastros distintos.');
+ const a=cmGroupCounts(src),b=cmGroupCounts(dst);
+ if(!confirm(`Unir "${src}" em "${dst}"?\n\n${a.demands+a.deleted} demandas de produção e ${a.social} registros de Social Media terão o nome unificado.\nOs cadastros duplicados da mesma área serão consolidados, e os históricos permanecerão salvos. Esta ação não é desfeita automaticamente.`))return;
+ if(!smUnlocked&&state.socialMediaSecure?.cipher){toast('Desbloqueie o Social Media com o login administrativo antes de mesclar.');return}
+ const old=state,prevItems=smItems,next=structuredClone(state),nextSocial=smUnlocked?structuredClone(smItems):null;
+ const srcKey=cmKey(src),dstKey=cmKey(dst);
+ // Consolidação por área, sem recriar IDs de demandas.
+ const targetByArea=new Map();for(const c of next.clients)if(!c.mergedInto&&cmKey(c.name)===dstKey&&!targetByArea.has(c.area))targetByArea.set(c.area,c);
+ for(const c of next.clients.filter(x=>!x.mergedInto&&cmKey(x.name)===srcKey)){
+  const keeper=targetByArea.get(c.area);
+  if(!keeper){c.name=dst;targetByArea.set(c.area,c);continue}
+  if(c.id===keeper.id)continue;
+  for(const d of [...next.demands,...next.deletedDemands])if(d.clientId===c.id)d.clientId=keeper.id;
+  c.mergedInto=keeper.id;
+ }
+ // Retém as remoções originais com seus IDs para auditoria, mas elas não afetam o cadastro principal.
+ // Também consolida duplicados pré-existentes dentro do próprio destino.
+ for(const c of next.clients.filter(x=>!x.mergedInto&&cmKey(x.name)===dstKey)){
+  const keeper=targetByArea.get(c.area);if(!keeper||keeper.id===c.id)continue;
+  for(const d of [...next.demands,...next.deletedDemands])if(d.clientId===c.id)d.clientId=keeper.id;
+  c.mergedInto=keeper.id;
+ }
+ cmChangeName(next,src,dst);
+ if(nextSocial)nextSocial.forEach(t=>{if(cmKey(t.client)===srcKey)t.client=dst});
+ next.clientDirectory=[...new Map(next.clientDirectory.map(n=>[cmKey(n),n])).values()];
+ next.archivedClientKeys=(next.archivedClientKeys||[]).filter(k=>k!==srcKey);
+ cmBusy=true;const btn=document.getElementById('cmMergeSubmit');btn.disabled=true;
+ const ok=await cmCommit(next,nextSocial,old,prevItems);
+ cmBusy=false;btn.disabled=false;
+ if(ok){closeModal('cmMergeModal');toast('Cadastros mesclados e demandas preservadas.',null,null,'success')}
+}
+
 function start(){
- document.getElementById('smNewTask').onclick=()=>smOpenModal();
+  document.getElementById('cmAddBtn').onclick=()=>cmOpenEditor();
+  document.getElementById('cmEditorForm').onsubmit=cmSaveEditor;
+  document.getElementById('cmMergeForm').onsubmit=cmSubmitMerge;
+  document.getElementById('cmMergeSource').onchange=cmRenderMergeInfo;document.getElementById('cmMergeTarget').onchange=cmRenderMergeInfo;
+  document.getElementById('cmSearch').oninput=e=>{cmSearchText=e.target.value;cmRender()};
+  document.getElementById('cmShowArchived').onchange=e=>{cmShowArchived=e.target.checked;cmRender()};
+  document.getElementById('smNewTask').onclick=()=>smOpenModal();
  document.getElementById('smFormClient').onchange=smToggleNewClient;
  document.getElementById('smForm').onsubmit=smSubmit;
  document.getElementById('smSearch').oninput=e=>{smSearchText=e.target.value;renderSocialMedia()};
