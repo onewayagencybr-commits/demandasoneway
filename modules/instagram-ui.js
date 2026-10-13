@@ -49,7 +49,7 @@
     const username=normalize($('igUsername').value),from=$('igFrom').value,to=$('igTo').value;
     if(!/^[a-z0-9._]{1,30}$/.test(username))return notify('Informe um perfil válido, como @abelcarames.',true);
     if(!from||!to||from>to)return notify('Confira o intervalo de datas.',true);
-    if(window.igReportLibrary?.findSaved(username,from,to)&&!confirm('Já existe um PDF deste perfil e período em Relatórios salvos. Deseja refazer a coleta e gerar novo custo no Apify?'))return;
+    if(window.igReportLibrary?.findSaved(username,from,to)&&!confirm('Já existem dados salvos para este perfil e período. Deseja refazer a coleta e gerar novo custo no Apify?'))return;
     running=true;report=null;$('igGenerate').disabled=true;$('igDownload').disabled=true;
     $('igMetrics').classList.add('hidden');$('igRankingPanel').classList.add('hidden');
     rememberClient();
@@ -57,19 +57,19 @@
       notify('Solicitando coleta ao Apify…');
       const start=await request('/api/instagram-report',{method:'POST',keepalive:true,body:JSON.stringify({username,from,to,clientName:$('igClient').value.trim()||username})});
       localStorage.setItem('oneway-ig-run-v1',JSON.stringify({runId:start.runId,username,from,to,clientName:$('igClient').value.trim()||username,startedAt:Date.now()}));
-      notify('Análise solicitada! O Apify continuará trabalhando e salvará o PDF na biblioteca, mesmo que você feche esta aba.');
+      notify('Análise solicitada! O Apify continuará trabalhando e salvará os dados na biblioteca, mesmo que você feche esta aba.');
       let output;
       for(let count=0;count<48;count++){
         if(count)await wait(5000);
         output=await request(`/api/instagram-report?runId=${encodeURIComponent(start.runId)}&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`);
         if(output.status==='SUCCEEDED')break;
         if(['FAILED','ABORTED','TIMED-OUT'].includes(output.status))throw new Error(output.error||'A consulta do Apify falhou.');
-        notify('Coleta em andamento. Pode fechar esta aba: o PDF será gerado e salvo automaticamente em Relatórios salvos.');
+        notify('Coleta em andamento. Pode fechar esta aba: os dados serão salvos automaticamente em Relatórios salvos.');
       }
       if(output?.status!=='SUCCEEDED')throw new Error('A análise ainda está em processamento. Você pode solicitar novamente mais tarde.');
       report={username,from,to,clientName:$('igClient').value.trim()||username,posts:output.posts,coverageNote:output.coverageNote,background:start.background,costUsd:output.costUsd};
       localStorage.removeItem('oneway-ig-run-v1');
-      renderResult();notify('Coleta concluída! Custo desta análise: '+(window.igFinance?.cost(output.costUsd)||'Não informado')+'. O PDF está sendo salvo automaticamente. Você pode fechar esta aba.');
+      renderResult();notify('Coleta concluída! Custo desta análise: '+(window.igFinance?.cost(output.costUsd)||'Não informado')+'. Os dados estão sendo salvos automaticamente. Você pode fechar esta aba.');
       window.igFinance?.refresh();setTimeout(()=>window.igReportLibrary?.refresh(),5000);
     }catch(err){notify(err.message||'Não foi possível concluir.',true)}finally{running=false;$('igGenerate').disabled=false}
   }
@@ -134,42 +134,44 @@
     txt(ctx,'ONE WAY  /  ESTRATÉGIA · CRIAÇÃO · CONEXÃO',77,1395,16,C.accent,500);
     return pages;
   }
+  async function buildPDFBlob(data){
+    if(!data||!Array.isArray(data.posts))throw Error('Informações da análise indisponíveis.');
+    if(document.fonts?.load)await Promise.allSettled([document.fonts.load('300 46px Montserrat'),document.fonts.load('500 16px Montserrat')]);
+    const logo=await new Promise(resolve=>{
+      const im=new Image(),timeout=setTimeout(()=>resolve(null),3500);
+      im.onload=()=>{clearTimeout(timeout);resolve(im)};
+      im.onerror=()=>{clearTimeout(timeout);resolve(null)};
+      im.src='/oneway-logo.png';
+    });
+    if(!window.onewayInstagramPDF?.build)throw Error('Gerador de PDFs indisponível. Atualize a página.');
+    const blob=window.onewayInstagramPDF.build(makePages(data,logo),data.posts);
+    if(blob.size<5000)throw Error('Não foi possível finalizar o PDF. Tente novamente.');
+    return blob;
+  }
+  window.igPdfFromData=buildPDFBlob;
+  window.igShowSavedData=data=>{
+    if(!data||!Array.isArray(data.posts))return;
+    report=data;
+    $('igClient').value=data.clientName||data.username;
+    $('igUsername').value='@'+data.username;
+    $('igFrom').value=data.from;$('igTo').value=data.to;
+    renderResult();
+    notify('Análise restaurada a partir dos dados salvos. Nenhum crédito Apify foi consumido.');
+  };
   async function download(){
     if(!report)return;
-    const btn=$('igDownload');
-    btn.disabled=true;notify('Preparando PDF One Way com links de acesso…');
-    let downloaded=false;
+    const btn=$('igDownload');btn.disabled=true;
+    notify('Montando o PDF a partir dos dados. Nenhum PDF será armazenado no Supabase…');
     try{
-      await Promise.all([document.fonts.load('300 46px Montserrat'),document.fonts.load('500 16px Montserrat')]);
-      const logo=await new Promise(resolve=>{
-        const im=new Image(),timeout=setTimeout(()=>resolve(null),3500);
-        im.onload=()=>{clearTimeout(timeout);resolve(im)};
-        im.onerror=()=>{clearTimeout(timeout);resolve(null)};
-        im.src='/oneway-logo.png';
-      });
-      const pages=makePages(report,logo);
-      if(!window.onewayInstagramPDF?.build)throw Error('Exportador do PDF não está disponível. Atualize a página.');
-      const blob=window.onewayInstagramPDF.build(pages,report.posts);
-      if(blob.size<5000)throw Error('PDF gerado incompleto. Tente novamente.');
+      const blob=await buildPDFBlob(report);
       const url=URL.createObjectURL(blob),link=document.createElement('a');
-      const safe=report.username.replace(/[^a-z0-9_]/gi,'_');
-      link.href=url;link.download='One_Way_Instagram_'+safe+'_'+report.from+'_a_'+report.to+'.pdf';
-      document.body.appendChild(link);link.click();link.remove();downloaded=true;
+      link.href=url;
+      link.download='One_Way_Instagram_'+report.username.replace(/[^a-z0-9_]/gi,'_')+'_'+report.from+'_a_'+report.to+'.pdf';
+      document.body.appendChild(link);link.click();link.remove();
       setTimeout(()=>URL.revokeObjectURL(url),90000);
-      notify('PDF baixado. Salvando também na biblioteca da equipe…');
-      if(report.background){notify('PDF baixado. O relatório automático está sendo disponibilizado na biblioteca.');}
-      else if(window.igReportLibrary?.save){
-        try{
-          await window.igReportLibrary.save(report,blob);
-          notify('PDF baixado e salvo na biblioteca da agência por 30 dias.');
-        }catch(e){
-          notify('PDF baixado, mas a biblioteca não salvou: '+String(e?.message||'confira a configuração do Supabase.'),true);
-        }
-      }else notify('PDF baixado. Biblioteca temporariamente indisponível.',true);
-    }catch(error){
-      console.error('One Way Instagram PDF:',error);
-      notify((downloaded?'PDF baixado, mas houve um problema: ':'Não foi possível gerar o PDF: ')+(error.message||'tente novamente'),true);
-    }finally{btn.disabled=false;}
+      notify('PDF baixado. A biblioteca guarda somente os dados da análise, por 30 dias.');
+    }catch(err){console.error('Gerador de PDF Instagram:',err);notify(err?.message||'Falha ao montar o PDF.',true);}
+    finally{btn.disabled=false;}
   }
 
   window.igRender=function(){
@@ -189,7 +191,7 @@
           const result=await request('/api/instagram-recover',{method:'POST',body:JSON.stringify({
             username,from,to,clientName:$('igClient').value.trim()||username
           })});
-          notify((result.alreadySaved?'PDF anterior já estava salvo. ':'PDF recuperado e salvo! ')+'Nenhuma nova coleta do Apify foi executada.');
+          notify((result.alreadySaved?'Análise anterior já estava salva. ':'Dados da análise recuperados! ')+'Nenhuma nova coleta do Apify foi executada.');
           if(window.igReportLibrary?.refresh)await window.igReportLibrary.refresh();
         }catch(err){notify(err.message||'A recuperação ainda não foi concluída.',true);}
         finally{button.disabled=false;button.textContent='Recuperar análise sem custo';}
@@ -210,7 +212,7 @@
       storageCheck.onclick=async()=>{
         storageCheck.disabled=true;storageCheck.textContent='Testando…';
         const note=$('igSavedMessage');
-        if(note)note.textContent='Verificando permissão de gravar e excluir um PDF no Supabase. Sem cobrança do Apify…';
+        if(note)note.textContent='Testando gravação de dados JSON privados. Não armazena PDFs nem cobra o Apify…';
         try{
           const result=await request('/api/instagram-storage-check',{method:'POST',body:'{}'});
           if(note)note.textContent=result.message||'Teste de salvamento concluído.';

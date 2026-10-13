@@ -1,10 +1,10 @@
-/* Vercel Cron — remove PDFs de relatórios Instagram com mais de 30 dias.
+/* Vercel Cron — remove análises JSON com mais de 30 dias e PDFs antigos expirados.
    Variáveis privadas: CRON_SECRET e SUPABASE_SERVICE_ROLE_KEY.
    Usa a Storage API oficial para apagar arquivo físico + metadados.
 */
 const {timingSafeEqual}=require('node:crypto');
 const {serviceHeaders}=require('../lib/oneway-server');
-const BUCKET='oneway-instagram-reports',PREFIX='instagram/';
+const collections=[{bucket:'oneway-instagram-data',prefix:'reports/',ext:'.json'},{bucket:'oneway-instagram-reports',prefix:'instagram/',ext:'.pdf'}];
 const RETENTION_MS=30*86400000;
 const ok=(req,secret)=>{
  const token=(req.headers.authorization||'').replace(/^Bearer\s+/,'');
@@ -26,22 +26,26 @@ module.exports=async function handler(req,res){
    return json;
  };
  try{
-   const old=[],now=Date.now();
-   for(let offset=0;offset<5000;offset+=100){
-     const items=await call('/list/'+BUCKET,'POST',{prefix:PREFIX,limit:100,offset,sortBy:{column:'created_at',order:'asc'}});
-     if(!Array.isArray(items))throw Error('Listagem de PDFs retornou formato inválido.');
-     for(const p of items){
+   const now=Date.now(),removed={json:0,legacyPdf:0};
+   for(const group of collections){
+    const old=[];
+    for(let offset=0;offset<5000;offset+=100){
+      const response=await fetch(root+'/list/'+group.bucket,{method:'POST',headers:hdr,body:JSON.stringify({prefix:group.prefix,limit:100,offset,sortBy:{column:'created_at',order:'asc'}}),signal:AbortSignal.timeout(25000)});
+      if(response.status===404)break; // novo bucket ainda não criado
+      if(!response.ok)throw Error('Listagem de dados retornou '+response.status);
+      const items=await response.json();
+      if(!Array.isArray(items))throw Error('Resposta de listagem inválida.');
+      for(const p of items){
        const ms=Date.parse(p.created_at||'');
-       if(p.name?.endsWith('.pdf')&&Number.isFinite(ms)&&now-ms>=RETENTION_MS)old.push(PREFIX+p.name);
-     }
-     if(items.length<100)break;
+       if(p.name?.endsWith(group.ext)&&Number.isFinite(ms)&&now-ms>=RETENTION_MS)old.push(group.prefix+p.name);
+      }
+      if(items.length<100)break;
+    }
+    for(let i=0;i<old.length;i+=100){
+     await call('/'+group.bucket,'DELETE',{prefixes:old.slice(i,i+100)});
+    }
+    removed[group.ext==='.json'?'json':'legacyPdf']=old.length;
    }
-   let deleted=0;
-   for(let i=0;i<old.length;i+=100){
-     const part=old.slice(i,i+100);
-     await call('/'+BUCKET,'DELETE',{prefixes:part});
-     deleted+=part.length;
-   }
-   return respond(res,200,{ok:true,deleted,expiresAfterDays:30});
+   return respond(res,200,{ok:true,deleted:removed,total:removed.json+removed.legacyPdf,expiresAfterDays:30});
  }catch(e){console.error('One Way report cleanup:',e);return respond(res,500,{error:'Falha ao excluir relatórios expirados.'});}
 };

@@ -1,6 +1,7 @@
 // One Way Agency — API protegida de análises do Instagram via Apify.
 // Nunca exponha APIFY_TOKEN no HTML, no browser ou no repositório.
 const {serviceHeaders}=require('../lib/oneway-server');
+const {ensureBucket}=require('../lib/instagram-data-store');
 const APIFY = 'https://api.apify.com/v2';
 const ACTOR = 'apify~instagram-post-scraper';
 const allowedHandle = /^[a-zA-Z0-9._]{1,30}$/;
@@ -45,6 +46,7 @@ module.exports=async function handler(req,res){
     if(req.method==='POST'){
       // Evita cobrar outra coleta do Apify quando a chave de gravação está incorreta.
       serviceHeaders();
+      await ensureBucket(); // Não cobrar coleta se dados não puderem ser armazenados.
       const {username,from,to,clientName}=req.body||{};
       if(!allowedHandle.test(username||'')||!intervalOk(from,to)) return json(res,400,{error:'Informe usuário e datas válidos (período máximo de 366 dias).'});
       const days=1+(Date.parse(to)-Date.parse(from))/86400000;
