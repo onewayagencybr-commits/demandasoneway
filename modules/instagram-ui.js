@@ -55,7 +55,7 @@
     rememberClient();
     try{
       notify('Solicitando coleta ao Apify…');
-      const start=await request('/api/instagram-report',{method:'POST',body:JSON.stringify({username,from,to,clientName:$('igClient').value.trim()||username})});
+      const start=await request('/api/instagram-report',{method:'POST',keepalive:true,body:JSON.stringify({username,from,to,clientName:$('igClient').value.trim()||username})});
       localStorage.setItem('oneway-ig-run-v1',JSON.stringify({runId:start.runId,username,from,to,clientName:$('igClient').value.trim()||username,startedAt:Date.now()}));
       notify('Análise solicitada! O Apify continuará trabalhando e salvará o PDF na biblioteca, mesmo que você feche esta aba.');
       let output;
