@@ -8,7 +8,7 @@
  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const pretty=d=>{const n=new Date(d);return Number.isFinite(n.getTime())?n.toLocaleDateString('pt-BR'):'—'};
  const money=n=>typeof n==='number'&&Number.isFinite(n)?'US$ '+n.toFixed(4).replace('.',','):'';
- let data=[],inited=false,loading=false;
+ let data=[],inited=false,loading=false,refreshAgain=false,lastRefreshAt=0;
  async function bearer(){
   if(typeof supabaseClient==='undefined'||!supabaseClient)throw Error('Entre com o login administrativo.');
   const {data,error}=await supabaseClient.auth.getSession();
@@ -95,7 +95,7 @@
   }).join('');
  }
  async function refresh(){
-  if(loading)return;panel();loading=true;
+  if(loading){refreshAgain=true;return;}panel();loading=true;
   $('igSavedRefresh').disabled=true;$('igSavedMessage').textContent='Carregando análises salvas…';
   try{
    const server=await api('/api/instagram-saved?mode=list');
@@ -111,12 +111,23 @@
    $('igSavedMessage').textContent='Biblioteca sincronizada. Novas análises são guardadas como JSON. '+(legacyError?'PDFs antigos temporariamente indisponíveis.':'PDFs anteriores disponíveis até expirarem.');
   }catch(e){
    $('igSavedMessage').textContent='Não foi possível consultar o acervo: '+(e?.message||'tente novamente');
-  }finally{loading=false;$('igSavedRefresh').disabled=false;}
+  }finally{loading=false;lastRefreshAt=Date.now();$('igSavedRefresh').disabled=false;if(refreshAgain){refreshAgain=false;return refresh();}}
  }
  function findSaved(username,from,to){
   const clean=String(username||'').replace(/^@/,'').toLowerCase();
   return data.find(r=>r.username.toLowerCase()===clean&&r.from===from&&r.to===to)||null;
  }
- function init(){if(!inited){inited=true;panel();refresh()}else panel();}
+ function maybeRefresh(){
+  if(document.hidden||$('instagramReportsContent')?.classList.contains('hidden'))return;
+  if(Date.now()-lastRefreshAt>=14000)refresh();
+ }
+ function init(){
+  if(!inited){
+   inited=true;panel();refresh();
+   window.addEventListener('focus',maybeRefresh);
+   document.addEventListener('visibilitychange',maybeRefresh);
+   setInterval(maybeRefresh,20000);
+  }else{panel();maybeRefresh();}
+ }
  window.igReportLibrary={init,refresh,findSaved};
 })();
