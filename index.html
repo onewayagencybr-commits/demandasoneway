@@ -812,7 +812,7 @@ body.calendar-view{background-attachment:scroll!important}
   <div class="ig-shell">
     <div class="ig-panel">
       <div class="ig-head">
-        <div><span class="ig-eyebrow">ONE WAY · INTELIGÊNCIA DE CONTEÚDO</span><h2>Relatórios Instagram</h2><p>Escolha um cliente, informe o perfil e o intervalo. A One Way consulta o Apify e monta a apresentação pronta para compartilhar, com a mesma identidade visual da agência.</p></div>
+        <div><span class="ig-eyebrow">ONE WAY · INTELIGÊNCIA DE CONTEÚDO</span><h2>Relatórios Instagram</h2><p>Escolha um cliente, informe o perfil e o intervalo. O Apify coleta os dados, e o servidor salva o PDF automaticamente mesmo com a aba fechada. Os arquivos ficam disponíveis por 30 dias.</p></div>
         <div class="ig-counter"><strong>IG</strong><span>Análises</span></div>
       </div>
       <div class="ig-form">
@@ -822,8 +822,9 @@ body.calendar-view{background-attachment:scroll!important}
         <label>Data final <input id="igTo" type="date"></label>
       </div>
       <div class="ig-actions">
-        <button type="button" class="ig-primary" id="igGenerate">Solicitar análise</button>
-        <button type="button" class="ig-secondary" id="igDownload" disabled>Gerar PDF</button>
+        <button type="button" class="ig-primary" id="igGenerate">Gerar relatório automático</button>
+        <button type="button" class="ig-secondary" id="igDownload" disabled>Baixar PDF agora</button>
+        <button type="button" class="ig-secondary" id="igRecover">Recuperar análise sem custo</button>
         <button type="button" class="ig-quick" id="igLast30">Últimos 30 dias</button>
         <button type="button" class="ig-quick" id="igSinceJuly">Últimos 3 meses</button>
       </div>

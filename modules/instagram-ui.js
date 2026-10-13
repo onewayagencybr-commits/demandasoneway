@@ -177,6 +177,23 @@
       const d=dates();$('igFrom').value=d.from;$('igTo').value=d.to;
       $('igGenerate').addEventListener('click',generate);
       $('igDownload').addEventListener('click',download);
+      $('igRecover')?.addEventListener('click',async()=>{
+        const username=normalize($('igUsername').value),from=$('igFrom').value,to=$('igTo').value;
+        if(!/^[a-z0-9._]{1,30}$/.test(username)||!from||!to||from>to){
+          notify('Escolha o perfil e as datas exatas da análise anterior.',true);return;
+        }
+        const button=$('igRecover');
+        button.disabled=true;button.textContent='Recuperando…';
+        try{
+          notify('Procurando a coleta anterior no Apify, sem iniciar uma nova análise e sem cobrar outra execução…');
+          const result=await request('/api/instagram-recover',{method:'POST',body:JSON.stringify({
+            username,from,to,clientName:$('igClient').value.trim()||username
+          })});
+          notify((result.alreadySaved?'PDF anterior já estava salvo. ':'PDF recuperado e salvo! ')+'Nenhuma nova coleta do Apify foi executada.');
+          if(window.igReportLibrary?.refresh)await window.igReportLibrary.refresh();
+        }catch(err){notify(err.message||'A recuperação ainda não foi concluída.',true);}
+        finally{button.disabled=false;button.textContent='Recuperar análise sem custo';}
+      });
       $('igLast30').addEventListener('click',()=>{const d=dates();$('igFrom').value=d.from;$('igTo').value=d.to});
       $('igSinceJuly').textContent='Últimos 3 meses';
       $('igSinceJuly').addEventListener('click',()=>{
@@ -188,6 +205,19 @@
     }
     $('igClientList').innerHTML=clientNames().map(name=>`<option value="${esc(name)}"></option>`).join('');
     window.igReportLibrary?.init();
+    const storageCheck=$('igStorageCheck');
+    if(storageCheck){
+      storageCheck.onclick=async()=>{
+        storageCheck.disabled=true;storageCheck.textContent='Testando…';
+        const note=$('igSavedMessage');
+        if(note)note.textContent='Verificando permissão de gravar e excluir um PDF no Supabase. Sem cobrança do Apify…';
+        try{
+          const result=await request('/api/instagram-storage-check',{method:'POST',body:'{}'});
+          if(note)note.textContent=result.message||'Teste de salvamento concluído.';
+        }catch(error){if(note)note.textContent='Falha no salvamento: '+(error.message||'Confira a configuração Supabase');}
+        finally{storageCheck.disabled=false;storageCheck.textContent='Testar salvamento';}
+      };
+    }
     window.igFinance?.init();
     if(!running){try{
       const pending=JSON.parse(localStorage.getItem('oneway-ig-run-v1')||'null');

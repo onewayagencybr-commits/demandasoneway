@@ -23,7 +23,7 @@
   function panel(){
     if($('igSavedPanel'))return;
     const el=document.createElement('section');el.id='igSavedPanel';el.className='ig-panel';
-    el.innerHTML='<div class="ig-results-head ig-library-heading"><div><span class="ig-eyebrow">ONE WAY · ACERVO DA AGÊNCIA</span><h3>Relatórios salvos <span id="igSavedCount"></span></h3><p class="ig-muted">Acesse sem refazer a coleta. Arquivos compartilhados entre administradores, com prazo de 30 dias.</p></div><button type="button" class="ig-secondary" id="igSavedRefresh">Atualizar lista</button></div><div id="igSavedMessage" class="ig-muted">Buscando relatórios…</div><div id="igSavedRows" class="ig-saved-rows"></div>';
+    el.innerHTML='<div class="ig-results-head ig-library-heading"><div><span class="ig-eyebrow">ONE WAY · ACERVO DA AGÊNCIA</span><h3>Relatórios salvos <span id="igSavedCount"></span></h3><p class="ig-muted">Acesse sem refazer a coleta. Arquivos compartilhados entre administradores, com prazo de 30 dias.</p></div><div class="ig-saved-actions"><button type="button" class="ig-secondary" id="igStorageCheck">Testar salvamento</button><button type="button" class="ig-secondary" id="igSavedRefresh">Atualizar lista</button></div></div><div id="igSavedMessage" class="ig-muted">Buscando relatórios…</div><div id="igSavedRows" class="ig-saved-rows"></div>';
     $('instagramReportsContent')?.querySelector('.ig-shell')?.appendChild(el);
     $('igSavedRefresh')?.addEventListener('click',refresh);
     $('igSavedRows')?.addEventListener('click',async event=>{

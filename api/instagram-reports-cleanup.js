@@ -3,6 +3,7 @@
    Usa a Storage API oficial para apagar arquivo físico + metadados.
 */
 const {timingSafeEqual}=require('node:crypto');
+const {serviceHeaders}=require('../lib/oneway-server');
 const BUCKET='oneway-instagram-reports',PREFIX='instagram/';
 const RETENTION_MS=30*86400000;
 const ok=(req,secret)=>{
@@ -17,7 +18,7 @@ module.exports=async function handler(req,res){
  if(!cron||!key||!base)return respond(res,503,{error:'Agendamento ainda sem as variáveis seguras configuradas.'});
  if(!ok(req,cron))return respond(res,401,{error:'Não autorizado.'});
  const root=base.replace(/\/$/,'')+'/storage/v1/object';
- const hdr={'apikey':key,'Authorization':'Bearer '+key,'Content-Type':'application/json'};
+ let hdr;try{hdr=serviceHeaders();}catch(e){return respond(res,e.status||503,{error:e.message});}
  const call=async(path,method,body)=>{
    const r=await fetch(root+path,{method,headers:hdr,body:JSON.stringify(body),signal:AbortSignal.timeout(25000)});
    const json=await r.json().catch(()=>({}));
