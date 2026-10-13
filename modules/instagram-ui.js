@@ -188,6 +188,19 @@
     }
     $('igClientList').innerHTML=clientNames().map(name=>`<option value="${esc(name)}"></option>`).join('');
     window.igReportLibrary?.init();
+    const storageCheck=$('igStorageCheck');
+    if(storageCheck){
+      storageCheck.onclick=async()=>{
+        storageCheck.disabled=true;storageCheck.textContent='Testando…';
+        const note=$('igSavedMessage');
+        if(note)note.textContent='Verificando permissão de gravar e excluir um PDF no Supabase. Sem cobrança do Apify…';
+        try{
+          const result=await request('/api/instagram-storage-check',{method:'POST',body:'{}'});
+          if(note)note.textContent=result.message||'Teste de salvamento concluído.';
+        }catch(error){if(note)note.textContent='Falha no salvamento: '+(error.message||'Confira a configuração Supabase');}
+        finally{storageCheck.disabled=false;storageCheck.textContent='Testar salvamento';}
+      };
+    }
     window.igFinance?.init();
     if(!running){try{
       const pending=JSON.parse(localStorage.getItem('oneway-ig-run-v1')||'null');
