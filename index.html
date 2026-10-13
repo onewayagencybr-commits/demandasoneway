@@ -3258,9 +3258,22 @@ async function cmSaveEditor(e){
  e.preventDefault();if(!isAdmin()||!adminAuthReady()||cmBusy)return;
  const oldName=document.getElementById('cmOriginalName').value,requested=document.getElementById('cmNameInput').value.trim().replace(/\s+/g,' ');
  if(!requested)return toast('Informe o nome do cliente.');
- const others=cmAllNames().filter(n=>cmKey(n)!==cmKey(oldName));
- if(others.some(n=>cmKey(n)===cmKey(requested))){toast('Esse nome já está cadastrado. Use Mesclar para unir os registros.');return}
  const chosen=[...document.querySelectorAll('#cmAreaChoices input:checked')].map(c=>c.value);
+ // Um cliente existente pode estar arquivado ou ter apenas vínculos em outra frente.
+ // Abrimos o cadastro correto em vez de sugerir mesclagem de um registro inexistente.
+ const existing=cmAllNames().find(n=>cmKey(n)===cmKey(requested)&&cmKey(n)!==cmKey(oldName));
+ if(existing){
+  const archived=cmIsArchived(existing);
+  const question=archived
+   ?'O cliente "'+existing+'" já existe, mas está ARQUIVADO. Deseja abrir o cadastro para reativá-lo e acrescentar as frentes selecionadas?'
+   :'O cliente "'+existing+'" já está cadastrado em outra frente ou no catálogo. Deseja abrir o cadastro existente para acrescentar as frentes selecionadas, sem duplicar nem mesclar dados?';
+  if(confirm(question)){
+   cmOpenEditor(existing);
+   document.querySelectorAll('#cmAreaChoices input').forEach(el=>{if(chosen.includes(el.value))el.checked=true});
+   document.getElementById('cmNameInput').focus();
+  }
+  return;
+ }
  if(!smUnlocked&&state.socialMediaSecure?.cipher&&oldName&&oldName!==requested){toast('Desbloqueie o Social Media com o login administrativo antes de renomear este cliente.');return}
  const oldState=state,oldItems=smItems;const next=structuredClone(state),nextSocial=smUnlocked?structuredClone(smItems):null;
  if(oldName&&oldName!==requested){
