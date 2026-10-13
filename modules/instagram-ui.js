@@ -40,6 +40,7 @@
     const rank=[...posts].sort((a,b)=>(b.likes+b.comments)-(a.likes+a.comments)).slice(0,8);
     $('igRanking').innerHTML=rank.map(p=>`<tr><td>${esc(p.date.split('-').reverse().join('/'))}</td><td>${esc(p.type)}</td><td>${fmt(p.likes+p.comments)}</td><td>${p.plays==null?'—':fmt(p.plays)}</td><td><a target="_blank" rel="noopener noreferrer" href="https://www.instagram.com/${p.type==='Reel'?'reel':'p'}/${encodeURIComponent(p.shortCode)}/">Abrir ↗</a></td></tr>`).join('');
     $('igCoverage').textContent=report.coverageNote||'';
+    if(report.costUsd!=null){$('igCoverage').textContent=($('igCoverage').textContent||'')+' · Custo efetivo da execução: '+(window.igFinance?.cost(report.costUsd)||('USD '+Number(report.costUsd).toFixed(4)));}
     $('igDownload').disabled=false;
   }
   const wait=(ms)=>new Promise(resolve=>setTimeout(resolve,ms));
@@ -48,25 +49,28 @@
     const username=normalize($('igUsername').value),from=$('igFrom').value,to=$('igTo').value;
     if(!/^[a-z0-9._]{1,30}$/.test(username))return notify('Informe um perfil válido, como @abelcarames.',true);
     if(!from||!to||from>to)return notify('Confira o intervalo de datas.',true);
+    if(window.igReportLibrary?.findSaved(username,from,to)&&!confirm('Já existe um PDF deste perfil e período em Relatórios salvos. Deseja refazer a coleta e gerar novo custo no Apify?'))return;
     running=true;report=null;$('igGenerate').disabled=true;$('igDownload').disabled=true;
     $('igMetrics').classList.add('hidden');$('igRankingPanel').classList.add('hidden');
     rememberClient();
     try{
       notify('Solicitando coleta ao Apify…');
-      const start=await request('/api/instagram-report',{method:'POST',body:JSON.stringify({username,from,to})});
-      sessionStorage.setItem('oneway-ig-run-v1',JSON.stringify({runId:start.runId,username,from,to}));
+      const start=await request('/api/instagram-report',{method:'POST',body:JSON.stringify({username,from,to,clientName:$('igClient').value.trim()||username})});
+      localStorage.setItem('oneway-ig-run-v1',JSON.stringify({runId:start.runId,username,from,to,clientName:$('igClient').value.trim()||username,startedAt:Date.now()}));
+      notify('Análise solicitada! O Apify continuará trabalhando e salvará o PDF na biblioteca, mesmo que você feche esta aba.');
       let output;
       for(let count=0;count<48;count++){
         if(count)await wait(5000);
         output=await request(`/api/instagram-report?runId=${encodeURIComponent(start.runId)}&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`);
         if(output.status==='SUCCEEDED')break;
         if(['FAILED','ABORTED','TIMED-OUT'].includes(output.status))throw new Error(output.error||'A consulta do Apify falhou.');
-        notify('Coletando dados do perfil. Isso pode levar de 30 segundos a alguns minutos…');
+        notify('Coleta em andamento. Pode fechar esta aba: o PDF será gerado e salvo automaticamente em Relatórios salvos.');
       }
       if(output?.status!=='SUCCEEDED')throw new Error('A análise ainda está em processamento. Você pode solicitar novamente mais tarde.');
-      report={username,from,to,clientName:$('igClient').value.trim()||username,posts:output.posts,coverageNote:output.coverageNote};
-      sessionStorage.removeItem('oneway-ig-run-v1');
-      renderResult();notify(`Análise concluída! ${fmt(report.posts.length)} publicações processadas. Clique em Gerar PDF.`);
+      report={username,from,to,clientName:$('igClient').value.trim()||username,posts:output.posts,coverageNote:output.coverageNote,background:start.background,costUsd:output.costUsd};
+      localStorage.removeItem('oneway-ig-run-v1');
+      renderResult();notify('Coleta concluída! Custo desta análise: '+(window.igFinance?.cost(output.costUsd)||'Não informado')+'. O PDF está sendo salvo automaticamente. Você pode fechar esta aba.');
+      window.igFinance?.refresh();setTimeout(()=>window.igReportLibrary?.refresh(),5000);
     }catch(err){notify(err.message||'Não foi possível concluir.',true)}finally{running=false;$('igGenerate').disabled=false}
   }
 
@@ -153,7 +157,8 @@
       document.body.appendChild(link);link.click();link.remove();downloaded=true;
       setTimeout(()=>URL.revokeObjectURL(url),90000);
       notify('PDF baixado. Salvando também na biblioteca da equipe…');
-      if(window.igReportLibrary?.save){
+      if(report.background){notify('PDF baixado. O relatório automático está sendo disponibilizado na biblioteca.');}
+      else if(window.igReportLibrary?.save){
         try{
           await window.igReportLibrary.save(report,blob);
           notify('PDF baixado e salvo na biblioteca da agência por 30 dias.');
@@ -183,5 +188,21 @@
     }
     $('igClientList').innerHTML=clientNames().map(name=>`<option value="${esc(name)}"></option>`).join('');
     window.igReportLibrary?.init();
+    window.igFinance?.init();
+    if(!running){try{
+      const pending=JSON.parse(localStorage.getItem('oneway-ig-run-v1')||'null');
+      if(pending?.runId&&Date.now()-Number(pending.startedAt||0)<24*3600000){
+        notify('Você tem uma análise iniciada anteriormente. O processo continua no servidor; confira Relatórios salvos em alguns instantes.');
+        request('/api/instagram-report?runId='+encodeURIComponent(pending.runId)+'&from='+encodeURIComponent(pending.from)+'&to='+encodeURIComponent(pending.to)).then(o=>{
+          if(o.status==='SUCCEEDED'){
+            report={...pending,posts:o.posts||[],background:true,costUsd:o.costUsd,coverageNote:o.coverageNote};renderResult();
+            notify('Sua coleta anterior concluiu. Custo: '+(window.igFinance?.cost(o.costUsd)||'Não informado')+'. Confira a biblioteca para baixar o PDF.');
+            localStorage.removeItem('oneway-ig-run-v1');
+            setTimeout(()=>window.igReportLibrary?.refresh(),4000);
+          }else if(['FAILED','ABORTED','TIMED-OUT'].includes(o.status)){localStorage.removeItem('oneway-ig-run-v1');notify('A coleta anterior não foi concluída. Verifique o Apify.',true);}
+        }).catch(()=>{});
+      }
+    }catch{}}
+
   };
 })();
