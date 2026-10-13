@@ -16,7 +16,9 @@
     if(!/^\d{8}T\d{6}Z$/.test(created)||!/^[a-z0-9._]{1,30}$/i.test(username)||!/^\d{4}-\d{2}-\d{2}$/.test(from)||!/^\d{4}-\d{2}-\d{2}$/.test(to))return null;
     const at=Date.parse(item.created_at||created.slice(0,4)+'-'+created.slice(4,6)+'-'+created.slice(6,8)+'T'+created.slice(9,11)+':'+created.slice(11,13)+':'+created.slice(13,15)+'Z');
     const expires=at+RETENTION_MS;
-    return {name,path:DIR+'/'+name,client:client.replace(/_/g,' '),username,from,to,createdAt:at,expiresAt:expires,bytes:item.metadata?.size||0};
+    const costRaw=tail.find(x=>/^usd-(?:[0-9]+p[0-9]+|unknown)$/.test(x))||'';
+    const costUsd=/^usd-[0-9]+p[0-9]+$/.test(costRaw)?Number(costRaw.slice(4).replace('p','.')):null;
+    return {name,path:DIR+'/'+name,client:client.replace(/_/g,' '),username,from,to,createdAt:at,expiresAt:expires,costUsd,bytes:item.metadata?.size||0};
   }
   function panel(){
     if($('igSavedPanel'))return;
@@ -50,7 +52,7 @@
     if(!$('igSavedRows'))return;
     $('igSavedCount').textContent='('+data.length+')';
     if(!data.length){$('igSavedRows').innerHTML='<p class="ig-muted">Nenhum relatório salvo ainda. Ao gerar o próximo PDF, ele aparecerá aqui.</p>';return;}
-    $('igSavedRows').innerHTML=data.map(r=>'<article class="ig-saved-item"><div class="ig-saved-description"><strong>'+esc(r.client)+' <span class="ig-saved-handle">@'+esc(r.username)+'</span></strong><span>'+esc(pretty(r.from))+' a '+esc(pretty(r.to))+' · salvo em '+esc(pretty(r.createdAt))+' · expira em '+esc(pretty(r.expiresAt))+'</span></div><div class="ig-saved-actions"><button type="button" class="ig-secondary" data-report-action="view" data-path="'+esc(r.path)+'">Abrir ↗</button><button type="button" class="ig-secondary" data-report-action="download" data-path="'+esc(r.path)+'">Baixar PDF</button><button type="button" class="ig-secondary ig-delete" data-report-action="delete" data-path="'+esc(r.path)+'">Excluir</button></div></article>').join('');
+    $('igSavedRows').innerHTML=data.map(r=>'<article class="ig-saved-item"><div class="ig-saved-description"><strong>'+esc(r.client)+' <span class="ig-saved-handle">@'+esc(r.username)+'</span></strong><span>'+esc(pretty(r.from))+' a '+esc(pretty(r.to))+' · salvo em '+esc(pretty(r.createdAt))+' · expira em '+esc(pretty(r.expiresAt))+(r.costUsd!=null?' · Apify: US$ '+r.costUsd.toFixed(4).replace('.',','):'')+'</span></div><div class="ig-saved-actions"><button type="button" class="ig-secondary" data-report-action="view" data-path="'+esc(r.path)+'">Abrir ↗</button><button type="button" class="ig-secondary" data-report-action="download" data-path="'+esc(r.path)+'">Baixar PDF</button><button type="button" class="ig-secondary ig-delete" data-report-action="delete" data-path="'+esc(r.path)+'">Excluir</button></div></article>').join('');
   }
   async function refresh(){
     if(loading)return;
