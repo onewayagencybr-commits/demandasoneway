@@ -1,7 +1,7 @@
 // One Way Agency — API protegida de análises do Instagram via Apify.
 // Nunca exponha APIFY_TOKEN no HTML, no browser ou no repositório.
 const {serviceHeaders}=require('../lib/oneway-server');
-const {ensureBucket}=require('../lib/instagram-data-store');
+const {ensureBucket,storeReport}=require('../lib/instagram-data-store');
 const APIFY = 'https://api.apify.com/v2';
 const ACTOR = 'apify~instagram-post-scraper';
 const allowedHandle = /^[a-zA-Z0-9._]{1,30}$/;
@@ -51,7 +51,7 @@ module.exports=async function handler(req,res){
       if(!allowedHandle.test(username||'')||!intervalOk(from,to)) return json(res,400,{error:'Informe usuário e datas válidos (período máximo de 366 dias).'});
       const days=1+(Date.parse(to)-Date.parse(from))/86400000;
       const limit=Math.min(250, Math.max(50,Math.ceil(days*2.7)));
-      // The Apify completion webhook generates/stores the PDF, independent of the browser.
+      // A notificação Apify armazena somente JSON; o navegador pode confirmar/recuperar o salvamento.
       const secret=process.env.CRON_SECRET;
       if(!secret||!process.env.SUPABASE_SERVICE_ROLE_KEY)
         throw Object.assign(new Error('Configure o processamento em segundo plano na Vercel.'),{status:503});
@@ -65,8 +65,8 @@ module.exports=async function handler(req,res){
       if(!run.id)throw new Error('Apify não retornou o identificador da análise.');
       return json(res,200,{runId:run.id,status:run.status||'RUNNING',username,from,to,limit,background:true});
     }
-    const {runId,from,to}=req.query||{};
-    if(!allowedRun.test(runId||'')||!intervalOk(from,to))return json(res,400,{error:'Parâmetros de consulta inválidos.'});
+    const {runId,from,to,username,clientName}=req.query||{};
+    if(!allowedRun.test(runId||'')||!intervalOk(from,to)||!allowedHandle.test(username||''))return json(res,400,{error:'Parâmetros de consulta inválidos.'});
     const resp=await apiFetch(`${APIFY}/actor-runs/${runId}`);
     const run=resp.data||{};
     if(['FAILED','ABORTED','TIMED-OUT'].includes(run.status))return json(res,200,{status:run.status,error:'A coleta foi interrompida. Tente novamente.'});
@@ -87,7 +87,23 @@ module.exports=async function handler(req,res){
       posts.push({date,shortCode:p.shortCode,type,likes:Math.max(0,Number(p.likesCount)||0),comments:Math.max(0,Number(p.commentsCount)||0),plays:p.videoPlayCount==null?null:Math.max(0,Number(p.videoPlayCount)||0),owner:String(p.ownerUsername||'').slice(0,35),caption:String(p.caption||'').slice(0,800)});
     }
     posts.sort((a,b)=>b.date.localeCompare(a.date));
-    return json(res,200,{status:'SUCCEEDED',costUsd:run.usageTotalUsd??null,posts,coverageNote:records.length>=requestedLimit?'Atenção: coleta pode ter atingido o limite de publicações; reduza o período para conferir a cobertura integral.':null});
+    // Confirma persistência do JSON em cada consulta concluída: se o webhook atrasou
+    // ou falhou, os mesmos dados são recuperados sem executar novamente o Actor.
+    let archived=false,archiveError=null,archiveName=null;
+    try{
+      const saved=await storeReport({
+        username:username.toLowerCase(),from,to,
+        clientName:String(clientName||username).slice(0,100),
+        posts
+      },run);
+      archived=!!(saved.saved||saved.duplicate);
+      archiveName=saved.name||null;
+      console.info('One Way Instagram archive confirmed',{runId,archived,posts:posts.length});
+    }catch(error){
+      archiveError='O Apify concluiu a análise, mas não foi possível salvar os dados. Tente recuperar esta execução sem gerar outra cobrança.';
+      console.error('One Way Instagram archive confirmation failed',{runId,error:String(error?.message||'').slice(0,220)});
+    }
+    return json(res,200,{status:'SUCCEEDED',archived,archiveName,archiveError,costUsd:run.usageTotalUsd??null,posts,coverageNote:records.length>=requestedLimit?'Atenção: coleta pode ter atingido o limite de publicações; reduza o período para conferir a cobertura integral.':null});
   }catch(error){
     const code=error.status||500;
     return json(res,code,{error:code===500?'Não foi possível iniciar ou consultar a análise: '+String(error.message||''):error.message});
