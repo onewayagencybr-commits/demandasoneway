@@ -540,6 +540,72 @@ body.calendar-view{background-attachment:scroll!important}
   .admin-utility-tabs .admin-agenda-tab{max-width:100%;white-space:normal;text-align:center}
 }
 .commemorative-suggestion{color:rgba(230,240,255,.72)!important}.commemorative-kind{display:inline-flex;margin:4px 8px 0 0;color:rgba(233,242,255,.55);font-size:8px;font-weight:600}.commemorative-source{display:inline-flex;align-items:center;margin-left:10px;color:rgba(197,218,255,.72);font-size:9px;text-decoration:none}.commemorative-source:hover{text-decoration:underline;color:#fff}
+
+/* ONE WAY · Social Media — frente exclusiva do administrador */
+.social-media-tab{position:relative;margin-left:14px!important}
+.social-media-tab::before{content:"";position:absolute;left:-11px;top:9px;bottom:9px;width:1px;background:rgba(221,235,255,.24)}
+.sm-shell{display:grid;gap:18px;animation:contentReveal .45s var(--ease) both}
+.sm-top{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:24px 27px;border:1px solid rgba(218,232,255,.14);border-radius:22px;background:linear-gradient(125deg,rgba(15,43,102,.72),rgba(14,33,74,.42));box-shadow:0 22px 55px rgba(0,6,30,.15)}
+.sm-eyebrow{display:block;color:#a7c3ee;font-size:10px;font-weight:650;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}
+.sm-top h2{font-size:26px;letter-spacing:-.04em;font-weight:600;color:#fff;margin:0 0 6px}
+.sm-top p{color:rgba(226,237,255,.65);font-size:11px;line-height:1.7;margin:0;max-width:680px}
+.sm-top .primary{white-space:nowrap;padding:12px 16px}
+.sm-toolbar{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.sm-toolbar-left{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.sm-toolbar input{border:1px solid rgba(218,232,255,.18);background:rgba(255,255,255,.09)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;color-scheme:dark;border-radius:11px;padding:10px 12px;outline:none;font-size:12px}
+.sm-toolbar input::placeholder{color:rgba(226,237,255,.46)}
+.sm-toolbar #smSearch{min-width:220px}
+.sm-toolbar #smMonth{min-width:155px}
+.sm-count{font-size:10px;color:rgba(221,232,255,.59)}
+.sm-layout{display:grid;grid-template-columns:minmax(230px,285px) minmax(0,1fr);gap:15px;align-items:start}
+.sm-clients,.sm-work{border-radius:19px;background:linear-gradient(150deg,rgba(15,40,92,.62),rgba(13,31,68,.52));border:1px solid rgba(218,232,255,.14);box-shadow:0 17px 40px rgba(0,8,30,.10);overflow:hidden}
+.sm-panel-heading{padding:18px 19px 14px;border-bottom:1px solid rgba(226,235,255,.10);display:flex;gap:8px;align-items:center;justify-content:space-between}
+.sm-panel-heading strong{font-size:12px;color:#fff;font-weight:650}
+.sm-panel-heading span{font-size:10px;color:rgba(230,239,255,.53)}
+.sm-client-list{padding:8px;max-height:680px;overflow:auto;display:grid;gap:5px}
+.sm-client{width:100%;display:flex;justify-content:space-between;align-items:center;gap:11px;text-align:left;padding:12px 13px;border-radius:11px;border:1px solid transparent;background:transparent;color:rgba(237,244,255,.76);font-size:12px;font-weight:530;transition:background .16s,border-color .16s}
+.sm-client:hover{background:rgba(255,255,255,.07);color:#fff}
+.sm-client.active{background:rgba(91,144,255,.21);color:#fff;border-color:rgba(173,205,255,.28)}
+.sm-client .sm-client-count{font-size:10px;color:rgba(230,240,255,.52);font-weight:500}
+.sm-client.active .sm-client-count{color:#d3e5ff}
+.sm-work-title{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:21px 22px;border-bottom:1px solid rgba(226,235,255,.11)}
+.sm-work-title h3{font-size:17px;color:#fff;font-weight:600;margin:0;letter-spacing:-.02em}
+.sm-work-title p{margin:5px 0 0;color:rgba(230,240,255,.56);font-size:10px}
+.sm-task-list{display:grid;gap:9px;padding:15px}
+.sm-task{padding:15px 16px;border-radius:13px;background:rgba(255,255,255,.065);border:1px solid rgba(223,236,255,.11);display:grid;gap:8px}
+.sm-task-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.sm-task-title{min-width:0}
+.sm-task-title strong{color:#fff;display:block;font-size:12px;font-weight:625;line-height:1.55;overflow-wrap:anywhere}
+.sm-task-date{color:#abc9ff;font-size:10px;display:inline-block;margin-bottom:5px;font-weight:550}
+.sm-task-desc{color:rgba(233,242,255,.70);font-size:11px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere;margin:0}
+.sm-task-actions{display:flex;align-items:center;gap:7px;flex:0 0 auto}
+.sm-task-actions button{border:1px solid rgba(214,232,255,.16);border-radius:8px;background:rgba(255,255,255,.06);color:rgba(233,244,255,.81);font-size:10px;padding:7px 10px;font-weight:600}
+.sm-task-actions button:hover{background:rgba(255,255,255,.12)}
+.sm-task-actions .sm-remove{color:#ffd0d0;border-color:rgba(255,178,178,.15)}
+.sm-empty{padding:45px 20px;text-align:center;color:rgba(226,236,255,.56);font-size:11px;line-height:1.7}
+.sm-empty strong{display:block;color:#fff;margin-bottom:5px;font-size:13px;font-weight:550}
+.sm-form-modal{width:min(590px,100%)}
+.sm-form-modal .sm-modal-sub{font-size:11px;color:#8794a9;margin:5px 0 0;line-height:1.5}
+.sm-form-modal .field textarea{min-height:155px;line-height:1.6}
+.sm-form-modal .field select{min-height:43px}
+.sm-locked{margin:12px;padding:25px;border:1px dashed rgba(255,196,96,.27);border-radius:12px;color:#ffe1b0;font-size:11px;line-height:1.6}
+@media(max-width:900px){.sm-layout{grid-template-columns:1fr}.sm-client-list{max-height:250px;grid-template-columns:repeat(auto-fill,minmax(145px,1fr))}.sm-top{padding:20px}.sm-work-title{padding:18px}}
+@media(max-width:640px){.social-media-tab{margin-left:4px!important}.social-media-tab::before{display:none}.sm-top{align-items:stretch;flex-direction:column;gap:14px}.sm-top h2{font-size:22px}.sm-top .primary{width:100%}.sm-toolbar-left{width:100%}.sm-toolbar input{min-width:0!important;flex:1;width:100%}.sm-task-head{flex-direction:column}.sm-task-actions{width:100%}.sm-task-actions button{flex:1}}
+
+/* Navegacao das quatro frentes no celular, sem corte lateral */
+@media(max-width:700px){
+ .sm-enabled .nav-row{display:flex;flex-direction:column;align-items:stretch;gap:9px}
+ .sm-enabled .area-nav-cluster{width:100%;min-width:0;display:flex;align-items:stretch}
+ .sm-enabled .area-nav-cluster .tabs{width:100%;max-width:100%;flex:1;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;gap:4px}
+ .sm-enabled .area-nav-cluster .tab{flex:0 0 auto;white-space:nowrap;font-size:12px;padding:9px 10px}
+ .sm-enabled .area-nav-cluster .social-media-tab{margin-left:7px!important}
+ .sm-enabled .admin-utility-tabs,.sm-enabled.home-mode .admin-utility-tabs{position:static;left:auto;right:auto;top:auto;bottom:auto;transform:none;display:flex;gap:6px;justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;max-width:100%;width:100%;padding:0;margin:0;opacity:1}
+ .sm-enabled .admin-utility-tabs .admin-agenda-tab{flex:0 0 auto;width:auto;white-space:nowrap;font-size:12px!important;height:36px;padding:0 10px}
+ .sm-enabled.home-mode .area-nav-cluster{transform:none}
+ .sm-enabled.home-mode .nav-row{min-height:0;margin-top:20px}
+ .sm-enabled.home-mode .tabs{transform:none!important}
+ .sm-enabled.home-mode .tab{animation:none;font-size:12px;padding:9px 10px}
+}
 </style>
 </head>
 <body class="booting">
@@ -580,6 +646,16 @@ body.calendar-view{background-attachment:scroll!important}
     </section>
 
     <section id="agendaContent" class="hidden"><div class="agenda-wrap"><div class="agenda-summary"><div><h2>Agenda de postagens</h2><span>Demandas em andamento organizadas por prazo.</span></div><span id="agendaCount"></span></div><div class="agenda-view-tabs" id="agendaViewTabs"><button type="button" class="agenda-view-tab active" data-agenda-view="active">Agenda</button><button type="button" class="agenda-view-tab" data-agenda-view="finished">Finalizadas <span id="agendaFinishedCount">0</span></button></div><div class="agenda-list" id="agendaList"></div></div></section>
+
+
+    <!-- Social Media: trabalho editorial independente, somente administrador -->
+    <section id="socialMediaContent" class="hidden" aria-label="Social Media">
+      <div class="sm-shell">
+        <div class="sm-top"><div><span class="sm-eyebrow">ONE WAY · FRENTE DE TRABALHO</span><h2>Social Media</h2><p>Clientes da agência e planejamento editorial num único lugar. Cadastre suas demandas com apenas data, nome e descrição, sem alterar as demandas de Arte, Vídeo ou Tráfego.</p></div><button type="button" class="primary" id="smNewTask">+ Nova demanda</button></div>
+        <div class="sm-toolbar"><div class="sm-toolbar-left"><input id="smSearch" type="search" placeholder="Buscar cliente ou demanda" aria-label="Buscar no Social Media"><input id="smMonth" type="month" aria-label="Mês das demandas de Social Media"></div><span class="sm-count" id="smSummary"></span></div>
+        <div class="sm-layout"><aside class="sm-clients"><div class="sm-panel-heading"><strong>Clientes</strong><span id="smClientsCount"></span></div><div class="sm-client-list" id="smClientList"></div></aside><div class="sm-work"><div class="sm-work-title"><div><h3 id="smSelectedTitle">Demandas de Social Media</h3><p id="smSelectedSubtitle">Selecione um cliente ou visualize todos.</p></div></div><div class="sm-task-list" id="smTaskList"></div></div></div>
+      </div>
+    </section>
 
     <section id="weekCalendarContent" class="hidden">
       <div class="wk-shell">
@@ -631,6 +707,19 @@ body.calendar-view{background-attachment:scroll!important}
     </div></section>
   </main>
 </div>
+
+
+<div class="modal-backdrop hidden" id="socialMediaModal"><div class="modal sm-form-modal">
+  <div class="modal-head"><div><h3 id="smModalTitle">Nova demanda · Social Media</h3><p class="sm-modal-sub">Somente o essencial para o planejamento: cliente, data, demanda e descrição.</p></div><button type="button" class="x" data-close="socialMediaModal">×</button></div>
+  <form id="smForm"><input type="hidden" id="smEditId">
+    <div class="field"><label>Cliente</label><select id="smFormClient" required></select></div>
+    <div class="field hidden" id="smNewClientWrap"><label>Nome do novo cliente</label><input id="smNewClientName" maxlength="110" placeholder="Digite o nome do cliente"></div>
+    <div class="field"><label>Data da demanda</label><input id="smFormDate" type="date" required></div>
+    <div class="field"><label>Demanda</label><input id="smFormTitle" maxlength="220" required placeholder="Ex.: Planejar conteúdos da semana"></div>
+    <div class="field"><label>Descrição</label><textarea id="smFormDescription" maxlength="12000" placeholder="Detalhes, briefing e anotações..."></textarea></div>
+    <div class="modal-actions"><button type="button" class="ghost" data-close="socialMediaModal">Cancelar</button><button type="submit" class="primary" id="smSaveBtn">Salvar demanda</button></div>
+  </form>
+</div></div>
 
 <div class="modal-backdrop hidden" id="demandModal"><div class="modal">
   <div class="modal-head"><div><h3 id="demandModalTitle">Nova demanda</h3><p>Cadastre briefing, prazo, referências e arquivos para produção em um só lugar.</p></div><button class="x" data-close="demandModal">×</button></div>
@@ -971,15 +1060,18 @@ const DB_NAME='demandas-neutro-v7-db';
 const SUPABASE_URL='https://wreolbaiqfpoytfshmoz.supabase.co';
 const SUPABASE_KEY='sb_publishable_R7Umvf3iStv_e6xkIzKEyQ_YHFThLxe';
 const REMOTE_STATE_ID='main';
+const SM_KDF_SALT='oneway-social-media-v1';
+const SM_KDF_ITERATIONS=250000;
 const STORAGE_BUCKET='demand-files';
 const supabaseClient=window.supabase?.createClient?.(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:false,autoRefreshToken:true,detectSessionInUrl:false}})||null;
 let supabaseAdminAuthenticated=false,supabaseAdminEmail='';
 let realtimeChannel=null,financeRealtimeChannel=null,financeCryptoKey=null,financeUnlocked=false,financeUpdatedAt=0,legacyFinanceItems=[];
 let contractsRealtimeChannel=null,contractsCryptoKey=null,contractsUnlocked=false,contractsUpdatedAt=0,secureContracts=[],hiddenContractClientProfiles=[],savedContractAgencyProfiles=[],contractView='active',activeContractId=null;
+let smCryptoKey=null,smUnlocked=false,smItems=[],smUpdatedAt=0,smSelectedClient='',smMonth=currentMonthKey(),smSearchText='',smSaving=false;
 let state=seed(),currentUser=null,currentArea=null,currentMonth=currentMonthKey(),openClientId=null,openDemandId=null,toastTimer=null,lastAddedClientId=null,activeAnalytics=null,bulkImportDrafts=[],bulkImportMeta={warnings:[],expected:{}},agendaView="active",commemorativeYear=2026,commemorativeMonth=10,commemorativeCategory='all',formDemandArea='arte',calendarWeekStart=calendarMonday(calendarLocalISO(new Date())),calendarViewFilter='todos';
 let bulkSpeechRecognition=null,bulkSpeechListening=false,bulkSpeechBaseText='',bulkSpeechCommitted='';
 
-function seed(){return {version:7,clients:[],demands:[],deletedDemands:[],removedClientMonths:[],recentClients:[],proposalHistory:[],analyticsReports:{},financeItems:[],calendarEvents:[],updatedAt:Date.now()}}
+function seed(){return {version:7,clients:[],demands:[],deletedDemands:[],removedClientMonths:[],recentClients:[],proposalHistory:[],analyticsReports:{},financeItems:[],calendarEvents:[],socialMediaSecure:null,updatedAt:Date.now()}}
 function uid(){return 'id_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,10)}
 function esc(v=''){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function currentMonthKey(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}
@@ -997,7 +1089,7 @@ function allowedAreaKeys(){if(isAdmin()||userAccess()==='status')return Object.k
 function agendaAreaFilter(){return isDesign()?'arte':isVideoUser()?'video':null}
 function canAccessArea(area){return allowedAreaKeys().includes(area)}
 function safeUrl(v){try{const u=new URL(v);return ['http:','https:'].includes(u.protocol)?u.href:'#'}catch{return '#'}}
-function normalizeState(s){if(!s||typeof s!=='object')return seed();const clients=Array.isArray(s.clients)?s.clients:[];const derivedRecent=[...clients].sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||''))).map(c=>c.name).filter(Boolean);const recent=Array.isArray(s.recentClients)?s.recentClients:derivedRecent;return {version:7,clients,demands:Array.isArray(s.demands)?s.demands:[],deletedDemands:Array.isArray(s.deletedDemands)?s.deletedDemands:[],removedClientMonths:Array.isArray(s.removedClientMonths)?s.removedClientMonths:[],recentClients:[...new Set(recent)].slice(0,8),proposalHistory:Array.isArray(s.proposalHistory)?s.proposalHistory:[],analyticsReports:s.analyticsReports&&typeof s.analyticsReports==='object'?s.analyticsReports:{},financeItems:Array.isArray(s.financeItems)?s.financeItems:[],calendarEvents:Array.isArray(s.calendarEvents)?s.calendarEvents:[],updatedAt:Number(s.updatedAt)||0}}
+function normalizeState(s){if(!s||typeof s!=='object')return seed();const clients=Array.isArray(s.clients)?s.clients:[];const derivedRecent=[...clients].sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||''))).map(c=>c.name).filter(Boolean);const recent=Array.isArray(s.recentClients)?s.recentClients:derivedRecent;return {version:7,clients,demands:Array.isArray(s.demands)?s.demands:[],deletedDemands:Array.isArray(s.deletedDemands)?s.deletedDemands:[],removedClientMonths:Array.isArray(s.removedClientMonths)?s.removedClientMonths:[],recentClients:[...new Set(recent)].slice(0,8),proposalHistory:Array.isArray(s.proposalHistory)?s.proposalHistory:[],analyticsReports:s.analyticsReports&&typeof s.analyticsReports==='object'?s.analyticsReports:{},financeItems:Array.isArray(s.financeItems)?s.financeItems:[],calendarEvents:Array.isArray(s.calendarEvents)?s.calendarEvents:[],socialMediaSecure:s.socialMediaSecure&&typeof s.socialMediaSecure==='object'?s.socialMediaSecure:null,updatedAt:Number(s.updatedAt)||0}}
 
 function openDB(){return new Promise((resolve,reject)=>{try{const req=indexedDB.open(DB_NAME,1);req.onupgradeneeded=()=>{const db=req.result;if(!db.objectStoreNames.contains('app'))db.createObjectStore('app',{keyPath:'key'});if(!db.objectStoreNames.contains('files'))db.createObjectStore('files',{keyPath:'id'})};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)}catch(e){reject(e)}})}
 async function dbReadState(){try{const db=await openDB();return await new Promise((resolve,reject)=>{const req=db.transaction('app').objectStore('app').get('state');req.onsuccess=()=>resolve(req.result?.value||null);req.onerror=()=>reject(req.error)})}catch{return null}}
@@ -1155,6 +1247,7 @@ function subscribeRealtime(){
       if(Number(incoming.updatedAt)&&Number(incoming.updatedAt)===Number(state.updatedAt))return;
       state=incoming;writeLocalCache(state);
       if(currentUser)renderAll();
+      if(smUnlocked&&isAdmin())smRefreshFromRemote();
     })
     .subscribe(status=>console.log('Realtime:',status));
 }
@@ -1182,6 +1275,7 @@ function initLogin(){
       const syncIssues=[];
       try{await loadSecureFinance(password)}catch(e){console.error(e);lockFinance();syncIssues.push('Financeiro')}
       try{await loadSecureContracts(password);await migrateLegacySignedContractsEncryption()}catch(e){console.error(e);lockContracts();syncIssues.push('Contratos')}
+      try{await smUnlock(password)}catch(e){console.error(e);smLock();syncIssues.push('Social Media')}
       if(syncIssues.length)error.textContent=`Administrador autenticado. ${syncIssues.join(' e ')} não conseguiu sincronizar agora.`;
       enterAs('Administrador');
     }finally{adminBtn.disabled=false}
@@ -1190,15 +1284,15 @@ function initLogin(){
   let saved=null;try{saved=sessionStorage.getItem('demanda-user-v7')}catch{}if(saved&&USERS[saved]&&saved!=='Administrador'){currentUser=saved;enterApp()}else if(saved==='Administrador'){try{sessionStorage.removeItem('demanda-user-v7')}catch{}}
 }
 function enterApp(){document.getElementById('loginScreen').classList.add('hidden');document.getElementById('app').classList.remove('hidden');if(isAdmin()){if(currentArea==='agenda')currentArea=null}else if(isDesign()){currentArea='arte'}else if(isVideoUser()){currentArea='video'}else if(!currentArea||!canAccessArea(currentArea)){currentArea='agenda'}renderAll()}
-async function logout(){lockFinance();lockContracts();try{sessionStorage.removeItem('demanda-user-v7')}catch{}await clearSupabaseAdminAuth();location.reload()}
+async function logout(){smLock();lockFinance();lockContracts();try{sessionStorage.removeItem('demanda-user-v7')}catch{}await clearSupabaseAdminAuth();location.reload()}
 
 function renderTabs(){
   const cluster=document.querySelector('.area-nav-cluster');if(cluster)cluster.classList.toggle('role-limited',isDesign()||isVideoUser());
   const agenda=!isAdmin()?`<button class="tab ${currentArea==='agenda'?'active':''}" data-area="agenda">Agenda</button>`:'';
-  const areaTabs=allowedAreaKeys().map(k=>`<button class="tab ${currentArea===k?'active':''}" data-area="${k}">${AREAS[k]}</button>`).join('');
+  const areaTabs=allowedAreaKeys().map(k=>`<button class="tab ${currentArea===k?'active':''}" data-area="${k}">${AREAS[k]}</button>`).join('')+(isAdmin()?`<button class="tab social-media-tab ${currentArea==='socialMedia'?'active':''}" data-area="socialMedia">Social Media</button>`:'');
   document.getElementById('tabs').innerHTML=agenda+areaTabs;
   document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{
-    const target=b.dataset.area;if(target!=='agenda'&&!canAccessArea(target))return;
+    const target=b.dataset.area;if(target!=='agenda'&&!(target==='socialMedia'&&isAdmin())&&!canAccessArea(target))return;
     const wasHome=isAdmin()&&!currentArea,go=()=>{currentArea=target;if(target==='agenda')agendaView='active';openClientId=null;openDemandId=null;document.getElementById('searchInput').value='';document.getElementById('app').classList.remove('leaving-home');renderAll()};
     if(wasHome){document.getElementById('app').classList.add('leaving-home');setTimeout(go,420)}else go();
   });
@@ -1210,15 +1304,16 @@ function renderTabs(){
 }
 function renderMonths(){const s=document.getElementById('monthSelect');const year=currentMonthKey().slice(0,4),finance=currentArea==='finance';if(finance&&currentMonth.slice(0,4)!==year)currentMonth=currentMonthKey();s.min=finance?`${year}-01`:'';s.max=finance?`${year}-12`:'';s.value=/^\d{4}-(0[1-9]|1[0-2])$/.test(currentMonth)?currentMonth:currentMonthKey();s.onchange=()=>{if(!s.value)return;currentMonth=s.value;openClientId=null;openDemandId=null;renderAll()}}
 function renderAll(){
-  if(currentArea&&!['agenda','deleted','proposals','finance','contracts','commemorativeDates','weekCalendar'].includes(currentArea)&&!canAccessArea(currentArea))currentArea=isDesign()?'arte':isVideoUser()?'video':'agenda';
-  const app=document.getElementById('app');document.body.classList.toggle('calendar-view',isAdmin()&&currentArea==='weekCalendar');app.classList.toggle('home-mode',isAdmin()&&!currentArea);
+  if(currentArea&&!['agenda','deleted','proposals','finance','contracts','commemorativeDates','weekCalendar','socialMedia'].includes(currentArea)&&!canAccessArea(currentArea))currentArea=isDesign()?'arte':isVideoUser()?'video':'agenda';
+  const app=document.getElementById('app');app.classList.toggle('sm-enabled',isAdmin());document.body.classList.toggle('calendar-view',isAdmin()&&currentArea==='weekCalendar');app.classList.toggle('home-mode',isAdmin()&&!currentArea);
   document.getElementById('userName').textContent=currentUser;document.getElementById('userRole').textContent=isAdmin()?'Acesso total':isDesign()?'Arte + Agenda':isVideoUser()?'Vídeo + Agenda':'Visualização + status';document.getElementById('avatar').textContent=isAdmin()?'A':isDesign()?'D':isVideoUser()?'V':'G';document.getElementById('newProposalBtn').classList.toggle('hidden',!isAdmin());document.getElementById('bulkImportBtn').classList.toggle('hidden',!isAdmin());document.getElementById('newContractBtn').classList.toggle('hidden',!isAdmin());document.getElementById('contractsTab').classList.toggle('hidden',!isAdmin());const contractAlertBtn=document.getElementById('contractAlertBtn');contractAlertBtn.classList.toggle('hidden',!isAdmin());contractAlertBtn.style.display=isAdmin()?'':'none';contractAlertBtn.setAttribute('aria-hidden',isAdmin()?'false':'true');document.getElementById('contractsTab').classList.toggle('active',currentArea==='contracts');renderContractAlert();renderTabs();renderMonths();
-  const selected=!!currentArea,deleted=currentArea==='deleted',agenda=currentArea==='agenda',proposals=currentArea==='proposals',finance=currentArea==='finance',contracts=currentArea==='contracts',commemorativeDates=currentArea==='commemorativeDates',weekCalendar=currentArea==='weekCalendar';
-  document.getElementById('heroControls').classList.toggle('hidden',!selected||proposals||contracts||commemorativeDates||weekCalendar);document.getElementById('searchInput').classList.toggle('hidden',finance||contracts||commemorativeDates||weekCalendar);document.getElementById('monthSelect').classList.toggle('hidden',agenda||proposals||contracts||commemorativeDates||weekCalendar);document.getElementById('areaContent').classList.toggle('hidden',!selected||deleted||agenda||proposals||finance||contracts||commemorativeDates||weekCalendar);document.getElementById('agendaContent').classList.toggle('hidden',!agenda);document.getElementById('commemorativeDatesContent').classList.toggle('hidden',!commemorativeDates);document.getElementById('weekCalendarContent').classList.toggle('hidden',!weekCalendar||!isAdmin());document.getElementById('deletedContent').classList.toggle('hidden',!deleted);document.getElementById('proposalHistoryContent').classList.toggle('hidden',!proposals);document.getElementById('contractsContent').classList.toggle('hidden',!contracts);document.getElementById('financeContent').classList.toggle('hidden',!finance);document.getElementById('newDemandTop').classList.toggle('hidden',!selected||deleted||agenda||proposals||finance||contracts||commemorativeDates||weekCalendar||!isAdmin());document.getElementById('addClientBtn').classList.toggle('hidden',!selected||deleted||agenda||proposals||finance||contracts||commemorativeDates||weekCalendar||!isAdmin());document.getElementById('trafficReportBtn').classList.toggle('hidden',!(isAdmin()&&currentArea==='trafego'));
+  const selected=!!currentArea,deleted=currentArea==='deleted',agenda=currentArea==='agenda',proposals=currentArea==='proposals',finance=currentArea==='finance',contracts=currentArea==='contracts',commemorativeDates=currentArea==='commemorativeDates',weekCalendar=currentArea==='weekCalendar',socialMedia=currentArea==='socialMedia'&&isAdmin();
+  document.getElementById('heroControls').classList.toggle('hidden',!selected||proposals||contracts||commemorativeDates||weekCalendar||socialMedia);document.getElementById('searchInput').classList.toggle('hidden',finance||contracts||commemorativeDates||weekCalendar||socialMedia);document.getElementById('monthSelect').classList.toggle('hidden',agenda||proposals||contracts||commemorativeDates||weekCalendar||socialMedia);document.getElementById('areaContent').classList.toggle('hidden',!selected||deleted||agenda||proposals||finance||contracts||commemorativeDates||weekCalendar||socialMedia);document.getElementById('agendaContent').classList.toggle('hidden',!agenda);document.getElementById('commemorativeDatesContent').classList.toggle('hidden',!commemorativeDates);document.getElementById('weekCalendarContent').classList.toggle('hidden',!weekCalendar||!isAdmin());document.getElementById('socialMediaContent').classList.toggle('hidden',!socialMedia);document.getElementById('deletedContent').classList.toggle('hidden',!deleted);document.getElementById('proposalHistoryContent').classList.toggle('hidden',!proposals);document.getElementById('contractsContent').classList.toggle('hidden',!contracts);document.getElementById('financeContent').classList.toggle('hidden',!finance);document.getElementById('newDemandTop').classList.toggle('hidden',!selected||deleted||agenda||proposals||finance||contracts||commemorativeDates||weekCalendar||socialMedia||!isAdmin());document.getElementById('addClientBtn').classList.toggle('hidden',!selected||deleted||agenda||proposals||finance||contracts||commemorativeDates||weekCalendar||socialMedia||!isAdmin());document.getElementById('trafficReportBtn').classList.toggle('hidden',!(isAdmin()&&currentArea==='trafego'));
   if(!selected){document.getElementById('pageTitle').textContent='Acompanhamento de Demandas';document.getElementById('pageSubtitle').textContent='Escolha uma área para começar.';return}
   if(finance){document.getElementById('pageTitle').textContent='Financeiro da Agência';document.getElementById('pageSubtitle').textContent=`Entradas, custos e saldo de ${fmtMonth(currentMonth)}.`;renderFinance();return}
   if(proposals){document.getElementById('pageTitle').textContent='Propostas';document.getElementById('pageSubtitle').textContent='Histórico das propostas realmente geradas.';renderProposalHistory();return}
   if(contracts){document.getElementById('pageTitle').textContent='Contratos';document.getElementById('pageSubtitle').textContent='Contratos em vigência, vencimentos e arquivos assinados.';renderContracts();return}
+  if(socialMedia){document.getElementById('pageTitle').textContent='Social Media';document.getElementById('pageSubtitle').textContent='Organização editorial simplificada por cliente.';renderSocialMedia();return}
   if(weekCalendar){if(!isAdmin()){currentArea=null;renderAll();return}document.getElementById('pageTitle').textContent='Calendário';document.getElementById('pageSubtitle').textContent='Planejamento semanal de postagens, gravações e reuniões.';renderWeekCalendar();return}
   if(commemorativeDates){document.getElementById('pageTitle').textContent='Datas Comemorativas';document.getElementById('pageSubtitle').textContent='Calendário editorial de oportunidades para os clientes da agência.';renderCommemorativeDates();return}
   if(agenda){document.getElementById('pageTitle').textContent='Agenda de demandas';const f=agendaAreaFilter();document.getElementById('pageSubtitle').textContent=f?`Somente demandas de ${AREAS[f]}, organizadas pela data de postagem.`:'Todas as demandas organizadas pela data de postagem.';renderAgenda();return}
@@ -2413,6 +2508,142 @@ function handleGlobalEscape(e){
 }
 
 // ========================== CALENDÁRIO SEMANAL (ADMIN) ==========================
+
+// Social Media: AES-GCM. Conteúdo legível apenas com chave derivada da senha do administrador.
+async function smDeriveKey(password){
+  const raw=await crypto.subtle.importKey('raw',new TextEncoder().encode(password),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt:new TextEncoder().encode(SM_KDF_SALT),iterations:SM_KDF_ITERATIONS,hash:'SHA-256'},raw,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+}
+function smNormalizeName(name){return String(name||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toLocaleLowerCase('pt-BR')}
+function smAllClients(){
+  const byKey=new Map();
+  for(const c of (state.clients||[])){const name=String(c.name||'').trim(),key=smNormalizeName(name);if(key&&!byKey.has(key))byKey.set(key,name)}
+  if(smUnlocked)for(const task of smItems){const name=String(task.client||'').trim(),key=smNormalizeName(name);if(key&&!byKey.has(key))byKey.set(key,name)}
+  return [...byKey.values()].sort((a,b)=>a.localeCompare(b,'pt-BR',{sensitivity:'base'}));
+}
+async function smDecrypt(pack){
+  if(!smCryptoKey||!pack?.cipher||!pack?.iv)throw new Error('Dados protegidos de Social Media indisponíveis');
+  const raw=await crypto.subtle.decrypt({name:'AES-GCM',iv:base64ToBytes(pack.iv)},smCryptoKey,base64ToBytes(pack.cipher));
+  const decoded=JSON.parse(new TextDecoder().decode(raw));
+  return {items:Array.isArray(decoded?.items)?decoded.items:[],updatedAt:Number(pack.updatedAt)||0};
+}
+async function smEncrypt(items){
+  if(!smCryptoKey)throw new Error('Chave do Social Media bloqueada');
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const raw=new TextEncoder().encode(JSON.stringify({items,updatedAt:Date.now()}));
+  const cipher=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},smCryptoKey,raw));
+  return {v:1,alg:'AES-GCM',iv:bytesToBase64(iv),cipher:bytesToBase64(cipher),updatedAt:Date.now()};
+}
+async function smUnlock(password){
+  if(!adminAuthReady())throw new Error('Autenticação administrativa necessária');
+  smCryptoKey=await smDeriveKey(password);smUnlocked=false;smItems=[];smUpdatedAt=0;
+  const pack=state.socialMediaSecure;
+  if(pack?.cipher){const decoded=await smDecrypt(pack);smItems=decoded.items;smUpdatedAt=decoded.updatedAt}
+  smUnlocked=true;
+}
+function smLock(){smCryptoKey=null;smUnlocked=false;smItems=[];smUpdatedAt=0;smSelectedClient=''}
+async function smRefreshFromRemote(){
+  if(!smUnlocked||!isAdmin()||!adminAuthReady())return;
+  const pack=state.socialMediaSecure;
+  if(!pack?.cipher){if(!smUpdatedAt){smItems=[];if(currentArea==='socialMedia')renderSocialMedia()}return}
+  if(Number(pack.updatedAt)<=smUpdatedAt)return;
+  try{const result=await smDecrypt(pack);if(result.updatedAt>smUpdatedAt){smItems=result.items;smUpdatedAt=result.updatedAt;if(currentArea==='socialMedia')renderSocialMedia()}}
+  catch(e){console.error('Falha ao abrir atualização de Social Media:',e);toast('A atualização segura do Social Media não pôde ser aberta neste login.')}
+}
+async function smPersistItems(nextItems){
+  if(!isAdmin()||!adminAuthReady()||!smUnlocked||smSaving)return false;
+  smSaving=true;
+  const oldPack=state.socialMediaSecure,oldItems=smItems,oldTime=smUpdatedAt;
+  try{
+    const pack=await smEncrypt(nextItems);
+    // Marca o registro novo como mais recente mesmo dentro do mesmo milissegundo.
+    pack.updatedAt=Math.max(pack.updatedAt,oldTime+1);
+    state.socialMediaSecure=pack;
+    const ok=await saveState({strictRemote:true});
+    if(!ok)throw new Error('Supabase não confirmou a gravação');
+    smItems=nextItems;smUpdatedAt=pack.updatedAt;
+    return true;
+  }catch(e){
+    state.socialMediaSecure=oldPack;smItems=oldItems;smUpdatedAt=oldTime;
+    writeLocalCache(state);
+    console.error('Falha ao salvar Social Media:',e);
+    toast('Não foi possível sincronizar a demanda. Nenhuma alteração foi confirmada no Supabase.');
+    return false;
+  }finally{smSaving=false}
+}
+function smVisibleItems(){
+  let items=smItems.filter(x=>String(x.date||'').slice(0,7)===smMonth);
+  if(smSelectedClient)items=items.filter(x=>smNormalizeName(x.client)===smSelectedClient);
+  const q=smNormalizeName(smSearchText);
+  if(q)items=items.filter(x=>[x.client,x.title,x.description].some(v=>smNormalizeName(v).includes(q)));
+  return items.sort((a,b)=>String(a.date||'').localeCompare(String(b.date||''))||String(a.title||'').localeCompare(String(b.title||''),'pt-BR'));
+}
+function renderSocialMedia(){
+  if(!isAdmin()||!adminAuthReady())return;
+  const list=document.getElementById('smClientList'),tasks=document.getElementById('smTaskList');
+  const month=document.getElementById('smMonth');if(month.value!==smMonth)month.value=smMonth;
+  const search=document.getElementById('smSearch');if(search.value!==smSearchText)search.value=smSearchText;
+  if(!smUnlocked){list.innerHTML='';tasks.innerHTML='<div class="sm-locked">Os registros estão protegidos. Faça novamente o login administrativo para desbloquear este módulo.</div>';document.getElementById('smNewTask').disabled=true;return}
+  document.getElementById('smNewTask').disabled=false;
+  const names=smAllClients(),q=smNormalizeName(smSearchText),filteredNames=names.filter(name=>!q||smNormalizeName(name).includes(q)||smItems.some(item=>smNormalizeName(item.client)===smNormalizeName(name)&&[item.title,item.description].some(v=>smNormalizeName(v).includes(q))));
+  if(smSelectedClient&&!names.some(name=>smNormalizeName(name)===smSelectedClient))smSelectedClient='';
+  document.getElementById('smClientsCount').textContent=String(names.length);
+  list.innerHTML='<button type="button" class="sm-client '+(smSelectedClient===''?'active':'')+'" data-sm-client=""><span>Todos os clientes</span><span class="sm-client-count">'+smItems.filter(x=>String(x.date||'').slice(0,7)===smMonth).length+'</span></button>'+filteredNames.map(name=>{
+    const key=smNormalizeName(name),count=smItems.filter(x=>smNormalizeName(x.client)===key&&String(x.date||'').slice(0,7)===smMonth).length;
+    return '<button type="button" class="sm-client '+(smSelectedClient===key?'active':'')+'" data-sm-client="'+esc(key)+'"><span>'+esc(name)+'</span><span class="sm-client-count">'+count+'</span></button>';
+  }).join('');
+  list.querySelectorAll('[data-sm-client]').forEach(btn=>btn.onclick=()=>{smSelectedClient=btn.dataset.smClient;renderSocialMedia()});
+  const currentName=names.find(name=>smNormalizeName(name)===smSelectedClient);
+  document.getElementById('smSelectedTitle').textContent=currentName||'Todas as demandas';
+  document.getElementById('smSelectedSubtitle').textContent=monthKeyLabel(smMonth)+' · planejamento Social Media';
+  const items=smVisibleItems();
+  document.getElementById('smSummary').textContent=items.length+' demanda'+(items.length===1?'':'s')+' neste filtro';
+  if(!items.length){tasks.innerHTML='<div class="sm-empty"><strong>Nenhuma demanda neste período</strong>Escolha outro mês ou cadastre uma nova demanda de Social Media.</div>';return}
+  tasks.innerHTML=items.map(item=>`<article class="sm-task"><div class="sm-task-head"><div class="sm-task-title"><span class="sm-task-date">${esc(fmtPostDate(item.date))} · ${esc(item.client)}</span><strong>${esc(item.title)}</strong></div><div class="sm-task-actions"><button type="button" data-sm-edit="${esc(item.id)}">Editar</button><button type="button" class="sm-remove" data-sm-remove="${esc(item.id)}">Excluir</button></div></div>${item.description?`<p class="sm-task-desc">${esc(item.description)}</p>`:''}</article>`).join('');
+  tasks.querySelectorAll('[data-sm-edit]').forEach(btn=>btn.onclick=()=>smOpenModal(btn.dataset.smEdit));
+  tasks.querySelectorAll('[data-sm-remove]').forEach(btn=>btn.onclick=()=>smDeleteTask(btn.dataset.smRemove));
+}
+function smOpenModal(id=''){
+  if(!isAdmin()||!adminAuthReady()||!smUnlocked)return;
+  const item=smItems.find(t=>t.id===id),names=smAllClients();
+  document.getElementById('smModalTitle').textContent=item?'Editar demanda · Social Media':'Nova demanda · Social Media';
+  document.getElementById('smEditId').value=item?.id||'';
+  const clientSelect=document.getElementById('smFormClient'),selected=item?.client||names.find(x=>smNormalizeName(x)===smSelectedClient)||'';
+  const hasName=names.some(x=>smNormalizeName(x)===smNormalizeName(selected));
+  clientSelect.innerHTML='<option value="">Selecione um cliente</option>'+names.map(name=>'<option value="'+esc(name)+'">'+esc(name)+'</option>').join('')+'<option value="__new__">+ Novo cliente (somente Social Media)</option>';
+  clientSelect.value=selected?(hasName?names.find(x=>smNormalizeName(x)===smNormalizeName(selected)):'__new__'):'';
+  document.getElementById('smNewClientName').value=hasName?'':selected;
+  document.getElementById('smFormDate').value=item?.date||calendarLocalISO(new Date());
+  document.getElementById('smFormTitle').value=item?.title||'';
+  document.getElementById('smFormDescription').value=item?.description||'';
+  smToggleNewClient();document.getElementById('socialMediaModal').classList.remove('hidden');
+  setTimeout(()=>document.getElementById('smFormTitle').focus(),50);
+}
+function smToggleNewClient(){document.getElementById('smNewClientWrap').classList.toggle('hidden',document.getElementById('smFormClient').value!=='__new__')}
+async function smSubmit(e){
+  e.preventDefault();if(!isAdmin()||!adminAuthReady()||!smUnlocked||smSaving)return;
+  const id=document.getElementById('smEditId').value,existing=smItems.find(x=>x.id===id);
+  const choice=document.getElementById('smFormClient').value;
+  const client=(choice==='__new__'?document.getElementById('smNewClientName').value:choice).trim();
+  const date=document.getElementById('smFormDate').value;
+  const title=document.getElementById('smFormTitle').value.trim();
+  const description=document.getElementById('smFormDescription').value.trim();
+  if(!client||!/^\d{4}-\d\d-\d\d$/.test(date)||!title){toast('Informe cliente, data e nome da demanda.');return}
+  const record={id:existing?.id||uid(),client,date,title,description,createdAt:existing?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()};
+  const next=existing?smItems.map(x=>x.id===record.id?record:x):[...smItems,record];
+  const btn=document.getElementById('smSaveBtn');btn.disabled=true;btn.textContent='Salvando...';
+  const ok=await smPersistItems(next);btn.disabled=false;btn.textContent='Salvar demanda';
+  if(!ok)return;
+  smMonth=date.slice(0,7);smSelectedClient=smNormalizeName(client);smSearchText='';
+  closeModal('socialMediaModal');renderSocialMedia();toast(existing?'Demanda de Social Media atualizada.':'Demanda de Social Media criada.',null,null,'success');
+}
+async function smDeleteTask(id){
+  if(!isAdmin()||!adminAuthReady()||!smUnlocked||smSaving)return;
+  const record=smItems.find(x=>x.id===id);if(!record)return;
+  if(!confirm('Excluir a demanda de Social Media "'+record.title+'"?'))return;
+  if(await smPersistItems(smItems.filter(x=>x.id!==id))){renderSocialMedia();toast('Demanda de Social Media excluída.',null,null,'success')}
+}
+
 function calendarLocalISO(date){const d=date instanceof Date?date:new Date(date+'T12:00:00');return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 function calendarAddDays(iso,number){const date=new Date(`${iso}T12:00:00`);date.setDate(date.getDate()+number);return calendarLocalISO(date)}
 function calendarMonday(iso){const date=new Date(`${iso}T12:00:00`);return calendarAddDays(iso,-((date.getDay()+6)%7))}
@@ -2698,6 +2929,11 @@ function exportWeekCalendarPDF(){
 }
 
 function start(){
+ document.getElementById('smNewTask').onclick=()=>smOpenModal();
+ document.getElementById('smFormClient').onchange=smToggleNewClient;
+ document.getElementById('smForm').onsubmit=smSubmit;
+ document.getElementById('smSearch').oninput=e=>{smSearchText=e.target.value;renderSocialMedia()};
+ document.getElementById('smMonth').onchange=e=>{if(/^\d{4}-\d{2}$/.test(e.target.value)){smMonth=e.target.value;renderSocialMedia()}};
  document.querySelectorAll('[data-demand-area]').forEach(b=>b.onclick=()=>setDemandArea(b.dataset.demandArea));
  document.querySelectorAll('#wkFilters [data-wk-filter]').forEach(btn=>btn.onclick=()=>setCalendarViewFilter(btn.dataset.wkFilter));
  document.getElementById('wkAddEventBtn').onclick=()=>openWeekEventModal();
