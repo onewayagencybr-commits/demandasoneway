@@ -115,7 +115,7 @@
     [['REELS',reels],['CARROSSÉIS',carousel],['ESTÁTICOS',images]].forEach(([label,n],i)=>{const x=76+i*325;rect(ctx,x,yFormat+38,304,120);txt(ctx,fmt(n),x+19,yFormat+106,39,C.white,400);txt(ctx,label,x+20,yFormat+142,13,C.muted,500)});
     ctx=base('Conteúdos de destaque','Publicações com maior volume de curtidas e comentários.');
     const top=rank.slice(0,5);
-    top.forEach((p,i)=>{const y=340+i*198;rect(ctx,77,y,946,169,18,'#1d3b65');txt(ctx,String(i+1).padStart(2,'0'),103,y+64,43,C.accent,400);const caption=(p.caption||'Publicação').replace(/\s+/g,' ');wrap(ctx,caption,202,y+52,765,21,28,C.white,400,2);txt(ctx,`${p.date.split('-').reverse().join('/')}   •   ${p.type}`,202,y+114,18,C.muted);txt(ctx,`${fmt(p.likes+p.comments)} interações   •   ${fmt(p.plays||0)} reproduções`,202,y+146,18,C.soft)});
+    top.forEach((p,i)=>{const y=340+i*198;rect(ctx,77,y,946,169,18,'#1d3b65');txt(ctx,String(i+1).padStart(2,'0'),103,y+64,43,C.accent,400);const caption=(p.caption||'Publicação').replace(/\s+/g,' ');wrap(ctx,caption,202,y+52,765,21,28,C.white,400,2);txt(ctx,`${p.date.split('-').reverse().join('/')}   •   ${p.type}`,202,y+114,18,C.muted);txt(ctx,`${fmt(p.likes+p.comments)} interações   •   ${fmt(p.plays||0)} reproduções`,202,y+146,18,C.soft);txt(ctx,'ABRIR PUBLICAÇÃO ↗',836,y+146,14,C.accent,500)});
     if(!top.length)txt(ctx,'Nenhuma publicação encontrada nesse período.',80,390,25,C.muted);
     ctx=base('Leitura estratégica','O que os números sugerem para o próximo ciclo.');
     let y=355;
@@ -130,36 +130,58 @@
     txt(ctx,'ONE WAY  /  ESTRATÉGIA · CRIAÇÃO · CONEXÃO',77,1395,16,C.accent,500);
     return pages;
   }
-  async function loadPdfLib(){
-    if(window.jspdf?.jsPDF)return;
-    await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js';script.onload=resolve;script.onerror=()=>reject(new Error('Não foi possível carregar o motor de PDF.'));document.head.append(script)});
-    if(!window.jspdf?.jsPDF)throw new Error('Motor de PDF indisponível.');
-  }
   async function download(){
     if(!report)return;
-    const btn=$('igDownload');btn.disabled=true;notify('Preparando seu PDF no padrão One Way…');
+    const btn=$('igDownload');
+    btn.disabled=true;notify('Preparando PDF One Way com links de acesso…');
+    let downloaded=false;
     try{
-      await Promise.all([loadPdfLib(),document.fonts.load('300 46px Montserrat'),document.fonts.load('500 16px Montserrat')]);
-      const {jsPDF}=window.jspdf;
-      const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4',compress:true});
-      const logo=await new Promise(resolve=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>resolve(null);im.src='/oneway-logo.png'});
+      await Promise.all([document.fonts.load('300 46px Montserrat'),document.fonts.load('500 16px Montserrat')]);
+      const logo=await new Promise(resolve=>{
+        const im=new Image(),timeout=setTimeout(()=>resolve(null),3500);
+        im.onload=()=>{clearTimeout(timeout);resolve(im)};
+        im.onerror=()=>{clearTimeout(timeout);resolve(null)};
+        im.src='/oneway-logo.png';
+      });
       const pages=makePages(report,logo);
-      pages.forEach((canvas,i)=>{if(i)pdf.addPage();pdf.addImage(canvas.toDataURL('image/jpeg',0.92),'JPEG',0,0,210,297,undefined,'FAST')});
-      pdf.setProperties({title:`One Way · Relatório ${report.clientName}`,author:'One Way Agency'});
+      if(!window.onewayInstagramPDF?.build)throw Error('Exportador do PDF não está disponível. Atualize a página.');
+      const blob=window.onewayInstagramPDF.build(pages,report.posts);
+      if(blob.size<5000)throw Error('PDF gerado incompleto. Tente novamente.');
+      const url=URL.createObjectURL(blob),link=document.createElement('a');
       const safe=report.username.replace(/[^a-z0-9_]/gi,'_');
-      pdf.save(`One_Way_Instagram_${safe}_${report.from}_a_${report.to}.pdf`);
-      notify('PDF gerado! O relatório foi salvo na pasta de downloads do navegador.');
-    }catch(error){notify(error.message||'Falha ao exportar o relatório.',true)}finally{btn.disabled=false}
+      link.href=url;link.download='One_Way_Instagram_'+safe+'_'+report.from+'_a_'+report.to+'.pdf';
+      document.body.appendChild(link);link.click();link.remove();downloaded=true;
+      setTimeout(()=>URL.revokeObjectURL(url),90000);
+      notify('PDF baixado. Salvando também na biblioteca da equipe…');
+      if(window.igReportLibrary?.save){
+        try{
+          await window.igReportLibrary.save(report,blob);
+          notify('PDF baixado e salvo na biblioteca da agência por 30 dias.');
+        }catch(e){
+          notify('PDF baixado, mas a biblioteca não salvou: '+String(e?.message||'confira a configuração do Supabase.'),true);
+        }
+      }else notify('PDF baixado. Biblioteca temporariamente indisponível.',true);
+    }catch(error){
+      console.error('One Way Instagram PDF:',error);
+      notify((downloaded?'PDF baixado, mas houve um problema: ':'Não foi possível gerar o PDF: ')+(error.message||'tente novamente'),true);
+    }finally{btn.disabled=false;}
   }
+
   window.igRender=function(){
     if(!initialized){initialized=true;
       const d=dates();$('igFrom').value=d.from;$('igTo').value=d.to;
       $('igGenerate').addEventListener('click',generate);
       $('igDownload').addEventListener('click',download);
       $('igLast30').addEventListener('click',()=>{const d=dates();$('igFrom').value=d.from;$('igTo').value=d.to});
-      $('igSinceJuly').addEventListener('click',()=>{$('igFrom').value=`${new Date().getFullYear()}-07-01`;$('igTo').value=dateString(new Date())});
+      $('igSinceJuly').textContent='Últimos 3 meses';
+      $('igSinceJuly').addEventListener('click',()=>{
+        const end=new Date(),from=new Date(end.getFullYear(),end.getMonth()-3,1);
+        from.setDate(Math.min(end.getDate(),new Date(from.getFullYear(),from.getMonth()+1,0).getDate()));
+        $('igFrom').value=dateString(from);$('igTo').value=dateString(end);
+      });
       $('igClient').addEventListener('change',()=>{const username=storedClients()[$('igClient').value.trim()];if(username)$('igUsername').value='@'+username});
     }
     $('igClientList').innerHTML=clientNames().map(name=>`<option value="${esc(name)}"></option>`).join('');
+    window.igReportLibrary?.init();
   };
 })();
