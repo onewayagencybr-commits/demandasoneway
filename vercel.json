@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/instagram-reports-cleanup",
+      "schedule": "0 10 * * *"
+    }
+  ]
+}
