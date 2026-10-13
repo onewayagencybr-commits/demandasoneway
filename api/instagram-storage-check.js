@@ -22,5 +22,14 @@ module.exports=async function(req,res){
    signal:AbortSignal.timeout(15000)
   });
   return reply(res,deleted.ok?200:207,{ok:true,deleted:deleted.ok,message:deleted.ok?'PDF de teste salvo e removido com sucesso, sem custos no Apify.':'Gravação funcionou, mas exclusão do arquivo de teste falhou.'});
- }catch(e){console.error('Storage test error',e.message);return reply(res,503,{ok:false,error:'Não foi possível validar o Supabase Storage. Confira a configuração da chave administrativa.'});}
+ }catch(e){
+  const message=String(e?.message||'');
+  console.error('Storage test error',message);
+  const help=/chave configurada é pública|sb_publishable_/i.test(message)
+   ?'A chave em SUPABASE_SERVICE_ROLE_KEY está incorreta: você colocou uma chave PÚBLICA (publishable). Troque pelo valor de Secret key (sb_secret_...) do Supabase em Vercel > onewaydemandas > Environment Variables. Não compartilhe a chave no chat.'
+   :/não tem o papel service_role|Formato de chave de servidor inválido/i.test(message)
+   ?'A variável SUPABASE_SERVICE_ROLE_KEY não contém uma chave administrativa válida. Use uma Secret key (sb_secret_...) do mesmo projeto Supabase.'
+   :'Não foi possível validar o Supabase Storage. Verifique a chave administrativa e execute o teste novamente.';
+  return reply(res,503,{ok:false,error:help});
+ }
 };
