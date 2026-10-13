@@ -90,6 +90,6 @@ module.exports=async function handler(req,res){
     return json(res,200,{status:'SUCCEEDED',costUsd:run.usageTotalUsd??null,posts,coverageNote:records.length>=requestedLimit?'Atenção: coleta pode ter atingido o limite de publicações; reduza o período para conferir a cobertura integral.':null});
   }catch(error){
     const code=error.status||500;
-    return json(res,code,{error:code===500?'Não foi possível consultar o Apify agora. '+String(error.message||''):error.message});
+    return json(res,code,{error:code===500?'Não foi possível iniciar ou consultar a análise: '+String(error.message||''):error.message});
   }
 };
