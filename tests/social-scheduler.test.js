@@ -139,7 +139,7 @@ test('Approval hash accepts equivalent UTC date serializations from Supabase',()
   const {approvalDigest}=require('../lib/social-run-handler');
   const {sha}=require('../lib/social-scheduler-server');
   const input={caption:'Publicação de teste',media_path:'draft/asset.jpg',client_ref:'client:one way agency',scheduled_at:'2026-10-14T19:03:00+00:00'};
-  const hash=sha([input.caption,input.media_path,'2026-10-14T19:03:00.000Z',input.client_ref].join('\\n'));
+  const hash=sha([input.caption,input.media_path,'2026-10-14T19:03:00.000Z',input.client_ref].join(String.fromCharCode(10)));
   assert.equal(approvalDigest(input),hash);
   assert.equal(approvalDigest({...input,scheduled_at:'2026-10-14T19:03:00.000Z'}),hash);
   assert.notEqual(approvalDigest({...input,media_path:'draft/other.jpg'}),hash);
