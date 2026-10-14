@@ -10,7 +10,8 @@ const handlers={
   upload:require('../lib/social-upload-handler'),
   run:require('../lib/social-run-handler'),
   cleanup:require('../lib/social-cleanup-handler'),
-  oneoff:require('../lib/social-single-post-handler')
+  oneoff:require('../lib/social-single-post-handler'),
+  publishnow:require('../lib/social-publish-now-handler')
 };
 // Meta may replace the query part of a registered redirect_uri with ?code&state.
 // Detect a legitimate OAuth response independently of the optional action selector.
@@ -35,6 +36,7 @@ module.exports=async function(req,res){
   if(action==='run')return handlers.run(req,res);
   if(action==='cleanup')return handlers.cleanup(req,res);
   if(action==='oneoff')return handlers.oneoff(req,res);
+  if(action==='publishnow')return handlers.publishnow(req,res);
   if(action==='status'){
     if(req.method!=='GET')return reply(res,405,{error:'Método não permitido.'});
     try{
