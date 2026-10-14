@@ -180,7 +180,12 @@
        denied:'O responsável recusou a autorização do Instagram.',
        expired:'O prazo de autorização expirou. Clique em Conectar Instagram novamente.',
        callback_missing:'A Meta retornou sem código de autorização. Verifique o endereço de retorno OAuth configurado.',
-       error:'Falha ao validar o acesso do Instagram. Verifique o login de empresa e tente novamente.'
+       error:'O Instagram não concluiu o login. Tente novamente.',
+       code_exchange_failed:'A Meta recusou a troca do código de autorização. Verifique as credenciais e a URL OAuth.',
+       long_token_failed:'A Meta recusou a extensão do acesso. A conta pode precisar de nova autorização.',
+       profile_failed:'A Meta autorizou o acesso, mas não foi possível consultar a conta profissional.',
+       save_failed:'A Meta autorizou o Instagram, mas o vínculo não pôde ser salvo no banco.',
+       state_failed:'Não foi possível confirmar o código de segurança do login. Reinicie a conexão.'
      };
      runtime.oauthNotice={message:descriptions[response]||'O Instagram não concluiu a autorização.',error:response!=='ok'};
      url.searchParams.delete('instagram_connection');
