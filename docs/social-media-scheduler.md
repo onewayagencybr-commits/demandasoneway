@@ -22,7 +22,7 @@ Bucket `social-posts-temp` criado manualmente pelo usuário, privado. Verificar 
 - `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY`: seguem helpers existentes; service secret deve estar no ambiente Preview para testar o branch.
 - `META_INSTAGRAM_APP_ID`: ID específico da configuração Instagram Login (NÃO confundir com ID do app principal Meta).
 - `META_INSTAGRAM_APP_SECRET`: Instagram App Secret da configuração de login.
-- `META_INSTAGRAM_REDIRECT_URI`: exatamente `https://onewaydemandas.vercel.app/api/social-instagram-callback`, cadastrado na Meta.
+- `META_INSTAGRAM_REDIRECT_URI`: exatamente `https://onewaydemandas.vercel.app/api/social?action=callback`, cadastrado na Meta.
 - `META_TOKEN_ENCRYPTION_KEY`: 32 bytes aleatórios em 64 caracteres hexadecimais; guardar somente em Vercel Secrets.
 - `CRON_SECRET`: autenticação de cron que o projeto já possui na produção.
 - `SOCIAL_PUBLISHING_ENABLED`: ausente ou `false` durante testes; habilitar somente após publicar com sucesso numa conta teste.
