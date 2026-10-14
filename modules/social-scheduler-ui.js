@@ -41,8 +41,8 @@
    if(!adminReady())return;
    try{
      const [connected,schedules]=await Promise.all([
-       api('/api/social-instagram-connect'),
-       api('/api/social-scheduler')
+       api('/api/social?action=connect'),
+       api('/api/social?action=schedule')
      ]);
      runtime.accounts=connected.accounts||[];
      refreshClientNames();
@@ -60,7 +60,7 @@
    const ref=$('owsClient').value;
    if(!ref)return notify('Selecione primeiro o cliente que vai autorizar o Instagram.',true);
    try{
-     const result=await api('/api/social-instagram-connect',{method:'POST',body:JSON.stringify({client_ref:ref})});
+     const result=await api('/api/social?action=connect',{method:'POST',body:JSON.stringify({client_ref:ref})});
      window.location.assign(result.authorization_url);
    }catch(e){notify(e.message,true);}
  }
@@ -87,14 +87,14 @@
    try{
      notify('Criando rascunho privado...');
      const media=await jpegFile(file);
-     const draft=await api('/api/social-scheduler',{method:'POST',body:JSON.stringify({client_ref})});
+     const draft=await api('/api/social?action=schedule',{method:'POST',body:JSON.stringify({client_ref})});
      notify('Preparando upload seguro...');
-     const sign=await api('/api/social-scheduler-upload',{method:'POST',body:JSON.stringify({id:draft.post.id,size:media.size,mime:media.type})});
+     const sign=await api('/api/social?action=upload',{method:'POST',body:JSON.stringify({id:draft.post.id,size:media.size,mime:media.type})});
      notify('Enviando arquivo para o armazenamento privado...');
      const {error}=await supabaseClient.storage.from('social-posts-temp').uploadToSignedUrl(sign.path,sign.token,media,{contentType:media.type});
      if(error)throw Error('Falha no envio privado: '+error.message);
      notify('Registrando aprovação e agendamento...');
-     await api('/api/social-scheduler',{method:'PATCH',body:JSON.stringify({
+     await api('/api/social?action=schedule',{method:'PATCH',body:JSON.stringify({
        action:'schedule',id:draft.post.id,caption,scheduled_at,approved:true,media_path:sign.path,media_mime_type:media.type
      })});
      notify('Agendamento salvo. A publicação automática será habilitada após os testes da Meta.');
@@ -105,7 +105,7 @@
  }
  async function cancel(id){
    if(!window.confirm('Cancelar esta publicação? O arquivo temporário será removido posteriormente.'))return;
-   try{await api('/api/social-scheduler',{method:'PATCH',body:JSON.stringify({id,action:'cancel'})});notify('Agendamento cancelado.');await refresh();}
+   try{await api('/api/social?action=schedule',{method:'PATCH',body:JSON.stringify({id,action:'cancel'})});notify('Agendamento cancelado.');await refresh();}
    catch(e){notify(e.message,true);}
  }
  function boot(){
