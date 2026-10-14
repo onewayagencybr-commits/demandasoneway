@@ -3,7 +3,7 @@
  'use strict';
  const $=id=>document.getElementById(id);
  const safe=s=>String(s??'').replace(/[&<>"']/g,v=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[v]));
- const runtime={accounts:[],loading:false,ready:false,oauthNotice:null};
+ const runtime={accounts:[],loading:false,ready:false,publishingEnabled:false,oauthNotice:null};
  function adminReady(){
    return typeof isAdmin==='function'&&isAdmin()&&typeof adminAuthReady==='function'&&adminAuthReady();
  }
@@ -62,6 +62,11 @@
    try{
      const health=await api('/api/social?action=status');
      runtime.ready=Boolean(health.ready);
+     runtime.publishingEnabled=health.publishingEnabled===true;
+     const banner=$('owsAutomationNotice');
+     if(banner){banner.hidden=runtime.publishingEnabled;banner.textContent=runtime.publishingEnabled?'':'PUBLICAÇÃO AUTOMÁTICA DESATIVADA — os agendamentos são salvos, mas não serão publicados até ativarmos o serviço. Horários vencidos precisarão de revisão antes da ativação.';}
+     const chip=$('owsAutomationBadge');
+     if(chip)chip.textContent=runtime.publishingEnabled?'Automação habilitada':'Publicação pausada';
      $('owsSave').disabled=!runtime.ready;
      $('owsConnect').disabled=!runtime.ready;
      if(!runtime.ready){
@@ -83,11 +88,12 @@
      refreshClientNames();
      const list=$('owsList');
      const items=schedules.posts||[];
+     const pausedLabel=p=>p.status==='scheduled'&&!runtime.publishingEnabled?'Salvo · publicação pausada':statuses[p.status]||p.status;
      list.innerHTML=items.length?items.map(p=>{
        const name=clients().find(c=>String(c.id)===p.client_ref)?.name||'Cliente';
        const cancelable=['scheduled','draft','approved','failed'].includes(p.status);
        const link=p.published_permalink?'<a target="_blank" rel="noopener noreferrer" href="'+safe(p.published_permalink)+'">Ver post</a>':'';
-       return '<div class="ows-item"><div><b>'+safe(name)+'</b><span>'+safe(localTime(p.scheduled_at))+'</span></div><div><span class="ows-pill">'+safe(statuses[p.status]||p.status)+'</span> '+link+(cancelable?'<button class="ows-cancel" type="button" data-cancel="'+safe(p.id)+'">Cancelar</button>':'')+'</div></div>';
+       return '<div class="ows-item"><div><b>'+safe(name)+'</b><span>'+safe(localTime(p.scheduled_at))+'</span></div><div><span class="ows-pill">'+safe(pausedLabel(p))+'</span> '+link+(cancelable?'<button class="ows-cancel" type="button" data-cancel="'+safe(p.id)+'">Cancelar</button>':'')+'</div></div>';
      }).join(''):'<div class="ows-empty">Nenhuma publicação programada ainda.</div>';
      if(runtime.oauthNotice)notify(runtime.oauthNotice.message,runtime.oauthNotice.error);
    }catch(e){runtime.ready=false;$('owsSave').disabled=true;$('owsConnect').disabled=true;notify(e.message,true);}
@@ -135,7 +141,7 @@
      await api('/api/social?action=schedule',{method:'PATCH',body:JSON.stringify({
        action:'schedule',id:draft.post.id,caption,scheduled_at,approved:true,media_path:sign.path,media_mime_type:media.type
      })});
-     notify('Agendamento salvo. A publicação automática será habilitada após os testes da Meta.');
+     notify(runtime.publishingEnabled?'Agendamento salvo. Confirme a execução no histórico.':'Agendamento SALVO, MAS NÃO SERÁ PUBLICADO: a automação está desativada.',!runtime.publishingEnabled);
      $('owsCaption').value='';$('owsFile').value='';$('owsApproved').checked=false;
      await refresh();
    }catch(e){notify(e.message,true);}
@@ -150,7 +156,8 @@
    const host=document.querySelector('#socialMediaContent .sm-shell');
    if(!host||$('owScheduler'))return;
    const section=document.createElement('section');section.id='owScheduler';section.className='ows-panel';
-   section.innerHTML=`<div class="ows-heading"><div><span class="ows-kicker">ONE WAY · SOCIAL MEDIA</span><h3>Agendador de Posts</h3><p>Postagens futuras com autorização da Meta para cada cliente e aprovação manual pelo WhatsApp.</p></div><span class="ows-chip">Integração em teste</span></div>
+   section.innerHTML=`<div class="ows-heading"><div><span class="ows-kicker">ONE WAY · SOCIAL MEDIA</span><h3>Agendador de Posts</h3><p>Postagens futuras com autorização da Meta para cada cliente e aprovação manual pelo WhatsApp.</p></div><span class="ows-chip" id="owsAutomationBadge">Verificando automação</span></div>
+   <div id="owsAutomationNotice" class="ows-automation-notice" role="status" hidden></div>
    <div class="ows-form">
      <label>Cliente<select id="owsClient"><option>Selecione um cliente</option></select></label>
      <label>Data<input type="date" id="owsDate"></label>
