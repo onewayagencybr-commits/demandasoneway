@@ -21,12 +21,12 @@
 Em Vercel → `onewaydemandas` → Settings → Environment Variables, configurar:
 - `META_INSTAGRAM_APP_ID`: ID da seção Instagram Login do aplicativo One Way-IG.
 - `META_INSTAGRAM_APP_SECRET`: segredo correspondente. Tipo **Sensitive**.
-- `META_INSTAGRAM_REDIRECT_URI`: `https://onewaydemandas.vercel.app/api/social?action=callback`.
+- `META_INSTAGRAM_REDIRECT_URI`: `https://onewaydemandas.vercel.app/api/social`.
 - `META_TOKEN_ENCRYPTION_KEY`: string aleatória CRIPTOGRAFICAMENTE SEGURA com 64 caracteres hexadecimais (32 bytes), tipo **Sensitive**. Guardar em cofre; perdê-la inviabiliza descriptografar autorizações existentes.
 - `SOCIAL_PUBLISHING_ENABLED`: `false` inicialmente.
 O projeto já possui `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY` e `CRON_SECRET` em produção: **não duplicar, alterar nem expor** sem necessidade.
 
-Na configuração Instagram Login no Meta for Developers, adicionar o URI de retorno EXATO acima entre os OAuth Redirect URIs válidos. Conferir Instagram Business Basic e Content Publish.
+Na configuração Instagram Login no Meta for Developers, **substituir o URI anterior com ?action=callback** pelo URI EXATO `https://onewaydemandas.vercel.app/api/social` (sem parâmetros) entre os OAuth Redirect URIs válidos. O backend identifica automaticamente ?code=...&state=... no retorno. Não usar esta URL nos campos de webhook. Conferir Instagram Business Basic e Content Publish.
 
 **Importante:** o token que foi compartilhado no chat antes deve ser REVOGADO e substituído.
 Nenhum segredo deve entrar no `index.html`, em `*.js` públicos ou no GitHub.
