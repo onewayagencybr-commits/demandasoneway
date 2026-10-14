@@ -33,5 +33,6 @@ jobs:
           node --check lib/social-upload-handler.js
           node --check lib/social-run-handler.js
           node --check lib/social-single-post-handler.js
+          node --check lib/social-publish-now-handler.js
           node --check lib/social-cleanup-handler.js
           node --check modules/social-scheduler-ui.js

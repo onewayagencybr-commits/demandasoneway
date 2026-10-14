@@ -92,8 +92,10 @@
      list.innerHTML=items.length?items.map(p=>{
        const name=clients().find(c=>String(c.id)===p.client_ref)?.name||'Cliente';
        const cancelable=['scheduled','draft','approved','failed'].includes(p.status);
+       const publishable=p.status==='scheduled'&&p.publish_attempts===0&&Boolean(p.approved_at);
        const link=p.published_permalink?'<a target="_blank" rel="noopener noreferrer" href="'+safe(p.published_permalink)+'">Ver post</a>':'';
-       return '<div class="ows-item"><div><b>'+safe(name)+'</b><span>'+safe(localTime(p.scheduled_at))+'</span></div><div><span class="ows-pill">'+safe(pausedLabel(p))+'</span> '+link+(cancelable?'<button class="ows-cancel" type="button" data-cancel="'+safe(p.id)+'">Cancelar</button>':'')+'</div></div>';
+       const publishButton=publishable?'<button class="ows-publish-now" type="button" data-publish-now="'+safe(p.id)+'" data-name="'+safe(name)+'">Publicar agora</button>':'';
+       return '<div class="ows-item"><div><b>'+safe(name)+'</b><span>'+safe(localTime(p.scheduled_at))+'</span></div><div><span class="ows-pill">'+safe(pausedLabel(p))+'</span> '+link+publishButton+(cancelable?'<button class="ows-cancel" type="button" data-cancel="'+safe(p.id)+'">Cancelar</button>':'')+'</div></div>';
      }).join(''):'<div class="ows-empty">Nenhuma publicação programada ainda.</div>';
      if(runtime.oauthNotice)notify(runtime.oauthNotice.message,runtime.oauthNotice.error);
    }catch(e){runtime.ready=false;$('owsSave').disabled=true;$('owsConnect').disabled=true;notify(e.message,true);}
@@ -147,6 +149,31 @@
    }catch(e){notify(e.message,true);}
    finally{runtime.loading=false;$('owsSave').disabled=!runtime.ready;}
  }
+ async function publishNow(id,clientName){
+   if(runtime.loading)return;
+   if(!window.confirm('Publicar AGORA no Instagram de '+clientName+'?\\n\\nEsta ação envia o post imediatamente, mesmo se o agendamento estiver para outra hora. Não será possível desfazer o envio pelo One Way. Confirme a conta antes de continuar.'))return;
+   runtime.loading=true;
+   const buttons=Array.from(document.querySelectorAll('#owsList [data-publish-now]'));
+   buttons.forEach(button=>{button.disabled=true;});
+   try{
+     notify('Enviando ao Instagram. Aguarde a confirmação; não atualize a página.');
+     const result=await api('/api/social?action=publishnow',{
+       method:'POST',body:JSON.stringify({id})
+     });
+     if(result.ok&&result.post?.status==='published'){
+       notify('Publicado no Instagram! Confirme a publicação na listagem.');
+     }else{
+       notify('O envio foi iniciado, mas precisa de revisão. Não tente novamente para evitar posts duplicados.',true);
+     }
+     await refresh();
+   }catch(e){
+     notify(e.message||'Não foi possível publicar. Atualize a lista e verifique o status.',true);
+     try{await refresh();}catch{}
+   }finally{
+     runtime.loading=false;
+     buttons.forEach(button=>{if(button.isConnected)button.disabled=false;});
+   }
+ }
  async function cancel(id){
    if(!window.confirm('Cancelar esta publicação? O arquivo temporário será removido posteriormente.'))return;
    try{await api('/api/social?action=schedule',{method:'PATCH',body:JSON.stringify({id,action:'cancel'})});notify('Agendamento cancelado.');await refresh();}
@@ -175,7 +202,12 @@
    $('owsConnect').addEventListener('click',connect);
    $('owsSave').addEventListener('click',schedule);
    $('owsRefresh').addEventListener('click',refresh);
-   $('owsList').addEventListener('click',e=>{const id=e.target.closest('[data-cancel]')?.dataset.cancel;if(id)cancel(id);});
+   $('owsList').addEventListener('click',e=>{
+     const pub=e.target.closest('[data-publish-now]');
+     if(pub){publishNow(pub.dataset.publishNow,pub.dataset.name||'este cliente');return;}
+     const id=e.target.closest('[data-cancel]')?.dataset.cancel;
+     if(id)cancel(id);
+   });
    const observer=new MutationObserver(()=>{
      if(!document.getElementById('socialMediaContent').classList.contains('hidden')&&adminReady()){refreshClientNames();refresh();}
    });
