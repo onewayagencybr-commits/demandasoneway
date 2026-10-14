@@ -3,7 +3,7 @@
  'use strict';
  const $=id=>document.getElementById(id);
  const safe=s=>String(s??'').replace(/[&<>"']/g,v=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[v]));
- const runtime={accounts:[],loading:false};
+ const runtime={accounts:[],loading:false,ready:false};
  function adminReady(){
    return typeof isAdmin==='function'&&isAdmin()&&typeof adminAuthReady==='function'&&adminAuthReady();
  }
@@ -40,10 +40,15 @@
  async function refresh(){
    if(!adminReady())return;
    try{
-     const [connected,schedules]=await Promise.all([
+     const [health,connected,schedules]=await Promise.all([
+       api('/api/social?action=status'),
        api('/api/social?action=connect'),
        api('/api/social?action=schedule')
      ]);
+     runtime.ready=Boolean(health.ready);
+     $('owsSave').disabled=!runtime.ready;
+     $('owsConnect').disabled=!runtime.ready;
+     if(!runtime.ready)notify('Agendador aguardando configuração privada da Meta e migrações do Supabase. Nenhuma publicação será enviada.',true);
      runtime.accounts=connected.accounts||[];
      refreshClientNames();
      const list=$('owsList');
@@ -58,6 +63,7 @@
  }
  async function connect(){
    const ref=$('owsClient').value;
+   if(!runtime.ready)return notify('A conexão da Meta ainda não foi configurada.',true);
    if(!ref)return notify('Selecione primeiro o cliente que vai autorizar o Instagram.',true);
    try{
      const result=await api('/api/social?action=connect',{method:'POST',body:JSON.stringify({client_ref:ref})});
@@ -75,6 +81,7 @@
  }
  async function schedule(){
    if(runtime.loading)return;
+   if(!runtime.ready)return notify('A conexão da Meta e o banco precisam estar configurados antes de agendar.',true);
    const client_ref=$('owsClient').value,caption=$('owsCaption').value.trim(),
      date=$('owsDate').value,time=$('owsTime').value,approved=$('owsApproved').checked;
    const file=$('owsFile').files[0];
@@ -101,7 +108,7 @@
      $('owsCaption').value='';$('owsFile').value='';$('owsApproved').checked=false;
      await refresh();
    }catch(e){notify(e.message,true);}
-   finally{runtime.loading=false;$('owsSave').disabled=false;}
+   finally{runtime.loading=false;$('owsSave').disabled=!runtime.ready;}
  }
  async function cancel(id){
    if(!window.confirm('Cancelar esta publicação? O arquivo temporário será removido posteriormente.'))return;
@@ -117,12 +124,12 @@
      <label>Cliente<select id="owsClient"><option>Selecione um cliente</option></select></label>
      <label>Data<input type="date" id="owsDate"></label>
      <label>Horário · Cuiabá<input type="time" id="owsTime" value="18:00"></label>
-     <div class="ows-account ows-wide"><span id="owsAccount">Nenhum Instagram conectado</span><button type="button" class="ows-secondary" id="owsConnect">Conectar Instagram deste cliente</button></div>
+     <div class="ows-account ows-wide"><span id="owsAccount">Nenhum Instagram conectado</span><button type="button" class="ows-secondary" id="owsConnect" disabled>Conectar Instagram deste cliente</button></div>
      <label class="ows-wide">Legenda<textarea rows="4" id="owsCaption" placeholder="Legenda da publicação"></textarea></label>
      <label class="ows-wide">Arte (JPEG ou PNG) / Vídeo (MP4)<input type="file" id="owsFile" accept="image/jpeg,image/png,video/mp4"></label>
      <label class="ows-check ows-wide"><input type="checkbox" id="owsApproved"> Cliente aprovou esta arte e legenda pelo WhatsApp</label>
    </div>
-   <div class="ows-footer"><span id="owsStatus" role="status">Aguardando a conexão segura com o banco e a Meta.</span><button id="owsSave" type="button">Agendar publicação</button></div>
+   <div class="ows-footer"><span id="owsStatus" role="status">Aguardando a conexão segura com o banco e a Meta.</span><button id="owsSave" type="button" disabled>Agendar publicação</button></div>
    <div class="ows-saved"><div class="ows-saved-title"><h4>Publicações programadas</h4><button type="button" class="ows-secondary" id="owsRefresh">Atualizar</button></div><div id="owsList"><div class="ows-empty">Carregando agendamentos...</div></div></div>`;
    host.append(section);
    $('owsClient').addEventListener('change',accountForSelection);
