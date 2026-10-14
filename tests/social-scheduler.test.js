@@ -144,3 +144,10 @@ test('Approval hash accepts equivalent UTC date serializations from Supabase',()
   assert.equal(approvalDigest({...input,scheduled_at:'2026-10-14T19:03:00.000Z'}),hash);
   assert.notEqual(approvalDigest({...input,media_path:'draft/other.jpg'}),hash);
 });
+
+test('Admin Publish Now endpoint rejects unauthenticated use',async()=>{
+  const endpoint=require('../lib/social-publish-now-handler');
+  const res={statusCode:null,setHeader(){return this;},status(code){this.statusCode=code;return this;},json(data){this.data=data;return this;}};
+  await endpoint({method:'POST',headers:{},body:{id:'invalid'}},res);
+  assert.equal(res.statusCode,401);
+});
