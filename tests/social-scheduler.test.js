@@ -46,8 +46,10 @@ test('Meta redirect is restricted to the official One Way hostname',()=>{
     process.env.META_INSTAGRAM_APP_SECRET='synthetic-test-secret';
     process.env.META_INSTAGRAM_REDIRECT_URI='https://wrong.example.com/api/social?action=callback';
     assert.throws(()=>appConfig(),/incorreta/);
-    process.env.META_INSTAGRAM_REDIRECT_URI='https://onewaydemandas.vercel.app/api/social?action=callback';
+    process.env.META_INSTAGRAM_REDIRECT_URI='https://onewaydemandas.vercel.app/api/social';
     assert.equal(appConfig().clientId,'123456');
+    process.env.META_INSTAGRAM_REDIRECT_URI='https://onewaydemandas.vercel.app/api/social?action=callback';
+    assert.throws(()=>appConfig(),/sem parâmetros/);
   }finally{
     for(const [k,v] of Object.entries(saved)){if(v===undefined)delete process.env[k];else process.env[k]=v;}
   }
@@ -108,6 +110,7 @@ test('Meta OAuth failures expose only safe numeric diagnostics',async()=>{
   try{
     await assert.rejects(metaJSON('https://api.instagram.com/oauth/access_token'),err=>{
       assert.equal(err.metaHttpStatus,400);
+      assert.equal(err.metaReason,'other_meta_rejection');
       assert.equal(err.metaCode,100);
       assert.equal(err.metaSubcode,36008);
       assert.equal(err.message.includes('PRIVATE_TOKEN_DO_NOT_LEAK'),false);
@@ -115,4 +118,19 @@ test('Meta OAuth failures expose only safe numeric diagnostics',async()=>{
       return true;
     });
   }finally{global.fetch=old;}
+});
+
+test('Instagram top-level OAuth errors are safely categorized',async()=>{
+  const {metaJSON}=require('../lib/social-scheduler-server');
+  const original=global.fetch;
+  global.fetch=async()=>({ok:false,status:400,json:async()=>({
+    error_type:'OAuthException',code:400,
+    error_message:'Redirect URI does not match the original redirect_uri'
+  })});
+  try{await assert.rejects(metaJSON('https://api.instagram.com/oauth/access_token'),err=>{
+    assert.equal(err.metaCode,400);
+    assert.equal(err.metaReason,'redirect_mismatch');
+    assert.equal(err.message.includes('Redirect URI'),false);
+    return true;
+  });}finally{global.fetch=original;}
 });
