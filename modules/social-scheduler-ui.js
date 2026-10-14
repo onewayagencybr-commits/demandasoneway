@@ -9,8 +9,8 @@
  }
  function clientKey(name){
    if(typeof cmKey==='function')return cmKey(name);
-   return String(name||'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'')
-     .toLocaleLowerCase('pt-BR').replace(/[^a-z0-9]+/g,' ').trim().replace(/\\s+/g,' ');
+   return String(name||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+     .toLocaleLowerCase('pt-BR').replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' ');
  }
  function clients(){
    if(typeof state==='undefined')return [];
