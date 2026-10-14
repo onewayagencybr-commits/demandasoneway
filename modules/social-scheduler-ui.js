@@ -7,7 +7,28 @@
  function adminReady(){
    return typeof isAdmin==='function'&&isAdmin()&&typeof adminAuthReady==='function'&&adminAuthReady();
  }
- function clients(){return (typeof state!=='undefined'&&Array.isArray(state?.clients)?state.clients:[]).filter(c=>c&&c.id&&c.name&&!c.mergedInto);}
+ function clientKey(name){
+   if(typeof cmKey==='function')return cmKey(name);
+   return String(name||'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'')
+     .toLocaleLowerCase('pt-BR').replace(/[^a-z0-9]+/g,' ').trim().replace(/\\s+/g,' ');
+ }
+ function clients(){
+   if(typeof state==='undefined')return [];
+   const records=Array.isArray(state?.clients)?state.clients:[];
+   const directory=Array.isArray(state?.clientDirectory)?state.clientDirectory:[];
+   const archive=new Set(Array.isArray(state?.archivedClientKeys)?state.archivedClientKeys:[]);
+   // A company appears once even when it has Arte, Vídeo and Tráfego records.
+   const registry=[...directory,...records.filter(c=>c?.name&&!c.mergedInto).map(c=>c.name)];
+   const unique=new Map();
+   const names=typeof cmAllNames==='function'?cmAllNames():registry;
+   const allowed=new Set(registry.map(clientKey));
+   for(const name of names){
+     const key=clientKey(name);
+     if(key&&allowed.has(key)&&!archive.has(key)&&!unique.has(key))
+       unique.set(key,{id:'client:'+key,name:String(name).trim()});
+   }
+   return [...unique.values()];
+ }
  async function api(path,options={}){
    if(!adminReady()||typeof supabaseClient==='undefined')throw Error('Faça login como administrador para acessar o agendador.');
    const {data,error}=await supabaseClient.auth.getSession();
@@ -24,9 +45,8 @@
  function refreshClientNames(){
    const select=$('owsClient');if(!select)return;
    const old=select.value;select.replaceChildren(new Option('Selecione um cliente',''));
-   const used=new Set();
    for(const c of clients().sort((a,b)=>String(a.name).localeCompare(String(b.name),'pt-BR'))){
-     if(used.has(c.id))continue;used.add(c.id);select.add(new Option(String(c.name),String(c.id)));
+     select.add(new Option(String(c.name),String(c.id)));
    }
    if(Array.from(select.options).some(x=>x.value===old))select.value=old;
    accountForSelection();
