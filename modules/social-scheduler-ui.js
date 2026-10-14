@@ -3,7 +3,7 @@
  'use strict';
  const $=id=>document.getElementById(id);
  const safe=s=>String(s??'').replace(/[&<>"']/g,v=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[v]));
- const runtime={accounts:[],loading:false,ready:false};
+ const runtime={accounts:[],loading:false,ready:false,oauthNotice:null};
  function adminReady(){
    return typeof isAdmin==='function'&&isAdmin()&&typeof adminAuthReady==='function'&&adminAuthReady();
  }
@@ -89,6 +89,7 @@
        const link=p.published_permalink?'<a target="_blank" rel="noopener noreferrer" href="'+safe(p.published_permalink)+'">Ver post</a>':'';
        return '<div class="ows-item"><div><b>'+safe(name)+'</b><span>'+safe(localTime(p.scheduled_at))+'</span></div><div><span class="ows-pill">'+safe(statuses[p.status]||p.status)+'</span> '+link+(cancelable?'<button class="ows-cancel" type="button" data-cancel="'+safe(p.id)+'">Cancelar</button>':'')+'</div></div>';
      }).join(''):'<div class="ows-empty">Nenhuma publicação programada ainda.</div>';
+     if(runtime.oauthNotice)notify(runtime.oauthNotice.message,runtime.oauthNotice.error);
    }catch(e){runtime.ready=false;$('owsSave').disabled=true;$('owsConnect').disabled=true;notify(e.message,true);}
  }
  async function connect(){
@@ -171,11 +172,23 @@
      if(!document.getElementById('socialMediaContent').classList.contains('hidden')&&adminReady()){refreshClientNames();refresh();}
    });
    observer.observe(document.getElementById('socialMediaContent'),{attributes:true,attributeFilter:['class']});
-   refreshClientNames();
-   if(adminReady())refresh();
    const url=new URL(window.location.href);
    const response=url.searchParams.get('instagram_connection');
-   if(response){notify(response==='ok'?'Instagram autorizado! Confirme a conexão na listagem.':'O Instagram não concluiu a autorização. Verifique o aplicativo Meta.',response!=='ok');url.searchParams.delete('instagram_connection');window.history.replaceState({},'',url.toString());}
+   if(response){
+     const descriptions={
+       ok:'Instagram autorizado. Confirme a conta correta na listagem.',
+       denied:'O responsável recusou a autorização do Instagram.',
+       expired:'O prazo de autorização expirou. Clique em Conectar Instagram novamente.',
+       callback_missing:'A Meta retornou sem código de autorização. Verifique o endereço de retorno OAuth configurado.',
+       error:'Falha ao validar o acesso do Instagram. Verifique o login de empresa e tente novamente.'
+     };
+     runtime.oauthNotice={message:descriptions[response]||'O Instagram não concluiu a autorização.',error:response!=='ok'};
+     url.searchParams.delete('instagram_connection');
+     window.history.replaceState({},'',url.toString());
+     notify(runtime.oauthNotice.message,runtime.oauthNotice.error);
+   }
+   refreshClientNames();
+   if(adminReady())refresh();
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
