@@ -168,7 +168,8 @@
      <label class="ows-check ows-wide"><input type="checkbox" id="owsApproved"> Cliente aprovou esta arte e legenda pelo WhatsApp</label>
    </div>
    <div class="ows-footer"><span id="owsStatus" role="status">Aguardando a conexão segura com o banco e a Meta.</span><button id="owsSave" type="button" disabled>Agendar publicação</button></div>
-   <div class="ows-saved"><div class="ows-saved-title"><h4>Publicações programadas</h4><button type="button" class="ows-secondary" id="owsRefresh">Atualizar</button></div><div id="owsList"><div class="ows-empty">Carregando agendamentos...</div></div></div>`;
+   <div class="ows-saved"><div class="ows-saved-title"><h4>Publicações programadas</h4><button type="button" class="ows-secondary" id="owsRefresh">Atualizar</button></div><div id="owsList"><div class="ows-empty">Carregando agendamentos...</div></div></div>
+   <div class="ows-privacy-links"><a href="/politica-de-privacidade.html" target="_blank" rel="noopener noreferrer">Política de Privacidade</a><a href="/exclusao-de-dados.html" target="_blank" rel="noopener noreferrer">Desconexão e exclusão de dados</a></div>`;
    host.append(section);
    $('owsClient').addEventListener('change',accountForSelection);
    $('owsConnect').addEventListener('click',connect);
