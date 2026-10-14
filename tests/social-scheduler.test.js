@@ -1,7 +1,7 @@
 'use strict';
 const test=require('node:test');
 const assert=require('node:assert/strict');
-const {seal,unseal,sha,assertUuid,appConfig}=require('../lib/social-scheduler-server');
+const {seal,unseal,sha,assertUuid,appConfig,socialClientKey,assertClient}=require('../lib/social-scheduler-server');
 test('Instagram tokens are encrypted before database storage',()=>{
   const before=process.env.META_TOKEN_ENCRYPTION_KEY;
   process.env.META_TOKEN_ENCRYPTION_KEY='11'.repeat(32); // Synthetic test key, NOT a production secret.
@@ -50,5 +50,38 @@ test('Meta redirect is restricted to the official One Way hostname',()=>{
     assert.equal(appConfig().clientId,'123456');
   }finally{
     for(const [k,v] of Object.entries(saved)){if(v===undefined)delete process.env[k];else process.env[k]=v;}
+  }
+});
+
+test('Social clients are resolved per company across multiple departments',async()=>{
+  assert.equal(socialClientKey('Cuiabá Leilões'),'cuiaba leiloes');
+  assert.equal(socialClientKey('CUIABA - LEILÕES  '),'cuiaba leiloes');
+  const data={
+    clients:[
+      {id:'dept-arte',name:'Cuiabá Leilões',area:'arte'},
+      {id:'dept-video',name:'Cuiabá Leilões',area:'video'},
+      {id:'dept-old',name:'K- Energy',area:'arte'},
+      {id:'dept-merged',name:'Cuiabá Leilões 2',area:'trafego',mergedInto:'dept-arte'}
+    ],
+    clientDirectory:['Scania - Rota Oeste'],
+    archivedClientKeys:['k energy']
+  };
+  const savedFetch=global.fetch;
+  const saved={url:process.env.SUPABASE_URL,key:process.env.SUPABASE_SERVICE_ROLE_KEY};
+  process.env.SUPABASE_URL='https://example.supabase.co';
+  process.env.SUPABASE_SERVICE_ROLE_KEY='sb_secret_example_test_only';
+  global.fetch=async()=>({ok:true,status:200,text:async()=>JSON.stringify([{data}])});
+  try{
+    await assert.doesNotReject(assertClient('client:cuiaba leiloes'));
+    await assert.doesNotReject(assertClient('client:scania rota oeste'));
+    await assert.doesNotReject(assertClient('dept-video'));
+    await assert.rejects(assertClient('client:k energy'),/não encontrado/);
+    await assert.rejects(assertClient('dept-old'),/não encontrado/);
+    await assert.rejects(assertClient('client:cliente inexistente'),/não encontrado/);
+    await assert.rejects(assertClient('dept-merged'),/não encontrado/);
+  }finally{
+    global.fetch=savedFetch;
+    if(saved.url===undefined)delete process.env.SUPABASE_URL;else process.env.SUPABASE_URL=saved.url;
+    if(saved.key===undefined)delete process.env.SUPABASE_SERVICE_ROLE_KEY;else process.env.SUPABASE_SERVICE_ROLE_KEY=saved.key;
   }
 });
