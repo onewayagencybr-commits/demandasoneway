@@ -1,0 +1,36 @@
+name: One Way Social Scheduler - Safety Checks
+on:
+  push:
+    branches:
+      - feature/social-media-scheduler
+  pull_request:
+    paths:
+      - 'api/social.js'
+      - 'lib/social-*.js'
+      - 'modules/social-scheduler-ui.js'
+      - 'tests/social-scheduler.test.js'
+      - 'package.json'
+jobs:
+  validate-social-scheduler:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Test authentication and content safeguards
+        run: npm test
+      - name: Check JS files parse
+        run: |
+          node --check api/social.js
+          node --check lib/social-scheduler-server.js
+          node --check lib/social-connect-handler.js
+          node --check lib/social-callback-handler.js
+          node --check lib/social-schedule-handler.js
+          node --check lib/social-upload-handler.js
+          node --check lib/social-run-handler.js
+          node --check lib/social-cleanup-handler.js
+          node --check modules/social-scheduler-ui.js
