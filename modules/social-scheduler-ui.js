@@ -40,15 +40,25 @@
  async function refresh(){
    if(!adminReady())return;
    try{
-     const [health,connected,schedules]=await Promise.all([
-       api('/api/social?action=status'),
-       api('/api/social?action=connect'),
-       api('/api/social?action=schedule')
-     ]);
+     const health=await api('/api/social?action=status');
      runtime.ready=Boolean(health.ready);
      $('owsSave').disabled=!runtime.ready;
      $('owsConnect').disabled=!runtime.ready;
-     if(!runtime.ready)notify('Agendador aguardando configuração privada da Meta e migrações do Supabase. Nenhuma publicação será enviada.',true);
+     if(!runtime.ready){
+       runtime.accounts=[];
+       const missing=[];
+       if(!health.secretsReady)missing.push('credenciais oficiais da Meta e chave administrativa');
+       if(!health.schemaReady)missing.push('tabelas do Supabase');
+       if(!health.storageReady)missing.push('bucket privado de mídia');
+       notify('Configuração pendente: '+missing.join('; ')+'. Nenhuma publicação será enviada.',true);
+       $('owsList').textContent='Lista indisponível até concluir a instalação segura.';
+       refreshClientNames();
+       return;
+     }
+     const [connected,schedules]=await Promise.all([
+       api('/api/social?action=connect'),
+       api('/api/social?action=schedule')
+     ]);
      runtime.accounts=connected.accounts||[];
      refreshClientNames();
      const list=$('owsList');
@@ -59,7 +69,7 @@
        const link=p.published_permalink?'<a target="_blank" rel="noopener noreferrer" href="'+safe(p.published_permalink)+'">Ver post</a>':'';
        return '<div class="ows-item"><div><b>'+safe(name)+'</b><span>'+safe(localTime(p.scheduled_at))+'</span></div><div><span class="ows-pill">'+safe(statuses[p.status]||p.status)+'</span> '+link+(cancelable?'<button class="ows-cancel" type="button" data-cancel="'+safe(p.id)+'">Cancelar</button>':'')+'</div></div>';
      }).join(''):'<div class="ows-empty">Nenhuma publicação programada ainda.</div>';
-   }catch(e){notify(e.message,true);}
+   }catch(e){runtime.ready=false;$('owsSave').disabled=true;$('owsConnect').disabled=true;notify(e.message,true);}
  }
  async function connect(){
    const ref=$('owsClient').value;
