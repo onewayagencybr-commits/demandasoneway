@@ -23,7 +23,7 @@ async function signedMediaUrl(path){
  });
  const result=await response.json().catch(()=>({}));
  if(!response.ok||!result.signedURL)fail('Falha ao gerar URL temporária do arquivo.');
- return result.signedURL.startsWith('https://')?result.signedURL:url()+'/storage/v1/'+result.signedURL.replace(/^\\//,'');
+ return result.signedURL.startsWith('https://')?result.signedURL:url()+'/storage/v1/'+result.signedURL.replace(/^[/]+/,'');
 }
 async function activeAccount(ref) {
  const x=await rest('/social_instagram_accounts?id=eq.'+encodeURIComponent(ref)+'&select=*&limit=1');
