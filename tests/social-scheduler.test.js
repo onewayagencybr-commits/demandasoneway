@@ -85,3 +85,15 @@ test('Social clients are resolved per company across multiple departments',async
     if(saved.key===undefined)delete process.env.SUPABASE_SERVICE_ROLE_KEY;else process.env.SUPABASE_SERVICE_ROLE_KEY=saved.key;
   }
 });
+
+test('Instagram OAuth callbacks are recognized after Meta replaces action selector',()=>{
+  const {resolveAction}=require('../api/social');
+  const request=(query,method='GET')=>({query,method});
+  assert.equal(resolveAction(request({action:'callback',code:'abc',state:'opaque'})),'callback');
+  assert.equal(resolveAction(request({code:'abc',state:'opaque'})),'callback');
+  assert.equal(resolveAction(request({state:'opaque'})),'callback');
+  assert.equal(resolveAction(request({error:'access_denied'})),'callback');
+  assert.equal(resolveAction(request({action:'connect'},'POST')),'connect');
+  assert.equal(resolveAction(request({})),'');
+  assert.equal(resolveAction(request({code:'abc'},'POST')),'');
+});
