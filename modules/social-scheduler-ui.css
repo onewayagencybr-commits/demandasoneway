@@ -19,3 +19,7 @@
 .ows-privacy-links{display:flex;flex-wrap:wrap;gap:10px 23px;margin-top:18px;padding-top:13px;border-top:1px solid rgba(197,216,255,.14)}
 .ows-privacy-links a{color:#b8cbef;font:500 11px Montserrat,system-ui,sans-serif;text-decoration:underline;text-underline-offset:3px}
 .ows-privacy-links a:hover{color:#f1f6ff}
+
+.ows-publish-now{font:600 11px Montserrat,system-ui,sans-serif;color:#08234d;background:#bad1ff;border:1px solid #c2d7ff;border-radius:9px;padding:8px 11px;cursor:pointer;white-space:nowrap}
+.ows-publish-now:hover{background:#e1ebff}
+.ows-publish-now:disabled{opacity:.48;cursor:wait}
