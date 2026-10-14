@@ -12,3 +12,6 @@
 .ows-item>div:last-child{display:flex;gap:10px;align-items:center}.ows-item .ows-pill{display:inline-block;padding:5px 9px;margin:0;border:1px solid rgba(200,220,255,.24);border-radius:20px}.ows-item a{color:#c4d7ff;font-size:11px}.ows-cancel{font-size:11px;cursor:pointer;color:#efd9e3;background:transparent;border:1px solid rgba(227,200,214,.27);border-radius:9px;padding:8px}
 .ows-empty{font-size:12px;color:#a9bbdb;padding:16px 0}
 @media(max-width:750px){.ows-item,.ows-account{align-items:flex-start;flex-direction:column}.ows-item>div:last-child{flex-wrap:wrap}}
+
+.ows-automation-notice{display:block;margin:14px 0 20px;padding:15px 16px;border:1px solid rgba(255,195,130,.36);border-radius:12px;background:rgba(115,70,35,.24);color:#ffdfbe;font:600 12px/1.6 Montserrat,system-ui,sans-serif;letter-spacing:.012em}
+.ows-automation-notice[hidden]{display:none}
