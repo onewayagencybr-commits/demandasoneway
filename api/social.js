@@ -11,8 +11,25 @@ const handlers={
   run:require('../lib/social-run-handler'),
   cleanup:require('../lib/social-cleanup-handler')
 };
+// Meta may replace the query part of a registered redirect_uri with ?code&state.
+// Detect a legitimate OAuth response independently of the optional action selector.
+function resolveAction(req){
+  const explicit=typeof req.query?.action==='string'?req.query.action:'';
+  if(explicit)return explicit;
+  if(req.method==='GET'&&(
+    typeof req.query?.code==='string'||
+    typeof req.query?.state==='string'||
+    typeof req.query?.error==='string'
+  ))return 'callback';
+  return '';
+}
 module.exports=async function(req,res){
-  const action=String(req.query?.action||'');
+  const action=resolveAction(req);
+  if(!action&&req.method==='GET'){
+    // Avoid a confusing bare 404 after Meta strips the original query string.
+    console.warn('Social OAuth callback without authorization query parameters.');
+    return res.redirect(302,'https://onewaydemandas.vercel.app/?instagram_connection=callback_missing');
+  }
   if(action==='callback')return handlers.callback(req,res);
   if(action==='run')return handlers.run(req,res);
   if(action==='cleanup')return handlers.cleanup(req,res);
@@ -44,3 +61,4 @@ module.exports=async function(req,res){
   if(!handlers[action])return reply(res,404,{error:'Rota não encontrada.'});
   return handlers[action](req,res);
 };
+module.exports.resolveAction=resolveAction;
