@@ -97,3 +97,22 @@ test('Instagram OAuth callbacks are recognized after Meta replaces action select
   assert.equal(resolveAction(request({})),'');
   assert.equal(resolveAction(request({code:'abc'},'POST')),'');
 });
+
+test('Meta OAuth failures expose only safe numeric diagnostics',async()=>{
+  const {metaJSON}=require('../lib/social-scheduler-server');
+  const old=global.fetch;
+  global.fetch=async()=>({
+    ok:false,status:400,
+    json:async()=>({error:{message:'PRIVATE_TOKEN_DO_NOT_LEAK',code:100,error_subcode:36008}})
+  });
+  try{
+    await assert.rejects(metaJSON('https://api.instagram.com/oauth/access_token'),err=>{
+      assert.equal(err.metaHttpStatus,400);
+      assert.equal(err.metaCode,100);
+      assert.equal(err.metaSubcode,36008);
+      assert.equal(err.message.includes('PRIVATE_TOKEN_DO_NOT_LEAK'),false);
+      assert.equal(err.status,502);
+      return true;
+    });
+  }finally{global.fetch=old;}
+});
