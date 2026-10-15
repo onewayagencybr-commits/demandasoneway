@@ -117,17 +117,24 @@ dirty=true;render();}
 
 /* Implementação isolada: o antigo editor chamava funcoes privadas de outro <script>
    (feedTextBrand e feedPDFBlob), provocando ReferenceError em visualizar/baixar. */
+
 async function scriptTextBrand(ctx){
+  // A logo incorporada ao sistema e vertical: recortar apenas a marca, sem a
+  // grande área transparente que a deixava minúscula no PDF.
   try{
-    const logo=new Image();
-    await new Promise((resolve,reject)=>{logo.onload=resolve;logo.onerror=reject;logo.src='/oneway-logo.png';});
-    const scale=Math.min(260/logo.naturalWidth,102/logo.naturalHeight);
-    if(Number.isFinite(scale)&&scale>0){ctx.drawImage(logo,100,55,logo.naturalWidth*scale,logo.naturalHeight*scale);return;}
-  }catch(error){console.warn('Logo do PDF indisponível; usando marca em texto.',error);}
-  ctx.fillStyle='#edf4ff';ctx.font='600 44px OWScriptPDF,Montserrat,sans-serif';
-  ctx.fillText('ONE WAY',100,115);
-  ctx.font='500 16px OWScriptPDF,Montserrat,sans-serif';
-  ctx.fillStyle='#b7cef5';ctx.fillText('A G E N C Y',105,145);
+    if(typeof LOGO_DATA_URI!=='undefined'&&typeof LOGO_DATA_URI==='string'&&LOGO_DATA_URI.startsWith('data:image/')){
+      const img=new Image();
+      await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;img.src=LOGO_DATA_URI;});
+      ctx.drawImage(img,34,326,516,197,98,15,300,114);
+      return;
+    }
+  }catch(err){console.warn('Marca original indisponível no PDF:',err);}
+  ctx.fillStyle='#f1f6ff';
+  ctx.font='italic 800 64px OWScriptPDF,Montserrat,Arial,sans-serif';
+  ctx.fillText('One Way',101,104);
+  ctx.fillStyle='#bdcff2';
+  ctx.font='600 20px OWScriptPDF,Montserrat,Arial,sans-serif';
+  ctx.fillText('A G E N C Y',108,132);
 }
 function scriptPDFBlob(pages){
   if(!Array.isArray(pages)||!pages.length)throw Error('Nenhuma página do roteiro foi gerada.');
@@ -157,12 +164,118 @@ function scriptPDFBlob(pages){
 }
 // Every line is retained, including blank paragraphs and unbroken long words.
 function wrap(ctx,text,width){const result=[];for(const p of String(text).replace(/\r\n?/g,'\n').split('\n')){if(!p){result.push('');continue;}let line='';for(const word of p.split(/\s+/)){const next=line?line+' '+word:word;if(ctx.measureText(next).width<=width){line=next;continue;}if(line){result.push(line);line='';}for(const c of word){if(line&&ctx.measureText(line+c).width>width){result.push(line);line='';}line+=c;}}result.push(line);}return result;}
-async function pagesFor(data){const font=new FontFace('OWScriptPDF','url(/fonts/Montserrat.ttf)',{weight:'100 900'});try{await font.load();document.fonts.add(font);}catch(error){console.warn('Fonte do PDF indisponível; usando fonte reserva.',error);}const pages=[],W=1440,H=2036;let canvas,ctx,y,videoIndex=-1,part=0,activeScene=0;const fontAt=(size=30,weight=400)=>{ctx.font=`${weight} ${size}px OWScriptPDF`;};
-const finish=()=>{if(!canvas)return;ctx.fillStyle='#617a9b';fontAt(20);ctx.fillText('ONE WAY / ROTEIROS DE PRODUÇÃO',100,1968);ctx.textAlign='right';ctx.fillText(String(pages.length+1).padStart(2,'0'),1340,1968);ctx.textAlign='left';pages.push(canvas.toDataURL('image/jpeg',.95));};
-async function page(){finish();canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;ctx=canvas.getContext('2d');ctx.fillStyle='#f7f9fd';ctx.fillRect(0,0,W,H);const g=ctx.createLinearGradient(0,0,W,320);g.addColorStop(0,'#061229');g.addColorStop(1,'#265be3');fontAt(34,500);const name=wrap(ctx,data.client,1240),headerH=Math.max(310,280+(name.length-1)*44);ctx.fillStyle=g;ctx.fillRect(0,0,W,headerH);await scriptTextBrand(ctx);ctx.fillStyle='#adc9ff';fontAt(20,600);ctx.fillText('ROTEIROS / PRODUÇÃO AUDIOVISUAL',100,206);fontAt(34,500);ctx.fillStyle='white';name.forEach((l,i)=>ctx.fillText(l,100,253+i*44));y=headerH+50;ctx.fillStyle=videoIndex%2===0?'#e8f1ff':'#ffffff';ctx.fillRect(76,y-20,1288,1900-y+20);ctx.strokeStyle='#cfddf0';ctx.strokeRect(76,y-20,1288,1900-y+20);ctx.fillStyle='#365b94';fontAt(23,600);ctx.fillText(`VÍDEO ${String(videoIndex+1).padStart(2,'0')}${part>1?' / CONTINUAÇÃO '+part:''} · ${duration(data.videos[videoIndex])}`,112,y+28);y+=91;const v=data.videos[videoIndex];fontAt(44,600);for(const l of wrap(ctx,v.title,1190)){ctx.fillStyle='#15335c';ctx.fillText(l,112,y);y+=58;}y+=27;if(part>1&&activeScene){fontAt(21,600);ctx.fillStyle='#577aa9';ctx.fillText(`CENA ${String(activeScene).padStart(2,'0')} / CONTINUAÇÃO`,112,y);y+=44;}}
-async function lines(text,size=29,weight=400,color='#294465'){fontAt(size,weight);const ls=wrap(ctx,text,1180);for(const l of ls){if(y+size*1.5>1850){part++;await page();fontAt(size,weight);}ctx.fillStyle=color;ctx.fillText(l,112,y);y+=size*1.55;}}
-for(let i=0;i<data.videos.length;i++){videoIndex=i;part=1;activeScene=0;await page();const v=data.videos[i];if(v.mode==='full'){await lines('ROTEIRO COMPLETO',21,600,'#577aa9');y+=15;await lines(v.text);}else for(let j=0;j<v.scenes.length;j++){const s=v.scenes[j];activeScene=0;if(y+160>1830){part++;await page();}ctx.fillStyle='#c7d9f2';ctx.fillRect(112,y,1180,2);y+=50;activeScene=j+1;await lines(`CENA ${String(j+1).padStart(2,'0')}${s.seconds!==''?' · '+s.seconds+'s':''}`,24,600,'#315a98');y+=8;if(s.text){await lines('TEXTO / FALA',18,600,'#6880a0');await lines(s.text);y+=16;}if(s.visual){await lines('IMAGEM / AÇÃO',18,600,'#6880a0');await lines(s.visual,26,400,'#59718f');y+=16;}if(!s.text&&!s.visual)await lines('Cena a desenvolver.',26,400,'#6880a0');y+=27;}}
-finish();return pages;}
+
+async function pagesFor(data){
+  const font=new FontFace('OWScriptPDF','url(/fonts/Montserrat.ttf)',{weight:'100 900'});
+  try{await font.load();document.fonts.add(font);}catch(error){console.warn('Fonte Montserrat indisponível, usando reserva.',error);}
+  const pages=[], W=1440,H=2036, bottom=1836;
+  let canvas=null,ctx=null,y=0,videoIndex=-1,part=0,activeScene=0;
+  const fontAt=(size=30,weight=500)=>{ctx.font=weight+' '+size+'px OWScriptPDF,Montserrat,Arial,sans-serif';};
+  const footer=()=>{
+    if(!canvas)return;
+    ctx.fillStyle='#7185a4';fontAt(19,500);
+    ctx.fillText('ONE WAY  /  ROTEIROS DE PRODUÇÃO',110,1965);
+    ctx.textAlign='right';ctx.fillText(String(pages.length+1).padStart(2,'0'),1330,1965);
+    ctx.textAlign='left';
+    pages.push(canvas.toDataURL('image/jpeg',.94));
+  };
+  const page=async()=>{
+    footer();
+    canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;
+    ctx=canvas.getContext('2d');
+    if(!ctx)throw Error('Não foi possível preparar a página do roteiro.');
+    ctx.fillStyle='#f7f9fc';ctx.fillRect(0,0,W,H);
+    fontAt(39,650);
+    const names=wrap(ctx,data.client,1190);
+    const headerH=244+Math.max(0,names.length-1)*50;
+    const gradient=ctx.createLinearGradient(0,0,W,headerH);
+    gradient.addColorStop(0,'#091a35');
+    gradient.addColorStop(.7,'#152e54');
+    gradient.addColorStop(1,'#1c3b6b');
+    ctx.fillStyle=gradient;ctx.fillRect(0,0,W,headerH);
+    await scriptTextBrand(ctx);
+    ctx.fillStyle='#b9cdf0';fontAt(19,650);
+    ctx.fillText('ROTEIROS  /  PRODUÇÃO AUDIOVISUAL',106,165);
+    ctx.fillStyle='#f7faff';fontAt(37,650);
+    names.forEach((line,i)=>ctx.fillText(line,106,211+i*50));
+    const cardTop=headerH+36;
+    ctx.fillStyle=videoIndex%2===0?'#edf4ff':'#ffffff';
+    ctx.fillRect(76,cardTop,1288,1860-cardTop);
+    ctx.strokeStyle='#dfe8f5';ctx.lineWidth=2;
+    ctx.strokeRect(76,cardTop,1288,1860-cardTop);
+    y=cardTop+73;
+    ctx.fillStyle='#40639a';fontAt(24,700);
+    ctx.fillText('VÍDEO '+String(videoIndex+1).padStart(2,'0')+(part>1?'  /  CONTINUAÇÃO '+part:'')+'  ·  '+duration(data.videos[videoIndex]),114,y);
+    y+=79;
+    const video=data.videos[videoIndex];
+    fontAt(49,700);
+    const titleLines=wrap(ctx,video.title,1160);
+    for(const title of titleLines){
+      ctx.fillStyle='#132b51';ctx.fillText(title,114,y);y+=65;
+    }
+    y+=15;
+    if(part>1&&activeScene){
+      ctx.fillStyle='#5878a9';fontAt(21,650);
+      ctx.fillText('CENA '+String(activeScene).padStart(2,'0')+'  /  CONTINUAÇÃO',114,y);
+      y+=42;
+    }
+  };
+  const ensure=async(height=80)=>{
+    if(y+height<=bottom)return;
+    part++;
+    await page();
+  };
+  const writeLines=async(text,size=31,weight=500,color='#273e60',lineHeight=1.62)=>{
+    fontAt(size,weight);
+    const all=wrap(ctx,text,1160);
+    for(const line of all){
+      await ensure(size*lineHeight+9);
+      fontAt(size,weight);ctx.fillStyle=color;
+      if(line)ctx.fillText(line,114,y);
+      y+=size*lineHeight;
+    }
+  };
+  const writeLabel=async(label)=>{
+    await ensure(75);
+    ctx.fillStyle='#607ba1';fontAt(19,700);ctx.fillText(label,114,y);
+    y+=39;
+  };
+  for(let i=0;i<data.videos.length;i++){
+    videoIndex=i;part=1;activeScene=0;await page();
+    const v=data.videos[i];
+    if(v.mode==='full'){
+      y+=12;await writeLabel('ROTEIRO COMPLETO');y+=11;
+      await writeLines(v.text,31,500,'#263d60',1.66);
+    }else{
+      for(let j=0;j<v.scenes.length;j++){
+        const sc=v.scenes[j];activeScene=0;
+        await ensure(248);
+        y+=25;
+        ctx.fillStyle='#cad9ed';ctx.fillRect(114,y,1160,2);
+        y+=51;
+        activeScene=j+1;
+        ctx.fillStyle='#315c99';fontAt(26,700);
+        ctx.fillText('CENA '+String(j+1).padStart(2,'0')+(sc.seconds!==''?'  ·  '+sc.seconds+'s':''),114,y);
+        y+=47;
+        if(sc.text){
+          await writeLabel('TEXTO / FALA');
+          await writeLines(sc.text,31,500,'#263d60',1.65);
+          y+=23;
+        }
+        if(sc.visual){
+          await writeLabel('IMAGEM / AÇÃO / DIREÇÃO');
+          await writeLines(sc.visual,29,500,'#425b7e',1.62);
+          y+=24;
+        }
+        if(!sc.text&&!sc.visual){
+          await writeLines('Cena a desenvolver.',29,500,'#7186a4');
+        }
+        y+=28;
+      }
+    }
+  }
+  footer();return pages;
+}
 window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue='';}});
 window.owScripts={render,pagesFor,wrap,validate,seconds,refreshCloud};
 })();
