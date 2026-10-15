@@ -415,3 +415,23 @@
     min-height:38px;flex:1 1 43%;font-size:11px;
   }
 }
+
+/* Roteiro compartilhado: ações visíveis, hierarquia de vídeo e sincronização. */
+#scriptsContent .rs-video-library{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:22px 25px;margin-top:20px;border-radius:19px;background:linear-gradient(138deg,rgba(26,61,116,.68),rgba(10,30,70,.60));border:1px solid rgba(211,229,255,.18)}
+#scriptsContent .rs-video-library h3{font-size:20px;font-weight:600;margin:9px 0;color:#f2f6ff;letter-spacing:-.03em}
+#scriptsContent .rs-video-library p{font-size:11px;color:#b3c9ec;line-height:1.6;max-width:530px;margin:0}
+#scriptsContent .rs-video-count{font-size:15px;color:#b3cafa}
+#scriptsContent .rs-video-library button{min-width:165px}
+#scriptsContent .rs-videos-footer{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:16px auto 8px}
+#scriptsContent .rs-videos-footer button{min-height:43px}
+#scriptsContent .rs-video-controls{justify-content:flex-end}
+#scriptsContent #rsCloudCount{margin:8px 0 4px}
+#scriptsContent #rsMigrate[hidden]{display:none!important}
+#scriptsContent #rsMigrate{border-color:rgba(167,201,255,.42);color:#e8f1ff}
+@media(max-width:650px){
+ #scriptsContent .rs-video-library{padding:18px;align-items:stretch;flex-direction:column}
+ #scriptsContent .rs-video-library button{width:100%}
+ #scriptsContent .rs-video-controls{justify-content:flex-start}
+ #scriptsContent .rs-video-controls button{font-size:10px}
+ #scriptsContent .rs-videos-footer button{flex:1 1 100%}
+}
