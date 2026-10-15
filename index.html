@@ -732,6 +732,68 @@ body.calendar-view{background-attachment:scroll!important}
 .fp-btn{font-weight:600!important}
 @media(max-width:620px){.fp-phone{width:min(290px,100%)}.fp-phone-status{height:31px}}
 
+
+/* ONE WAY · Fluxo de postagem: etapa aprovada, mas ainda não publicada.
+   Preserva status e regras independentes da frente de Trafego. */
+#agendaContent .agenda-item.agenda-awaiting-post{
+  border:1px solid rgba(251,191,76,.48)!important;
+  background:linear-gradient(95deg,rgba(170,104,19,.22),rgba(25,52,97,.72) 38%,rgba(9,31,77,.60))!important;
+  box-shadow:inset 4px 0 0 #fbbf24,0 13px 34px rgba(0,8,30,.16)!important;
+}
+#agendaContent .agenda-item.agenda-awaiting-post:hover{
+  border-color:rgba(251,191,76,.72)!important;
+  background:linear-gradient(95deg,rgba(188,111,20,.28),rgba(28,57,101,.79) 38%,rgba(13,36,83,.70))!important;
+  box-shadow:inset 4px 0 0 #fbbf24,0 17px 40px rgba(0,8,30,.22)!important;
+}
+#agendaContent .agenda-item.agenda-awaiting-post .agenda-day{
+  color:#fde68a!important;
+}
+#agendaContent .agenda-item.agenda-awaiting-post .agenda-month{
+  color:#fcd9a2!important;
+}
+#agendaContent .agenda-item.agenda-awaiting-post .agenda-info strong{
+  color:#fff9ed!important;
+}
+#agendaContent .agenda-item.agenda-awaiting-post .agenda-info span{
+  color:#f2dfc8!important;
+}
+#agendaContent .agenda-item.agenda-awaiting-post .current-status.orange{
+  background:rgba(177,103,18,.34)!important;
+  color:#fff0c5!important;
+  border-color:rgba(252,199,93,.70)!important;
+  font-weight:700;
+}
+#agendaContent .agenda-item.agenda-awaiting-post .area-chip{
+  border-color:rgba(255,220,160,.24)!important;
+  background:rgba(243,174,73,.10)!important;
+  color:#f5e7d4!important;
+}
+#agendaContent .agenda-item.agenda-awaiting-post:focus-visible{
+  outline:2px solid #fbbf24;outline-offset:3px;
+}
+.status-posting-hint{
+  display:block;
+  flex:1 1 100%;
+  width:100%;
+  margin:4px 0 0;
+  color:#c7d9f6;
+  font-size:10px;
+  font-weight:400;
+  line-height:1.6;
+}
+.status-posting-hint b{font-weight:650;color:#ffdb99}
+.demand-posting-reminder{
+  margin:11px 0 6px;
+  padding:10px 12px;
+  border:1px solid rgba(251,191,76,.32);
+  border-radius:10px;
+  color:#ffe8b8;
+  background:rgba(185,108,23,.13);
+  font-size:11px;
+  font-weight:500;
+  line-height:1.5;
+}
+
 </style>
 <link rel="stylesheet" href="/modules/instagram-ui.css">
 <link rel="stylesheet" href="/modules/social-scheduler-ui.css">
@@ -1166,7 +1228,7 @@ const CONTRACTS_KDF_ITERATIONS=250000;
 const CONTRACTS_LOCAL_KEY='oneway-contracts-secure-cache-v1';
 const ADMIN_AUTH_EMAIL_KEY='oneway-admin-auth-email-v1';
 const AREAS={arte:'Arte',video:'Vídeo',trafego:'Tráfego'};
-const STATUS_DEFAULT={green:'Aprovado',red:'Não feito',yellow:'Em produção',purple:'Aguardando aprovação'};
+const STATUS_DEFAULT={red:'Não feito',yellow:'Em produção',purple:'Aguardando aprovação',orange:'Aguardando postagem',green:'Finalizado'};
 const STATUS_TRAFEGO={green:'Campanha ativa',red:'Campanha inativa',yellow:'Aguardando produção',orange:'Em montagem',purple:'Finalizada'};
 const MONTHS=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 const COMMEMORATIVE_YEAR_MONTHS={2026:[10,11,12],2027:[1,2,3,4,5,6,7,8,9,10,11,12]};
@@ -1560,22 +1622,24 @@ function renderCommemorativeDates(){
 }
 function agendaDateInfo(d){if(!d?.postDate)return {valid:false,days:null,target:null};const parts=String(d.postDate).split('-').map(Number);if(parts.length!==3||parts.some(n=>!Number.isFinite(n)))return {valid:false,days:null,target:null};const now=new Date(),today=new Date(now.getFullYear(),now.getMonth(),now.getDate()),target=new Date(parts[0],parts[1]-1,parts[2]);return {valid:true,target,days:Math.round((target-today)/86400000)}}
 function agendaDemandIsFinalized(d){if(!d)return false;return d.area==='trafego'?d.status==='purple':d.status==='green'}
-function agendaDemandIsOverdue(d){const info=agendaDateInfo(d);return info.valid&&info.days<0&&!agendaDemandIsFinalized(d)}
-function agendaDemandIsPriority(d){if(!d||!['arte','video'].includes(d.area)||!d.postDate||['green','purple'].includes(d.status))return false;const info=agendaDateInfo(d);return info.valid&&info.days>=0&&info.days<=2}
+function agendaDemandAwaitingPost(d){return !!d&&['arte','video'].includes(d.area)&&d.status==='orange'}
+function agendaDemandIsOverdue(d){if(agendaDemandAwaitingPost(d))return false;const info=agendaDateInfo(d);return info.valid&&info.days<0&&!agendaDemandIsFinalized(d)}
+function agendaDemandIsPriority(d){if(!d||!['arte','video'].includes(d.area)||!d.postDate||['green','purple','orange'].includes(d.status))return false;const info=agendaDateInfo(d);return info.valid&&info.days>=0&&info.days<=2}
 function bindAgendaViewTabs(){document.querySelectorAll('#agendaViewTabs [data-agenda-view]').forEach(b=>{b.classList.toggle('active',b.dataset.agendaView===agendaView);b.onclick=()=>{agendaView=b.dataset.agendaView==='finished'?'finished':'active';renderAgenda()}})}
 function renderAgenda(){
   const root=document.getElementById('agendaList'),q=document.getElementById('searchInput').value.trim().toLocaleLowerCase('pt-BR'),filterArea=agendaAreaFilter();
   const clientMap=new Map(state.clients.map(c=>[c.id,c]));
   const base=state.demands.filter(d=>!filterArea||d.area===filterArea).filter(d=>{const c=clientMap.get(d.clientId),hay=`${d.title||''} ${d.description||''} ${c?.name||''}`.toLocaleLowerCase('pt-BR');return !q||hay.includes(q)});
   const finished=base.filter(agendaDemandIsFinalized),active=base.filter(d=>!agendaDemandIsFinalized(d));
+  const awaitingPost=active.filter(agendaDemandAwaitingPost);
   const byActiveDeadline=(a,b)=>{const ao=agendaDemandIsOverdue(a),bo=agendaDemandIsOverdue(b);if(ao!==bo)return ao?-1:1;const ad=String(a.postDate||'9999-99-99'),bd=String(b.postDate||'9999-99-99');return ad.localeCompare(bd)||String(a.title||'').localeCompare(String(b.title||''),'pt-BR')};
   const byFinishedDate=(a,b)=>String(b.postDate||'0000-00-00').localeCompare(String(a.postDate||'0000-00-00'))||String(a.title||'').localeCompare(String(b.title||''),'pt-BR');
   const items=(agendaView==='finished'?finished.sort(byFinishedDate):active.sort(byActiveDeadline));
   const finCount=document.getElementById('agendaFinishedCount');if(finCount)finCount.textContent=String(finished.length);bindAgendaViewTabs();
-  document.getElementById('agendaCount').textContent=`${items.length} demanda${items.length===1?'':'s'}`;
-  const desc=document.querySelector('#agendaContent .agenda-summary span');if(desc){if(agendaView==='finished')desc.textContent=filterArea?`Demandas de ${AREAS[filterArea]} já finalizadas.`:'Demandas já aprovadas/finalizadas.';else desc.textContent=filterArea?`Demandas de ${AREAS[filterArea]} em andamento. Atrasadas aparecem primeiro.`:'Demandas em andamento. Atrasadas aparecem primeiro.'}
-  if(!items.length){root.innerHTML=agendaView==='finished'?'<div class="empty"><strong>Nenhuma demanda finalizada.</strong><span>As demandas aprovadas aparecerão aqui.</span></div>':'<div class="empty"><strong>Nenhuma demanda pendente.</strong><span>Não há demandas em andamento para exibir na agenda.</span></div>';return}
-  root.innerHTML=items.map((d,i)=>{const c=clientMap.get(d.clientId),date=d.postDate?new Date(`${d.postDate}T12:00:00`):null,day=date?String(date.getDate()).padStart(2,'0'):'—',mon=date?new Intl.DateTimeFormat('pt-BR',{month:'short'}).format(date).replace('.',''):'',area=AREAS[d.area]||d.area,overdue=agendaDemandIsOverdue(d),priority=!overdue&&agendaDemandIsPriority(d),finishedItem=agendaDemandIsFinalized(d);return `<button class="agenda-item ${date?'':'agenda-undated'} ${overdue?'agenda-overdue':''} ${priority?'agenda-priority':''} ${finishedItem?'agenda-finished':''}" data-agenda-id="${d.id}" style="animation-delay:${Math.min(i*35,300)}ms"><span class="agenda-date"><strong class="agenda-day">${day}</strong><span class="agenda-month">${esc(mon)}</span></span><span class="agenda-info"><strong>${esc(d.title)}</strong><span>${esc(c?.name||'Cliente não encontrado')}</span></span><span class="area-chip">${esc(area)}</span><span class="current-status ${d.status}">${esc(statusLabel(d))}</span><span class="agenda-arrow">›</span></button>`}).join('');
+  document.getElementById('agendaCount').textContent=`${items.length} demanda${items.length===1?'':'s'}${agendaView==='active'&&awaitingPost.length?' · '+awaitingPost.length+' aguardando postagem':''}`;
+  const desc=document.querySelector('#agendaContent .agenda-summary span');if(desc){if(agendaView==='finished')desc.textContent=filterArea?`Demandas de ${AREAS[filterArea]} com publicação concluída.`:'Somente demandas finalizadas após a postagem.';else desc.textContent=filterArea?`Demandas de ${AREAS[filterArea]} em andamento ou aguardando postagem.`:'Demandas em andamento e aprovadas aguardando postagem. Atrasadas aparecem primeiro.'}
+  if(!items.length){root.innerHTML=agendaView==='finished'?'<div class="empty"><strong>Nenhuma demanda finalizada.</strong><span>Somente as demandas com postagem concluída aparecem aqui.</span></div>':'<div class="empty"><strong>Nenhuma demanda pendente.</strong><span>Não há demandas em andamento para exibir na agenda.</span></div>';return}
+  root.innerHTML=items.map((d,i)=>{const c=clientMap.get(d.clientId),date=d.postDate?new Date(`${d.postDate}T12:00:00`):null,day=date?String(date.getDate()).padStart(2,'0'):'—',mon=date?new Intl.DateTimeFormat('pt-BR',{month:'short'}).format(date).replace('.',''):'',area=AREAS[d.area]||d.area,overdue=agendaDemandIsOverdue(d),priority=!overdue&&agendaDemandIsPriority(d),finishedItem=agendaDemandIsFinalized(d);return `<button class="agenda-item ${date?'':'agenda-undated'} ${overdue?'agenda-overdue':''} ${priority?'agenda-priority':''} ${finishedItem?'agenda-finished':''} ${agendaDemandAwaitingPost(d)?'agenda-awaiting-post':''}" data-agenda-id="${d.id}" style="animation-delay:${Math.min(i*35,300)}ms"><span class="agenda-date"><strong class="agenda-day">${day}</strong><span class="agenda-month">${esc(mon)}</span></span><span class="agenda-info"><strong>${esc(d.title)}</strong><span>${esc(c?.name||'Cliente não encontrado')}</span></span><span class="area-chip">${esc(area)}</span><span class="current-status ${d.status}">${esc(statusLabel(d))}</span><span class="agenda-arrow">›</span></button>`}).join('');
   root.querySelectorAll('[data-agenda-id]').forEach(b=>b.onclick=()=>{const d=state.demands.find(x=>x.id===b.dataset.agendaId);if(!d||!canAccessArea(d.area))return;currentArea=d.area;currentMonth=d.month;openClientId=d.clientId;openDemandId=d.id;renderAll();setTimeout(()=>document.getElementById('clients')?.scrollIntoView({behavior:'smooth',block:'start'}),80)})
 }
 function renderStats(){const set=statusesForArea(currentArea),counts={};Object.keys(set).forEach(k=>counts[k]=0);demandsFor().forEach(d=>counts[d.status]=(counts[d.status]||0)+1);const root=document.getElementById('stats');root.innerHTML=Object.entries(set).map(([k,l])=>`<div class="stat"><span class="dot ${k}"></span><small>${l}</small><strong>${counts[k]||0}</strong></div>`).join('');[...root.children].forEach((el,i)=>{el.style.animation=`softReveal .42s var(--ease) ${i*55}ms both`})}
@@ -1597,7 +1661,7 @@ function productionAssetsBlock(d){if(!['arte','video'].includes(d.area))return '
 function renderDemand(d,i){
   const expanded=openDemandId===d.id;
   const refsBlock=d.area==='trafego'?'':`<div><div class="detail-label">Referências</div><div class="refs">${(d.links||[]).map((link,idx)=>`<div class="ref-item"><a href="${esc(safeUrl(link))}" target="_blank" rel="noopener">${esc(link)}</a>${isAdmin()?`<button class="mini-link danger remove-link" data-index="${idx}">Remover</button>`:''}</div>`).join('')}${(d.attachments||[]).map(f=>`<div class="ref-item"><span>${esc(f.name)}</span><div><button class="mini-link open-file" data-file-id="${f.id}">Abrir</button>${isAdmin()?`<button class="mini-link danger remove-file" data-file-id="${f.id}">Remover</button>`:''}</div></div>`).join('')||(!d.links?.length?'<span style="font-size:11px;color:rgba(235,243,255,.6)">Nenhuma referência adicionada.</span>':'')}</div>${isAdmin()?`<div class="ref-add"><input class="link-input" placeholder="Cole um link"><button class="soft-btn small add-link">Adicionar</button></div><div class="file-upload"><label>+ Adicionar arquivo<input class="file-input" type="file" multiple></label></div>`:''}</div>`;
-  return `<div class="demand ${expanded?'expanded':''}" data-demand-id="${d.id}"><button class="demand-row"><span class="demand-title"><span class="demand-index">${String(i+1).padStart(2,'0')}</span>${esc(d.title)}<span class="demand-date">${esc(fmtPostDate(d.postDate))}</span></span><span class="current-status ${d.status}">${statusLabel(d)}</span><span class="demand-caret">⌄</span></button><div class="demand-detail"><div class="detail-overflow"><div class="detail-panel"><div class="detail-grid ${d.area==='trafego'?'traffic-detail-grid':''}"><div><div class="detail-label">Descrição</div><p class="description">${esc(d.description||'Sem descrição cadastrada.')}</p><div class="detail-label" style="margin-top:17px">Data da postagem</div><p class="description">${esc(fmtPostDate(d.postDate))}</p><div class="detail-label" style="margin-top:17px">Atualizar status</div><div class="status-edit">${Object.entries(statusesForArea(d.area)).map(([k,v])=>`<button class="status-btn ${d.status===k?'active':''}" data-status="${k}">${v}</button>`).join('')}</div>${productionAssetsBlock(d)}${finalMaterialBlock(d)}</div>${refsBlock}</div>${isAdmin()?`<div class="detail-actions"><button class="ghost small edit-demand">Editar</button><button class="ghost small danger delete-demand">Excluir</button></div>`:''}</div></div></div></div>`
+  return `<div class="demand ${expanded?'expanded':''}" data-demand-id="${d.id}"><button class="demand-row"><span class="demand-title"><span class="demand-index">${String(i+1).padStart(2,'0')}</span>${esc(d.title)}<span class="demand-date">${esc(fmtPostDate(d.postDate))}</span></span><span class="current-status ${d.status}">${statusLabel(d)}</span><span class="demand-caret">⌄</span></button><div class="demand-detail"><div class="detail-overflow"><div class="detail-panel"><div class="detail-grid ${d.area==='trafego'?'traffic-detail-grid':''}"><div><div class="detail-label">Descrição</div><p class="description">${esc(d.description||'Sem descrição cadastrada.')}</p><div class="detail-label" style="margin-top:17px">Data da postagem</div><p class="description">${esc(fmtPostDate(d.postDate))}</p><div class="detail-label" style="margin-top:17px">Atualizar status</div><div class="status-edit">${Object.entries(statusesForArea(d.area)).map(([k,v])=>`<button class="status-btn ${d.status===k?'active':''}" data-status="${k}">${v}</button>`).join('')}</div>${agendaDemandAwaitingPost(d)?'<div class="demand-posting-reminder">Material aprovado. Falta publicar — a demanda permanece na Agenda.</div>':''}${productionAssetsBlock(d)}${finalMaterialBlock(d)}</div>${refsBlock}</div>${isAdmin()?`<div class="detail-actions"><button class="ghost small edit-demand">Editar</button><button class="ghost small danger delete-demand">Excluir</button></div>`:''}</div></div></div></div>`
 }
 function bindClientEvents(root){root.querySelectorAll('.client-head').forEach(b=>b.onclick=()=>{const id=b.closest('.client').dataset.clientId;if(openClientId===id){openClientId=null;openDemandId=null}else{openClientId=id;openDemandId=null}renderClients();if(openClientId)setTimeout(()=>document.getElementById('clients').scrollIntoView({behavior:'smooth',block:'start'}),40)});root.querySelectorAll('.client-options').forEach(b=>b.onclick=e=>{e.stopPropagation();const menu=b.parentElement.querySelector('.client-menu');document.querySelectorAll('.client-menu').forEach(m=>{if(m!==menu)m.classList.add('hidden')});menu.classList.toggle('hidden')});root.querySelectorAll('.report-client').forEach(b=>b.onclick=()=>openClientReport(b.closest('.client').dataset.clientId));root.querySelectorAll('.planning-client').forEach(b=>b.onclick=()=>openClientPlanning(b.closest('.client').dataset.clientId));root.querySelectorAll('.instagram-analytics-client').forEach(b=>b.onclick=()=>openInstagramAnalytics(b.closest('.client').dataset.clientId));root.querySelectorAll('.remove-client').forEach(b=>b.onclick=()=>removeClientForMonth(b.closest('.client').dataset.clientId));root.querySelectorAll('.add-demand-client').forEach(b=>b.onclick=()=>openDemandModal(null,b.closest('.client').dataset.clientId));root.querySelectorAll('.demand-row').forEach(row=>row.onclick=()=>{const id=row.closest('.demand').dataset.demandId;openDemandId=openDemandId===id?null:id;renderClients()});root.querySelectorAll('.status-btn').forEach(b=>b.onclick=e=>{e.stopPropagation();updateStatus(b.closest('.demand').dataset.demandId,b.dataset.status)});root.querySelectorAll('.edit-demand').forEach(b=>b.onclick=()=>openDemandModal(b.closest('.demand').dataset.demandId));root.querySelectorAll('.delete-demand').forEach(b=>b.onclick=()=>deleteDemand(b.closest('.demand').dataset.demandId));root.querySelectorAll('.add-link').forEach(b=>b.onclick=()=>addLink(b.closest('.demand').dataset.demandId,b.parentElement.querySelector('.link-input').value));root.querySelectorAll('.add-production-link').forEach(b=>b.onclick=()=>addProductionLink(b.closest('.demand').dataset.demandId,b.parentElement.querySelector('.production-link-input').value));root.querySelectorAll('.production-link-input').forEach(inp=>inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();addProductionLink(inp.closest('.demand').dataset.demandId,inp.value)}});root.querySelectorAll('.remove-production-link').forEach(b=>b.onclick=()=>removeProductionLink(b.closest('.demand').dataset.demandId,Number(b.dataset.index)));root.querySelectorAll('.production-file-input').forEach(inp=>inp.onchange=()=>addProductionFiles(inp.closest('.demand').dataset.demandId,inp.files));root.querySelectorAll('.remove-production-file').forEach(b=>b.onclick=()=>removeProductionFile(b.closest('.demand').dataset.demandId,b.dataset.fileId));root.querySelectorAll('.save-final-link').forEach(b=>b.onclick=()=>saveFinalMaterialLink(b.closest('.demand').dataset.demandId,b.parentElement.querySelector('.final-link-input').value));root.querySelectorAll('.final-link-input').forEach(inp=>inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();saveFinalMaterialLink(inp.closest('.demand').dataset.demandId,inp.value)}});root.querySelectorAll('.remove-final-link').forEach(b=>b.onclick=()=>saveFinalMaterialLink(b.closest('.demand').dataset.demandId,''));root.querySelectorAll('.remove-link').forEach(b=>b.onclick=()=>removeLink(b.closest('.demand').dataset.demandId,Number(b.dataset.index)));root.querySelectorAll('.file-input').forEach(inp=>inp.onchange=()=>addFiles(inp.closest('.demand').dataset.demandId,inp.files));root.querySelectorAll('.open-file').forEach(b=>b.onclick=()=>openFile(b.dataset.fileId));root.querySelectorAll('.remove-file').forEach(b=>b.onclick=()=>removeFile(b.closest('.demand').dataset.demandId,b.dataset.fileId))}
 
@@ -2310,7 +2374,7 @@ function renderBulkImportPreview(){const wrap=document.getElementById('bulkPrevi
 function updateBulkImportSummary(){const unresolved=bulkImportDrafts.filter(d=>!d.clientId).length,arte=bulkImportDrafts.filter(d=>d.area==='arte').length,video=bulkImportDrafts.filter(d=>d.area==='video').length,refs=bulkImportDrafts.reduce((n,d)=>n+(d.links||[]).length,0);document.getElementById('bulkPreviewCount').textContent=`${bulkImportDrafts.length} demanda${bulkImportDrafts.length===1?'':'s'}`;document.getElementById('bulkImportSummary').textContent=`${arte} Arte · ${video} Vídeo${refs?` · ${refs} referência${refs===1?'':'s'}`:''}${unresolved?` · ${unresolved} sem cliente vinculado`:''}`;document.getElementById('bulkConfirmBtn').textContent=`Importar ${bulkImportDrafts.length} demanda${bulkImportDrafts.length===1?'':'s'}`}
 async function confirmBulkDemandImport(){if(!isAdmin()||!bulkImportDrafts.length)return;const createMissing=document.getElementById('bulkCreateMissing').checked,skipDuplicates=document.getElementById('bulkSkipDuplicates').checked;for(const d of bulkImportDrafts){if(!String(d.title||'').trim()){toast('Há uma demanda sem nome na prévia.');return}if(d.postDate&&d.postDate.slice(0,7)!==d.month){toast(`A data de “${d.title}” não pertence ao mês selecionado.`);return}if(!d.clientId&&!createMissing){toast('Vincule os clientes pendentes ou marque a opção para criá-los automaticamente.');return}if(!d.clientId&&!d.rawClient){toast('Há uma demanda sem nome de cliente identificado.');return}}const btn=document.getElementById('bulkConfirmBtn'),old=btn.textContent;btn.disabled=true;btn.textContent='Importando...';const prevClients=state.clients.length,prevDemands=state.demands.length,createdMap=new Map();let added=0,duplicates=0;try{for(const d of bulkImportDrafts){let clientId=d.clientId;if(!clientId){const key=`${d.area}|${d.month}|${importNorm(d.rawClient)}`;clientId=createdMap.get(key)||'';if(!clientId){const existing=importClientMatch(d.rawClient,d.area,d.month);if(existing)clientId=existing.id;else{const c={id:uid(),name:d.rawClient.trim(),area:d.area,type:'fixed',startMonth:d.month,createdAt:new Date().toISOString()};state.clients.push(c);rememberClientName(c.name);clientId=c.id;createdMap.set(key,clientId)}}}const isDup=state.demands.some(x=>x.clientId===clientId&&x.area===d.area&&x.month===d.month&&importNorm(x.title)===importNorm(d.title));if(isDup&&skipDuplicates){duplicates++;continue}state.demands.push({id:uid(),clientId,month:d.month,area:d.area,title:String(d.title).trim(),postDate:d.postDate||'',description:String(d.description||'').trim(),status:'red',links:[...new Set((d.links||[]).filter(Boolean))],attachments:[],createdAt:new Date().toISOString()});added++}const ok=await saveState();if(!ok)throw new Error('save');closeModal('bulkImportModal');if(bulkImportDrafts[0]){currentArea=bulkImportDrafts[0].area;currentMonth=bulkImportDrafts[0].month;openClientId=null;openDemandId=null}renderAll();toast(`${added} demanda${added===1?'':'s'} importada${added===1?'':'s'}${duplicates?` · ${duplicates} duplicada${duplicates===1?' ignorada':'s ignoradas'}`:''}.`,null,null,'success');bulkImportDrafts=[]}catch(e){state.clients.splice(prevClients);state.demands.splice(prevDemands);toast('Não foi possível concluir a importação. Nenhuma demanda foi adicionada.')}finally{btn.disabled=false;btn.textContent=old}}
 
-function setFormStatus(status,area=currentArea){const set=statusesForArea(area);if(!set[status])status='red';document.getElementById('formStatus').value=status;document.getElementById('formStatusButtons').innerHTML=Object.entries(set).map(([k,v])=>`<button type="button" class="status-btn ${status===k?'active':''}" data-status="${k}">${v}</button>`).join('');document.querySelectorAll('#formStatusButtons .status-btn').forEach(b=>b.onclick=()=>setFormStatus(b.dataset.status,area))}
+function setFormStatus(status,area=currentArea){const set=statusesForArea(area);if(!set[status])status='red';document.getElementById('formStatus').value=status;document.getElementById('formStatusButtons').innerHTML=Object.entries(set).map(([k,v])=>`<button type="button" class="status-btn ${status===k?'active':''}" data-status="${k}">${v}</button>`).join('')+(area==='trafego'?'':'<span class="status-posting-hint">Após a aprovação do cliente, escolha <b>Aguardando postagem</b>. Use <b>Finalizado</b> somente depois de publicar.</span>');document.querySelectorAll('#formStatusButtons .status-btn').forEach(b=>b.onclick=()=>setFormStatus(b.dataset.status,area))}
 function renderDemandReferenceFileSelection(){const input=document.getElementById('formReferenceFiles'),root=document.getElementById('formReferenceFileList');if(!input||!root)return;const files=[...(input.files||[])];root.innerHTML=files.length?files.map(f=>`<span class="reference-file-chip"><span>↥</span><b title="${esc(f.name)}">${esc(f.name)}</b><span>${(f.size/1024/1024).toLocaleString('pt-BR',{maximumFractionDigits:1})} MB</span></span>`).join(''):'<span class="reference-file-empty">Nenhum arquivo selecionado.</span>'}
 function renderDemandProductionFileSelection(){const input=document.getElementById('formProductionFiles'),root=document.getElementById('formProductionFileList');if(!input||!root)return;const files=[...(input.files||[])];root.innerHTML=files.length?files.map(f=>`<span class="reference-file-chip"><span>↓</span><b title="${esc(f.name)}">${esc(f.name)}</b><span>${(f.size/1024/1024).toLocaleString('pt-BR',{maximumFractionDigits:1})} MB</span></span>`).join(''):'<span class="reference-file-empty">Nenhum arquivo selecionado.</span>'}
 function normalizeReferenceLinkValue(val){const clean=String(val||'').trim();if(!clean)return '';const href=safeUrl(/^https?:\/\//i.test(clean)?clean:`https://${clean}`);return href==='#'?'':href}
