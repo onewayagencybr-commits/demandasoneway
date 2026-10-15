@@ -3281,7 +3281,10 @@ function weekCalendarText(){
   lines.push('','────────────────────────',calendarDateLabel(day.date).toUpperCase());
   if(day.posts.length){
    lines.push(calendarPostsLabel());
-   day.posts.forEach(d=>lines.push(`• ${String(d.title||'Sem título').replace(/\s+/g,' ').trim()}`));
+   day.posts.forEach(d=>{
+    lines.push(`• ${String(d.title||'Sem título').replace(/\s+/g,' ').trim()}`);
+    lines.push(`  Cliente: ${calendarClientName(d.clientId)||'Cliente não encontrado'}`);
+   });
   }
   if(day.events.length){
    if(day.posts.length)lines.push('');
@@ -3290,6 +3293,8 @@ function weekCalendarText(){
     const time=e.time?`${e.time} · `:'';
     const type=e.type?`${e.type} · `:'';
     lines.push(`• ${time}${type}${String(e.title||'Compromisso').replace(/\s+/g,' ').trim()}`);
+    const client=calendarClientName(e.clientId);
+    if(client)lines.push(`  Cliente: ${client}`);
    });
   }
   if(day.dates.length){
@@ -3311,11 +3316,11 @@ async function exportWeekCalendarJPEG(){
  function wrap(text,font,width){scratch.font=font;return canvasWrap(scratch,String(text||'').replace(/\s+/g,' ').trim(),width)}
  // O cabeçalho de cada dia já mostra a data, então as demandas exibem apenas o título.
  const cards=days.map(day=>{
-  const rows=[...day.posts.map(d=>({type:'post',title:wrap(d.title||'Sem título',titleFont,inside-525)})),
-   ...day.events.map(e=>({type:'event',title:wrap([e.time,e.title].filter(Boolean).join(' · '),titleFont,inside-525),extra:String(e.type||'Compromisso')})),
+  const rows=[...day.posts.map(d=>({type:'post',title:wrap(d.title||'Sem título',titleFont,inside-525),meta:wrap(calendarClientName(d.clientId)||'Cliente não encontrado',metaFont,inside-525)})),
+   ...day.events.map(e=>({type:'event',title:wrap([e.time,e.title].filter(Boolean).join(' · '),titleFont,inside-525),extra:String(e.type||'Compromisso'),meta:calendarClientName(e.clientId)?wrap(calendarClientName(e.clientId),metaFont,inside-525):[]})),
    ...day.dates.map(item=>({type:'date',title:wrap(item.title||'Data comemorativa',titleFont,inside-525)}))];
   let height=94;let old='';
-  for(const row of rows){if(row.type!==old){height+=39;old=row.type}height+=row.title.length*41+15}
+  for(const row of rows){if(row.type!==old){height+=39;old=row.type}height+=row.title.length*41+(row.meta?.length?row.meta.length*30+8:0)+15}
   return {day,rows,height:Math.max(130,height)};
  });
  const intro=305,footer=84,space=18,H=intro+(cards.length?cards.reduce((sum,c)=>sum+c.height+space,0):186)+footer;
@@ -3344,6 +3349,11 @@ async function exportWeekCalendarJPEG(){
    ctx.fillStyle='#fff';ctx.font=titleFont;
    for(const line of row.title){ctx.fillText(line,left+22,cy);cy+=41}
    ctx.fillStyle='#75a6f1';ctx.fillRect(left,cy-43,6,6);
+   if(row.meta?.length){
+    ctx.fillStyle='#c2d9fb';ctx.font=metaFont;
+    for(const nameLine of row.meta){ctx.fillText(nameLine,left+22,cy-5);cy+=30}
+    cy+=8;
+   }
    cy+=15;
   }
   y+=card.height+space;
@@ -3357,7 +3367,7 @@ async function exportWeekCalendarJPEG(){
 function weekCalendarPDFHTML(){
  if(!isAdmin())return '';
  const stats=calendarWeekStats();
- const payload=JSON.stringify({week:calendarWeekTitle(),start:calendarWeekStart,stats,filter:calendarViewFilter,filterLabel:CALENDAR_FILTER_LABELS[calendarViewFilter],postsLabel:calendarPostsLabel(),summary:calendarFilterSummary(stats),days:calendarExportSchedule().map(d=>({date:d.date,posts:d.posts.map(p=>({title:String(p.title||'Sem título')})),events:d.events.map(e=>({title:String(e.title||'Compromisso'),time:String(e.time||''),type:String(e.type||'')})),dates:d.dates.map(item=>({title:String(item.title||'Data comemorativa')}))}))}).replace(/</g,'\\u003c');
+ const payload=JSON.stringify({week:calendarWeekTitle(),start:calendarWeekStart,stats,filter:calendarViewFilter,filterLabel:CALENDAR_FILTER_LABELS[calendarViewFilter],postsLabel:calendarPostsLabel(),summary:calendarFilterSummary(stats),days:calendarExportSchedule().map(d=>({date:d.date,posts:d.posts.map(p=>({title:String(p.title||'Sem título'),client:calendarClientName(p.clientId)||'Cliente não encontrado'})),events:d.events.map(e=>({title:String(e.title||'Compromisso'),time:String(e.time||''),type:String(e.type||''),client:calendarClientName(e.clientId)||''})),dates:d.dates.map(item=>({title:String(item.title||'Data comemorativa')}))}))}).replace(/</g,'\\u003c');
  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Programação semanal · One Way</title><style>
  @page{size:A4;margin:0}
  *{box-sizing:border-box}html,body{margin:0;padding:0;background:#061128;color:#fff;font-family:Arial,Helvetica,sans-serif;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
@@ -3367,7 +3377,7 @@ function weekCalendarPDFHTML(){
  .pdf-overline{font-size:7.2pt;color:#b9d4ff;font-weight:700;letter-spacing:.11em}.head-top{display:flex;align-items:center;justify-content:space-between;gap:6mm}.pdf-logo{max-width:29mm;max-height:15mm;object-fit:contain}
  h1{font-size:25pt;line-height:1.06;margin:5mm 0 2.5mm;font-weight:750;letter-spacing:-.04em}.pdf-week{font-size:12pt;color:#e6efff;font-weight:600;margin:0}.pdf-summary{margin:4mm 0 0;color:#bed6ff;font-size:8.5pt}.pdf-head.secondary{display:flex;justify-content:space-between;align-items:center;padding-bottom:4mm}.secondary strong{font-size:10.5pt}.secondary span{font-size:8pt;color:#c7daf9}
  .pdf-content{flex:1;min-height:0;overflow:hidden;margin-top:6mm}.pdf-day{padding:5mm 5.5mm;border:1px solid rgba(221,234,255,.18);background:rgba(255,255,255,.07);border-radius:4mm;margin-bottom:3.2mm;overflow-wrap:anywhere}.pdf-day-head{font-size:12pt;font-weight:750;margin:0 0 3mm;color:#fff;padding-bottom:2mm;border-bottom:1px solid rgba(224,237,255,.15)}
- .pdf-group{margin-top:2.7mm}.pdf-group-title{color:#9fc5ff;font-size:7pt;font-weight:750;letter-spacing:.1em;margin-bottom:1.4mm}.pdf-item{display:flex;gap:2mm;align-items:flex-start;margin:1.45mm 0;font-size:9.3pt;line-height:1.35;color:#f8fbff;break-inside:avoid;page-break-inside:avoid}.pdf-dot{color:#88bcff;font-size:10pt;line-height:1.3;flex:none}.pdf-item span:last-child{flex:1;min-width:0}.pdf-footer{margin-top:auto;padding-top:3mm;display:flex;justify-content:space-between;color:rgba(231,241,255,.7);font-size:7pt;border-top:1px solid rgba(222,235,255,.15)}
+ .pdf-group{margin-top:2.7mm}.pdf-group-title{color:#9fc5ff;font-size:7pt;font-weight:750;letter-spacing:.1em;margin-bottom:1.4mm}.pdf-item{display:flex;gap:2mm;align-items:flex-start;margin:1.45mm 0;font-size:9.3pt;line-height:1.35;color:#f8fbff;break-inside:avoid;page-break-inside:avoid}.pdf-dot{color:#88bcff;font-size:10pt;line-height:1.3;flex:none}.pdf-item span:last-child{flex:1;min-width:0}.pdf-item>.pdf-item-body{flex:1;min-width:0}.pdf-item-title{display:block}.pdf-item-client{display:block;margin-top:.7mm;color:#bcd5fa;font-weight:600;font-size:7.5pt;line-height:1.35;overflow-wrap:anywhere}.pdf-footer{margin-top:auto;padding-top:3mm;display:flex;justify-content:space-between;color:rgba(231,241,255,.7);font-size:7pt;border-top:1px solid rgba(222,235,255,.15)}
  .pdf-empty{border:1px solid rgba(221,234,255,.18);background:rgba(255,255,255,.07);border-radius:4mm;padding:8mm;color:#dae9ff;font-size:10pt}.pdf-print{position:fixed;z-index:20;right:18px;top:15px;border:0;background:#fff;color:#153674;font:700 12px Arial;padding:11px 15px;border-radius:9px;cursor:pointer;box-shadow:0 6px 24px #0004}
  @media print{.pdf-print{display:none!important}html,body{width:210mm}.sheet{margin:0!important;box-shadow:none!important}}
  </style></head><body><button class="pdf-print" onclick="window.print()">Imprimir / salvar PDF</button><div id="pdfPages"></div><script type="application/json" id="weekData">${payload}<\/script><script>
@@ -3393,7 +3403,10 @@ function weekCalendarPDFHTML(){
   let madeGroup=false;
   if(kindNow!==kind){group=el('div','pdf-group');group.append(el('div','pdf-group-title',kind==='post'?data.postsLabel:kind==='date'?'DATAS COMEMORATIVAS':'COMPROMISSOS'));card.append(group);kindNow=kind;madeGroup=true}
   const text=kind==='event'?[entry.time,entry.type,entry.title].filter(Boolean).join(' · '):entry.title;
-  const row=el('div','pdf-item');row.append(el('span','pdf-dot','•'),el('span','',text));group.append(row);
+  const row=el('div','pdf-item'),body=el('span','pdf-item-body');
+  body.append(el('span','pdf-item-title',text));
+  if((kind==='post'||kind==='event')&&entry.client)body.append(el('span','pdf-item-client',entry.client));
+  row.append(el('span','pdf-dot','•'),body);group.append(row);
   if(overflowing()){
    group.removeChild(row);
    if(madeGroup){group.remove();group=null;kindNow=''}
