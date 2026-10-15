@@ -34,7 +34,7 @@ function bindClientPicker(){
  input.addEventListener('keydown',e=>{if(e.key==='Escape'||e.key==='Tab'){close();return;}if(e.key==='Enter'&&!list.hidden&&active>=0){e.preventDefault();select(active);return;}if(e.key!=='ArrowDown'&&e.key!=='ArrowUp')return;e.preventDefault();if(list.hidden)show();if(!matches.length)return;active=(active+(e.key==='ArrowDown'?1:active<0?0:-1)+matches.length)%matches.length;for(const b of list.querySelectorAll('[role=option]'))b.setAttribute('aria-selected',String(Number(b.dataset.clientIndex)===active));const item=$('rsClientOption'+active);input.setAttribute('aria-activedescendant',item.id);item.scrollIntoView({block:'nearest'});});
 }
 function validate(d){if(d?.client?.length>180||d?.title?.length>180||d?.videos?.some(v=>v.title?.length>180))throw Error('Títulos e cliente devem ter até 180 caracteres.');if(!d||typeof d.client!=='string'||typeof d.title!=='string'||!Array.isArray(d.videos)||!d.videos.length)throw Error('Formato de roteiro inválido.');const string=x=>typeof x==='string'?x:'';return {id:uid(),client:d.client,title:d.title,videos:d.videos.map(v=>{if(!v||!['scenes','full'].includes(v.mode)||!Array.isArray(v.scenes))throw Error('Vídeo inválido.');return {title:string(v.title),duration:String(v.duration??''),mode:v.mode,text:string(v.text),scenes:(v.scenes.length?v.scenes:[scene()]).map(s=>({text:string(s.text),visual:string(s.visual),seconds:String(s.seconds??'')}))};})};}
-function download(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),30000);}
+function download(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);}
 const filename=()=>`One Way - Roteiros - ${doc.client||'Cliente'} - ${doc.videos[0]?.title||doc.title||'Roteiros'}`.replace(/[<>:"/\\|?*\u0000-\u001f]/g,'-').slice(0,180);
 async function action(act,b){if(!allowed())return;
 if(act==='save'){if(!doc.client.trim())throw Error('Informe o cliente para salvar.');const list=saved(),item={...structuredClone(doc),updatedAt:new Date().toISOString()},i=list.findIndex(x=>x.id===doc.id);if(i<0)list.unshift(item);else list[i]=item;localStorage.setItem(key(),JSON.stringify(list));dirty=false;render();status('Rascunho salvo neste navegador.');return;}
@@ -51,8 +51,7 @@ dirty=true;render();}
 async function scriptTextBrand(ctx){
   try{
     const logo=new Image();
-    logo.src='/oneway-logo.png';
-    await new Promise((resolve,reject)=>{logo.onload=resolve;logo.onerror=reject;});
+    await new Promise((resolve,reject)=>{logo.onload=resolve;logo.onerror=reject;logo.src='/oneway-logo.png';});
     const scale=Math.min(260/logo.naturalWidth,102/logo.naturalHeight);
     if(Number.isFinite(scale)&&scale>0){ctx.drawImage(logo,100,55,logo.naturalWidth*scale,logo.naturalHeight*scale);return;}
   }catch(error){console.warn('Logo do PDF indisponível; usando marca em texto.',error);}
