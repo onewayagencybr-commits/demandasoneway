@@ -7,14 +7,67 @@ let doc=blank(),dirty=false,busy=false;
 const key=()=>`oneway-scripts-v1:${typeof currentUser==='string'?currentUser:'admin'}`;
 const allowed=()=>typeof isAdmin==='function'&&isAdmin();
 function status(t){if($('rsStatus'))$('rsStatus').textContent=t;}
-function saved(){const raw=localStorage.getItem(key());return raw?JSON.parse(raw):[];}
+
+let cloudDocs=[],cloudLoaded=false,cloudLoading=false,cloudOwner='';
+const cloudReady=()=>allowed()&&typeof supabaseClient!=='undefined'&&!!supabaseClient&&typeof adminAuthReady==='function'&&adminAuthReady();
+const saved=()=>cloudDocs;
+function legacyDocs(){try{const v=JSON.parse(localStorage.getItem(key())||'[]');return Array.isArray(v)?v.filter(x=>x&&Array.isArray(x.videos)):[];}catch{return []}}
+function checkCloudOwner(){const owner=typeof supabaseAdminEmail!=='undefined'?String(supabaseAdminEmail||''):'';if(owner!==cloudOwner){cloudOwner=owner;cloudDocs=[];cloudLoaded=false;cloudLoading=false;}}
+function updateCloudList(){
+ const select=$('rsDrafts');if(!select)return;
+ const chosen=select.value;select.innerHTML='<option value="">Selecione um roteiro salvo</option>';
+ for(const item of cloudDocs)select.add(new Option(`${item.client} · ${item.videos?.[0]?.title||item.title||'Sem título'} · ${item.videos?.length||0} vídeo(s)`,item.id));
+ if(cloudDocs.some(d=>d.id===chosen))select.value=chosen;
+ if($('rsMigrate'))$('rsMigrate').hidden=legacyDocs().length===0;
+ if($('rsCloudCount'))$('rsCloudCount').textContent=cloudLoaded?`${cloudDocs.length} roteiro(s) na nuvem`:'Carregando roteiros da nuvem…';
+}
+async function refreshCloud(){
+ checkCloudOwner();
+ if(!cloudReady())throw Error('Faça login como administrador autenticado no Supabase.');
+ if(cloudLoading)return;
+ cloudLoading=true;
+ try{
+  const {data,error}=await supabaseClient.from('video_scripts').select('id,client,document,updated_at').order('updated_at',{ascending:false}).limit(500);
+  if(error)throw error;
+  cloudDocs=(data||[]).map(r=>({...r.document,id:r.id,client:r.client,updatedAt:r.updated_at}));
+  cloudLoaded=true;updateCloudList();
+ }finally{cloudLoading=false;}
+}
+async function saveDocument(){
+ if(!doc.client.trim())throw Error('Escolha o cliente para salvar o roteiro.');
+ if(!cloudReady())throw Error('Entre como administrador para salvar na nuvem.');
+ const stamp=new Date().toISOString(),item={...structuredClone(doc),updatedAt:stamp};
+ const {error}=await supabaseClient.from('video_scripts').upsert({id:doc.id,client:doc.client.trim(),document:item,updated_at:stamp},{onConflict:'id'});
+ if(error)throw Error('Erro ao salvar no Supabase: '+error.message);
+ cloudDocs=[item,...cloudDocs.filter(x=>x.id!==item.id)];cloudLoaded=true;dirty=false;
+ return item;
+}
+async function migrateLegacy(){
+ if(!cloudReady())throw Error('É necessário autenticar como administrador.');
+ if(!cloudLoaded)await refreshCloud();
+ const old=legacyDocs(),existing=new Set(cloudDocs.map(x=>x.id)),remaining=[];let count=0;
+ for(const source of old){
+  if(existing.has(source.id)){remaining.push(source);continue;}
+  try{
+   const docToMigrate=validate(source);docToMigrate.id=source.id;
+   if(!/^[a-f0-9-]{36}$/i.test(docToMigrate.id)||!docToMigrate.client.trim()){remaining.push(source);continue;}
+   const stamp=source.updatedAt||new Date().toISOString(),item={...docToMigrate,updatedAt:stamp};
+   const {error}=await supabaseClient.from('video_scripts').upsert({id:item.id,client:item.client.trim(),document:item,updated_at:stamp},{onConflict:'id'});
+   if(error)throw error;existing.add(item.id);count++;
+  }catch(error){console.warn('Roteiro mantido no navegador após falha de migração',error);remaining.push(source);}
+ }
+ if(remaining.length)localStorage.setItem(key(),JSON.stringify(remaining));else localStorage.removeItem(key());
+ await refreshCloud();updateCloudList();
+ status(`${count} roteiro(s) migrado(s) para a nuvem.${remaining.length?' '+remaining.length+' registro(s) locais preservados.':''}`);
+}
+
 function seconds(v){if(v.duration!=='')return Math.max(0,Number(v.duration)||0);const parts=v.mode==='full'?[{text:v.text}]:v.scenes;return parts.reduce((n,s)=>n+(s.seconds!==''&&s.seconds!=null?Number(s.seconds)||0:Math.ceil((s.text.trim().match(/\S+/g)||[]).length*60/138)),0);}
 function duration(v){const n=seconds(v);return n?`${Math.floor(n/60)?Math.floor(n/60)+'min ':''}${n%60}s`:'A definir';}
 function field(label,name,value,type='text',extra=''){return `<label>${label}<input data-field="${name}" type="${type}" ${type==='text'?'maxlength="180"':''} value="${esc(value)}" ${extra}></label>`;}
 function buttons(kind,i,last){return `<button data-act="${kind}-up" ${i===0?'disabled':''} aria-label="Mover ${kind==='v'?'vídeo':'cena'} para cima">↑</button><button data-act="${kind}-down" ${last?'disabled':''} aria-label="Mover ${kind==='v'?'vídeo':'cena'} para baixo">↓</button><button data-act="${kind}-copy">Duplicar</button><button class="rs-danger" data-act="${kind}-delete">Excluir</button>`;}
 function render(){if(!allowed())return;const root=$('scriptsContent');if(!root)return;
-root.innerHTML=`<div class="rs-panel"><div class="rs-bar rs-head"><div><span class="rs-pill">PRODUÇÃO AUDIOVISUAL</span><h2>Roteiros para gravar.</h2></div><div class="rs-bar"><button data-act="new">Novo roteiro</button><button data-act="save">Salvar rascunho</button><button data-act="preview">Visualizar PDF</button><button class="rs-primary" data-act="pdf">Baixar PDF</button></div></div><div class="rs-meta rs-client-line"><div class="rs-client-picker">${field('Cliente','client',doc.client,'text','id="rsClientInput" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="rsClientOptions" placeholder="Busque ou digite o cliente"')}<div id="rsClientOptions" class="rs-client-options" role="listbox" aria-label="Clientes" hidden></div></div></div><p class="rs-muted">Escreva ou cole seu roteiro. Use texto completo ou organize cena por cena. A duração automática considera aproximadamente 138 palavras por minuto; você pode definir o tempo manualmente.</p><div class="rs-drafts"><label>Roteiros salvos neste navegador<select id="rsDrafts"><option value="">Selecione um roteiro</option></select></label><div class="rs-bar" style="margin-top:10px"><button data-act="load">Abrir roteiro</button><button data-act="delete-draft">Excluir roteiro</button></div><p id="rsStatus" role="status" aria-live="polite">${dirty?'Alterações ainda não salvas.':'Pronto para criar o PDF. Salve o roteiro para continuar depois neste navegador.'}</p></div></div><div id="rsVideos">${doc.videos.map((v,i)=>`<article class="rs-video" data-video="${i}"><div class="rs-bar rs-head"><h3>Vídeo ${String(i+1).padStart(2,'0')}</h3><div class="rs-bar">${buttons('v',i,i===doc.videos.length-1)}</div></div><div class="rs-meta">${field('Título do vídeo','title',v.title)}${field('Duração prevista (segundos) · opcional','duration',v.duration,'number','min="0" step="1" placeholder="Estimar pelo roteiro"')}</div><div class="rs-meta"><label>Formato do roteiro<select data-field="mode"><option value="scenes" ${v.mode==='scenes'?'selected':''}>Cena por cena</option><option value="full" ${v.mode==='full'?'selected':''}>Texto completo</option></select></label><div class="rs-muted" style="align-self:end" data-duration="${i}">Duração estimada: ${duration(v)}</div></div>${v.mode==='full'?`<label>Roteiro completo<textarea data-field="text" rows="10" placeholder="Cole ou escreva aqui o texto completo do vídeo…">${esc(v.text)}</textarea></label>`:v.scenes.map((s,j)=>`<section class="rs-scene" data-scene="${j}"><div class="rs-bar rs-head"><strong>Cena ${j+1}</strong><div class="rs-bar">${buttons('s',j,j===v.scenes.length-1)}</div></div><div class="rs-meta"><label>Texto / fala<textarea data-field="text" placeholder="O que será falado nesta cena…">${esc(s.text)}</textarea></label><label>Imagem / ação / orientação de gravação<textarea data-field="visual" placeholder="Enquadramento, ação, imagens de apoio…">${esc(s.visual)}</textarea></label></div>${field('Duração da cena (segundos) · opcional','seconds',s.seconds,'number','min="0" step="1"')}</section>`).join('')+'<button style="margin-top:18px" data-act="add-scene">+ Adicionar cena</button>'}</article>`).join('')}</div><button class="rs-primary" data-act="add-video">+ Adicionar vídeo</button>`;
-try{for(const d of saved())$('rsDrafts').add(new Option(`${d.client} · ${(d.videos?.[0]?.title||d.title||'Roteiro sem título')} · ${new Date(d.updatedAt).toLocaleDateString('pt-BR')}`,d.id));}catch{status('Não foi possível ler os rascunhos locais. Exporte seus dados para preservar o documento.');}
+root.innerHTML=`<div class="rs-panel"><div class="rs-bar rs-head"><div><span class="rs-pill">PRODUÇÃO AUDIOVISUAL</span><h2>Roteiros para gravar.</h2></div><div class="rs-bar"><button data-act="new">Novo roteiro</button><button data-act="save">Salvar roteiro</button><button data-act="preview">Visualizar PDF</button><button class="rs-primary" data-act="pdf">Baixar PDF</button></div></div><div class="rs-meta rs-client-line"><div class="rs-client-picker">${field('Cliente','client',doc.client,'text','id="rsClientInput" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="rsClientOptions" placeholder="Busque ou digite o cliente"')}<div id="rsClientOptions" class="rs-client-options" role="listbox" aria-label="Clientes" hidden></div></div></div><p class="rs-muted">Escreva ou cole seu roteiro. Use texto completo ou organize cena por cena. A duração automática considera aproximadamente 138 palavras por minuto; você pode definir o tempo manualmente.</p><div class="rs-drafts"><label>Roteiros salvos na nuvem<select id="rsDrafts"><option value="">Carregando roteiros…</option></select></label><p class="rs-muted" id="rsCloudCount">Roteiros compartilhados entre os administradores.</p><div class="rs-bar" style="margin-top:10px"><button data-act="load">Abrir roteiro</button><button data-act="delete-draft">Excluir roteiro</button><button data-act="refresh-cloud">Atualizar lista</button><button id="rsMigrate" data-act="migrate" hidden>Migrar roteiros antigos deste navegador</button></div><p id="rsStatus" role="status" aria-live="polite">${dirty?'Alterações ainda não salvas.':'Pronto para criar o PDF. Salve na nuvem para continuar em outro computador.'}</p></div></div><div class="rs-video-library"><div><span class="rs-pill">ROTEIRO DE GRAVAÇÃO</span><h3>Vídeos deste roteiro <span class="rs-video-count">(${doc.videos.length})</span></h3><p>Adicione os vídeos e salve tudo no mesmo roteiro do cliente. Não é necessário criar um documento por vídeo.</p></div><button class="rs-primary" data-act="add-video">+ Adicionar vídeo</button></div><div id="rsVideos">${doc.videos.map((v,i)=>`<article class="rs-video" data-video="${i}"><div class="rs-bar rs-head"><h3>Vídeo ${String(i+1).padStart(2,'0')}</h3><div class="rs-bar rs-video-controls"><button data-act="save-video" aria-label="Salvar vídeo ${i+1} neste roteiro">Salvar vídeo ${String(i+1).padStart(2,'0')}</button>${buttons('v',i,i===doc.videos.length-1)}</div></div><div class="rs-meta">${field('Título do vídeo','title',v.title)}${field('Duração prevista (segundos) · opcional','duration',v.duration,'number','min="0" step="1" placeholder="Estimar pelo roteiro"')}</div><div class="rs-meta"><label>Formato do roteiro<select data-field="mode"><option value="scenes" ${v.mode==='scenes'?'selected':''}>Cena por cena</option><option value="full" ${v.mode==='full'?'selected':''}>Texto completo</option></select></label><div class="rs-muted" style="align-self:end" data-duration="${i}">Duração estimada: ${duration(v)}</div></div>${v.mode==='full'?`<label>Roteiro completo<textarea data-field="text" rows="10" placeholder="Cole ou escreva aqui o texto completo do vídeo…">${esc(v.text)}</textarea></label>`:v.scenes.map((s,j)=>`<section class="rs-scene" data-scene="${j}"><div class="rs-bar rs-head"><strong>Cena ${j+1}</strong><div class="rs-bar">${buttons('s',j,j===v.scenes.length-1)}</div></div><div class="rs-meta"><label>Texto / fala<textarea data-field="text" placeholder="O que será falado nesta cena…">${esc(s.text)}</textarea></label><label>Imagem / ação / orientação de gravação<textarea data-field="visual" placeholder="Enquadramento, ação, imagens de apoio…">${esc(s.visual)}</textarea></label></div>${field('Duração da cena (segundos) · opcional','seconds',s.seconds,'number','min="0" step="1"')}</section>`).join('')+'<button style="margin-top:18px" data-act="add-scene">+ Adicionar cena</button>'}</article>`).join('')}</div><div class="rs-videos-footer"><button class="rs-primary" data-act="add-video">+ Adicionar próximo vídeo</button><button data-act="save">Salvar roteiro completo</button></div>`;
+checkCloudOwner();updateCloudList();if(!cloudLoaded&&!cloudLoading)void refreshCloud().catch(e=>status('Nuvem indisponível: '+e.message));
 root.oninput=e=>{const f=e.target.dataset.field;if(!f)return;const vi=e.target.closest('[data-video]'),si=e.target.closest('[data-scene]');let target=vi?doc.videos[Number(vi.dataset.video)]:doc;if(si)target=target.scenes[Number(si.dataset.scene)];target[f]=e.target.value;dirty=true;status('Alterações ainda não salvas.');if(vi){root.querySelector(`[data-duration="${vi.dataset.video}"]`).textContent='Duração estimada: '+duration(doc.videos[Number(vi.dataset.video)]);}if(f==='mode')render();};
 root.onclick=async e=>{const b=e.target.closest('[data-act]');if(!b||busy)return;try{await action(b.dataset.act,b);}catch(error){status(error.message||'Não foi possível concluir.');}};
 bindClientPicker();
@@ -37,13 +90,29 @@ function validate(d){if(d?.client?.length>180||d?.title?.length>180||d?.videos?.
 function download(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);}
 const filename=()=>`One Way - Roteiros - ${doc.client||'Cliente'} - ${doc.videos[0]?.title||doc.title||'Roteiros'}`.replace(/[<>:"/\\|?*\u0000-\u001f]/g,'-').slice(0,180);
 async function action(act,b){if(!allowed())return;
-if(act==='save'){if(!doc.client.trim())throw Error('Informe o cliente para salvar.');const list=saved(),item={...structuredClone(doc),updatedAt:new Date().toISOString()},i=list.findIndex(x=>x.id===doc.id);if(i<0)list.unshift(item);else list[i]=item;localStorage.setItem(key(),JSON.stringify(list));dirty=false;render();status('Rascunho salvo neste navegador.');return;}
-if(act==='load'){const id=$('rsDrafts').value,d=saved().find(x=>x.id===id);if(!d)throw Error('Selecione um rascunho.');if(dirty&&!confirm('Descartar as alterações não salvas?'))return;doc=validate(d);doc.id=d.id;dirty=false;render();return;}
-if(act==='delete-draft'){const id=$('rsDrafts').value;if(!id)throw Error('Selecione um rascunho.');if(confirm('Excluir este rascunho salvo?')){localStorage.setItem(key(),JSON.stringify(saved().filter(x=>x.id!==id)));render();}return;}
+if(act==='save'||act==='save-video'){
+  const vi=Number(b.closest('[data-video]')?.dataset.video);
+  await saveDocument();
+  render();
+  status(act==='save-video'&&Number.isInteger(vi) ? `Vídeo ${String(vi+1).padStart(2,'0')} salvo dentro do roteiro de ${doc.client}. Todos os ${doc.videos.length} vídeos estão vinculados na nuvem.` : `Roteiro de ${doc.client} salvo na nuvem com ${doc.videos.length} vídeo(s).`);
+  return;
+}
+if(act==='load'){const id=$('rsDrafts').value,d=saved().find(x=>x.id===id);if(!d)throw Error('Selecione um roteiro salvo na nuvem.');if(dirty&&!confirm('Descartar as alterações não salvas?'))return;doc=validate(d);doc.id=d.id;dirty=false;render();return;}
+if(act==='delete-draft'){
+ const id=$('rsDrafts').value;if(!id)throw Error('Selecione um roteiro salvo.');
+ if(!cloudReady())throw Error('Entre como administrador para excluir da nuvem.');
+ if(confirm('Excluir este roteiro da nuvem para todos os administradores?')){
+  const {error}=await supabaseClient.from('video_scripts').delete().eq('id',id);
+  if(error)throw Error('Falha ao excluir: '+error.message);
+  cloudDocs=cloudDocs.filter(x=>x.id!==id);render();status('Roteiro excluído da nuvem.');
+ }return;
+}
+if(act==='refresh-cloud'){await refreshCloud();status('Lista atualizada na nuvem.');return;}
+if(act==='migrate'){await migrateLegacy();return;}
 if(act==='new'){if(dirty&&!confirm('Descartar as alterações não salvas?'))return;doc=blank();dirty=false;render();return;}
 if(act==='pdf'||act==='preview'){if(!doc.client.trim())throw Error('Informe o cliente antes de gerar o PDF.');if(doc.videos.some(v=>!v.title.trim()))throw Error('Dê um título a cada vídeo.');if(doc.videos.some(v=>v.mode==='full'?!v.text.trim():!v.scenes.some(s=>s.text.trim()||s.visual.trim())))throw Error('Preencha o roteiro de cada vídeo.');busy=true;b.disabled=true;status('Preparando todas as páginas…');try{const pages=await pagesFor(structuredClone(doc));if(act==='pdf'){download(scriptPDFBlob(pages),filename()+'.pdf');status(`PDF pronto: ${pages.length} página(s), com todos os vídeos e cenas.`);}else{const overlay=document.createElement('div');overlay.id='rsPreview';overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');overlay.setAttribute('aria-label','Prévia do PDF');overlay.innerHTML=`<header><strong>Prévia · ${pages.length} página(s)</strong><button>Fechar prévia</button></header>`;const close=()=>{overlay.remove();document.removeEventListener('keydown',keyClose);b.focus();},keyClose=e=>{if(e.key==='Escape')close();};document.addEventListener('keydown',keyClose);overlay.querySelector('button').onclick=close;for(const src of pages){const img=new Image();img.src=src;img.alt='Página do roteiro';overlay.append(img);}document.body.append(overlay);overlay.querySelector('button').focus();status('Prévia pronta.');}}finally{busy=false;b.disabled=false;}return;}
 const vi=Number(b.closest('[data-video]')?.dataset.video),si=Number(b.closest('[data-scene]')?.dataset.scene);
-if(act==='add-video')doc.videos.push(video());else if(act==='add-scene')doc.videos[vi].scenes.push(scene());else {const [kind,op]=act.split('-'),list=kind==='v'?doc.videos:doc.videos[vi].scenes,i=kind==='v'?vi:si;if(op==='delete'){if(!confirm(`Excluir ${kind==='v'?'este vídeo e todas as cenas':'esta cena'}?`))return;list.splice(i,1);if(!list.length)list.push(kind==='v'?video():scene());}else if(op==='copy')list.splice(i+1,0,structuredClone(list[i]));else {const to=i+(op==='up'?-1:1);if(to<0||to>=list.length)return;[list[i],list[to]]=[list[to],list[i]];}}
+if(act==='add-video'){doc.videos.push(video());dirty=true;render();if(doc.client.trim()){try{await saveDocument();updateCloudList();status(`Novo vídeo salvo na nuvem no roteiro de ${doc.client}. Preencha o conteúdo e clique Salvar roteiro.`);}catch(error){status('Novo vídeo adicionado, mas ainda NÃO salvo na nuvem: '+error.message+'. Tente Salvar roteiro.');}}else status('Novo vídeo adicionado. Escolha o cliente e clique Salvar roteiro para guardar na nuvem.');const added=$('scriptsContent')?.querySelector(`[data-video="${doc.videos.length-1}"]`);if(added&&typeof added.scrollIntoView==='function')added.scrollIntoView({behavior:'smooth',block:'start'});return;}else if(act==='add-scene')doc.videos[vi].scenes.push(scene());else {const [kind,op]=act.split('-'),list=kind==='v'?doc.videos:doc.videos[vi].scenes,i=kind==='v'?vi:si;if(op==='delete'){if(!confirm(`Excluir ${kind==='v'?'este vídeo e todas as cenas':'esta cena'}?`))return;list.splice(i,1);if(!list.length)list.push(kind==='v'?video():scene());}else if(op==='copy')list.splice(i+1,0,structuredClone(list[i]));else {const to=i+(op==='up'?-1:1);if(to<0||to>=list.length)return;[list[i],list[to]]=[list[to],list[i]];}}
 dirty=true;render();}
 
 /* Implementação isolada: o antigo editor chamava funcoes privadas de outro <script>
@@ -95,5 +164,5 @@ async function lines(text,size=29,weight=400,color='#294465'){fontAt(size,weight
 for(let i=0;i<data.videos.length;i++){videoIndex=i;part=1;activeScene=0;await page();const v=data.videos[i];if(v.mode==='full'){await lines('ROTEIRO COMPLETO',21,600,'#577aa9');y+=15;await lines(v.text);}else for(let j=0;j<v.scenes.length;j++){const s=v.scenes[j];activeScene=0;if(y+160>1830){part++;await page();}ctx.fillStyle='#c7d9f2';ctx.fillRect(112,y,1180,2);y+=50;activeScene=j+1;await lines(`CENA ${String(j+1).padStart(2,'0')}${s.seconds!==''?' · '+s.seconds+'s':''}`,24,600,'#315a98');y+=8;if(s.text){await lines('TEXTO / FALA',18,600,'#6880a0');await lines(s.text);y+=16;}if(s.visual){await lines('IMAGEM / AÇÃO',18,600,'#6880a0');await lines(s.visual,26,400,'#59718f');y+=16;}if(!s.text&&!s.visual)await lines('Cena a desenvolver.',26,400,'#6880a0');y+=27;}}
 finish();return pages;}
 window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue='';}});
-window.owScripts={render,pagesFor,wrap,validate,seconds};
+window.owScripts={render,pagesFor,wrap,validate,seconds,refreshCloud};
 })();
