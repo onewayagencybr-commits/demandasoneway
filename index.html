@@ -794,6 +794,81 @@ body.calendar-view{background-attachment:scroll!important}
   line-height:1.5;
 }
 
+
+/* ONE WAY | indicadores da Agenda e data automática de criação */
+#agendaContent .agenda-item .agenda-info{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  min-width:0;
+  gap:0;
+}
+#agendaContent .agenda-item .agenda-info-checks{
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px;
+  align-items:center;
+  max-width:100%;
+  margin:0 0 8px;
+}
+#agendaContent .agenda-item .agenda-info-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  min-height:22px;
+  padding:3px 8px;
+  border-radius:7px;
+  border:1px solid transparent;
+  font-family:inherit;
+  font-size:9px;
+  font-weight:650;
+  line-height:1.2;
+  letter-spacing:.005em;
+  white-space:nowrap;
+  text-transform:none;
+}
+#agendaContent .agenda-item .agenda-info-chip svg{
+  flex:0 0 12px;
+  width:12px;
+  height:12px;
+}
+#agendaContent .agenda-item .agenda-info-chip.is-filled{
+  color:#bbf7da;
+  background:rgba(19,125,83,.21);
+  border-color:rgba(80,210,147,.31);
+}
+#agendaContent .agenda-item .agenda-info-chip.is-missing{
+  color:#fecaca;
+  background:rgba(165,53,63,.19);
+  border-color:rgba(244,114,118,.34);
+}
+#agendaContent .agenda-item .agenda-info>.agenda-created-date{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  margin-top:7px;
+  color:rgba(216,228,249,.72);
+  font-size:10px;
+  font-weight:500;
+  letter-spacing:0;
+  line-height:1.45;
+}
+#agendaContent .agenda-item .agenda-created-date svg{
+  flex:0 0 12px;
+  width:12px;
+  height:12px;
+  opacity:.8;
+}
+#agendaContent .agenda-item.agenda-awaiting-post .agenda-created-date{
+  color:rgba(248,230,198,.78);
+}
+@media(max-width:650px){
+  #agendaContent .agenda-item .agenda-info-checks{gap:4px;margin-bottom:7px}
+  #agendaContent .agenda-item .agenda-info-chip{font-size:8px;min-height:20px;padding:3px 6px;gap:3px}
+  #agendaContent .agenda-item .agenda-info-chip svg{width:11px;height:11px;flex-basis:11px}
+  #agendaContent .agenda-item .agenda-created-date{font-size:9px}
+}
+
 </style>
 <link rel="stylesheet" href="/modules/instagram-ui.css">
 <link rel="stylesheet" href="/modules/social-scheduler-ui.css">
@@ -1625,6 +1700,33 @@ function agendaDemandIsFinalized(d){if(!d)return false;return d.area==='trafego'
 function agendaDemandAwaitingPost(d){return !!d&&['arte','video'].includes(d.area)&&d.status==='orange'}
 function agendaDemandIsOverdue(d){if(agendaDemandAwaitingPost(d))return false;const info=agendaDateInfo(d);return info.valid&&info.days<0&&!agendaDemandIsFinalized(d)}
 function agendaDemandIsPriority(d){if(!d||!['arte','video'].includes(d.area)||!d.postDate||['green','purple','orange'].includes(d.status))return false;const info=agendaDateInfo(d);return info.valid&&info.days>=0&&info.days<=2}
+
+// Agenda: data de criação lida exclusivamente do carimbo original do cadastro.
+// A edição da data de postagem não modifica essa informação.
+function agendaCreationDate(d){
+  const raw=String(d?.createdAt||'').trim();
+  if(!raw)return null;
+  const date=new Date(raw);
+  if(!Number.isFinite(date.getTime()))return null;
+  return new Intl.DateTimeFormat('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'}).format(date);
+}
+function agendaDemandCompleteness(d){
+  const hasText=value=>typeof value==='string'&&value.trim().length>0;
+  const hasList=list=>Array.isArray(list)&&list.some(item=>
+    typeof item==='string'?hasText(item):!!item&&(hasText(item.id)||hasText(item.name)||hasText(item.url)));
+  return {
+    link:hasText(d?.finalLink)||hasList(d?.productionLinks),
+    description:hasText(d?.description),
+    reference:hasList(d?.links)||hasList(d?.attachments)
+  };
+}
+function agendaInfoChip(label,isFilled,filledTitle,missingTitle){
+  const desc=isFilled?filledTitle:missingTitle;
+  return `<span class="agenda-info-chip ${isFilled?'is-filled':'is-missing'}" title="${esc(desc)}" aria-label="${esc(label)}: ${isFilled?'preenchido':'pendente'}">
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      ${isFilled?'<path d="m4.5 10 3.6 3.6 7.4-7.4"/>':'<path d="M10 5.2v5.2"/><circle cx="10" cy="14.1" r=".8" fill="currentColor" stroke="none"/>'}
+    </svg>${esc(label)}</span>`;
+}
 function bindAgendaViewTabs(){document.querySelectorAll('#agendaViewTabs [data-agenda-view]').forEach(b=>{b.classList.toggle('active',b.dataset.agendaView===agendaView);b.onclick=()=>{agendaView=b.dataset.agendaView==='finished'?'finished':'active';renderAgenda()}})}
 function renderAgenda(){
   const root=document.getElementById('agendaList'),q=document.getElementById('searchInput').value.trim().toLocaleLowerCase('pt-BR'),filterArea=agendaAreaFilter();
@@ -1639,7 +1741,7 @@ function renderAgenda(){
   document.getElementById('agendaCount').textContent=`${items.length} demanda${items.length===1?'':'s'}${agendaView==='active'&&awaitingPost.length?' · '+awaitingPost.length+' aguardando postagem':''}`;
   const desc=document.querySelector('#agendaContent .agenda-summary span');if(desc){if(agendaView==='finished')desc.textContent=filterArea?`Demandas de ${AREAS[filterArea]} com publicação concluída.`:'Somente demandas finalizadas após a postagem.';else desc.textContent=filterArea?`Demandas de ${AREAS[filterArea]} em andamento ou aguardando postagem.`:'Demandas em andamento e aprovadas aguardando postagem. Atrasadas aparecem primeiro.'}
   if(!items.length){root.innerHTML=agendaView==='finished'?'<div class="empty"><strong>Nenhuma demanda finalizada.</strong><span>Somente as demandas com postagem concluída aparecem aqui.</span></div>':'<div class="empty"><strong>Nenhuma demanda pendente.</strong><span>Não há demandas em andamento para exibir na agenda.</span></div>';return}
-  root.innerHTML=items.map((d,i)=>{const c=clientMap.get(d.clientId),date=d.postDate?new Date(`${d.postDate}T12:00:00`):null,day=date?String(date.getDate()).padStart(2,'0'):'—',mon=date?new Intl.DateTimeFormat('pt-BR',{month:'short'}).format(date).replace('.',''):'',area=AREAS[d.area]||d.area,overdue=agendaDemandIsOverdue(d),priority=!overdue&&agendaDemandIsPriority(d),finishedItem=agendaDemandIsFinalized(d);return `<button class="agenda-item ${date?'':'agenda-undated'} ${overdue?'agenda-overdue':''} ${priority?'agenda-priority':''} ${finishedItem?'agenda-finished':''} ${agendaDemandAwaitingPost(d)?'agenda-awaiting-post':''}" data-agenda-id="${d.id}" style="animation-delay:${Math.min(i*35,300)}ms"><span class="agenda-date"><strong class="agenda-day">${day}</strong><span class="agenda-month">${esc(mon)}</span></span><span class="agenda-info"><strong>${esc(d.title)}</strong><span>${esc(c?.name||'Cliente não encontrado')}</span></span><span class="area-chip">${esc(area)}</span><span class="current-status ${d.status}">${esc(statusLabel(d))}</span><span class="agenda-arrow">›</span></button>`}).join('');
+  root.innerHTML=items.map((d,i)=>{const c=clientMap.get(d.clientId),date=d.postDate?new Date(`${d.postDate}T12:00:00`):null,day=date?String(date.getDate()).padStart(2,'0'):'—',mon=date?new Intl.DateTimeFormat('pt-BR',{month:'short'}).format(date).replace('.',''):'',area=AREAS[d.area]||d.area,overdue=agendaDemandIsOverdue(d),priority=!overdue&&agendaDemandIsPriority(d),finishedItem=agendaDemandIsFinalized(d);return `<button class="agenda-item ${date?'':'agenda-undated'} ${overdue?'agenda-overdue':''} ${priority?'agenda-priority':''} ${finishedItem?'agenda-finished':''} ${agendaDemandAwaitingPost(d)?'agenda-awaiting-post':''}" data-agenda-id="${d.id}" style="animation-delay:${Math.min(i*35,300)}ms"><span class="agenda-date"><strong class="agenda-day">${day}</strong><span class="agenda-month">${esc(mon)}</span></span><span class="agenda-info"><span class="agenda-info-checks" aria-label="Conferência do material: verde preenchido, vermelho pendente">${(()=>{const checks=agendaDemandCompleteness(d);return agendaInfoChip('Link',checks.link,'Link do material informado','Sem link do material final ou para produção')+agendaInfoChip('Descrição',checks.description,'Descrição preenchida','Descrição não preenchida')+agendaInfoChip('Ref.',checks.reference,'Referência cadastrada','Nenhuma referência cadastrada')})()}</span><strong>${esc(d.title)}</strong><span>${esc(c?.name||'Cliente não encontrado')}</span><span class="agenda-created-date" title="Data registrada automaticamente ao criar esta demanda. Não é editável."><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="14" height="12" rx="2"/><path d="M6.5 3v4M13.5 3v4M3 9h14"/></svg>${agendaCreationDate(d)?'Criada em '+esc(agendaCreationDate(d)):'Data de criação não registrada'}</span></span><span class="area-chip">${esc(area)}</span><span class="current-status ${d.status}">${esc(statusLabel(d))}</span><span class="agenda-arrow">›</span></button>`}).join('');
   root.querySelectorAll('[data-agenda-id]').forEach(b=>b.onclick=()=>{const d=state.demands.find(x=>x.id===b.dataset.agendaId);if(!d||!canAccessArea(d.area))return;currentArea=d.area;currentMonth=d.month;openClientId=d.clientId;openDemandId=d.id;renderAll();setTimeout(()=>document.getElementById('clients')?.scrollIntoView({behavior:'smooth',block:'start'}),80)})
 }
 function renderStats(){const set=statusesForArea(currentArea),counts={};Object.keys(set).forEach(k=>counts[k]=0);demandsFor().forEach(d=>counts[d.status]=(counts[d.status]||0)+1);const root=document.getElementById('stats');root.innerHTML=Object.entries(set).map(([k,l])=>`<div class="stat"><span class="dot ${k}"></span><small>${l}</small><strong>${counts[k]||0}</strong></div>`).join('');[...root.children].forEach((el,i)=>{el.style.animation=`softReveal .42s var(--ease) ${i*55}ms both`})}
@@ -2441,7 +2543,8 @@ async function submitDemand(e){
    const targetClientId=targetClient.id;
   if(id){
     d=state.demands.find(x=>x.id===id);if(!d){if(submitBtn){submitBtn.disabled=false;submitBtn.textContent='Salvar demanda'}return}
-    rollback={...d,links:[...(d.links||[])],attachments:[...(d.attachments||[])],productionLinks:[...(d.productionLinks||[])],productionAttachments:[...(d.productionAttachments||[])]};Object.assign(d,{clientId:targetClientId,area:destinationArea,month:destinationMonth,title,postDate,description,status:statusesForArea(destinationArea)[status]?status:'red'});d.links=d.links||[];d.attachments=d.attachments||[];d.productionLinks=d.productionLinks||[];d.productionAttachments=d.productionAttachments||[];openClientId=targetClientId;openDemandId=id;
+    rollback={...d,links:[...(d.links||[])],attachments:[...(d.attachments||[])],productionLinks:[...(d.productionLinks||[])],productionAttachments:[...(d.productionAttachments||[])]};// Não altera createdAt: a data de criação é automática e permanece fixa após qualquer edição.
+    Object.assign(d,{clientId:targetClientId,area:destinationArea,month:destinationMonth,title,postDate,description,status:statusesForArea(destinationArea)[status]?status:'red'});d.links=d.links||[];d.attachments=d.attachments||[];d.productionLinks=d.productionLinks||[];d.productionAttachments=d.productionAttachments||[];openClientId=targetClientId;openDemandId=id;
   }else{
     d={id:uid(),clientId:targetClientId,month:destinationMonth,area:destinationArea,title,postDate,description,status:statusesForArea(destinationArea)[status]?status:'red',links:[],attachments:[],productionLinks:[],productionAttachments:[],createdAt:new Date().toISOString()};
     newId=d.id;state.demands.push(d);openClientId=targetClientId;openDemandId=d.id;
