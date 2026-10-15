@@ -112,3 +112,238 @@
     font-size:12px!important;
   }
 }
+
+
+/* ============================================================
+   ONE WAY | Roteiros — identidade premium dos Relatorios IG
+   Somente interface: nao altera editor, eventos ou PDFs.
+   ============================================================ */
+#scriptsContent{
+  color:#e9f1ff;
+  font-family:OWMontserrat,Montserrat,sans-serif;
+  padding-bottom:45px;
+}
+#scriptsContent .rs-panel,
+#scriptsContent .rs-video{
+  background:linear-gradient(140deg,rgba(18,48,105,.80),rgba(9,28,65,.55));
+  border:1px solid rgba(218,232,255,.15);
+  border-radius:22px;
+  box-shadow:0 18px 48px rgba(0,0,0,.12);
+  padding:26px;
+}
+#scriptsContent .rs-panel{margin-bottom:20px}
+#scriptsContent .rs-video{
+  margin:20px 0;
+  background:linear-gradient(138deg,rgba(35,73,129,.70),rgba(14,39,85,.68));
+}
+#scriptsContent .rs-video:nth-child(even){
+  background:linear-gradient(138deg,rgba(17,47,101,.76),rgba(9,29,69,.69));
+}
+#scriptsContent .rs-panel h2{
+  margin:11px 0 4px;
+  color:#f1f6ff;
+  font-size:clamp(22px,2.4vw,27px);
+  font-weight:500;
+  letter-spacing:-.04em;
+  line-height:1.2;
+}
+#scriptsContent .rs-video h3{
+  color:#f1f6ff;
+  font-size:22px;
+  font-weight:500;
+  letter-spacing:-.04em;
+}
+#scriptsContent .rs-pill{
+  display:inline-flex;
+  align-items:center;
+  background:transparent;
+  color:#9db6fa;
+  padding:0;
+  border-radius:0;
+  text-transform:uppercase;
+  font-size:10px;
+  font-weight:600;
+  letter-spacing:.17em;
+}
+#scriptsContent .rs-head{gap:16px;margin-bottom:20px}
+#scriptsContent .rs-bar{gap:9px}
+#scriptsContent label{
+  color:#c1d2f1;
+  font-size:11px;
+  font-weight:500;
+  letter-spacing:.025em;
+}
+#scriptsContent .rs-meta{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+  margin:18px 0;
+}
+#scriptsContent input:not([type=file]),
+#scriptsContent select,
+#scriptsContent textarea{
+  width:100%;
+  min-width:0;
+  background:rgba(9,29,69,.72);
+  color:#eaf2ff;
+  -webkit-text-fill-color:#eaf2ff;
+  border:1px solid rgba(196,215,255,.20);
+  border-radius:12px;
+  margin-top:8px;
+  padding:12px 13px;
+  font-size:13px;
+  font-weight:400;
+  line-height:1.5;
+  box-shadow:none;
+  color-scheme:dark;
+}
+#scriptsContent input:not([type=file]),
+#scriptsContent select{min-height:43px}
+#scriptsContent textarea{min-height:105px;resize:vertical}
+#scriptsContent input::placeholder,
+#scriptsContent textarea::placeholder{
+  color:#8da6cb;
+  -webkit-text-fill-color:#8da6cb;
+  opacity:1;
+}
+#scriptsContent input:focus,
+#scriptsContent textarea:focus,
+#scriptsContent select:focus{
+  border-color:rgba(163,195,255,.67);
+  outline:2px solid rgba(149,186,255,.72);
+  outline-offset:1px;
+}
+#scriptsContent select option{
+  background:#102852;
+  color:#f0f5ff;
+}
+#scriptsContent button{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:38px;
+  padding:9px 14px;
+  background:rgba(178,203,255,.10);
+  color:#d7e5ff;
+  border:1px solid rgba(200,218,255,.20);
+  border-radius:11px;
+  font-family:inherit;
+  font-size:11px;
+  font-weight:500;
+  line-height:1.3;
+  transition:background .2s ease,border-color .2s ease,transform .2s ease;
+}
+#scriptsContent button:hover:not(:disabled){
+  background:rgba(187,211,255,.17);
+  border-color:rgba(202,219,255,.40);
+}
+#scriptsContent button:focus-visible{
+  outline:2px solid #a9c2ff;
+  outline-offset:2px;
+}
+#scriptsContent button:disabled{opacity:.4}
+#scriptsContent .rs-primary{
+  background:#a9c2ff;
+  color:#0c2148;
+  border-color:#a9c2ff;
+  font-weight:600;
+}
+#scriptsContent .rs-primary:hover:not(:disabled){
+  background:#c4d5ff;
+  border-color:#c4d5ff;
+}
+#scriptsContent .rs-danger{
+  color:#f1b7c7;
+  border-color:rgba(235,177,191,.22);
+  background:rgba(205,86,112,.07);
+}
+#scriptsContent .rs-danger:hover:not(:disabled){
+  background:rgba(205,86,112,.17);
+  border-color:rgba(235,177,191,.42);
+}
+#scriptsContent .rs-muted,
+#scriptsContent .rs-panel .rs-muted{
+  color:#a9bbdb!important;
+  opacity:1!important;
+  font-size:11px;
+  font-weight:400;
+  line-height:1.7;
+}
+#scriptsContent .rs-drafts{
+  margin-top:17px;
+  padding-top:15px;
+  border-top:1px solid rgba(205,223,255,.13);
+}
+#scriptsContent .rs-scene{
+  margin-top:18px;
+  padding:18px;
+  border:1px solid rgba(188,213,255,.14);
+  border-radius:15px;
+  background:rgba(91,129,193,.09);
+}
+#scriptsContent .rs-scene .rs-head{margin-bottom:12px}
+#scriptsContent .rs-scene strong{
+  color:#edf4ff;
+  font-weight:500;
+  font-size:13px;
+}
+#scriptsContent #rsStatus{
+  display:inline-flex;
+  margin:6px 0 0;
+  padding:11px 15px;
+  border-radius:11px;
+  background:rgba(177,201,255,.08);
+  border:1px solid rgba(201,221,255,.14);
+  color:#c9d9f8!important;
+  font-size:11px;
+  line-height:1.6;
+}
+/* Seletor personalizado de clientes: mesma linguagem dos campos IG */
+#scriptsContent .rs-client-options{
+  top:100%;
+  margin-top:6px;
+  z-index:50;
+  max-height:240px;
+  background:#102953;
+  border:1px solid rgba(196,215,255,.3);
+  border-radius:12px;
+  box-shadow:0 18px 44px rgba(0,7,26,.38);
+  color-scheme:dark;
+}
+#scriptsContent .rs-client-options button{
+  display:block;
+  width:100%;
+  min-height:0;
+  padding:10px 12px;
+  text-align:left;
+  background:transparent;
+  border:0;
+  color:#dce9ff;
+  font-size:12px;
+  font-weight:400;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+#scriptsContent .rs-client-options button:hover,
+#scriptsContent .rs-client-options button[aria-selected=true]{
+  background:rgba(151,183,249,.20);
+  color:#fff;
+}
+#scriptsContent .rs-client-empty{
+  color:#adc3e8;
+  font-size:11px;
+}
+@media(max-width:900px){
+  #scriptsContent .rs-panel>.rs-head{align-items:flex-start}
+  #scriptsContent .rs-panel>.rs-head>.rs-bar{justify-content:flex-start}
+}
+@media(max-width:650px){
+  #scriptsContent .rs-panel,
+  #scriptsContent .rs-video{padding:18px;border-radius:18px}
+  #scriptsContent .rs-meta{grid-template-columns:minmax(0,1fr);gap:10px}
+  #scriptsContent .rs-head{gap:12px}
+  #scriptsContent .rs-panel>.rs-head{flex-direction:column;align-items:stretch}
+  #scriptsContent .rs-panel>.rs-head>.rs-bar{width:100%}
+  #scriptsContent .rs-panel>.rs-head>.rs-bar button{flex:1 1 auto}
+  #scriptsContent .rs-scene{padding:14px}
+  #scriptsContent button{padding:9px 11px}
+}
