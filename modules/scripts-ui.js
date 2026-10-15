@@ -125,7 +125,7 @@ async function scriptTextBrand(ctx){
     if(typeof LOGO_DATA_URI!=='undefined'&&typeof LOGO_DATA_URI==='string'&&LOGO_DATA_URI.startsWith('data:image/')){
       const img=new Image();
       await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;img.src=LOGO_DATA_URI;});
-      ctx.drawImage(img,34,326,516,197,98,18,324,124);
+      ctx.drawImage(img,34,326,516,197,98,15,300,114);
       return;
     }
   }catch(err){console.warn('Marca original indisponível no PDF:',err);}
