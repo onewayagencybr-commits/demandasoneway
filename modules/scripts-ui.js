@@ -118,23 +118,27 @@ dirty=true;render();}
 /* Implementação isolada: o antigo editor chamava funcoes privadas de outro <script>
    (feedTextBrand e feedPDFBlob), provocando ReferenceError em visualizar/baixar. */
 
-async function scriptTextBrand(ctx){
-  // A logo incorporada ao sistema e vertical: recortar apenas a marca, sem a
-  // grande área transparente que a deixava minúscula no PDF.
+async function scriptTextBrand(ctx,headerHeight){
+  // Marca original recortada e centralizada verticalmente no cabeçalho.
+  // Não usar o PNG vertical inteiro: ele tem grande área vazia.
+  const box={x:110,y:Math.round((headerHeight-110)/2),w:292,h:110};
   try{
-    if(typeof LOGO_DATA_URI!=='undefined'&&typeof LOGO_DATA_URI==='string'&&LOGO_DATA_URI.startsWith('data:image/')){
+    if(typeof LOGO_DATA_URI==='string'&&LOGO_DATA_URI.startsWith('data:image/')){
       const img=new Image();
-      await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;img.src=LOGO_DATA_URI;});
-      ctx.drawImage(img,34,326,516,197,98,15,300,114);
-      return;
+      await new Promise((resolve,reject)=>{
+        img.onload=resolve;img.onerror=reject;img.src=LOGO_DATA_URI;
+      });
+      ctx.drawImage(img,34,326,516,197,box.x,box.y,box.w,box.h);
+      return box;
     }
-  }catch(err){console.warn('Marca original indisponível no PDF:',err);}
+  }catch(error){console.warn('Marca original indisponível no PDF:',error);}
   ctx.fillStyle='#f1f6ff';
-  ctx.font='italic 800 64px OWScriptPDF,Montserrat,Arial,sans-serif';
-  ctx.fillText('One Way',101,104);
+  ctx.font='italic 800 62px OWScriptPDF,Montserrat,Arial,sans-serif';
+  ctx.fillText('One Way',box.x+2,box.y+68);
   ctx.fillStyle='#bdcff2';
-  ctx.font='600 20px OWScriptPDF,Montserrat,Arial,sans-serif';
-  ctx.fillText('A G E N C Y',108,132);
+  ctx.font='600 18px OWScriptPDF,Montserrat,Arial,sans-serif';
+  ctx.fillText('A G E N C Y',box.x+11,box.y+98);
+  return box;
 }
 function scriptPDFBlob(pages){
   if(!Array.isArray(pages)||!pages.length)throw Error('Nenhuma página do roteiro foi gerada.');
@@ -185,19 +189,25 @@ async function pagesFor(data){
     ctx=canvas.getContext('2d');
     if(!ctx)throw Error('Não foi possível preparar a página do roteiro.');
     ctx.fillStyle='#f7f9fc';ctx.fillRect(0,0,W,H);
-    fontAt(39,650);
-    const names=wrap(ctx,data.client,1190);
-    const headerH=244+Math.max(0,names.length-1)*50;
+    // Logo à esquerda, alinhada ao centro vertical; identificação do cliente à direita.
+    // A largura do texto respeita a coluna até a margem direita do A4.
+    const textX=470,textWidth=W-textX-106;
+    fontAt(38,650);
+    const names=wrap(ctx,data.client,textWidth);
+    const headerH=254+Math.max(0,names.length-1)*50;
     const gradient=ctx.createLinearGradient(0,0,W,headerH);
     gradient.addColorStop(0,'#091a35');
     gradient.addColorStop(.7,'#152e54');
     gradient.addColorStop(1,'#1c3b6b');
     ctx.fillStyle=gradient;ctx.fillRect(0,0,W,headerH);
-    await scriptTextBrand(ctx);
-    ctx.fillStyle='#b9cdf0';fontAt(19,650);
-    ctx.fillText('ROTEIROS  /  PRODUÇÃO AUDIOVISUAL',106,165);
-    ctx.fillStyle='#f7faff';fontAt(37,650);
-    names.forEach((line,i)=>ctx.fillText(line,106,211+i*50));
+    await scriptTextBrand(ctx,headerH);
+    ctx.fillStyle='rgba(208,223,248,.23)';
+    ctx.fillRect(437,62,2,headerH-124);
+    const groupTop=Math.round((headerH-(46+50*names.length))/2);
+    ctx.fillStyle='#bfd1ef';fontAt(19,650);
+    ctx.fillText('ROTEIROS  /  PRODUÇÃO AUDIOVISUAL',textX,groupTop+20);
+    ctx.fillStyle='#f7faff';fontAt(38,700);
+    names.forEach((line,i)=>ctx.fillText(line,textX,groupTop+76+i*50));
     const cardTop=headerH+36;
     ctx.fillStyle=videoIndex%2===0?'#edf4ff':'#ffffff';
     ctx.fillRect(76,cardTop,1288,1860-cardTop);
