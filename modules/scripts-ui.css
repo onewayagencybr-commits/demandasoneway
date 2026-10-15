@@ -347,3 +347,71 @@
   #scriptsContent .rs-scene{padding:14px}
   #scriptsContent button{padding:9px 11px}
 }
+
+
+/* One Way · navegacao identica na Home e em todas as abas abertas */
+.sm-enabled .area-nav-cluster .tab,
+.sm-enabled.home-mode .area-nav-cluster .tab {
+  box-sizing:border-box;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+  height:42px;
+  min-height:42px;
+  padding:0 18px;
+  border-radius:10px;
+  font-size:13px!important;
+  line-height:1.25;
+  font-weight:500!important;
+  white-space:nowrap;
+  animation:none;
+  transform:none;
+}
+.sm-enabled .area-nav-cluster .tab:hover,
+.sm-enabled.home-mode .area-nav-cluster .tab:hover{transform:none}
+.sm-enabled .admin-utility-tabs .admin-agenda-tab,
+.sm-enabled.home-mode .admin-utility-tabs .admin-agenda-tab{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+  box-sizing:border-box;
+  width:auto;
+  height:40px;
+  min-height:40px;
+  padding:0 14px;
+  border-radius:10px;
+  font-size:13px!important;
+  font-weight:500!important;
+  line-height:1.25;
+  white-space:nowrap;
+  transform:none;
+}
+.sm-enabled .admin-utility-tabs .admin-agenda-tab:hover,
+.sm-enabled.home-mode .admin-utility-tabs .admin-agenda-tab:hover{transform:none}
+@media(max-width:700px){
+  .sm-enabled .area-nav-cluster .tab,
+  .sm-enabled.home-mode .area-nav-cluster .tab{
+    height:38px;min-height:38px;padding:0 12px;font-size:12px!important;
+  }
+  .sm-enabled .admin-utility-tabs .admin-agenda-tab,
+  .sm-enabled.home-mode .admin-utility-tabs .admin-agenda-tab{
+    height:38px;min-height:38px;padding:0 11px;font-size:12px!important;
+    white-space:normal;text-align:center;
+  }
+}
+
+/* Roteiros: editor objetivo, sem campo adicional de planejamento */
+#scriptsContent .rs-client-line{display:block;margin:20px 0 14px;max-width:740px}
+#scriptsContent .rs-client-line .rs-client-picker{width:100%}
+#scriptsContent .rs-drafts{margin-top:16px}
+#scriptsContent .rs-drafts>label{max-width:100%}
+#scriptsContent .rs-panel>.rs-head>.rs-bar button{min-height:40px}
+#scriptsContent .rs-panel #rsStatus{display:block;margin-top:15px;max-width:100%}
+@media(max-width:650px){
+  #scriptsContent .rs-client-line{margin-top:17px}
+  #scriptsContent .rs-panel>.rs-head>.rs-bar button{
+    min-height:38px;flex:1 1 43%;font-size:11px;
+  }
+}
