@@ -1,0 +1,44 @@
+name: One Way - Ajustes Mobile Administrador e Editores
+on:
+  push:
+    branches:
+      - fix/mobile-admin-editors-20261017
+    paths:
+      - 'modules/mobile-responsive.css'
+      - 'scripts/install-mobile-responsive.py'
+      - '.github/workflows/oneway-mobile-responsive.yml'
+permissions:
+  contents: write
+jobs:
+  mobile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Instalar stylesheet responsivo
+        run: python3 scripts/install-mobile-responsive.py
+      - name: Validar integridade do sistema
+        run: |
+          node --check modules/instagram-ui.js
+          node --check modules/scripts-ui.js
+          node --test tests/*.test.js
+          python3 - <<'PY'
+          import pathlib
+          s=pathlib.Path('modules/mobile-responsive.css').read_text()
+          assert '@media (max-width: 700px)' in s
+          assert '.production-asset-item' in s
+          assert '.final-material-form' in s
+          assert '.detail-grid' in s
+          assert '.modal-backdrop' in s
+          assert s.count('{')==s.count('}')
+          PY
+      - name: Gravar HTML de entrada com stylesheet mobile
+        run: |
+          git add index.html
+          if ! git diff --cached --quiet; then
+            git config user.name "oneway-mobile-bot"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "fix(mobile): carregar melhorias responsivas no sistema"
+            git push
+          fi
