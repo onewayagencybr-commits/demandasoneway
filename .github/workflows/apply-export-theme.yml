@@ -1,0 +1,35 @@
+name: One Way - Harmonizar exportações
+on:
+  push:
+    branches:
+      - feature/oneway-export-theme-20261017
+    paths:
+      - 'scripts/apply-export-theme.py'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  aplicar-e-validar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Harmonizar visual dos PDFs e JPEGs
+        run: python3 scripts/apply-export-theme.py
+      - name: Verificar sintaxe de módulos
+        run: |
+          node --check lib/instagram-pdf-server.js
+          node --check modules/instagram-ui.js
+          node --check modules/scripts-ui.js
+      - name: Testes existentes do sistema
+        run: node --test tests/*.test.js
+      - name: Publicar alterações somente nesta branch
+        run: |
+          git add index.html lib/instagram-pdf-server.js modules/instagram-ui.js modules/scripts-ui.js
+          if ! git diff --cached --quiet; then
+            git config user.name "oneway-export-theme-bot"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "style: alinhar exportações PDF e JPEG à identidade One Way"
+            git push
+          fi
