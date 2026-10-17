@@ -5,6 +5,7 @@ on:
       - feature/oneway-export-theme-20261017
     paths:
       - 'scripts/apply-export-theme.py'
+      - '.github/workflows/apply-export-theme.yml'
   workflow_dispatch:
 permissions:
   contents: write
