@@ -1,0 +1,45 @@
+name: One Way - Correção das logos exportadas
+on:
+  push:
+    branches:
+      - fix/oneway-logos-export-20261017
+    paths:
+      - 'scripts/fix-export-logo-scale.py'
+      - '.github/workflows/fix-export-logo-scale.yml'
+permissions:
+  contents: write
+jobs:
+  revisar-logos:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Corrigir enquadramento das logos nos documentos
+        run: python3 scripts/fix-export-logo-scale.py
+      - name: Conferir JavaScript
+        run: |
+          node --check lib/instagram-pdf-server.js
+          node --check modules/instagram-ui.js
+          node --check modules/scripts-ui.js
+          python3 - <<'PY'
+          import pathlib,re,subprocess
+          src=pathlib.Path('index.html').read_text()
+          scripts=re.findall(r'<script\b[^>]*>(.*?)<\/script>',src,re.I|re.S)
+          for n,s in enumerate(scripts):
+            if len(s)>100000 and not s.strip().startswith('JVBER'):
+              path='/tmp/oneway-inline-'+str(n)+'.js'
+              pathlib.Path(path).write_text(s)
+              subprocess.run(['node','--check',path],check=True)
+          PY
+      - name: Validar o sistema existente
+        run: node --test tests/*.test.js
+      - name: Salvar correções nesta branch
+        run: |
+          git add index.html lib/instagram-pdf-server.js modules/instagram-ui.js
+          if ! git diff --cached --quiet; then
+            git config user.name "oneway-brand-bot"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "fix: logos legíveis nos PDFs e JPEGs One Way"
+            git push
+          fi
