@@ -211,3 +211,10 @@
   }
   #scriptsContent .script-actions button,#instagramReportsContent .ig-actions button {min-height:44px}
 }
+
+@media (max-width: 1024px) {
+  /* iPad e celulares: os botões de status devem ser tocáveis, não miniaturas. */
+  .status-edit button,.form-status-wrap button,
+  .detail-actions button,.production-asset-action {min-height:46px!important}
+  .modal .field select,.modal .field input,.modal .field textarea {min-width:0;max-width:100%}
+}
