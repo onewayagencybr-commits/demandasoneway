@@ -55,6 +55,7 @@ def main():
     s=original
     segments=[
         ("function blueDocHTML","function fileSafeName",html_sheet),
+        ("function analyticsDocShell","function trafficReportHTML",html_sheet),
         ("async function exportReportJPEG","function exportReportPDF",generic),
         ("async function exportPlanningJPEG","function exportPlanningPDF",generic),
         ("function trafficReportHTML","function compactPieMoney",html_sheet),
@@ -64,6 +65,7 @@ def main():
         ("function contractPrintHTML","function exportContractPDF",html_sheet),
         ("async function exportWeekCalendarJPEG","function weekCalendarPDFHTML",generic),
         ("function weekCalendarPDFHTML","function exportWeekCalendarPDF",html_sheet),
+        ("function feedBackground","function feedDrawCover",generic),
         ("function feedDrawCover","function feedDrawMiniIcon",generic),
         ("function feedDrawPhonePage","function feedPDFBlob",generic)
     ]
@@ -75,6 +77,15 @@ def main():
     # Ampliar logos pequenos, preservando proporção e transparência.
     s=span_replace(s,"async function exportProposalJPEG","function wrapCanvas",lambda x:x.replace("lh=105","lh=135"))
     s=span_replace(s,"function exportFinanceJPEG","function ",lambda x:x.replace("tw=245","tw=285"))
+    # A marca precisa permanecer legível mesmo com área transparente dentro do PNG.
+    s=span_replace(s,"function blueDocHTML","function fileSafeName",lambda x:x.replace(".pdf-logo{width:29mm;max-height:18mm",".pdf-logo{width:44mm;max-height:24mm"))
+    s=span_replace(s,"function analyticsDocShell","function trafficReportHTML",lambda x:x.replace(".logo{width:38mm;height:auto}",".logo{width:51mm;height:auto}"))
+    s=span_replace(s,"function proposalPrintHTML","function exportProposalPDF",lambda x:x.replace(".logo{width:38mm;max-height:28mm",".logo{width:50mm;max-height:32mm"))
+    s=span_replace(s,"function weekCalendarPDFHTML","function exportWeekCalendarPDF",lambda x:x.replace(".pdf-logo{max-width:29mm;max-height:15mm",".pdf-logo{max-width:44mm;max-height:22mm"))
+    s=span_replace(s,"async function exportReportJPEG","function exportReportPDF",lambda x:x.replace("const h=114,w=logo.width","const h=140,w=logo.width"))
+    s=span_replace(s,"async function exportPlanningJPEG","function exportPlanningPDF",lambda x:x.replace("const h=114,w=logo.width","const h=140,w=logo.width"))
+    s=span_replace(s,"async function exportInstagramJPEG","function exportActiveAnalyticsPDF",lambda x:x.replace("h=92,w=logo.width","h=120,w=logo.width"))
+    s=span_replace(s,"async function exportTrafficJPEG","async function exportInstagramJPEG",lambda x:x.replace("tw=248","tw=285"))
     # Os painéis seguem mesma linguagem glass do site, sem alterar conteúdo ou métricas.
     s=span_replace(s,"function proposalPrintHTML","function exportProposalPDF",lambda x:x.replace("background:linear-gradient(115deg,#071633 0%,#0c2858 56%,#2153eb 100%)","background:linear-gradient(135deg,#071633 0%,#102c61 55%,#2153eb 100%)"))
     if s==original:raise AssertionError("HTML não foi modificado")
@@ -85,20 +96,19 @@ def main():
     new=src
     old="const C={navy:'#102648',navy2:'#244777',card:'#2b4c7d',line:'#45628c',white:'#f9fbff',muted:'#bfcfeb',soft:'#96add4',accent:'#b5c8fb'};"
     fresh="const C={navy:'#071633',navy2:'#2153c4',card:'rgba(135,175,250,.17)',line:'rgba(220,236,255,.17)',white:'#f9fbff',muted:'#c6d8f4',soft:'#a8c5f2',accent:'#b7d0ff'};"
-    if old not in new:raise AssertionError("Tema anterior do PDF Instagram não localizado")
-    new=new.replace(old,fresh)
+    if old in new:new=new.replace(old,fresh)
+    elif fresh not in new:raise AssertionError("Tema do PDF Instagram não localizado")
     old="const rect=(ctx,x,y,w,h,r=20,fill=C.card)=>{ctx.fillStyle=fill;ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill()};"
     fresh="const rect=(ctx,x,y,w,h,r=20,fill=C.card)=>{ctx.fillStyle=fill;ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill();ctx.strokeStyle=C.line;ctx.lineWidth=1.5;ctx.stroke()};"
-    if old not in new:raise AssertionError("Cards Instagram não localizados")
-    new=new.replace(old,fresh)
+    if old in new:new=new.replace(old,fresh)
+    elif fresh not in new:raise AssertionError("Cards Instagram não localizados")
     new=new.replace("g.addColorStop(0,C.navy);g.addColorStop(1,C.navy2);","g.addColorStop(0,C.navy);g.addColorStop(.58,'#102f69');g.addColorStop(1,C.navy2);")
     new=new.replace("const h=70,w=Math.min(195,h*logo.naturalWidth/logo.naturalHeight)","const h=100,w=Math.min(280,h*logo.naturalWidth/logo.naturalHeight)")
     new=new.replace("rect(ctx,77,y,946,169,18,'#1d3b65')","rect(ctx,77,y,946,169,22,'rgba(135,175,250,.12)')")
     new=new.replace("rect(ctx,76,y,947,185,19,'#1d3b65')","rect(ctx,76,y,947,185,22,'rgba(135,175,250,.12)')")
     new=new.replace("'#19385f'","'rgba(135,175,250,.12)'")
     new=new.replace("const font=(ctx,size=22,weight=300)","const font=(ctx,size=22,weight=400)")
-    if new==src:raise AssertionError("Instagram UI sem alterações")
-    p.write_text(new,encoding="utf-8")
+    if new!=src:p.write_text(new,encoding="utf-8")
 
     p=ROOT/"modules/scripts-ui.js"
     src=p.read_text(encoding="utf-8");new=src
@@ -118,16 +128,16 @@ def main():
       "'#7186a4'":"'#b6c9e8'"
     }
     for a,b in replacements.items():
-        if a not in new:raise AssertionError("Roteiro: trecho não encontrado: "+a[:80])
-        new=new.replace(a,b)
+        if a in new:new=new.replace(a,b)
+        elif b not in new:raise AssertionError("Roteiro: trecho não encontrado: "+a[:80])
     p.write_text(new,encoding="utf-8")
 
     p=ROOT/"lib/instagram-pdf-server.js"
     src=p.read_text(encoding="utf-8");new=src
     old="const C={navy:'#102648',navy2:'#244777',card:'#2b4c7d',line:'#45628c',white:'#f9fbff',muted:'#bfcfeb',soft:'#96add4',accent:'#b5c8fb',deep:'#1d3b65'};"
     fresh="const C={navy:'#071633',navy2:'#2153c4',card:'#2b518c',line:'#5479b5',white:'#f9fbff',muted:'#c6d8f4',soft:'#a8c5f2',accent:'#b7d0ff',deep:'#244677'};"
-    if old not in new:raise AssertionError("Tema de servidor Instagram não localizado")
-    new=new.replace(old,fresh)
+    if old in new:new=new.replace(old,fresh)
+    elif fresh not in new:raise AssertionError("Tema de servidor Instagram não localizado")
     new=new.replace("let a=[16,38,72],b=[36,71,119]","let a=[7,22,51],b=[33,83,196]")
     new=new.replace("if(logo){const h=65*K,w=Math.min(195*K,h*logo.width/logo.height)","if(logo){const h=103*K,w=Math.min(282*K,h*logo.width/logo.height)")
     new=new.replace("g.rect(x,355,303,160,C.card)","g.rounded(x,355,303,160,C.card,20)")
@@ -147,7 +157,7 @@ def main():
  }
 """
     if marker not in new:raise AssertionError("PDF servidor: função interna não localizada")
-    new=new.replace(marker,rounded+marker)
+    if "function rounded(" not in new:new=new.replace(marker,rounded+marker)
     new=new.replace("return {p,rect,text,wrap,link,base}","return {p,rect,rounded,text,wrap,link,base}")
     if "g.rounded(" not in new:raise AssertionError("PDF servidor: cards arredondados não aplicados")
     p.write_text(new,encoding="utf-8")
