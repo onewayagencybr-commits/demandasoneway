@@ -134,7 +134,7 @@
     function base(title,sub){
       const cv=document.createElement('canvas');cv.width=W;cv.height=H;
       const ctx=cv.getContext('2d');const g=ctx.createLinearGradient(0,0,W,H);g.addColorStop(0,C.navy);g.addColorStop(.58,'#102f69');g.addColorStop(1,C.navy2);ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
-      if(logo?.naturalWidth && logo?.naturalHeight){const h=100,w=Math.min(280,h*logo.naturalWidth/logo.naturalHeight);ctx.drawImage(logo,76,46,w,h)}else{txt(ctx,'ONE WAY',76,92,38,C.accent,600);txt(ctx,'AGENCY',77,113,12,C.soft,500)}
+      if(logo?.naturalWidth && logo?.naturalHeight){if(logo.naturalWidth===1447&&logo.naturalHeight===2048)ctx.drawImage(logo,89,792,1231,464,76,49,308,116);else{const h=116,w=Math.min(308,h*logo.naturalWidth/logo.naturalHeight);ctx.drawImage(logo,76,49,w,h)}}else{txt(ctx,'ONE WAY',76,92,38,C.accent,600);txt(ctx,'AGENCY',77,113,12,C.soft,500)}
       txt(ctx,title,76,235,46,C.white,300);
       if(sub)wrap(ctx,sub,77,282,W-160,20,34,C.muted,300,2);
       pages.push(cv);return ctx;
