@@ -177,7 +177,7 @@ async function pagesFor(data){
   const fontAt=(size=30,weight=500)=>{ctx.font=weight+' '+size+'px OWScriptPDF,Montserrat,Arial,sans-serif';};
   const footer=()=>{
     if(!canvas)return;
-    ctx.fillStyle='#7185a4';fontAt(19,500);
+    ctx.fillStyle='#bdd3f5';fontAt(19,500);
     ctx.fillText('ONE WAY  /  ROTEIROS DE PRODUÇÃO',110,1965);
     ctx.textAlign='right';ctx.fillText(String(pages.length+1).padStart(2,'0'),1330,1965);
     ctx.textAlign='left';
@@ -188,7 +188,7 @@ async function pagesFor(data){
     canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;
     ctx=canvas.getContext('2d');
     if(!ctx)throw Error('Não foi possível preparar a página do roteiro.');
-    ctx.fillStyle='#f7f9fc';ctx.fillRect(0,0,W,H);
+    const pg=ctx.createLinearGradient(0,0,W,H);pg.addColorStop(0,'#071633');pg.addColorStop(.55,'#102c61');pg.addColorStop(1,'#2153c4');ctx.fillStyle=pg;ctx.fillRect(0,0,W,H);
     // Logo à esquerda, alinhada ao centro vertical; identificação do cliente à direita.
     // A largura do texto respeita a coluna até a margem direita do A4.
     const textX=470,textWidth=W-textX-106;
@@ -209,23 +209,22 @@ async function pagesFor(data){
     ctx.fillStyle='#f7faff';fontAt(38,700);
     names.forEach((line,i)=>ctx.fillText(line,textX,groupTop+76+i*50));
     const cardTop=headerH+36;
-    ctx.fillStyle=videoIndex%2===0?'#edf4ff':'#ffffff';
-    ctx.fillRect(76,cardTop,1288,1860-cardTop);
-    ctx.strokeStyle='#dfe8f5';ctx.lineWidth=2;
-    ctx.strokeRect(76,cardTop,1288,1860-cardTop);
+    ctx.fillStyle=videoIndex%2===0?'rgba(189,213,255,.13)':'rgba(189,213,255,.08)';
+    ctx.beginPath();ctx.roundRect(76,cardTop,1288,1860-cardTop,30);ctx.fill();
+    ctx.strokeStyle='rgba(233,243,255,.21)';ctx.lineWidth=2;ctx.stroke();
     y=cardTop+73;
-    ctx.fillStyle='#40639a';fontAt(24,700);
+    ctx.fillStyle='#bdd3f5';fontAt(24,700);
     ctx.fillText('VÍDEO '+String(videoIndex+1).padStart(2,'0')+(part>1?'  /  CONTINUAÇÃO '+part:'')+'  ·  '+duration(data.videos[videoIndex]),114,y);
     y+=79;
     const video=data.videos[videoIndex];
     fontAt(49,700);
     const titleLines=wrap(ctx,video.title,1160);
     for(const title of titleLines){
-      ctx.fillStyle='#132b51';ctx.fillText(title,114,y);y+=65;
+      ctx.fillStyle='#f7faff';ctx.fillText(title,114,y);y+=65;
     }
     y+=15;
     if(part>1&&activeScene){
-      ctx.fillStyle='#5878a9';fontAt(21,650);
+      ctx.fillStyle='#a8c5f2';fontAt(21,650);
       ctx.fillText('CENA '+String(activeScene).padStart(2,'0')+'  /  CONTINUAÇÃO',114,y);
       y+=42;
     }
@@ -235,7 +234,7 @@ async function pagesFor(data){
     part++;
     await page();
   };
-  const writeLines=async(text,size=31,weight=500,color='#273e60',lineHeight=1.62)=>{
+  const writeLines=async(text,size=31,weight=500,color='#e4eeff',lineHeight=1.62)=>{
     fontAt(size,weight);
     const all=wrap(ctx,text,1160);
     for(const line of all){
@@ -247,7 +246,7 @@ async function pagesFor(data){
   };
   const writeLabel=async(label)=>{
     await ensure(75);
-    ctx.fillStyle='#607ba1';fontAt(19,700);ctx.fillText(label,114,y);
+    ctx.fillStyle='#adccff';fontAt(19,700);ctx.fillText(label,114,y);
     y+=39;
   };
   for(let i=0;i<data.videos.length;i++){
@@ -255,30 +254,30 @@ async function pagesFor(data){
     const v=data.videos[i];
     if(v.mode==='full'){
       y+=12;await writeLabel('ROTEIRO COMPLETO');y+=11;
-      await writeLines(v.text,31,500,'#263d60',1.66);
+      await writeLines(v.text,31,500,'#e4eeff',1.66);
     }else{
       for(let j=0;j<v.scenes.length;j++){
         const sc=v.scenes[j];activeScene=0;
         await ensure(248);
         y+=25;
-        ctx.fillStyle='#cad9ed';ctx.fillRect(114,y,1160,2);
+        ctx.fillStyle='rgba(230,242,255,.23)';ctx.fillRect(114,y,1160,2);
         y+=51;
         activeScene=j+1;
-        ctx.fillStyle='#315c99';fontAt(26,700);
+        ctx.fillStyle='#b6d2ff';fontAt(26,700);
         ctx.fillText('CENA '+String(j+1).padStart(2,'0')+(sc.seconds!==''?'  ·  '+sc.seconds+'s':''),114,y);
         y+=47;
         if(sc.text){
           await writeLabel('TEXTO / FALA');
-          await writeLines(sc.text,31,500,'#263d60',1.65);
+          await writeLines(sc.text,31,500,'#e4eeff',1.65);
           y+=23;
         }
         if(sc.visual){
           await writeLabel('IMAGEM / AÇÃO / DIREÇÃO');
-          await writeLines(sc.visual,29,500,'#425b7e',1.62);
+          await writeLines(sc.visual,29,500,'#cadcf9',1.62);
           y+=24;
         }
         if(!sc.text&&!sc.visual){
-          await writeLines('Cena a desenvolver.',29,500,'#7186a4');
+          await writeLines('Cena a desenvolver.',29,500,'#b6c9e8');
         }
         y+=28;
       }
