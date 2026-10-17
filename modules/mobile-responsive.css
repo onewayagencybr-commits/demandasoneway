@@ -1,0 +1,183 @@
+/* One Way Agency — Mobile UX 2026
+   Responsivo para administrador e equipe de produção.
+   A camada só altera apresentação, sem regras de permissão ou dados. */
+@media (max-width: 1024px) {
+  html, body {max-width:100%;overflow-x:clip}
+  #app, .shell, .hero, #areaContent, .clients, .client, .client-body,
+  .client-body-inner, .demand-list, .demand, .detail-overflow,
+  .detail-panel, .detail-grid {min-width:0;max-width:100%}
+  .shell {width:100%;padding-inline:18px}
+  .hero {grid-template-columns:minmax(0,1fr);gap:14px}
+  .hero > *, .hero-controls {min-width:0;max-width:100%}
+  .hero-controls {display:flex;flex-wrap:wrap;align-items:stretch}
+  .hero-controls .search {flex:1 1 225px;min-width:0}
+  .hero-controls .month-select {flex:1 1 150px;min-width:0}
+  .stats {grid-template-columns:repeat(2,minmax(0,1fr))}
+  .clients {grid-template-columns:minmax(0,1fr)}
+  .client-toolbar, .client-toolbar-actions {flex-wrap:wrap;min-width:0}
+  .client-area-filters {max-width:100%;overflow-x:auto;scrollbar-width:thin}
+  .detail-grid, .detail-grid.traffic-detail-grid,
+  .demand-detail .detail-grid {grid-template-columns:minmax(0,1fr)!important}
+  .detail-panel, .detail-grid > * {min-width:0}
+  .demand-reference-grid {grid-template-columns:minmax(0,1fr)!important}
+  .nav-row {min-width:0;max-width:100%}
+  .area-nav-cluster {min-width:0;max-width:100%}
+  .area-nav-cluster .tabs, .tabs {max-width:100%;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .area-nav-cluster .tabs::-webkit-scrollbar,.tabs::-webkit-scrollbar {display:none}
+  .fp-workspace, .fp-editor, .fp-preview, .fp-panel, .fp-editor-panel,
+  #scriptsContent, #instagramReportsContent, #calendarContent, #agendaContent,
+  #financeContent, #socialMediaContent {min-width:0;max-width:100%}
+  .fp-workspace {grid-template-columns:minmax(0,1fr)!important}
+  #scriptsContent [class*="grid"], #instagramReportsContent [class*="grid"] {min-width:0}
+}
+
+@media (max-width: 700px) {
+  html { -webkit-text-size-adjust:100%; }
+  body {min-width:0;overflow-x:clip}
+  #app {width:100%;overflow-x:clip}
+  .shell {padding:16px 12px max(86px,calc(60px + env(safe-area-inset-bottom)))}
+  .topbar {position:relative;top:auto;z-index:32}
+  .topbar-inner {padding:12px 12px 10px;display:flex;flex-direction:column;align-items:stretch;gap:9px;min-width:0}
+  .topbar-inner > .brand {min-width:0;width:100%;gap:8px}
+  .topbar-inner .brand-copy {min-width:0}
+  .topbar-inner .brand-copy strong {font-size:12px;line-height:1.3;overflow-wrap:anywhere}
+  .topbar-inner .brand-copy span {font-size:10px}
+  .topbar-inner .brand-logo {max-height:45px;max-width:112px;object-fit:contain}
+  .top-actions {display:flex;align-items:center;justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;gap:7px;width:100%;min-width:0;max-width:100%;padding:2px 0 7px;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+  .top-actions > * {flex:0 0 auto;white-space:nowrap}
+  .top-actions button,.top-actions .ghost {min-height:42px;padding:9px 12px;font-size:11px;white-space:nowrap}
+  .top-actions button.hidden {display:none!important}
+  .hero {display:grid;grid-template-columns:minmax(0,1fr);margin:8px 0 14px;gap:10px}
+  .hero h1 {font-size:clamp(23px,6.4vw,30px)!important;line-height:1.15;letter-spacing:-.035em;overflow-wrap:anywhere}
+  .hero p {font-size:12px;line-height:1.5}
+  .hero .eyebrow {font-size:10px}
+  .hero-controls {display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;width:100%}
+  .hero-controls.hidden {display:none!important}
+  .hero-controls .search {grid-column:1/-1;width:100%;min-width:0}
+  .hero-controls .month-select {grid-column:1;width:100%;min-width:0}
+  .hero-controls #newDemandTop {grid-column:2;width:100%;white-space:normal;min-width:0}
+  .hero-controls input,.hero-controls button {min-height:44px;font-size:14px}
+  .nav-row {position:sticky;top:0;z-index:28;display:block;max-width:100%;padding:7px 0;margin:0 0 14px;background:rgba(7,22,51,.95);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:0 0 14px 14px}
+  .area-nav-cluster {display:flex!important;width:100%!important;min-width:0!important;max-width:100%;gap:5px;transform:none!important}
+  .area-nav-cluster .tabs,.tabs {flex:1 1 auto;min-width:0;max-width:100%;width:100%!important;display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;overflow-y:hidden!important;scroll-snap-type:x proximity;padding:5px}
+  .area-nav-cluster .tab,.tabs .tab {flex:0 0 auto;min-height:42px;padding:10px 13px!important;font-size:12px;scroll-snap-align:start}
+  .area-nav-cluster.role-limited .tabs {display:flex!important;grid-template-columns:none!important;width:100%!important}
+  .trash-tab {min-width:42px;min-height:42px;flex:0 0 auto}
+  .section-head {align-items:stretch;gap:10px}
+  .section-head .section-copy {min-width:0}
+  .section-head .section-actions,.section-head .actions {width:100%;display:flex;flex-wrap:wrap;gap:7px}
+  .section-head button {min-height:42px}
+  .stats {grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px}
+  .stats > * {min-width:0;padding:14px 12px;border-radius:15px}
+  .clients {grid-template-columns:minmax(0,1fr)!important;gap:12px;max-width:100%}
+  .client {width:100%;min-width:0;border-radius:17px}
+  .client:hover {transform:none}
+  .client-top {display:flex;min-width:0;max-width:100%}
+  .client-head {padding:14px 12px!important;min-width:0;flex:1 1 0;gap:8px}
+  .client-head > div {min-width:0}
+  .client-name {display:block;font-size:15px;overflow-wrap:anywhere;line-height:1.35}
+  .client-meta {flex-wrap:wrap}
+  .client-body,.client-body-inner,.demand-list {width:100%;min-width:0}
+  .client-body-inner {overflow:hidden}
+  .client-toolbar {padding:14px 12px 8px;flex-direction:column;align-items:stretch;gap:9px}
+  .client-toolbar-actions {width:100%;justify-content:flex-start;align-items:center;min-width:0}
+  .client-area-filters {width:100%;max-width:100%;overflow-x:auto;flex-wrap:nowrap}
+  .client-area-filter-btn {min-height:40px;flex:0 0 auto}
+  .client-helper {font-size:11px;line-height:1.5}
+  .add-demand-client {min-height:42px}
+  .demand-list {padding:0 11px 16px!important}
+  .demand {min-width:0;max-width:100%}
+  .demand-row {display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:start;gap:8px;min-height:55px;padding:13px 2px!important}
+  .demand-row > * {min-width:0}
+  .demand-title {min-width:0;max-width:100%;white-space:normal!important;overflow-wrap:anywhere;word-break:normal;line-height:1.4}
+  .demand-date {white-space:normal;font-size:10px}
+  .demand-caret {min-width:22px;align-self:center}
+  .detail-overflow {min-width:0;max-width:100%;overflow:hidden}
+  .detail-panel {width:100%;min-width:0;max-width:100%;margin:6px 0 14px;padding:13px 11px!important;border-radius:16px}
+  .detail-grid,.detail-grid.traffic-detail-grid {display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:16px!important;width:100%;min-width:0}
+  .detail-grid > * {min-width:0;width:100%;max-width:100%}
+  .detail-label {overflow-wrap:anywhere}
+  .description,.detail-panel p {overflow-wrap:anywhere;white-space:pre-wrap;line-height:1.55}
+  .status-edit,.form-status-wrap {display:flex;flex-wrap:wrap;gap:8px;min-width:0}
+  .status-btn,.form-status-wrap button {min-height:44px;min-width:44px;white-space:normal;text-align:center;padding:9px 12px;font-size:12px}
+  .detail-actions {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;justify-content:stretch}
+  .detail-actions > button {min-width:0;min-height:44px;white-space:normal}
+  .ref-item {min-width:0;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .ref-item > a,.ref-item > span {min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:break-word;white-space:normal}
+  .ref-item > div {display:flex;flex-wrap:wrap;gap:6px}
+  .ref-add {display:grid!important;grid-template-columns:minmax(0,1fr);gap:8px}
+  .ref-add .link-input,.ref-add button {width:100%;min-width:0;min-height:44px;font-size:16px}
+  .file-upload label,.reference-file-picker {min-height:44px}
+  .production-assets,.final-material {width:100%;max-width:100%;min-width:0;padding:14px 12px!important;border-radius:16px}
+  .production-assets-head,.final-material-head {display:grid!important;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:10px}
+  .production-assets-title,.final-material-title {min-width:0;align-items:flex-start}
+  .production-assets-title > div,.final-material-title > div {min-width:0}
+  .production-assets-title strong,.final-material-title strong {font-size:15px!important;line-height:1.35;font-weight:600!important;overflow-wrap:anywhere}
+  .production-assets-title span:not(.production-assets-icon),.final-material-title span:not(.final-material-icon) {font-size:11px!important;line-height:1.45;margin-top:4px;white-space:normal;overflow-wrap:anywhere}
+  .production-assets-badge,.final-material-ready {white-space:normal;min-width:0;text-align:center;font-size:10px!important;padding:7px 8px}
+  .production-assets-list {display:grid;gap:10px;width:100%;min-width:0}
+  .production-asset-item {display:grid!important;grid-template-columns:36px minmax(0,1fr)!important;align-items:start;gap:9px 10px;padding:12px!important;min-width:0;width:100%;border-radius:12px}
+  .asset-kind,.production-assets-icon,.final-material-icon {display:grid;place-items:center;min-width:32px;width:32px;min-height:34px;height:34px;flex:0 0 32px}
+  .production-asset-main {min-width:0;width:100%;max-width:100%;overflow:hidden}
+  .production-asset-main strong {font-size:12px!important;line-height:1.35;white-space:normal!important;overflow-wrap:anywhere}
+  .production-asset-main span {display:block;font-size:11px!important;line-height:1.5!important;white-space:normal!important;overflow-wrap:anywhere!important;word-break:break-word!important;max-width:100%}
+  .production-asset-actions {grid-column:1/-1;display:flex!important;justify-content:flex-start;flex-wrap:wrap;min-width:0;width:100%;gap:8px}
+  .production-asset-actions .production-asset-action,
+  .production-asset-actions .production-remove {min-height:44px;min-width:0;flex:1 1 auto;font-size:12px;padding:11px 13px;display:inline-flex;align-items:center;justify-content:center}
+  .production-assets-empty,.final-material-meta {font-size:12px!important;line-height:1.5;overflow-wrap:anywhere}
+  .final-material-form {display:grid!important;grid-template-columns:minmax(0,1fr)!important;align-items:stretch;gap:9px;width:100%;min-width:0}
+  .final-material-form .final-link-input,
+  .final-material-form input {display:block;width:100%!important;min-width:0;max-width:100%;min-height:46px;font-size:16px!important;padding:12px!important}
+  .final-material-form button {display:block;min-height:46px;width:100%;font-size:13px!important}
+  .final-material-view {display:flex!important;flex-direction:column;align-items:stretch;gap:8px;width:100%;min-width:0}
+  .final-material-view a {width:100%;max-width:100%;min-height:44px;white-space:normal!important;overflow-wrap:anywhere!important;word-break:break-word!important;display:flex;align-items:center;font-size:12px!important;line-height:1.5}
+  .final-material-view button {min-height:44px;font-size:12px}
+  .demand-reference-card,.demand-production-card {width:100%;min-width:0;padding:15px 12px}
+  .demand-reference-head {display:flex;flex-wrap:wrap;gap:8px}
+  .demand-reference-grid {grid-template-columns:minmax(0,1fr)!important;gap:12px}
+  .demand-reference-mini,.demand-reference-mini input {min-width:0}
+  .reference-file-list,.reference-file-chip {max-width:100%}
+  .reference-file-chip b {max-width:min(64vw,300px)}
+  .modal-backdrop {position:fixed;inset:0;display:flex;justify-content:center;align-items:flex-start;padding:12px 9px max(12px,env(safe-area-inset-bottom));overflow-y:auto;overscroll-behavior:contain}
+  .modal-backdrop.hidden {display:none!important}
+  .modal {width:100%!important;max-width:560px!important;min-width:0!important;max-height:calc(100dvh - 24px);overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;border-radius:19px;padding:15px!important}
+  .modal-head {gap:10px;align-items:flex-start}
+  .modal-head > div {min-width:0}
+  .modal-head h3 {font-size:20px;line-height:1.25;overflow-wrap:anywhere}
+  .modal-head p {font-size:12px;line-height:1.45}
+  .modal .field,.modal form {min-width:0;max-width:100%}
+  .modal input,.modal textarea,.modal select,.field input,.field select,.field textarea {max-width:100%;min-width:0;font-size:16px!important}
+  .modal textarea {min-height:110px}
+  .modal-actions {position:sticky;bottom:0;z-index:2;display:flex;flex-wrap:wrap;gap:8px;padding:13px 0 max(4px,env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(9,27,62,.87),rgba(9,27,62,.99));border-top:1px solid rgba(225,237,255,.15)}
+  .modal-actions button {min-height:46px;flex:1 1 120px;white-space:normal;font-size:13px}
+  .modal .x,.modal-head .x {min-width:44px;min-height:44px;flex:0 0 44px}
+  .finance-side-tab {position:fixed!important;top:auto!important;right:12px!important;bottom:calc(14px + env(safe-area-inset-bottom));left:auto!important;transform:none!important;writing-mode:horizontal-tb!important;height:auto!important;min-width:48px;min-height:44px;padding:9px 13px!important;border-radius:999px!important;z-index:35;box-shadow:0 8px 20px rgba(5,14,37,.35)}
+  .finance-side-tab span {writing-mode:horizontal-tb!important}
+  input[type="date"],input[type="month"],input[type="datetime-local"],select {max-width:100%}
+  table {max-width:100%}
+  .table-wrap,.table-responsive,.finance-table-wrap,.wk-table-wrap {max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  #agendaContent .agenda-item {min-width:0;max-width:100%;overflow-wrap:anywhere}
+  #agendaContent .agenda-item > * {min-width:0}
+  #calendarContent .wk-toolbar,#calendarContent .wk-toolbar-buttons,
+  #agendaContent .agenda-toolbar {max-width:100%;min-width:0;flex-wrap:wrap}
+  #calendarContent .wk-toolbar button,#agendaContent .agenda-toolbar button {min-height:42px}
+  #instagramReportsContent .ig-panel,#instagramReportsContent .ig-shell,
+  #scriptsContent .scripts-panel,#scriptsContent .scripts-shell {max-width:100%;min-width:0}
+  #instagramReportsContent input,#instagramReportsContent select,
+  #scriptsContent input,#scriptsContent select,#scriptsContent textarea {font-size:16px!important;max-width:100%}
+  #instagramReportsContent button,#scriptsContent button {min-height:42px}
+  #socialMediaContent [class*="card"],#financeContent [class*="card"] {max-width:100%;min-width:0}
+}
+
+@media (max-width: 390px) {
+  .shell {padding-left:9px;padding-right:9px}
+  .hero-controls {grid-template-columns:minmax(0,1fr)}
+  .hero-controls .search,.hero-controls .month-select,.hero-controls #newDemandTop {grid-column:1/-1}
+  .production-assets-head,.final-material-head {grid-template-columns:minmax(0,1fr)}
+  .production-assets-badge,.final-material-ready {justify-self:start}
+  .detail-actions {grid-template-columns:minmax(0,1fr)}
+  .topbar-inner {padding-left:10px;padding-right:10px}
+}
+@media (prefers-reduced-motion:reduce) {
+  .nav-row,.top-actions,.area-nav-cluster .tabs {scroll-behavior:auto}
+}
