@@ -181,3 +181,33 @@
 @media (prefers-reduced-motion:reduce) {
   .nav-row,.top-actions,.area-nav-cluster .tabs {scroll-behavior:auto}
 }
+
+/* Tablets: áreas de produção também usam ações grandes e links legíveis. */
+@media (min-width:701px) and (max-width:1024px) {
+  .production-asset-item {display:grid;grid-template-columns:40px minmax(0,1fr);align-items:start;gap:9px 12px}
+  .production-asset-main strong {white-space:normal;overflow-wrap:anywhere;font-size:13px}
+  .production-asset-main span {white-space:normal;overflow-wrap:anywhere;word-break:break-word;font-size:11px;line-height:1.5}
+  .production-asset-actions {grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px}
+  .production-asset-actions .production-asset-action,.production-asset-actions .production-remove {min-height:44px;font-size:12px;padding:10px 14px}
+  .final-material-view a {white-space:normal;overflow-wrap:anywhere;word-break:break-word}
+  .final-link-input {min-width:0;flex:1 1 200px}
+}
+@media (max-width:700px) {
+  .home-mode .tabs,.home-mode .area-nav-cluster .tabs {transform:none!important}
+  .home-mode .nav-row {min-height:0!important}
+  .home-mode .tab {font-size:12px!important}
+  .proposal-grid,.proposal-total-wrap,.proposal-footer-actions,.proposal-item,
+  .contract-grid,.contract-form-grid,.wk-event-form-grid {grid-template-columns:minmax(0,1fr)!important}
+  .proposal-grid > *,.proposal-item > *,.contract-grid > * {min-width:0}
+  .wk-toolbar,.wk-toolbar-buttons,.wk-calendar-controls,
+  .agenda-filters,.agenda-actions,.agenda-controls {max-width:100%;min-width:0;flex-wrap:wrap!important}
+  .wk-day,.wk-event-card,.wk-calendar-card,.agenda-card {max-width:100%;min-width:0;overflow-wrap:anywhere}
+  .wk-day button,.agenda-item button {min-height:40px}
+  .fp-workspace {display:grid!important;grid-template-columns:minmax(0,1fr)!important}
+  .fp-workspace > *,.fp-panel,.fp-editor,.fp-preview {width:100%;min-width:0;max-width:100%}
+  #scriptsContent .script-actions,#scriptsContent .script-toolbar,
+  #instagramReportsContent .ig-actions,#instagramReportsContent .ig-form-actions {
+    display:flex;max-width:100%;flex-wrap:wrap;gap:8px
+  }
+  #scriptsContent .script-actions button,#instagramReportsContent .ig-actions button {min-height:44px}
+}
