@@ -17,6 +17,19 @@ anchor = '<script src="/modules/scripts-ui.js" defer></script>'
 
 assert '</head>' in html, "Cabeçalho não encontrado"
 assert anchor in html, "Ponto de instalação do módulo não encontrado"
+# Corrige um fechamento HTML indevido dentro de um template de PDF.
+# Ele encerrava prematuramente o script principal no navegador e bloqueava todos os logins.
+# O player de panorama não pertence ao documento de impressão.
+bad_pdf_tag = '<script src="/modules/panorama-mensal.js" defer></script>'
+if bad_pdf_tag in html:
+    assert html.count(bad_pdf_tag) == 1, "Mais de uma inclusão indevida no PDF"
+    html = html.replace(bad_pdf_tag, '', 1)
+
+# O primeiro </script> literal após o script principal deve ser seu encerramento real.
+main_start = html.index('<script>\\nconst USERS') + len('<script>') if '<script>\\nconst USERS' in html else html.index('<script>\nconst USERS') + len('<script>')
+main_end = html.index('</script>\n<script src="/modules/instagram-pdf.js"', main_start)
+assert html.index('</script>', main_start) == main_end, "Script principal encerrado prematuramente"
+
 if style_tag not in html:
     html = html.replace('</head>', style_tag + '\n</head>', 1)
 if script_tag not in html:
