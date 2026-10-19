@@ -2998,7 +2998,15 @@ function loadImage(src){return new Promise((resolve,reject)=>{const img=new Imag
 async function exportProposalJPEG(data){
   const width=1080,pad=72,header=405,rowBase=162,height=Math.max(1480,header+data.items.length*rowBase+360),c=document.createElement('canvas');c.width=width;c.height=height;const ctx=c.getContext('2d');
   const g=ctx.createLinearGradient(0,0,width,height);g.addColorStop(0,'#071633');g.addColorStop(.55,'#0c2858');g.addColorStop(1,'#2153eb');ctx.fillStyle=g;ctx.fillRect(0,0,width,height);const glow=ctx.createRadialGradient(width*.88,height*.16,0,width*.88,height*.16,width*.58);glow.addColorStop(0,'rgba(34,91,255,.45)');glow.addColorStop(1,'rgba(34,91,255,0)');ctx.fillStyle=glow;ctx.fillRect(0,0,width,height);
-  try{const logo=await loadImage(TRAFFIC_LOGO_DATA_URI),lh=135,lw=logo.width*(lh/logo.height),x=width-pad-lw,y=56;ctx.drawImage(logo,x,y,lw,lh)}catch{}
+  // Logo proporcional e restrita ao cabeçalho: sem invadir o nome do cliente.
+  try{
+    const logo=await loadImage(TRAFFIC_LOGO_DATA_URI);
+    const maxLogoWidth=184,maxLogoHeight=70;
+    const logoScale=Math.min(maxLogoWidth/logo.width,maxLogoHeight/logo.height);
+    const lw=Math.round(logo.width*logoScale),lh=Math.round(logo.height*logoScale);
+    const x=width-pad-lw,y=36;
+    ctx.drawImage(logo,x,y,lw,lh);
+  }catch(err){console.warn('Não foi possível carregar a logo da proposta JPEG.',err)}
   ctx.fillStyle='#7ab8ff';ctx.font='700 21px Montserrat, Arial';ctx.fillText('PROPOSTA COMERCIAL',pad,82);ctx.fillStyle='#fff';ctx.font='700 54px Montserrat, Arial';const endTitle=wrapCanvas(ctx,data.client.toUpperCase(),pad,170,width-pad*2,62);ctx.fillStyle='#afc8ff';ctx.font='600 22px Montserrat, Arial';ctx.fillText('ESCOPO E INVESTIMENTO',pad,Math.max(292,endTitle+44));
   let y=Math.max(420,endTitle+140);ctx.strokeStyle='rgba(190,210,255,.18)';ctx.lineWidth=1;for(const [i,it] of data.items.entries()){ctx.beginPath();ctx.moveTo(pad,y-44);ctx.lineTo(width-pad,y-44);ctx.stroke();ctx.fillStyle='#55d7ff';ctx.font='700 18px Montserrat, Arial';ctx.fillText(String(i+1).padStart(2,'0'),pad,y);ctx.fillStyle='#fff';ctx.font='700 21px Montserrat, Arial';ctx.fillText(`${it.quantity>0?it.quantity+'×  ':''}${it.title}`,pad+48,y);let yy=y;if(it.description){ctx.fillStyle='#aebfe8';ctx.font='400 16px Montserrat, Arial';yy=wrapCanvas(ctx,it.description,pad+48,y+30,width-pad*2-330,23)}ctx.textAlign='right';if(it.quantity>0){ctx.fillStyle='#829bd1';ctx.font='700 13px Montserrat, Arial';ctx.fillText('VALOR UNITÁRIO',width-pad,y-4);ctx.fillStyle='#dce8ff';ctx.font='700 17px Montserrat, Arial';ctx.fillText(it.unitValue?moneyBR(it.unitValue):'—',width-pad,y+20)}ctx.fillStyle='#68ddff';ctx.font='700 13px Montserrat, Arial';ctx.fillText(it.quantity>0?'SUBTOTAL':'VALOR',width-pad,y+47);ctx.fillStyle='#d8f4ff';ctx.font='700 17px Montserrat, Arial';ctx.fillText(it.subtotal?moneyBR(it.subtotal):'—',width-pad,y+70);ctx.textAlign='left';y=Math.max(y+rowBase,yy+66)}
   ctx.fillStyle='#7895d2';ctx.font='700 15px Montserrat, Arial';ctx.fillText('INVESTIMENTO FINAL',pad,height-190);ctx.fillStyle='#fff';ctx.font='700 46px Montserrat, Arial';ctx.fillText(data.total?moneyBR(data.total):'Sob consulta',pad,height-135);ctx.fillStyle='#8198cb';ctx.font='400 15px Montserrat, Arial';ctx.fillText('ONE WAY AGENCY',pad,height-70);
