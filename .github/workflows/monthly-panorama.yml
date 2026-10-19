@@ -24,6 +24,7 @@ jobs:
       - name: Validar integridade visual e JavaScript
         run: |
           node --check modules/monthly-panorama.js
+          node --check modules/editor-calendar.js
           node --check modules/scripts-ui.js
           node --check modules/social-scheduler-ui.js
           python3 - <<'PY'
@@ -31,6 +32,10 @@ jobs:
           text=Path('index.html').read_text()
           assert text.count('src="/modules/monthly-panorama.js"') == 1
           assert text.count('href="/modules/monthly-panorama.css"') == 1
+          assert text.count('src="/modules/editor-calendar.js"') == 1
+          assert text.count('href="/modules/editor-calendar.css"') == 1
+          assert '<script src="/modules/panorama-mensal.js" defer></script>' not in text
+          assert 'ow-editor-week' in Path('modules/editor-calendar.js').read_text()
           styles=Path('modules/monthly-panorama.css').read_text()
           assert styles.count('{') == styles.count('}')
           assert '.ow-cal-arte' in styles and '.ow-cal-video' in styles
