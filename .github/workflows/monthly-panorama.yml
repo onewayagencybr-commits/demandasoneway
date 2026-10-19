@@ -7,6 +7,8 @@ on:
       - 'scripts/install-monthly-panorama.py'
       - 'modules/monthly-panorama.js'
       - 'modules/monthly-panorama.css'
+      - 'modules/editor-calendar.js'
+      - 'modules/editor-calendar.css'
       - '.github/workflows/monthly-panorama.yml'
   workflow_dispatch:
 permissions:
