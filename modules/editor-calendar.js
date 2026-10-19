@@ -144,6 +144,7 @@
       previousRenderAll.apply(this, arguments);
       var week = document.getElementById('weekCalendarContent');
       if (area && week) week.classList.remove('ow-editor-week');
+      if (area) document.body.classList.remove('calendar-view');
       return;
     }
     // Mantém a área atual válida durante o render original, preservando todas
@@ -158,6 +159,7 @@
     var content = document.getElementById('weekCalendarContent');
     content.classList.remove('hidden');
     content.classList.add('ow-editor-week');
+    document.body.classList.add('calendar-view');
     document.getElementById('areaContent').classList.add('hidden');
     document.getElementById('agendaContent').classList.add('hidden');
     document.getElementById('heroControls').classList.add('hidden');
