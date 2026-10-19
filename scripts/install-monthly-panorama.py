@@ -55,5 +55,22 @@ assert html.count(script_tag) == 1
 assert html.index(style_tag) < html.index('</head>')
 assert html.index(script_tag) > html.index(anchor)
 
+# Calendário de Artes e Vídeos: somente visualização das demandas da própria área.
+# A extensão reutiliza o calendário semanal, sem alterar autorizações do sistema.
+editor_js = root / "modules/editor-calendar.js"
+editor_css = root / "modules/editor-calendar.css"
+assert editor_js.exists() and editor_js.stat().st_size > 5000, "Calendário dos editores ausente"
+assert editor_css.exists() and editor_css.stat().st_size > 700, "CSS do calendário dos editores ausente"
+editor_style_tag = '<link rel="stylesheet" href="/modules/editor-calendar.css">'
+editor_script_tag = '<script src="/modules/editor-calendar.js" defer></script>'
+if editor_style_tag not in html:
+    html = html.replace(style_tag, style_tag + '\n' + editor_style_tag, 1)
+if editor_script_tag not in html:
+    html = html.replace(script_tag, script_tag + '\n' + editor_script_tag, 1)
+assert html.count(editor_style_tag) == 1, "Folha de estilo duplicada"
+assert html.count(editor_script_tag) == 1, "Calendário dos editores duplicado"
+assert html.index(editor_style_tag) > html.index(style_tag)
+assert html.index(editor_script_tag) > html.index(script_tag)
+
 index.write_text(html, encoding="utf-8")
 print("Panorama mensal instalado de forma aditiva; sistema preexistente preservado.")
