@@ -1,0 +1,19 @@
+/* Calendário da equipe - mantém a aparência original do calendário da One Way */
+#weekCalendarContent.ow-editor-week .wk-toolbar-buttons,
+#weekCalendarContent.ow-editor-week #wkFilters,
+#weekCalendarContent.ow-editor-week .wk-day-create {display:none!important}
+#weekCalendarContent.ow-editor-week .wk-toolbar{justify-content:flex-start}
+#weekCalendarContent.ow-editor-week .wk-line-action{cursor:pointer}
+#weekCalendarContent.ow-editor-week .wk-line-action.ow-week-approval{
+border:2px solid rgba(182,116,255,.87)!important;
+box-shadow:inset 4px 0 0 #9b4af3,0 8px 25px rgba(106,41,180,.15)!important;
+background:linear-gradient(105deg,rgba(145,64,234,.18),rgba(255,255,255,.05))!important
+}
+#weekCalendarContent.ow-editor-week .wk-footer-note{color:rgba(224,235,255,.69)}
+@media(max-width:700px){
+#weekCalendarContent.ow-editor-week{width:100%;min-width:0}
+#weekCalendarContent.ow-editor-week .wk-shell{max-width:100%;min-width:0}
+#weekCalendarContent.ow-editor-week .wk-navigator{flex-wrap:wrap}
+#weekCalendarContent.ow-editor-week .wk-week-grid{min-width:0}
+#weekCalendarTab:not(.hidden){min-width:112px}
+}
