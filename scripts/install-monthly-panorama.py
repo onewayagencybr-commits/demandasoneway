@@ -11,6 +11,21 @@ assert script.exists() and script.stat().st_size > 10000, "Módulo JS não encon
 assert css.exists() and css.stat().st_size > 5000, "Tema do panorama não encontrado"
 
 html = index.read_text(encoding="utf-8")
+# Corrige a regressão: uma tag de script do panorama legado foi inserida
+# DENTRO do template JavaScript de exportação PDF e fechava o script principal
+# antes da inicialização do login em navegadores, especialmente no Safari.
+legacy_script = '<script src="/modules/panorama-mensal.js" defer></script>'
+legacy_css = '<link rel="stylesheet" href="/modules/panorama-mensal.css">'
+html = html.replace(legacy_script, '', 1)
+html = html.replace(legacy_css, '', 1)
+# A extensão monthly-panorama é a única usada; os módulos legados permanecem
+# como arquivos no repositório, mas sem execução duplicada.
+main_start = html.index('<script>\nconst USERS')
+main_end = html.index('</script>\n<script src="/modules/instagram-pdf.js"', main_start)
+assert '</script>' not in html[main_start+len('<script>'):main_end], (
+    "Uma tag de fechamento literal ainda interrompe o JavaScript principal"
+)
+
 style_tag = '<link rel="stylesheet" href="/modules/monthly-panorama.css">'
 script_tag = '<script src="/modules/monthly-panorama.js" defer></script>'
 anchor = '<script src="/modules/scripts-ui.js" defer></script>'
