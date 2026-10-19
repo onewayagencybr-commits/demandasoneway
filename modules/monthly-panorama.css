@@ -1,0 +1,62 @@
+/* One Way · panorama mensal: camada visual adicional */
+.ow-mode-toggle{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:32px;border:1px solid rgba(173,205,255,.35);background:linear-gradient(140deg,rgba(47,102,255,.22),rgba(79,132,255,.10));color:#e7f0ff;border-radius:9px;padding:7px 12px;font-size:10px;font-weight:800;white-space:nowrap;transition:transform .2s var(--ease),background .2s var(--ease),border-color .2s var(--ease)}
+.ow-mode-toggle:hover{transform:translateY(-1px);border-color:rgba(190,219,255,.65);background:rgba(47,102,255,.34)}
+.ow-mode-toggle.is-active{color:#102d6c;background:linear-gradient(135deg,#fff,#dce9ff);border-color:rgba(255,255,255,.95);box-shadow:0 7px 20px rgba(0,10,45,.2)}
+.ow-client-calendar{width:100%;min-width:0;margin:4px 0 16px}
+.ow-month-shell{width:100%;min-width:0;border:1px solid rgba(170,196,248,.24);border-radius:17px;background:linear-gradient(145deg,rgba(15,37,85,.95),rgba(8,22,55,.95));padding:16px;box-shadow:0 18px 40px rgba(0,11,36,.2);color:#f6f9ff;overflow:hidden}
+.ow-month-head{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap;margin-bottom:13px}
+.ow-month-head h3{margin:5px 0 4px;font-size:17px;line-height:1.25;font-weight:850;color:#fff;letter-spacing:-.03em}
+.ow-month-head p{margin:0;font-size:10px;line-height:1.6;color:rgba(235,241,255,.73)}
+.ow-month-eyebrow{font-size:8px;letter-spacing:.15em;font-weight:850;color:#a7c6ff}
+.ow-month-nav{display:flex;align-items:center;gap:8px;flex-wrap:nowrap;border:1px solid rgba(193,216,255,.23);border-radius:11px;background:rgba(255,255,255,.06);padding:4px}
+.ow-month-nav strong{font-size:11px;color:#fff;text-align:center;min-width:122px;white-space:nowrap;text-transform:capitalize}
+.ow-month-nav button{border:1px solid rgba(189,216,255,.22);border-radius:8px;background:rgba(255,255,255,.10);color:white;font-size:23px;width:31px;height:31px;line-height:1}
+.ow-month-nav button:hover{background:rgba(121,166,255,.3);border-color:rgba(218,232,255,.5)}
+.ow-month-legend{display:flex;align-items:center;flex-wrap:wrap;gap:7px;margin:0 0 12px}
+.ow-month-legend span:not(.ow-legend-count){border-radius:7px;padding:4px 8px;font-size:9px;font-weight:850}
+.ow-legend-arte{background:#f8df75;color:#634900}
+.ow-legend-video{background:#e2caff;color:#5c239b}
+.ow-legend-trafego{background:#cadeff;color:#174d9e}
+.ow-legend-count{margin-left:auto;color:rgba(235,244,255,.72);font-size:10px;font-weight:700}
+.ow-calendar-scroll{width:100%;overflow:auto;overscroll-behavior-x:contain;border-radius:11px;border:1px solid rgba(202,222,255,.22);background:rgba(5,17,43,.44);scrollbar-color:rgba(137,172,242,.5) transparent}
+.ow-calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));min-width:650px;gap:1px;background:rgba(192,218,255,.14)}
+.ow-weekday{padding:11px 5px;text-align:center;background:rgba(24,48,101,.95);color:#c9dcff;font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:.06em}
+.ow-day{position:relative;min-width:0;min-height:112px;background:rgba(8,26,64,.95);padding:6px;transition:background .16s ease,box-shadow .16s ease}
+.ow-day:hover{background:rgba(27,57,120,.88)}
+.ow-day-outside{background:rgba(6,17,42,.8);opacity:.66}
+.ow-day-today{box-shadow:inset 0 0 0 1.5px #78aaff;background:rgba(22,50,105,.92)}
+.ow-day-busy{background:rgba(15,38,88,.96)}
+.ow-day-target{box-shadow:inset 0 0 0 2px #a8c6ff!important;background:rgba(72,117,206,.44)!important}
+.ow-day-top{display:flex;align-items:center;justify-content:space-between;gap:3px;margin-bottom:7px}
+.ow-day-top>span{display:inline-flex;align-items:center;justify-content:center;min-width:23px;height:23px;border-radius:7px;color:#e7f1ff;font-size:11px;font-weight:850}
+.ow-day-today .ow-day-top>span{background:#d9e7ff;color:#153779}
+.ow-day-top small{color:#a8c5ff;font-size:8px;font-weight:730;white-space:nowrap}
+.ow-day-items{display:flex;flex-direction:column;gap:4px;min-width:0}
+.ow-cal-demand{position:relative;display:flex;align-items:center;justify-content:space-between;gap:3px;min-width:0;min-height:27px;padding:5px 5px 5px 7px;border:1px solid transparent;border-left-width:3px;border-radius:6px;cursor:grab;transition:transform .15s ease,box-shadow .15s ease,outline .15s ease;user-select:none}
+.ow-cal-demand:active{cursor:grabbing}
+.ow-cal-demand:hover{transform:translateY(-1px);box-shadow:0 5px 14px rgba(0,8,30,.27);z-index:2}
+.ow-cal-demand:focus-visible{outline:2px solid #fff;outline-offset:1px}
+.ow-cal-arte{background:#f4dd84;color:#4f3c07;border-color:#ebcf6e;border-left-color:#a97600}
+.ow-cal-video{background:#dfccff;color:#52238d;border-color:#ccb1fb;border-left-color:#7c3aed}
+.ow-cal-trafego{background:#c9dfff;color:#1e488f;border-color:#a6c9fd;border-left-color:#3476cf}
+.ow-cal-text{display:block;min-width:0;font-size:9px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ow-cal-open{flex:0 0 18px;width:18px;height:18px;padding:0;border:0;border-radius:4px;background:rgba(17,42,93,.10);color:inherit;font-size:12px;font-weight:900;line-height:1}
+.ow-cal-open:hover{background:rgba(17,42,93,.2)}
+.ow-cal-approval{outline:2px solid #9a4bf5;outline-offset:-1px;box-shadow:0 0 0 1px rgba(154,75,245,.3)}
+.ow-cal-selected{outline:3px solid #fff!important;outline-offset:1px;box-shadow:0 0 0 5px rgba(111,168,255,.55)!important;z-index:3}
+.ow-cal-dragging{opacity:.45}
+.ow-month-foot{margin-top:12px;font-size:10px;font-weight:600;color:rgba(218,231,255,.76);line-height:1.6}
+.ow-agenda-controls{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin:5px 0 12px}
+.ow-agenda-mode,.ow-agenda-areas{display:flex;align-items:center;flex-wrap:wrap;gap:5px;padding:4px;border:1px solid rgba(220,233,255,.17);border-radius:11px;background:rgba(255,255,255,.08)}
+.ow-agenda-mode button,.ow-agenda-areas button{border:0;border-radius:8px;padding:8px 11px;background:transparent;color:rgba(233,243,255,.76);font-size:10px;font-weight:800;transition:background .2s,color .2s}
+.ow-agenda-areas>span{color:rgba(231,242,255,.65);font-size:9px;font-weight:800;padding:0 6px}
+.ow-agenda-mode button:hover,.ow-agenda-areas button:hover{background:rgba(213,231,255,.11);color:#fff}
+.ow-agenda-mode button.is-active,.ow-agenda-areas button.is-active{background:linear-gradient(135deg,#fff,#deebff);color:#12366e;box-shadow:0 5px 17px rgba(0,9,35,.18)}
+#owAgendaCalendar{margin-top:8px}
+#agendaViewTabs.ow-agenda-tabs-hidden{display:none!important}
+.agenda-item.ow-awaiting-approval{border:2px solid rgba(173,104,255,.9)!important;box-shadow:inset 5px 0 0 #a855f7,0 12px 31px rgba(102,38,174,.23)!important;background:linear-gradient(100deg,rgba(140,69,224,.2),rgba(15,36,84,.74) 22%)!important}
+.agenda-item.ow-awaiting-approval:hover{border-color:#cba3ff!important;box-shadow:inset 5px 0 0 #b86dff,0 17px 35px rgba(102,38,174,.35)!important}
+.agenda-item.ow-awaiting-approval:after{content:'AGUARDANDO APROVAÇÃO'!important;position:absolute;top:-9px;right:12px;display:inline-block;border-radius:999px;background:#8c3ce0;color:#fff;font-size:7px;font-weight:900;letter-spacing:.055em;padding:4px 8px;box-shadow:0 5px 14px rgba(66,17,112,.35)}
+.agenda-item.ow-awaiting-approval .current-status.purple{border-color:#c8a0ff!important;box-shadow:0 0 0 2px rgba(169,92,253,.25)}
+@media(max-width:900px){.ow-month-shell{padding:12px}.ow-day{min-height:103px}.ow-calendar-grid{min-width:630px}.ow-agenda-controls{justify-content:flex-start}.ow-client-calendar{margin-top:10px}}
+@media(max-width:600px){.ow-month-head{align-items:flex-start;gap:10px}.ow-month-head h3{font-size:16px}.ow-month-head p{font-size:9px}.ow-month-nav{width:100%;justify-content:space-between}.ow-month-nav strong{flex:1}.ow-month-legend{gap:5px}.ow-legend-count{width:100%;margin-left:0}.ow-calendar-grid{min-width:595px}.ow-day{min-height:90px;padding:4px}.ow-cal-text{font-size:8px}.ow-mode-toggle{padding:7px 9px}.ow-agenda-mode button,.ow-agenda-areas button{font-size:9px;padding:8px}.agenda-item.ow-awaiting-approval:after{font-size:6px;right:5px}}
