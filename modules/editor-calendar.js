@@ -180,4 +180,5 @@
       editorCalendarOpen = false;
     }
   }, true);
+  if (typeof currentUser !== 'undefined' && currentUser && editorArea()) renderAll();
 })();
