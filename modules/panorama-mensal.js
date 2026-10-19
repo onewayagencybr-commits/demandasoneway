@@ -191,14 +191,21 @@
 
   const previousRenderClient = renderClient;
   renderClient = function (client, index) {
+    const showingCalendar = view.clientId === client.id;
+    if (isAdmin() && showingCalendar) {
+      const filterKey = `${currentArea}|${currentMonth}|${client.id}`;
+      if (clientDemandFilterKey !== filterKey) {
+        clientDemandFilterKey = filterKey;
+        clientDemandFilters = ['arte', 'video', 'trafego'].filter(canAccessArea);
+      }
+    }
     let html = previousRenderClient(client, index);
     if (!isAdmin() || openClientId !== client.id) return html;
-    const showingCalendar = view.clientId === client.id;
     const marker = '</div></div><div class="demand-list">';
     if (!html.includes(marker)) return html;
     const tab = `<button type="button" class="client-area-filter-btn ow-client-panorama-tab ${showingCalendar ? 'selected' : ''}" data-ow-client-panorama="${safeLabel(client.id)}" aria-pressed="${showingCalendar}">Panorama mensal</button>`;
     const calendar = showingCalendar ? monthCalendar(currentMonth, relevantClientDemands(client), 'client') : '';
-    html = html.replace(marker, `${tab}</div></div>${calendar}<div class="demand-list"`);
+    html = html.replace(marker, `${tab}</div></div>${calendar}<div class="demand-list">`);
     if (showingCalendar) html = html.replace('class="client open', 'class="client open ow-client-panorama-visible');
     return html;
   };
