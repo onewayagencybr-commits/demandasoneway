@@ -1930,7 +1930,7 @@ function blueDocHTML(opts){
   .pdf-print-action{position:fixed;bottom:25px;right:25px;z-index:1000;padding:13px 18px;background:#e5efff;color:#0b2d77;border:1px solid #adc9ff;border-radius:11px;font:700 12px Montserrat, Arial;cursor:pointer;box-shadow:0 12px 28px rgba(0,0,0,.30)}
   @media print{html,body{min-width:0;width:210mm;background:#071633!important}#pdf-output{padding:0}.pdf-sheet{margin:0;box-shadow:none}.pdf-print-action{display:none!important}}
   @media screen{.pdf-sheet{box-shadow:0 20px 70px rgba(0,0,0,.4);margin-bottom:20px}}
-  </style></head><body><div id="pdf-output"></div><button type="button" class="pdf-print-action" onclick="window.print()">Imprimir / Salvar PDF</button><script id="pdf-payload" type="application/json">${payload}<\/script><script>(${blueDocPaginate.toString()})();<\/script><script src="/modules/panorama-mensal.js" defer></script>
+  </style></head><body><div id="pdf-output"></div><button type="button" class="pdf-print-action" onclick="window.print()">Imprimir / Salvar PDF</button><script id="pdf-payload" type="application/json">${payload}<\/script><script>(${blueDocPaginate.toString()})();<\/script>
 </body></html>`;
 }
 function blueDocPaginate(){
