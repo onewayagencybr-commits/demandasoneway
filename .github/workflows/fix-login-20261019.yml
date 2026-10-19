@@ -1,0 +1,33 @@
+name: One Way - Restaurar Login
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/fix-login-script-20261019.py'
+      - '.github/workflows/fix-login-20261019.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  restaurar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Corrigir HTML sem alterar o banco ou os módulos
+        run: python3 scripts/fix-login-script-20261019.py
+      - name: Validar login e módulos
+        run: |
+          node --check modules/monthly-panorama.js
+          node --check modules/panorama-mensal.js
+          node --test tests/*.test.js
+      - name: Publicar HTML corrigido
+        run: |
+          git add index.html
+          if ! git diff --cached --quiet; then
+            git config user.name "oneway-login-fix-bot"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "fix(login): corrigir script interrompido no HTML"
+            git push
+          fi
