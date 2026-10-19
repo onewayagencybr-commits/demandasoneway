@@ -1,0 +1,49 @@
+name: One Way - Instalar Panorama Mensal
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'scripts/install-monthly-panorama.py'
+      - 'modules/monthly-panorama.js'
+      - 'modules/monthly-panorama.css'
+      - '.github/workflows/monthly-panorama.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  instalar-panorama:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Obter versão atual
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Instalar o novo panorama sem alterar demais módulos
+        run: python3 scripts/install-monthly-panorama.py
+      - name: Validar integridade visual e JavaScript
+        run: |
+          node --check modules/monthly-panorama.js
+          node --check modules/scripts-ui.js
+          node --check modules/social-scheduler-ui.js
+          python3 - <<'PY'
+          from pathlib import Path
+          text=Path('index.html').read_text()
+          assert text.count('src="/modules/monthly-panorama.js"') == 1
+          assert text.count('href="/modules/monthly-panorama.css"') == 1
+          styles=Path('modules/monthly-panorama.css').read_text()
+          assert styles.count('{') == styles.count('}')
+          assert '.ow-cal-arte' in styles and '.ow-cal-video' in styles
+          assert '.ow-awaiting-approval' in styles
+          PY
+      - name: Executar testes existentes
+        run: node --test tests/*.test.js
+      - name: Aplicar alteração na versão principal
+        run: |
+          git add index.html
+          if ! git diff --cached --quiet; then
+            git config user.name "oneway-panorama-bot"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "feat: ativar panorama mensal em clientes e agenda"
+            git push
+          fi
