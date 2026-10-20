@@ -54,8 +54,8 @@
 .ow-agenda-mode button.is-active,.ow-agenda-areas button.is-active{background:linear-gradient(135deg,#fff,#deebff);color:#12366e;box-shadow:0 5px 17px rgba(0,9,35,.18)}
 #owAgendaCalendar{margin-top:8px}
 #agendaViewTabs.ow-agenda-tabs-hidden{display:none!important}
-.agenda-item.ow-awaiting-approval{border:2px solid rgba(173,104,255,.9)!important;box-shadow:inset 5px 0 0 #a855f7,0 12px 31px rgba(102,38,174,.23)!important;background:linear-gradient(100deg,rgba(140,69,224,.2),rgba(15,36,84,.74) 22%)!important}
-.agenda-item.ow-awaiting-approval:hover{border-color:#cba3ff!important;box-shadow:inset 5px 0 0 #b86dff,0 17px 35px rgba(102,38,174,.35)!important}
+.agenda-item.ow-awaiting-approval{border:1px solid rgba(173,104,255,.9)!important;box-shadow:inset 7px 0 0 #a855f7,0 12px 31px rgba(102,38,174,.23)!important;background:linear-gradient(100deg,rgba(140,69,224,.2),rgba(15,36,84,.74) 22%)!important}
+.agenda-item.ow-awaiting-approval:hover{border-color:#cba3ff!important;box-shadow:inset 7px 0 0 #b86dff,0 17px 35px rgba(102,38,174,.35)!important}
 .agenda-item.ow-awaiting-approval:after{content:'AGUARDANDO APROVAÇÃO'!important;position:absolute;top:-9px;right:12px;display:inline-block;border-radius:999px;background:#8c3ce0;color:#fff;font-size:7px;font-weight:900;letter-spacing:.055em;padding:4px 8px;box-shadow:0 5px 14px rgba(66,17,112,.35)}
 .agenda-item.ow-awaiting-approval .current-status.purple{border-color:#c8a0ff!important;box-shadow:0 0 0 2px rgba(169,92,253,.25)}
 @media(max-width:900px){.ow-month-shell{padding:12px}.ow-day{min-height:103px}.ow-calendar-grid{min-width:630px}.ow-agenda-controls{justify-content:flex-start}.ow-client-calendar{margin-top:10px}}
