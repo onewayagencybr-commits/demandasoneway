@@ -379,22 +379,25 @@ async function pagesFor(data){
     const video=data.videos[videoIndex];
     fontAt(49,700);
     const refs=references[videoIndex],titleTop=y;
-    const titleLines=wrap(ctx,video.title,refs.length?670:1160);
+    const titleLines=wrap(ctx,video.title,refs.length?930:1160);
     for(const title of titleLines){
       ctx.fillStyle='#102a55';ctx.fillText(title,114,y);y+=65;
     }
     if(refs.length){
       let refY=titleTop-55;
       for(let i=0;i<refs.length;i++){
-        const ref=refs[i],qrSize=210,qrX=1100,linkX=820;
+        const ref=refs[i],qrSize=210,qrX=1100;
         ctx.imageSmoothingEnabled=false;ctx.drawImage(ref.qr,qrX,refY,qrSize,qrSize);ctx.imageSmoothingEnabled=true;
-        ctx.fillStyle='#294f84';fontAt(17,700);ctx.fillText('REFERÊNCIA'+(refs.length>1?' '+(i+1):''),linkX,refY+24);
-        fontAt(16,500);
-        const allLinkLines=wrap(ctx,ref.url,265),linkLines=allLinkLines.slice(0,6);
-        if(allLinkLines.length>6)linkLines[5]=linkLines[5].slice(0,-2)+'…';
-        pageLinks.push({url:ref.url,x:linkX,y:refY,w:490,h:qrSize});
-        linkLines.forEach((line,j)=>ctx.fillText(line,linkX,refY+54+j*22));
-        refY+=Math.max(qrSize,54+linkLines.length*22)+24;
+        // Compact, centered link; the complete URL stays in the QR and PDF annotation.
+        const label='Abrir referência'+(refs.length>1?' '+(i+1):'');
+        ctx.textAlign='center';ctx.fillStyle='#294f84';fontAt(18,650);
+        ctx.fillText(label,qrX+qrSize/2,refY+qrSize+22);
+        const labelWidth=ctx.measureText(label).width;
+        ctx.fillRect(qrX+(qrSize-labelWidth)/2,refY+qrSize+27,labelWidth,1);
+        ctx.textAlign='left';
+        // Both the QR image and its label are clickable, including their white margins.
+        pageLinks.push({url:ref.url,x:qrX,y:refY,w:qrSize,h:qrSize+36});
+        refY+=qrSize+60;
       }
       y=Math.max(y,refY);
     }
