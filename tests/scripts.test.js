@@ -69,3 +69,16 @@ test('PDF slider fits representative Scania script on one page without cutting t
  assert.equal(mockedWindow.owScripts.fontScale(20),70);
  assert.equal(mockedWindow.owScripts.fontScale(200),115);
 });
+
+test('references survive document reload and old scripts remain compatible',()=>{
+ const context={window:{addEventListener(){}},URL,crypto:require('node:crypto').webcrypto,document:{getElementById(){}},structuredClone};
+ vm.runInNewContext(fs.readFileSync('modules/scripts-ui.js','utf8'),context);
+ const api=context.window.owScripts;
+ const v={title:'Vídeo',mode:'full',text:'Texto',scenes:[],references:'https://youtu.be/abc\nhttps://www.instagram.com/reel/xyz/'};
+ const d=api.validate({client:'Cliente',title:'',videos:[v]});
+ assert.equal(d.videos[0].references,v.references);
+ assert.equal(api.referenceURLs(d.videos[0].references).length,2);
+ assert.equal(api.validate({client:'Cliente',title:'',videos:[{...v,references:undefined}]}).videos[0].references,'');
+ for(const value of ['javascript:alert(1)','data:text/html,test','https://user:pass@example.com','não é um link'])assert.throws(()=>api.referenceURLs(value));
+ assert.equal(api.pdfIssue({...d,videos:[{...v,references:'javascript:alert(1)'}]}),'Use um link de referência http:// ou https:// sem credenciais.');
+});
