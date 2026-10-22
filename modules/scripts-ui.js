@@ -77,6 +77,86 @@ root.oninput=e=>{if(e.target.dataset.previewScale){setFontScale(e.target.value);
 root.onclick=async e=>{const b=e.target.closest('[data-act]');if(!b||busy)return;try{await action(b.dataset.act,b);}catch(error){status(error.message||'Não foi possível concluir.');}};
 bindClientPicker();syncFontControls();scheduleLivePreview(350);
 }
+
+/* A mesma composição alimenta prévia pequena, modal e PDF final. */
+function syncFontControls(){
+ const n=fontScale(doc.pdfFontScale);
+ for(const id of ['rsFontScale','rsModalFontScale']){const el=$(id);if(el)el.value=String(n);}
+ for(const id of ['rsFontScaleValue','rsModalFontScaleValue']){const el=$(id);if(el)el.textContent=n+'%';}
+}
+function setFontScale(value){
+ const n=fontScale(value);if(n===fontScale(doc.pdfFontScale))return;
+ doc.pdfFontScale=n;dirty=true;syncFontControls();
+ status('Texto: '+n+'%. Salve o roteiro para guardar o ajuste na nuvem.');
+ scheduleLivePreview(170);
+}
+function showPageImages(parent,pages){
+ if(!parent)return;
+ parent.replaceChildren();
+ pages.forEach((src,index)=>{
+  const img=new Image();img.src=src;
+  img.alt='Página '+(index+1)+' de '+pages.length+' do roteiro';
+  img.loading='lazy';img.decoding='async';parent.appendChild(img);
+ });
+}
+function updatePreviewUI(pages){
+ const message=pages.length+' página'+(pages.length===1?'':'s')+' · texto '+fontScale(doc.pdfFontScale)+'%';
+ if($('rsPageCount'))$('rsPageCount').textContent=message;
+ if($('rsModalCount'))$('rsModalCount').textContent=message;
+ showPageImages($('rsLivePreviewPages'),pages);
+ showPageImages($('rsModalPages'),pages);
+ const downloadButton=$('rsModalDownload');if(downloadButton)downloadButton.disabled=false;
+}
+function scheduleLivePreview(delay=350){
+ clearTimeout(liveTimer);
+ const revision=++liveRevision,holder=$('rsLivePreviewPages'),info=$('rsPageCount');
+ if(!holder)return;
+ const issue=pdfIssue(doc);
+ if(issue){
+  if(info)info.textContent='Prévia indisponível';
+  holder.textContent=issue;
+  if($('rsModalCount'))$('rsModalCount').textContent=issue;
+  if($('rsModalDownload'))$('rsModalDownload').disabled=true;
+  return;
+ }
+ if(info)info.textContent='Atualizando prévia…';
+ if($('rsModalCount'))$('rsModalCount').textContent='Atualizando prévia…';
+ if($('rsModalDownload'))$('rsModalDownload').disabled=true;
+ const snapshot=structuredClone(doc),key=pdfKey(snapshot);
+ liveTimer=setTimeout(async()=>{
+  if(revision!==liveRevision)return;
+  try{
+   const pages=key===cachedKey?cachedPages:await pagesFor(snapshot);
+   if(revision!==liveRevision||pdfKey(doc)!==key||!$('rsLivePreviewPages'))return;
+   cachedKey=key;cachedPages=pages;updatePreviewUI(pages);
+  }catch(error){
+   if(revision!==liveRevision)return;
+   if(info)info.textContent='Erro na prévia';
+   holder.textContent='Não foi possível gerar a prévia: '+(error.message||error);
+  }
+ },delay);
+}
+function openPDFPreview(trigger,pages){
+ const earlier=$('rsPreview');if(earlier)earlier.remove();
+ const overlay=document.createElement('div');
+ overlay.id='rsPreview';overlay.setAttribute('role','dialog');
+ overlay.setAttribute('aria-modal','true');overlay.setAttribute('aria-label','Prévia do PDF e ajuste do texto');
+ overlay.innerHTML='<header class="rs-modal-header"><div class="rs-modal-heading"><strong>Prévia do PDF</strong><span id="rsModalCount"></span></div><div class="rs-modal-tools"><label>Texto <input id="rsModalFontScale" data-preview-scale="1" type="range" min="70" max="115" step="5" aria-label="Tamanho do texto no PDF"><output id="rsModalFontScaleValue">100%</output></label><button id="rsModalDownload" type="button">Baixar PDF</button><button id="rsModalClose" type="button">Fechar prévia</button></div></header><div id="rsModalPages" class="rs-modal-pages"></div>';
+ const close=()=>{overlay.remove();document.removeEventListener('keydown',onKey);if(trigger.isConnected)trigger.focus();};
+ const onKey=e=>{if(e.key==='Escape')close();};
+ overlay.querySelector('#rsModalClose').onclick=close;
+ overlay.querySelector('#rsModalDownload').onclick=()=>{
+  if(pdfKey(doc)!==cachedKey||!cachedPages.length)return;
+  download(scriptPDFBlob(cachedPages),filename()+'.pdf');
+  status('PDF baixado: '+cachedPages.length+' página(s), texto '+fontScale(doc.pdfFontScale)+'%.');
+ };
+ overlay.oninput=e=>{if(e.target.dataset.previewScale)setFontScale(e.target.value);};
+ document.body.appendChild(overlay);
+ document.addEventListener('keydown',onKey);
+ syncFontControls();updatePreviewUI(pages);
+ overlay.querySelector('#rsModalClose').focus();
+}
+
 function bindClientPicker(){
  const input=$('rsClientInput'),list=$('rsClientOptions'),picker=input.closest('.rs-client-picker');
  const normalize=n=>String(n||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR').replace(/[^a-z0-9]+/g,' ').trim();
@@ -116,7 +196,23 @@ if(act==='delete-draft'){
 if(act==='refresh-cloud'){await refreshCloud();status('Lista atualizada na nuvem.');return;}
 if(act==='migrate'){await migrateLegacy();return;}
 if(act==='new'){if(dirty&&!confirm('Descartar as alterações não salvas?'))return;doc=blank();dirty=false;render();return;}
-if(act==='pdf'||act==='preview'){if(!doc.client.trim())throw Error('Informe o cliente antes de gerar o PDF.');if(doc.videos.some(v=>!v.title.trim()))throw Error('Dê um título a cada vídeo.');if(doc.videos.some(v=>v.mode==='full'?!v.text.trim():!v.scenes.some(s=>s.text.trim()||s.visual.trim())))throw Error('Preencha o roteiro de cada vídeo.');busy=true;b.disabled=true;status('Preparando todas as páginas…');try{const pages=await pagesFor(structuredClone(doc));if(act==='pdf'){download(scriptPDFBlob(pages),filename()+'.pdf');status(`PDF pronto: ${pages.length} página(s), com todos os vídeos e cenas.`);}else{const overlay=document.createElement('div');overlay.id='rsPreview';overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');overlay.setAttribute('aria-label','Prévia do PDF');overlay.innerHTML=`<header><strong>Prévia · ${pages.length} página(s)</strong><button>Fechar prévia</button></header>`;const close=()=>{overlay.remove();document.removeEventListener('keydown',keyClose);b.focus();},keyClose=e=>{if(e.key==='Escape')close();};document.addEventListener('keydown',keyClose);overlay.querySelector('button').onclick=close;for(const src of pages){const img=new Image();img.src=src;img.alt='Página do roteiro';overlay.append(img);}document.body.append(overlay);overlay.querySelector('button').focus();status('Prévia pronta.');}}finally{busy=false;b.disabled=false;}return;}
+if(act==='pdf'||act==='preview'){
+ const issue=pdfIssue(doc);if(issue)throw Error(issue);
+ busy=true;b.disabled=true;status('Preparando todas as páginas…');
+ try{
+  const snapshot=structuredClone(doc),key=pdfKey(snapshot);
+  const pages=key===cachedKey?cachedPages:await pagesFor(snapshot);
+  cachedKey=key;cachedPages=pages;
+  if(act==='pdf'){
+   download(scriptPDFBlob(pages),filename()+'.pdf');
+   status('PDF pronto: '+pages.length+' página(s), texto '+fontScale(doc.pdfFontScale)+'%.');
+  }else{
+   openPDFPreview(b,pages);
+   status('Prévia pronta. Ajuste o texto e acompanhe as páginas em tempo real.');
+  }
+ }finally{busy=false;b.disabled=false;}
+ return;
+}
 const vi=Number(b.closest('[data-video]')?.dataset.video),si=Number(b.closest('[data-scene]')?.dataset.scene);
 if(act==='add-video'){doc.videos.push(video());dirty=true;render();if(doc.client.trim()){try{await saveDocument();updateCloudList();status(`Novo vídeo salvo na nuvem no roteiro de ${doc.client}. Preencha o conteúdo e clique Salvar roteiro.`);}catch(error){status('Novo vídeo adicionado, mas ainda NÃO salvo na nuvem: '+error.message+'. Tente Salvar roteiro.');}}else status('Novo vídeo adicionado. Escolha o cliente e clique Salvar roteiro para guardar na nuvem.');const added=$('scriptsContent')?.querySelector(`[data-video="${doc.videos.length-1}"]`);if(added&&typeof added.scrollIntoView==='function')added.scrollIntoView({behavior:'smooth',block:'start'});return;}else if(act==='add-scene')doc.videos[vi].scenes.push(scene());else {const [kind,op]=act.split('-'),list=kind==='v'?doc.videos:doc.videos[vi].scenes,i=kind==='v'?vi:si;if(op==='delete'){if(!confirm(`Excluir ${kind==='v'?'este vídeo e todas as cenas':'esta cena'}?`))return;list.splice(i,1);if(!list.length)list.push(kind==='v'?video():scene());}else if(op==='copy')list.splice(i+1,0,structuredClone(list[i]));else {const to=i+(op==='up'?-1:1);if(to<0||to>=list.length)return;[list[i],list[to]]=[list[to],list[i]];}}
 dirty=true;render();}
