@@ -2666,6 +2666,7 @@ async function submitDemand(e){
     if(submitBtn){submitBtn.disabled=false;submitBtn.textContent='Salvar demanda'}
     return;
   }
+   if(isAdmin()&&!isDemandVisible(d))adminAssigneeFilter='all';
    closeModal('demandModal');currentArea=destinationArea;currentMonth=destinationMonth;renderAll();
   if(submitBtn){submitBtn.disabled=false;submitBtn.textContent='Salvar demanda'}
   const refCount=(referenceLink?1:0)+addedFiles.length,productionCount=(productionLink?1:0)+addedProductionFiles.length;
