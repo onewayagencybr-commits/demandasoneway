@@ -536,3 +536,49 @@
   #rsPreview header button{min-height:32px;padding:6px 10px;font-size:10px}
   #rsPreview img{margin:14px auto 20px}
 }
+
+
+/* ONE WAY | PRÉVIA A4 AO VIVO — não altera o tema do editor nem a exportação. */
+#scriptsContent .rs-print-panel{
+ margin:18px 0 24px;padding:23px 25px;border-radius:20px;
+ background:linear-gradient(135deg,rgba(15,42,87,.83),rgba(12,33,75,.72));
+ border:1px solid rgba(216,230,255,.2);color:#eaf2ff;
+ box-shadow:0 14px 42px rgba(0,12,42,.12);
+}
+#scriptsContent .rs-print-header{display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap}
+#scriptsContent .rs-print-header h3{font-size:21px;line-height:1.25;font-weight:600;color:#f5f8ff;margin:13px 0 6px}
+#scriptsContent .rs-print-header p{font-size:12px;line-height:1.6;color:#bfd0ed;margin:0;max-width:550px}
+#scriptsContent .rs-print-count{border:1px solid rgba(185,212,255,.23);border-radius:10px;background:rgba(109,154,235,.13);padding:10px 13px;color:#eef4ff;font-size:12px;font-weight:650;white-space:normal}
+#scriptsContent .rs-print-settings{display:flex;align-items:flex-end;gap:20px;margin:17px 0 13px;flex-wrap:wrap}
+#scriptsContent .rs-font-slider-label{flex:1 1 350px;min-width:170px;font-size:13px;color:#e3eeff;font-weight:600}
+#scriptsContent .rs-font-slider-label output{display:inline-block;margin-left:10px;padding:3px 8px;border-radius:7px;background:rgba(148,181,246,.19);color:#fff;font-size:13px;font-weight:700}
+#scriptsContent #rsFontScale{display:block;width:100%;height:24px;margin:9px 0 2px;padding:0;border:0;border-radius:0;background:transparent;accent-color:#9bbfff;cursor:pointer;outline-offset:4px}
+#scriptsContent .rs-scale-ends{display:flex;justify-content:space-between;gap:8px;color:#afc6e9;font-size:10px;font-weight:400}
+#scriptsContent .rs-print-settings button{min-height:40px;background:rgba(232,241,255,.10);color:#edf4ff;border:1px solid rgba(213,231,255,.27)}
+#scriptsContent .rs-print-settings button:hover{background:rgba(232,241,255,.2)}
+#scriptsContent .rs-live-preview{display:flex;align-items:flex-start;gap:14px;padding:16px;overflow-x:auto;overscroll-behavior-x:contain;min-height:135px;max-height:420px;border:1px solid rgba(195,216,255,.18);border-radius:14px;background:rgba(3,15,40,.23)}
+#scriptsContent .rs-live-preview img{display:block;flex:0 0 auto;width:min(190px,35vw);height:auto;max-width:none;box-shadow:0 4px 18px rgba(0,4,22,.26);background:#fff;border-radius:2px}
+#scriptsContent .rs-live-placeholder{font-size:12px;color:#c6d7f0;line-height:1.6}
+#rsPreview .rs-modal-header{width:min(100%,1120px);max-width:1120px;display:flex;flex-wrap:wrap;gap:13px;align-items:center;justify-content:space-between;padding:12px 15px}
+#rsPreview .rs-modal-heading{display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+#rsPreview #rsModalCount{font-family:OWMontserrat,Montserrat,sans-serif;font-size:11px;color:#bad0f3}
+#rsPreview .rs-modal-tools{display:flex;align-items:center;flex-wrap:wrap;justify-content:flex-end;gap:10px}
+#rsPreview .rs-modal-tools label{display:flex;align-items:center;gap:8px;font-size:12px;color:#e7efff}
+#rsPreview #rsModalFontScale{width:132px;height:24px;accent-color:#aac8ff;cursor:pointer}
+#rsPreview .rs-modal-tools output{min-width:41px;text-align:right;font-weight:700;font-size:12px}
+#rsPreview #rsModalDownload{background:#d9e7ff;color:#123264;font-weight:700}
+#rsPreview #rsModalDownload:disabled{opacity:.5;cursor:wait}
+#rsPreview .rs-modal-pages{padding-bottom:30px}
+@media(max-width:650px){
+ #scriptsContent .rs-print-panel{padding:16px;margin-top:14px}
+ #scriptsContent .rs-print-header h3{font-size:18px}
+ #scriptsContent .rs-print-settings{gap:10px}
+ #scriptsContent .rs-print-settings button{width:100%}
+ #scriptsContent .rs-live-preview{padding:10px;gap:10px;max-height:335px}
+ #scriptsContent .rs-live-preview img{width:min(155px,54vw)}
+ #rsPreview .rs-modal-header{display:flex;flex-direction:column;align-items:stretch}
+ #rsPreview .rs-modal-tools{justify-content:space-between;gap:8px}
+ #rsPreview .rs-modal-tools label{flex:1 1 100%;justify-content:space-between}
+ #rsPreview #rsModalFontScale{flex:1;min-width:80px}
+ #rsPreview .rs-modal-tools button{flex:1 1 auto}
+}
