@@ -275,14 +275,15 @@ async function referenceQR(url){
  for(let row=0;row<count;row++)for(let col=0;col<count;col++)if(code.isDark(row,col))ctx.fillRect((col+quiet)*cell,(row+quiet)*cell,cell,cell);
  if(typeof LOGO_DATA_URI==='string'){
   const img=new Image();await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=()=>reject(Error('Não foi possível carregar a logo do QR Code.'));img.src=LOGO_DATA_URI;});
-  // Small central horizontal mark, covering under 3% of the code area.
-  const w=Math.round(count*cell*.23),h=Math.round(w*197/516),pad=cell*.7;
+  // Prominent original mark with a white inset; high error correction protects scanning.
+  const w=Math.round(count*cell*(count>65?.23:.40)),h=Math.round(w*197/516),pad=cell*.8;
   const x=(canvas.width-w)/2,y=(canvas.height-h)/2;
   ctx.fillStyle='#fff';ctx.fillRect(x-pad,y-pad,w+pad*2,h+pad*2);
   const mark=document.createElement('canvas');mark.width=w;mark.height=h;
   const m=mark.getContext('2d');m.drawImage(img,34,326,516,197,0,0,w,h);
   m.globalCompositeOperation='source-in';m.fillStyle='#102a55';m.fillRect(0,0,w,h);
   ctx.drawImage(mark,x,y);
+  canvas.brand={image:mark,x,y,w,h};
  }
  return canvas;
 }
@@ -343,7 +344,7 @@ async function pagesFor(data){
     ctx.fillText('ONE WAY  /  ROTEIROS DE PRODUÇÃO',110,1965);
     ctx.textAlign='right';ctx.fillText(String(pages.length+1).padStart(2,'0'),1330,1965);
     ctx.textAlign='left';
-    pages.push(canvas.toDataURL('image/jpeg',.94));pages.links.push(pageLinks);pageLinks=[];
+    pages.push(canvas.toDataURL('image/jpeg',.98));pages.links.push(pageLinks);pageLinks=[];
   };
   const page=async()=>{
     footer();
@@ -379,15 +380,21 @@ async function pagesFor(data){
     const video=data.videos[videoIndex];
     fontAt(49,700);
     const refs=references[videoIndex],titleTop=y;
-    const titleLines=wrap(ctx,video.title,refs.length?930:1160);
+    const titleLines=wrap(ctx,video.title,refs.length?870:1160);
     for(const title of titleLines){
       ctx.fillStyle='#102a55';ctx.fillText(title,114,y);y+=65;
     }
     if(refs.length){
       let refY=titleTop-55;
       for(let i=0;i<refs.length;i++){
-        const ref=refs[i],qrSize=210,qrX=1100;
+        const ref=refs[i],qrSize=280,qrX=1030;
         ctx.imageSmoothingEnabled=false;ctx.drawImage(ref.qr,qrX,refY,qrSize,qrSize);ctx.imageSmoothingEnabled=true;
+        // Keep QR cells crisp, then resample the logo separately for smooth brand edges.
+        if(ref.qr.brand){
+          const b=ref.qr.brand,scale=qrSize/ref.qr.width;
+          ctx.imageSmoothingQuality='high';
+          ctx.drawImage(b.image,qrX+b.x*scale,refY+b.y*scale,b.w*scale,b.h*scale);
+        }
         // Compact, centered link; the complete URL stays in the QR and PDF annotation.
         const label='Abrir referência'+(refs.length>1?' '+(i+1):'');
         ctx.textAlign='center';ctx.fillStyle='#294f84';fontAt(18,650);
