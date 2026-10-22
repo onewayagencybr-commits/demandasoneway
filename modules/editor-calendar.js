@@ -16,7 +16,7 @@
   }
 
   function demandInArea(d, area, date) {
-    return !!d && d.area === area && d.postDate === date && canAccessArea(area);
+    return !!d && d.area === area && d.postDate === date && canAccessArea(area) && typeof canAccessDemand === 'function' && canAccessDemand(d);
   }
 
   function editorWeekCalendar() {
@@ -76,7 +76,7 @@
         var d = state.demands.find(function (x) {
           return x.id === button.dataset.owEditorDemand;
         });
-        if (!d || d.area !== editorArea() || !canAccessArea(d.area)) return;
+        if (!d || d.area !== editorArea() || !canAccessArea(d.area) || !canAccessDemand(d)) return;
         editorCalendarOpen = false;
         currentArea = d.area;
         currentMonth = d.month;
@@ -115,9 +115,9 @@
     if (info) info.textContent = 'Calendário de ' + AREAS[area];
     var subtitle = document.querySelector('#weekCalendarContent .wk-toolbar p');
     if (subtitle) subtitle.textContent = 'Somente demandas de ' + AREAS[area].toLowerCase() +
-      '. Nenhuma reunião, compromisso ou demanda de outro setor aparece aqui.';
+      '. Só aparecem as demandas atribuídas a você; reuniões e outros setores ficam ocultos.';
     var foot = document.querySelector('#weekCalendarContent .wk-footer-note');
-    if (foot) foot.textContent = 'Calendário da equipe · Somente demandas do seu setor. ' +
+    if (foot) foot.textContent = 'Calendário da equipe · Somente demandas atribuídas a você. ' +
       'Selecione uma demanda para abrir os detalhes e atualizar o andamento.';
   }
 
