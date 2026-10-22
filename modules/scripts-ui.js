@@ -282,9 +282,18 @@ function scriptPDFBlob(pages){
 // Every line is retained, including blank paragraphs and unbroken long words.
 function wrap(ctx,text,width){const result=[];for(const p of String(text).replace(/\r\n?/g,'\n').split('\n')){if(!p){result.push('');continue;}let line='';for(const word of p.split(/\s+/)){const next=line?line+' '+word:word;if(ctx.measureText(next).width<=width){line=next;continue;}if(line){result.push(line);line='';}for(const c of word){if(line&&ctx.measureText(line+c).width>width){result.push(line);line='';}line+=c;}}result.push(line);}return result;}
 
+let scriptPDFFontReady=null;
+async function loadScriptPDFFont(){
+ if(!scriptPDFFontReady)scriptPDFFontReady=(async()=>{
+  try{
+   const font=new FontFace('OWScriptPDF','url(/fonts/Montserrat.ttf)',{weight:'100 900'});
+   await font.load();document.fonts.add(font);
+  }catch(error){console.warn('Fonte Montserrat indisponível, usando reserva.',error);}
+ })();
+ return scriptPDFFontReady;
+}
 async function pagesFor(data){
-  const font=new FontFace('OWScriptPDF','url(/fonts/Montserrat.ttf)',{weight:'100 900'});
-  try{await font.load();document.fonts.add(font);}catch(error){console.warn('Fonte Montserrat indisponível, usando reserva.',error);}
+ await loadScriptPDFFont();
   const pages=[], W=1440,H=2036, bottom=1836, bodyScale=fontScale(data.pdfFontScale)/100;
   let canvas=null,ctx=null,y=0,videoIndex=-1,part=0,activeScene=0;
   const fontAt=(size=30,weight=500)=>{ctx.font=weight+' '+size+'px OWScriptPDF,Montserrat,Arial,sans-serif';};
