@@ -128,14 +128,25 @@ async function scriptTextBrand(ctx,headerHeight){
       await new Promise((resolve,reject)=>{
         img.onload=resolve;img.onerror=reject;img.src=LOGO_DATA_URI;
       });
-      ctx.drawImage(img,34,326,516,197,box.x,box.y,box.w,box.h);
-      return box;
+      // Mantém o recorte e a proporção da marca, com tinta azul-escura sobre papel branco.
+      const mark=document.createElement('canvas');
+      mark.width=box.w;mark.height=box.h;
+      const markCtx=mark.getContext('2d');
+      if(markCtx){
+        markCtx.drawImage(img,34,326,516,197,0,0,box.w,box.h);
+        markCtx.globalCompositeOperation='source-in';
+        markCtx.fillStyle='#102a55';
+        markCtx.fillRect(0,0,box.w,box.h);
+        markCtx.globalCompositeOperation='source-over';
+        ctx.drawImage(mark,box.x,box.y);
+        return box;
+      }
     }
   }catch(error){console.warn('Marca original indisponível no PDF:',error);}
-  ctx.fillStyle='#f1f6ff';
+  ctx.fillStyle='#102a55';
   ctx.font='italic 800 62px OWScriptPDF,Montserrat,Arial,sans-serif';
   ctx.fillText('One Way',box.x+2,box.y+68);
-  ctx.fillStyle='#bdcff2';
+  ctx.fillStyle='#294f84';
   ctx.font='600 18px OWScriptPDF,Montserrat,Arial,sans-serif';
   ctx.fillText('A G E N C Y',box.x+11,box.y+98);
   return box;
@@ -177,7 +188,7 @@ async function pagesFor(data){
   const fontAt=(size=30,weight=500)=>{ctx.font=weight+' '+size+'px OWScriptPDF,Montserrat,Arial,sans-serif';};
   const footer=()=>{
     if(!canvas)return;
-    ctx.fillStyle='#bdd3f5';fontAt(19,500);
+    ctx.fillStyle='#294f84';fontAt(19,500);
     ctx.fillText('ONE WAY  /  ROTEIROS DE PRODUÇÃO',110,1965);
     ctx.textAlign='right';ctx.fillText(String(pages.length+1).padStart(2,'0'),1330,1965);
     ctx.textAlign='left';
@@ -188,43 +199,41 @@ async function pagesFor(data){
     canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;
     ctx=canvas.getContext('2d');
     if(!ctx)throw Error('Não foi possível preparar a página do roteiro.');
-    const pg=ctx.createLinearGradient(0,0,W,H);pg.addColorStop(0,'#071633');pg.addColorStop(.55,'#102c61');pg.addColorStop(1,'#2153c4');ctx.fillStyle=pg;ctx.fillRect(0,0,W,H);
+    // Versão de impressão: toda a área de papel é branca, sem degradê de cobertura total.
+    ctx.fillStyle='#ffffff';ctx.fillRect(0,0,W,H);
     // Logo à esquerda, alinhada ao centro vertical; identificação do cliente à direita.
     // A largura do texto respeita a coluna até a margem direita do A4.
     const textX=470,textWidth=W-textX-106;
     fontAt(38,650);
     const names=wrap(ctx,data.client,textWidth);
     const headerH=254+Math.max(0,names.length-1)*50;
-    const gradient=ctx.createLinearGradient(0,0,W,headerH);
-    gradient.addColorStop(0,'#091a35');
-    gradient.addColorStop(.7,'#152e54');
-    gradient.addColorStop(1,'#1c3b6b');
-    ctx.fillStyle=gradient;ctx.fillRect(0,0,W,headerH);
+    // Preserva o mesmo cabeçalho, margens, marca e tipografia; muda só a paleta.
+    ctx.fillStyle='#ffffff';ctx.fillRect(0,0,W,headerH);
     await scriptTextBrand(ctx,headerH);
-    ctx.fillStyle='rgba(208,223,248,.23)';
+    ctx.fillStyle='rgba(16,42,85,.25)';
     ctx.fillRect(437,62,2,headerH-124);
     const groupTop=Math.round((headerH-(46+50*names.length))/2);
-    ctx.fillStyle='#bfd1ef';fontAt(19,650);
+    ctx.fillStyle='#294f84';fontAt(19,650);
     ctx.fillText('ROTEIROS  /  PRODUÇÃO AUDIOVISUAL',textX,groupTop+20);
-    ctx.fillStyle='#f7faff';fontAt(38,700);
+    ctx.fillStyle='#102a55';fontAt(38,700);
     names.forEach((line,i)=>ctx.fillText(line,textX,groupTop+76+i*50));
     const cardTop=headerH+36;
-    ctx.fillStyle=videoIndex%2===0?'rgba(189,213,255,.13)':'rgba(189,213,255,.08)';
+    ctx.fillStyle='#ffffff';
     ctx.beginPath();ctx.roundRect(76,cardTop,1288,1860-cardTop,30);ctx.fill();
-    ctx.strokeStyle='rgba(233,243,255,.21)';ctx.lineWidth=2;ctx.stroke();
+    ctx.strokeStyle='#a5b6cf';ctx.lineWidth=2;ctx.stroke();
     y=cardTop+73;
-    ctx.fillStyle='#bdd3f5';fontAt(24,700);
+    ctx.fillStyle='#294f84';fontAt(24,700);
     ctx.fillText('VÍDEO '+String(videoIndex+1).padStart(2,'0')+(part>1?'  /  CONTINUAÇÃO '+part:'')+'  ·  '+duration(data.videos[videoIndex]),114,y);
     y+=79;
     const video=data.videos[videoIndex];
     fontAt(49,700);
     const titleLines=wrap(ctx,video.title,1160);
     for(const title of titleLines){
-      ctx.fillStyle='#f7faff';ctx.fillText(title,114,y);y+=65;
+      ctx.fillStyle='#102a55';ctx.fillText(title,114,y);y+=65;
     }
     y+=15;
     if(part>1&&activeScene){
-      ctx.fillStyle='#a8c5f2';fontAt(21,650);
+      ctx.fillStyle='#2a568b';fontAt(21,650);
       ctx.fillText('CENA '+String(activeScene).padStart(2,'0')+'  /  CONTINUAÇÃO',114,y);
       y+=42;
     }
@@ -234,7 +243,7 @@ async function pagesFor(data){
     part++;
     await page();
   };
-  const writeLines=async(text,size=31,weight=500,color='#e4eeff',lineHeight=1.62)=>{
+  const writeLines=async(text,size=31,weight=500,color='#17375f',lineHeight=1.62)=>{
     fontAt(size,weight);
     const all=wrap(ctx,text,1160);
     for(const line of all){
@@ -246,7 +255,7 @@ async function pagesFor(data){
   };
   const writeLabel=async(label)=>{
     await ensure(75);
-    ctx.fillStyle='#adccff';fontAt(19,700);ctx.fillText(label,114,y);
+    ctx.fillStyle='#23528c';fontAt(19,700);ctx.fillText(label,114,y);
     y+=39;
   };
   for(let i=0;i<data.videos.length;i++){
@@ -254,30 +263,30 @@ async function pagesFor(data){
     const v=data.videos[i];
     if(v.mode==='full'){
       y+=12;await writeLabel('ROTEIRO COMPLETO');y+=11;
-      await writeLines(v.text,31,500,'#e4eeff',1.66);
+      await writeLines(v.text,31,500,'#17375f',1.66);
     }else{
       for(let j=0;j<v.scenes.length;j++){
         const sc=v.scenes[j];activeScene=0;
         await ensure(248);
         y+=25;
-        ctx.fillStyle='rgba(230,242,255,.23)';ctx.fillRect(114,y,1160,2);
+        ctx.fillStyle='rgba(26,65,112,.22)';ctx.fillRect(114,y,1160,2);
         y+=51;
         activeScene=j+1;
-        ctx.fillStyle='#b6d2ff';fontAt(26,700);
+        ctx.fillStyle='#173f78';fontAt(26,700);
         ctx.fillText('CENA '+String(j+1).padStart(2,'0')+(sc.seconds!==''?'  ·  '+sc.seconds+'s':''),114,y);
         y+=47;
         if(sc.text){
           await writeLabel('TEXTO / FALA');
-          await writeLines(sc.text,31,500,'#e4eeff',1.65);
+          await writeLines(sc.text,31,500,'#17375f',1.65);
           y+=23;
         }
         if(sc.visual){
           await writeLabel('IMAGEM / AÇÃO / DIREÇÃO');
-          await writeLines(sc.visual,29,500,'#cadcf9',1.62);
+          await writeLines(sc.visual,29,500,'#2d5787',1.62);
           y+=24;
         }
         if(!sc.text&&!sc.visual){
-          await writeLines('Cena a desenvolver.',29,500,'#b6c9e8');
+          await writeLines('Cena a desenvolver.',29,500,'#5b7392');
         }
         y+=28;
       }
