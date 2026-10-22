@@ -38,7 +38,7 @@ test('PDF slider fits representative Scania script on one page without cutting t
  const written=[];
  const ctx={
   font:'',fillStyle:'#000',textAlign:'left',
-  measureText(t){const match=this.font.match(/(\\d+(?:\\.\\d+)?)px/);return {width:String(t).length*Number(match?.[1]||30)*.51};},
+  measureText(t){const match=this.font.match(/(\d+(?:\\.\d+)?)px/);return {width:String(t).length*Number(match?.[1]||30)*.51};},
   fillRect(){},fillText(t){written.push(String(t))},beginPath(){},roundRect(){},fill(){},stroke(){},drawImage(){}
  };
  const canvas={getContext:()=>ctx,toDataURL:()=> 'data:image/jpeg;base64,/9j/2Q=='};
@@ -53,11 +53,11 @@ test('PDF slider fits representative Scania script on one page without cutting t
   'Na estrada, cada detalhe faz a diferença.',
   'A disponibilidade do veículo é fundamental para manter sua operação em movimento.',
   'A eficiência e a economia de combustível podem contribuir para reduzir os custos operacionais e melhorar a rentabilidade por quilômetro rodado.',
-  'O desempenho vai além da força:\\n- tecnologia, recursos de segurança e conforto para o motorista fazem parte de uma experiência pensada para enfrentar longas jornadas com mais confiança e praticidade.',
+  'O desempenho vai além da força:\n- tecnologia, recursos de segurança e conforto para o motorista fazem parte de uma experiência pensada para enfrentar longas jornadas com mais confiança e praticidade.',
   'Se você busca mais eficiência, produtividade e potencial de rentabilidade para sua operação, venha conhecer o Scania R 560 SUPER 6x4.',
-  'Entre em contato com a Rota Oeste Veículos e converse com nosso time comercial.\\nScania R 560 SUPER 6x4.',
+  'Entre em contato com a Rota Oeste Veículos e converse com nosso time comercial.\nScania R 560 SUPER 6x4.',
   'Mais do que potência, uma escolha estratégica para o seu negócio.'
- ].join('\\n\\n');
+ ].join('\n\n');
  const script={client:'Scania - Rota Oeste',videos:[{title:'Scania R 560 SUPER 6x4',duration:'70',mode:'scenes',text:'',scenes:[{text:body,visual:'',seconds:''}]}]};
  const normal=await mockedWindow.owScripts.pagesFor({...script,pdfFontScale:100});
  const smaller=await mockedWindow.owScripts.pagesFor({...script,pdfFontScale:85});
