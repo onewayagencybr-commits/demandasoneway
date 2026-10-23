@@ -42,9 +42,10 @@ test('Vídeos Login sees only Pedro videos',()=>{
  assert.equal(role.canAccessDemand(fixtures[5]),false);
  assert.equal(role.canAccessDemand(fixtures[0]),false);
 });
-test('administrator sees others by default but can select all or an individual',()=>{
+test('administrator sees all demands by default and can select others or an individual',()=>{
  const role=asRole('admin');
- assert.equal(ids(fixtures.filter(role.isDemandVisible)),'a-gabriel,a-lucas,a-old-unassigned,v-tiago,v-fernando,v-old-unassigned');
+ assert.equal(fixtures.filter(role.isDemandVisible).length,fixtures.length);
+ role.setFilter('others');assert.equal(ids(fixtures.filter(role.isDemandVisible)),'a-gabriel,a-lucas,a-old-unassigned,v-tiago,v-fernando,v-old-unassigned');
  role.setFilter('all');assert.equal(fixtures.filter(role.isDemandVisible).length,fixtures.length);
  role.setFilter('João');assert.equal(ids(fixtures.filter(role.isDemandVisible)),'a-joao,t-joao');
  role.setFilter('unassigned');assert.equal(ids(fixtures.filter(role.isDemandVisible)),'a-old-unassigned,v-old-unassigned');
