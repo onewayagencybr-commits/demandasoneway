@@ -82,3 +82,36 @@ test('references survive document reload and old scripts remain compatible',()=>
  for(const value of ['javascript:alert(1)','data:text/html,test','https://user:pass@example.com','não é um link'])assert.throws(()=>api.referenceURLs(value));
  assert.equal(api.pdfIssue({...d,videos:[{...v,references:'javascript:alert(1)'}]}),'Use um link de referência http:// ou https:// sem credenciais.');
 });
+
+test('compact reference QR codes interrupt card border without pushing text and keep PDF links',async()=>{
+ const written=[],images=[],painted=[];
+ const ctx={
+  font:'',fillStyle:'#000',textAlign:'left',imageSmoothingEnabled:true,imageSmoothingQuality:'low',
+  measureText:t=>({width:String(t).length*14}),
+  fillRect(x,y,w,h){painted.push({color:this.fillStyle,x,y,w,h})},
+  fillText(t){written.push(String(t))},
+  beginPath(){},roundRect(){},fill(){},stroke(){},drawImage(...args){images.push(args)}
+ };
+ const canvas=()=>({width:0,height:0,getContext:()=>ctx,toDataURL:()=> 'data:image/jpeg;base64,/9j/2Q=='});
+ const mockDoc={fonts:{add(){}},createElement:tag=>{assert.equal(tag,'canvas');return canvas()}};
+ const mockQr=()=>({addData(){},make(){},getModuleCount:()=>25,isDark:()=>false});
+ class FontFace{async load(){return this;}}
+ const fakeWindow={addEventListener(){}};
+ vm.runInNewContext(fs.readFileSync('modules/scripts-ui.js','utf8'),{
+  window:fakeWindow,document:mockDoc,FontFace,qrcode:mockQr,URL,crypto:require('node:crypto').webcrypto,structuredClone
+ });
+ const urls=['https://youtu.be/first','https://youtu.be/second','https://youtu.be/third'];
+ const script={client:'One Way Agency',pdfFontScale:100,videos:[{title:'Bastidores da produção',mode:'full',duration:'30',text:'Um roteiro curto em uma página.',references:urls.join('\\n'),scenes:[]}]};
+ const pages=await fakeWindow.owScripts.pagesFor(script);
+ assert.equal(pages.length,1);
+ assert.equal(pages.links[0].length,3);
+ assert.deepEqual(Array.from(pages.links[0],link=>link.url),urls);
+ assert.deepEqual(Array.from(pages.links[0],link=>link.w),[182,182,182]);
+ assert.ok(pages.links[0].every(link=>link.y===212&&link.h===182));
+ assert.ok(pages.links[0][0].x<pages.links[0][1].x&&pages.links[0][1].x<pages.links[0][2].x);
+ assert.ok(painted.some(r=>r.color==='#ffffff'&&r.y===200&&r.w===210&&r.h===206),'white cutout above card border');
+ assert.equal(images.filter(args=>args.length===5&&args[3]===182&&args[4]===182).length,3);
+ assert.ok(written.includes('ROTEIRO COMPLETO'));
+ assert.ok(written.some(t=>t.includes('Um roteiro curto')));
+ assert.ok(!written.some(t=>t.includes('Abrir referência')));
+});
