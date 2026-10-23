@@ -377,34 +377,33 @@ async function pagesFor(data){
     y+=79;
     const video=data.videos[videoIndex];
     fontAt(49,700);
-    const refs=references[videoIndex],titleTop=y;
-    const titleLines=wrap(ctx,video.title,refs.length?870:1160);
+    const refs=references[videoIndex];
+    // Referências ficam sobre a borda superior do card, sem ocupar o espaço do texto.
+    const titleLines=wrap(ctx,video.title,1160);
     for(const title of titleLines){
       ctx.fillStyle='#102a55';ctx.fillText(title,114,y);y+=65;
     }
     if(refs.length){
-      let refY=titleTop-55;
+      // Até três QRs lado a lado: compactos, alinhados e atravessando a borda.
+      const qrSize=182,gap=34,qrY=cardTop-Math.round(qrSize*.43);
+      const firstX=1288-qrSize-(refs.length-1)*(qrSize+gap);
       for(let i=0;i<refs.length;i++){
-        const ref=refs[i],qrSize=280,qrX=1030;
-        ctx.imageSmoothingEnabled=false;ctx.drawImage(ref.qr,qrX,refY,qrSize,qrSize);ctx.imageSmoothingEnabled=true;
-        // Keep QR cells crisp, then resample the logo separately for smooth brand edges.
+        const ref=refs[i],qrX=firstX+i*(qrSize+gap);
+        // Reserva uma faixa branca para interromper a linha sob o QR.
+        ctx.fillStyle='#ffffff';
+        ctx.fillRect(qrX-14,qrY-12,qrSize+28,qrSize+24);
+        ctx.imageSmoothingEnabled=false;
+        ctx.drawImage(ref.qr,qrX,qrY,qrSize,qrSize);
+        ctx.imageSmoothingEnabled=true;
+        // Retoca apenas a marca em alta qualidade; mantém as células nítidas.
         if(ref.qr.brand){
           const b=ref.qr.brand,scale=qrSize/ref.qr.width;
           ctx.imageSmoothingQuality='high';
-          ctx.drawImage(b.image,qrX+b.x*scale,refY+b.y*scale,b.w*scale,b.h*scale);
+          ctx.drawImage(b.image,qrX+b.x*scale,qrY+b.y*scale,b.w*scale,b.h*scale);
         }
-        // Compact, centered link; the complete URL stays in the QR and PDF annotation.
-        const label='Abrir referência'+(refs.length>1?' '+(i+1):'');
-        ctx.textAlign='center';ctx.fillStyle='#294f84';fontAt(18,650);
-        ctx.fillText(label,qrX+qrSize/2,refY+qrSize+22);
-        const labelWidth=ctx.measureText(label).width;
-        ctx.fillRect(qrX+(qrSize-labelWidth)/2,refY+qrSize+27,labelWidth,1);
-        ctx.textAlign='left';
-        // Both the QR image and its label are clickable, including their white margins.
-        pageLinks.push({url:ref.url,x:qrX,y:refY,w:qrSize,h:qrSize+36});
-        refY+=qrSize+60;
+        // A imagem inteira continua clicável no PDF, sem legenda adicional.
+        pageLinks.push({url:ref.url,x:qrX,y:qrY,w:qrSize,h:qrSize});
       }
-      y=Math.max(y,refY);
     }
     y+=15;
     if(part>1&&activeScene){
