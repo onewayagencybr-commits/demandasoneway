@@ -6,7 +6,7 @@
   let draggedDemandId = null;
   const areaName = { arte: 'Arte', video: 'Vídeo', trafego: 'Tráfego' };
   const validDate = x => /^\d{4}-\d{2}-\d{2}$/.test(String(x || '')) && !Number.isNaN(new Date(x + 'T12:00:00').getTime());
-  const nameKey = x => String(x || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLocaleLowerCase('pt-BR');
+  const nameKey = x => cmSelectionKey(x);
   const clientName = id => state.clients.find(c => c.id === id)?.name || 'Cliente';
   const currentDay = () => typeof demandCreationCalendarDate === 'function' ? demandCreationCalendarDate() : calendarLocalISO(new Date());
   const safeLabel = x => esc(String(x ?? ''));
@@ -241,7 +241,7 @@
       document.getElementById('agendaViewTabs')?.after(bar);
     }
     const areas = allowedAreaKeys();
-    const names = Array.from(new Set(state.clients.filter(c => !c.mergedInto).map(c => c.name))).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+    const names = cmSelectableNames();
     const keys = new Map();
     for (const name of names) if (!keys.has(nameKey(name))) keys.set(nameKey(name), name);
     const options = Array.from(keys, ([key, name]) => `<option value="${safeLabel(key)}" ${view.client === key ? 'selected' : ''}>${safeLabel(name)}</option>`).join('');
@@ -252,7 +252,8 @@
       <label>Situação<select id="ow-pan-status-filter"><option value="all">Todas</option><option value="approval">Aguardando aprovação</option><option value="posting">Aguardando postagem</option><option value="production">Em produção / Não feito</option></select></label></div>
       <div class="ow-pan-mode-picker"><button class="${view.agendaMode === 'list' ? 'selected' : ''}" type="button" data-ow-mode="list">Lista</button><button class="${view.agendaMode === 'calendar' ? 'selected' : ''}" type="button" data-ow-mode="calendar">Panorama mensal</button></div>`;
     bar.querySelector('#ow-pan-area-filter').value = areas.includes(view.area) ? view.area : 'all';
-    bar.querySelector('#ow-pan-client-filter').value = keys.has(view.client) ? view.client : 'all';
+    if (!keys.has(view.client)) view.client = 'all';
+    bar.querySelector('#ow-pan-client-filter').value = view.client;
     bar.querySelector('#ow-pan-status-filter').value = view.status;
     bar.querySelector('#ow-pan-area-filter').onchange = e => { view.area = e.target.value; renderAgenda(); };
     bar.querySelector('#ow-pan-client-filter').onchange = e => { view.client = e.target.value; renderAgenda(); };

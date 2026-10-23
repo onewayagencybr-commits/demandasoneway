@@ -14,20 +14,7 @@
  }
  function clients(){
    if(typeof state==='undefined')return [];
-   const records=Array.isArray(state?.clients)?state.clients:[];
-   const directory=Array.isArray(state?.clientDirectory)?state.clientDirectory:[];
-   const archive=new Set(Array.isArray(state?.archivedClientKeys)?state.archivedClientKeys:[]);
-   // A company appears once even when it has Arte, Vídeo and Tráfego records.
-   const registry=[...directory,...records.filter(c=>c?.name&&!c.mergedInto).map(c=>c.name)];
-   const unique=new Map();
-   const names=typeof cmAllNames==='function'?cmAllNames():registry;
-   const allowed=new Set(registry.map(clientKey));
-   for(const name of names){
-     const key=clientKey(name);
-     if(key&&allowed.has(key)&&!archive.has(key)&&!unique.has(key))
-       unique.set(key,{id:'client:'+key,name:String(name).trim()});
-   }
-   return [...unique.values()];
+   return cmSelectableNames().map(name=>({id:'client:'+clientKey(name),name}));
  }
  async function api(path,options={}){
    if(!adminReady()||typeof supabaseClient==='undefined')throw Error('Faça login como administrador para acessar o agendador.');

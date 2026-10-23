@@ -172,12 +172,10 @@ function openPDFPreview(trigger,pages){
 function bindClientPicker(){
  const input=$('rsClientInput'),list=$('rsClientOptions'),picker=input.closest('.rs-client-picker');
  const normalize=n=>String(n||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR').replace(/[^a-z0-9]+/g,' ').trim();
- const names=typeof cmAllNames==='function'?cmAllNames():(typeof state!=='undefined'?state.clients||[]:[]).filter(c=>!c.deletedAt&&!c.mergedInto).map(c=>c.name);
- const unique=new Map();for(const raw of names){const name=String(raw||'').trim(),key=normalize(name);if(key&&!unique.has(key)&&!(typeof cmIsArchived==='function'&&cmIsArchived(name)))unique.set(key,name);}
- const options=[...unique.values()].sort((a,b)=>a.localeCompare(b,'pt-BR',{sensitivity:'base'}));let matches=[],active=-1;
+ let matches=[],active=-1;
  function close(){list.hidden=true;input.setAttribute('aria-expanded','false');input.removeAttribute('aria-activedescendant');active=-1;}
  function select(index){if(!matches[index])return;input.value=matches[index];input.dispatchEvent(new Event('input',{bubbles:true}));close();input.focus();close();}
- function show(){matches=options.filter(n=>normalize(n).includes(normalize(input.value)));active=-1;list.innerHTML=matches.length?matches.map((n,i)=>`<button type="button" role="option" aria-selected="false" id="rsClientOption${i}" data-client-index="${i}">${esc(n)}</button>`).join(''):'<div class="rs-client-empty">Nenhum cliente encontrado. Você pode usar o nome digitado.</div>';list.hidden=false;input.setAttribute('aria-expanded','true');input.removeAttribute('aria-activedescendant');}
+ function show(){const options=cmSelectableNames();matches=options.filter(n=>normalize(n).includes(normalize(input.value)));active=-1;list.innerHTML=matches.length?matches.map((n,i)=>`<button type="button" role="option" aria-selected="false" id="rsClientOption${i}" data-client-index="${i}">${esc(n)}</button>`).join(''):'<div class="rs-client-empty">Nenhum cliente encontrado. Você pode usar o nome digitado.</div>';list.hidden=false;input.setAttribute('aria-expanded','true');input.removeAttribute('aria-activedescendant');}
  input.addEventListener('focus',show);input.addEventListener('click',()=>{if(list.hidden)show();});input.addEventListener('input',show);
  list.addEventListener('mousedown',e=>e.preventDefault());list.addEventListener('click',e=>{const b=e.target.closest('[data-client-index]');if(b)select(Number(b.dataset.clientIndex));});
  picker.addEventListener('focusout',e=>{if(!picker.contains(e.relatedTarget))close();});

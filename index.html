@@ -2401,7 +2401,7 @@ async function exportInstagramJPEG(data,clientName){const W=1400,H=1450,pad=80,c
 async function exportActiveAnalyticsPDF(){if(!activeAnalytics)return;if(activeAnalytics.type==='traffic')syncTrafficTotalsFromCampaigns();const c=analyticsClient(activeAnalytics.clientId),data=activeAnalytics.type==='traffic'?readTrafficForm():readInstagramForm();if(!data.analysis)data.analysis=activeAnalytics.type==='traffic'?trafficAnalysisText(data):instagramAnalysisText(data);await saveAnalyticsRecord(activeAnalytics.type,activeAnalytics.clientId,data);const reportName=activeAnalytics.type==='traffic'?((data._clientName||activeAnalytics.reportName||'Análise Geral')):(c?.name||'Cliente');const html=activeAnalytics.type==='traffic'?trafficReportHTML(data,reportName):instagramReportHTML(data,reportName);const w=window.open('','_blank');if(!w){toast('Permita pop-ups para gerar o PDF.');return}w.document.open();w.document.write(html);w.document.close();toast('Relatório pronto para salvar em PDF.',null,null,'success')}
 async function exportActiveAnalyticsJPEG(){if(!activeAnalytics)return;if(activeAnalytics.type==='traffic')syncTrafficTotalsFromCampaigns();const c=analyticsClient(activeAnalytics.clientId),data=activeAnalytics.type==='traffic'?readTrafficForm():readInstagramForm();if(!data.analysis)data.analysis=activeAnalytics.type==='traffic'?trafficAnalysisText(data):instagramAnalysisText(data);await saveAnalyticsRecord(activeAnalytics.type,activeAnalytics.clientId,data);const reportName=activeAnalytics.type==='traffic'?((data._clientName||activeAnalytics.reportName||'Análise Geral')):(c?.name||'Cliente');if(activeAnalytics.type==='traffic')await exportTrafficJPEG(data,reportName);else await exportInstagramJPEG(data,reportName);toast('JPEG gerado.',null,null,'success')}
 
-function recentClientNames(){return [...new Set((state.recentClients||[]).filter(Boolean))].slice(0,8)}
+function recentClientNames(){const active=cmSelectableNames(),recent=new Set((state.recentClients||[]).map(cmSelectionKey));return active.filter(n=>recent.has(cmSelectionKey(n))).slice(0,8)}
 function rememberClientName(name){const clean=String(name||'').trim();if(!clean)return;state.recentClients=[clean,...recentClientNames().filter(n=>n.localeCompare(clean,'pt-BR',{sensitivity:'base'})!==0)].slice(0,8)}
 function renderRecentClientSuggestions(filter=''){const wrap=document.getElementById('recentClientsWrap'),root=document.getElementById('recentClientChips');if(!wrap||!root)return;const q=String(filter||'').trim().toLocaleLowerCase('pt-BR');const names=recentClientNames().filter(n=>!q||n.toLocaleLowerCase('pt-BR').includes(q));wrap.classList.toggle('hidden',!names.length);root.innerHTML=names.map(n=>`<button type="button" class="recent-client-chip" data-recent-client="${esc(n)}">${esc(n)}</button>`).join('');root.querySelectorAll('[data-recent-client]').forEach(b=>b.onclick=()=>{const input=document.getElementById('clientNameInput');input.value=b.dataset.recentClient;renderRecentClientSuggestions(input.value);input.focus()})}
 function selectedClientAreas(){return [...document.querySelectorAll('#clientAreaChoices [data-client-area].active')].map(b=>b.dataset.clientArea).filter(a=>AREAS[a])}
@@ -2456,7 +2456,7 @@ async function restoreClientMonth(id){const idx=state.removedClientMonths.findIn
 function financeMoney(v){return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(v)||0)}
 function financeVisibleInMonth(item,month=currentMonth){if(!item)return false;if(item.type==='recurring')return String(month)>=String(item.startMonth||item.month||month);return String(item.month||item.startMonth||'')===String(month)}
 function financeItemsFor(kind,month=currentMonth){return (state.financeItems||[]).filter(x=>x.kind===kind&&financeVisibleInMonth(x,month)).sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'pt-BR',{sensitivity:'base'}))}
-function financeClientSuggestionNames(){return [...new Set([...(state.clients||[]).map(c=>c.name),...(state.recentClients||[])].filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR',{sensitivity:'base'}))}
+function financeClientSuggestionNames(){return cmSelectableNames()}
 function financeRowHTML(item){const income=item.kind==='income',typeLabel=item.type==='recurring'?'Recorrente':income?'Entrada única':'Custo único';return `<div class="finance-row" data-finance-id="${item.id}"><input class="finance-name" data-finance="name" ${income?'list="financeClientSuggestions"':''} value="${esc(item.name||'')}" placeholder="${income?'Nome do cliente':'Ex.: IA, Adobe, equipe'}"><select data-finance="type"><option value="recurring" ${item.type==='recurring'?'selected':''}>Recorrente</option><option value="oneoff" ${item.type==='oneoff'?'selected':''}>${income?'Entrada única':'Custo único'}</option></select><div class="finance-money"><input data-finance="amount" inputmode="decimal" value="${item.amount?String(Number(item.amount).toFixed(2)).replace('.',','):''}" placeholder="0,00"></div><button class="finance-delete" type="button" title="Excluir">×</button></div>`}
 function renderFinance(){
   if(!isAdmin())return;
@@ -2483,7 +2483,7 @@ function importAreaToken(v){const n=importNorm(v);if(['arte','artes','design'].i
 function importDemandMarker(line,sectionArea=null){const s=String(line||'').trim().replace(/^[•·]+\s*/,'');if(/^(arte|artes|design|v[ií]deo|v[ií]deos|reel|reels)\s*$/i.test(s))return {section:true,area:importAreaToken(s)};let m=s.match(/^(arte|artes|design|v[ií]deo|v[ií]deos)\s*(?:#?\s*\d+)?\s*(?:(?:vai\s+ser|ser[aá]|[:\-–—])\s*)?(.+)$/i);if(m)return {area:importAreaToken(m[1]),title:String(m[2]||'').trim().replace(/^[:\-–—]\s*/,'')};m=s.match(/^(reel|reels)\s*(?:#?\s*\d+)\s*(?:(?:vai\s+ser|ser[aá]|[:\-–—])\s*)?(.+)$/i);if(!m)m=s.match(/^(reel|reels)\s*[:\-–—]\s*(.+)$/i);if(m)return {area:'video',title:String(m[2]||'').trim()};if(sectionArea){m=s.match(/^\d+\s*[\.\)\-:–—]\s*(.+)$/);if(m)return {area:sectionArea,title:m[1].trim()}}return null}
 function importDateFromLine(line,month){const s=String(line||'').trim();let m=s.match(/^(?:postagem|data|publica(?:ç|c)[aã]o|publicar)\s*[:\-]?\s*(\d{1,2})(?:\/(\d{1,2})(?:\/(\d{2,4}))?)?\s*$/i);if(!m)return null;let [y,mo]=String(month).split('-').map(Number),d=Number(m[1]);if(m[2])mo=Number(m[2]);if(m[3]){y=Number(m[3]);if(y<100)y+=2000}const max=new Date(y,mo,0).getDate();if(!d||!mo||mo>12||d>max)return '';return `${y}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`}
 function importClientMatch(raw,area,month){const n=importNorm(raw);if(!n)return null;const candidates=state.clients.filter(c=>c.area===area&&clientVisibleInMonth(c,month,area));let found=candidates.find(c=>importNorm(c.name)===n);if(found)return found;const loose=candidates.filter(c=>{const cn=importNorm(c.name);return n.length>=4&&cn.length>=4&&(cn.includes(n)||n.includes(cn))});return loose.length===1?loose[0]:null}
-function importClientOptions(area,month,selectedId=''){const candidates=state.clients.filter(c=>c.area===area&&clientVisibleInMonth(c,month,area)).sort((a,b)=>a.name.localeCompare(b.name,'pt-BR',{sensitivity:'base'}));return `<option value="">Selecione o cliente…</option>`+candidates.map(c=>`<option value="${c.id}" ${c.id===selectedId?'selected':''}>${esc(c.name)}</option>`).join('')}
+function importClientOptions(area,month,selectedId=''){const candidates=cmSelectableRecords(area,selectedId).filter(c=>c.area===area&&clientVisibleInMonth(c,month,area)).sort((a,b)=>a.name.localeCompare(b.name,'pt-BR',{sensitivity:'base'}));return `<option value="">Selecione o cliente…</option>`+candidates.map(c=>`<option value="${c.id}" ${c.id===selectedId?'selected':''}>${esc(c.name)}</option>`).join('')}
 function importPtNumber(v){const n=importNorm(v),map={um:1,uma:1,dois:2,duas:2,tres:3,quatro:4,cinco:5,seis:6,sete:7,oito:8,nove:9,dez:10,onze:11,doze:12,treze:13,quatorze:14,catorze:14,quinze:15,dezesseis:16,dezessete:17,dezoito:18,dezenove:19,vinte:20};if(/^\d+$/.test(n))return Number(n);return map[n]||0}
 function importExpectedCounts(text){const out={};const re=/(\d+|um|uma|dois|duas|tr[eê]s|quatro|cinco|seis|sete|oito|nove|dez|onze|doze|treze|quatorze|catorze|quinze|dezesseis|dezessete|dezoito|dezenove|vinte)\s+(artes?|v[ií]deos?|reels?)/gi;let m;while((m=re.exec(text))){const area=importAreaToken(m[2]),qty=importPtNumber(m[1]);if(area&&qty)out[area]=qty}return out}
 function importFindClientInSpeech(text){const original=String(text||'').replace(/\s+/g,' ').trim(),norm=importNorm(original),clients=[...new Map(state.clients.map(c=>[importNorm(c.name),c.name])).entries()].filter(x=>x[0]).sort((a,b)=>b[0].length-a[0].length);for(const [n,name] of clients){if(n.length>=3&&(` ${norm} `).includes(` ${n} `))return name}const patterns=[/demanda(?:s)?\s+(?:do|deste)\s+m[eê]s\s*[,;:\-–—]?\s*([^,;:.]+?)(?=\s*[,;:]\s*(?:(?:\d+|um|uma|dois|duas|tr[eê]s|quatro|cinco|seis|sete|oito|nove|dez|onze|doze)\s+)?(?:artes?|v[ií]deos?|reels?)\b)/i,/planejamento(?:\s+do\s+m[eê]s)?\s*[,;:\-–—]?\s*([^,;:.]+?)(?=\s*[,;:]\s*(?:artes?|v[ií]deos?|\d+\s+artes?))/i,/cliente\s*[:\-–—]?\s*([^,;:.]+)/i,/demandas?\s+(?:da|do|de)\s+([^,;:.]+?)(?=\s*[,;:]|$)/i];for(const re of patterns){const m=original.match(re);if(m&&m[1])return m[1].trim().replace(/^(?:cliente\s+)?/i,'')}const firstMarker=original.search(/\b(?:arte|v[ií]deo|video|reel)\s*(?:n[ºo°.]?\s*)?\d+/i),prefix=(firstMarker>=0?original.slice(0,firstMarker):original).replace(/^(?:demanda(?:s)?\s+(?:do|deste)\s+m[eê]s|planejamento(?:\s+do\s+m[eê]s)?)\s*[,;:\-–—]?\s*/i,'');for(const part of prefix.split(/[,;]+/).map(x=>x.trim()).filter(Boolean)){if(!/(?:\d+|um|uma|dois|duas|tr[eê]s|quatro|cinco|seis|sete|oito|nove|dez)\s+(?:artes?|v[ií]deos?|reels?)/i.test(part)&&!/^(?:artes?|v[ií]deos?|reels?|institucionais?)$/i.test(part)&&part.length<=60)return part}return ''}
@@ -2586,16 +2586,12 @@ function renderDemandProductionFileSelection(){const input=document.getElementBy
 function normalizeReferenceLinkValue(val){const clean=String(val||'').trim();if(!clean)return '';const href=safeUrl(/^https?:\/\//i.test(clean)?clean:`https://${clean}`);return href==='#'?'':href}
 function demandClientOptions(area,selectedId=null){
  const select=document.getElementById('formClient');
- const names=new Map();
- [...state.clients].sort((a,b)=>a.name.localeCompare(b.name,'pt-BR',{sensitivity:'base'})).forEach(c=>{
-   const key=String(c.name||'').trim().toLocaleLowerCase('pt-BR');
-   if(!key)return;
-   const old=names.get(key);
-   if(!old || (c.area===area&&old.area!==area))names.set(key,c);
- });
- const clients=[...names.values()].sort((a,b)=>a.name.localeCompare(b.name,'pt-BR',{sensitivity:'base'}));
+ const clients=cmSelectableRecords(area,selectedId);
+ // Keep an existing historical association when editing; it is not a new suggestion.
+ const selected=state.clients.find(c=>c.id===selectedId);
+ if(selected&&!clients.some(c=>c.id===selectedId))clients.push(selected);
  select.innerHTML=clients.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}${c.area===area?'':` · ${esc(AREAS[c.area]||c.area)}`}</option>`).join('');
- if(selectedId){const existing=state.clients.find(c=>c.id===selectedId),match=clients.find(c=>c.id===selectedId)||clients.find(c=>existing&&c.name.trim().toLocaleLowerCase('pt-BR')===existing.name.trim().toLocaleLowerCase('pt-BR'));if(match)select.value=match.id}
+ if(selectedId){const existing=state.clients.find(c=>c.id===selectedId),match=clients.find(c=>c.id===selectedId)||clients.find(c=>existing&&cmSelectionKey(c.name)===cmSelectionKey(existing.name));if(match)select.value=match.id}
  if(!select.value && clients.length)select.value=clients[0].id;
 }
 function setDemandArea(area,preferredClientId=null){
@@ -2957,7 +2953,7 @@ function bindProductProposalUI(){
  document.getElementById('productBackToChoice').onclick=()=>{document.getElementById('productProposalModal').classList.add('hidden');showProposalChoice();document.getElementById('productChoiceStage').classList.remove('hidden')};
 }
 
-function proposalRecentClients(){return [...new Set([...(state.recentClients||[]),...state.clients.map(c=>c.name)].filter(Boolean))].slice(0,6)}
+function proposalRecentClients(){return cmSelectableNames()}
 function renderProposalClientSuggestions(){const root=document.getElementById('proposalClientSuggestions');if(!root)return;root.innerHTML=proposalRecentClients().map(n=>`<button type="button" data-proposal-client="${esc(n)}">${esc(n)}</button>`).join('');root.querySelectorAll('[data-proposal-client]').forEach(b=>b.onclick=()=>{document.getElementById('proposalClient').value=b.dataset.proposalClient})}
 function addProposalItem(data={}){
   const root=document.getElementById('proposalItems'),el=document.createElement('div');el.className='proposal-item';
@@ -3135,7 +3131,7 @@ function contractDefaultData(){return {id:'',createdAt:'',updatedAt:'',client:{t
 function setContractField(id,value){const el=document.getElementById(id);if(el)el.value=value??''}
 function contractProfileNorm(v){return String(v||'').trim().toLocaleLowerCase('pt-BR').replace(/\s+/g,' ')}
 function contractProfileKey(p){return contractProfileNorm(p?.document)||`${contractProfileNorm(p?.legalName)}|${contractProfileNorm(p?.representative)}`}
-function contractClientProfiles(){const seen=new Set(),hidden=new Set(hiddenContractClientProfiles||[]),out=[];[...secureContracts].sort((a,b)=>String(b.updatedAt||b.createdAt||'').localeCompare(String(a.updatedAt||a.createdAt||''))).forEach(c=>{const p=c?.client;if(!p?.legalName)return;const key=contractProfileKey(p);if(!key||seen.has(key)||hidden.has(key))return;seen.add(key);out.push({id:c.id,key,label:p.tradeName||p.legalName,data:{...p}})});return out}
+function contractClientProfiles(){const active=new Set(cmSelectableNames().map(cmSelectionKey)),seen=new Set(),seenNames=new Set(),hidden=new Set(hiddenContractClientProfiles||[]),out=[];[...secureContracts].sort((a,b)=>String(b.updatedAt||b.createdAt||'').localeCompare(String(a.updatedAt||a.createdAt||''))).forEach(c=>{const p=c?.client;if(!p?.legalName)return;const nameKey=[p.tradeName,p.legalName].map(cmSelectionKey).find(k=>active.has(k));if(!nameKey||seenNames.has(nameKey))return;const key=contractProfileKey(p);if(!key||seen.has(key)||hidden.has(key))return;seen.add(key);seenNames.add(nameKey);out.push({id:c.id,key,label:p.tradeName||p.legalName,data:{...p}})});return out}
 function contractAgencyProfiles(){
   const seen=new Set(),out=[];
   const pushProfile=(p,extra={},id='')=>{if(!p?.legalName||!p?.document)return;const key=contractProfileKey(p);if(!key||seen.has(key))return;seen.add(key);const cleanTrade=/^one\s*way\s*agency$/i.test(String(p.tradeName||'').trim())?'':(p.tradeName||'');out.push({id:id||key,key,label:`${p.representative||p.legalName} — ${p.legalName}`,data:{...p,tradeName:cleanTrade},bank:extra.bank||'',bankAgency:extra.bankAgency||'',bankAccount:extra.bankAccount||'',bankHolder:extra.bankHolder||'',pix:extra.pix||'',signatureCity:extra.signatureCity||'',signatureState:extra.signatureState||'',forumCity:extra.forumCity||'',forumState:extra.forumState||''})};
@@ -3217,8 +3213,8 @@ async function smDeriveKey(password){
   const raw=await crypto.subtle.importKey('raw',new TextEncoder().encode(password),'PBKDF2',false,['deriveKey']);
   return crypto.subtle.deriveKey({name:'PBKDF2',salt:new TextEncoder().encode(SM_KDF_SALT),iterations:SM_KDF_ITERATIONS,hash:'SHA-256'},raw,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
 }
-function smNormalizeName(name){return String(name||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toLocaleLowerCase('pt-BR')}
-function smAllClients(){return cmAllNames().filter(n=>!cmIsArchived(n))}
+function smNormalizeName(name){return cmSelectionKey(name)}
+function smAllClients(){return cmSelectableNames()}
 async function smDecrypt(pack){
   if(!smCryptoKey||!pack?.cipher||!pack?.iv)throw new Error('Dados protegidos de Social Media indisponíveis');
   const raw=await crypto.subtle.decrypt({name:'AES-GCM',iv:base64ToBytes(pack.iv)},smCryptoKey,base64ToBytes(pack.cipher));
@@ -3428,10 +3424,11 @@ function openWeekEventModal(id=null,date=null){
  document.getElementById('wkEventDate').value=e?.date||date||calendarWeekStart;
  document.getElementById('wkEventTime').value=e?.time||'';
  document.getElementById('wkEventDescription').value=e?.description||'';
- const clientOptions=new Map();state.clients.forEach(c=>{const key=String(c.name||'').trim().toLocaleLowerCase('pt-BR');if(key&&!clientOptions.has(key))clientOptions.set(key,c)});
- const clients=[...clientOptions.values()].sort((a,b)=>a.name.localeCompare(b.name,'pt-BR'));
+ const clients=cmSelectableRecords(null,e?.clientId);
+ const selected=state.clients.find(c=>c.id===e?.clientId);
+ if(selected&&!clients.some(c=>c.id===selected.id))clients.push(selected);
  const clientSelect=document.getElementById('wkEventClient');clientSelect.innerHTML='<option value="">Sem cliente vinculado</option>'+clients.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
- if(e?.clientId){const linked=state.clients.find(c=>c.id===e.clientId),option=clients.find(c=>linked&&c.name.trim().toLocaleLowerCase('pt-BR')===linked.name.trim().toLocaleLowerCase('pt-BR'));clientSelect.value=option?.id||''}else clientSelect.value='';
+ if(e?.clientId){const linked=state.clients.find(c=>c.id===e.clientId),option=clients.find(c=>linked&&cmSelectionKey(c.name)===cmSelectionKey(linked.name));clientSelect.value=option?.id||''}else clientSelect.value='';
  document.getElementById('wkDeleteEventBtn').classList.toggle('hidden',!e);
  document.getElementById('weekEventModal').classList.remove('hidden');
 }
@@ -3644,9 +3641,33 @@ function exportWeekCalendarPDF(){
 let cmSearchText='',cmShowArchived=false,cmBusy=false;
 function cmKey(name){return String(name||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR').replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' ')}
 function cmIsArchived(name){return (state.archivedClientKeys||[]).includes(cmKey(name))}
+// Selection lists use only the live registry, never document or social history.
+function cmSelectionKey(name){return cmKey(name).replace(/\s/g,'')}
+function cmSelectableRecords(area=null,selectedId=null){
+ const seen=new Map();
+ for(const c of state.clients||[]){
+  if(!c||c.deletedAt||c.mergedInto||cmIsArchived(c.name))continue;
+  const key=cmSelectionKey(c.name);if(!key)continue;
+  const old=seen.get(key);
+  if(!old||(area&&c.area===area&&old.area!==area)||(c.id===selectedId&&(!area||c.area===area||old.area!==area)))seen.set(key,c);
+ }
+ return [...seen.values()].sort((a,b)=>a.name.localeCompare(b.name,'pt-BR',{sensitivity:'base'}));
+}
+function cmSelectableNames(){
+ const seen=new Map();
+ for(const raw of [...(state.clientDirectory||[]),...cmSelectableRecords().map(c=>c.name)]){
+  const name=String(raw||'').trim(),key=cmSelectionKey(name);
+  if(!key||cmIsArchived(name)||seen.has(key))continue;
+  // A directory alias must not resurrect a deleted or merged record.
+  const linked=(state.clients||[]).filter(c=>cmSelectionKey(c.name)===key);
+  if(linked.length&&!linked.some(c=>!c.deletedAt&&!c.mergedInto&&!cmIsArchived(c.name)))continue;
+  seen.set(key,name);
+ }
+ return [...seen.values()].sort((a,b)=>a.localeCompare(b,'pt-BR',{sensitivity:'base'}));
+}
 function cmAllNames(){
  const seen=new Map();
- for(const n of [...(state.clientDirectory||[]),...state.clients.filter(c=>!c.mergedInto).map(c=>c.name),...(smUnlocked?smItems.map(i=>i.client):[])]){
+ for(const n of [...(state.clientDirectory||[]),...state.clients.filter(c=>!c.mergedInto&&!c.deletedAt).map(c=>c.name)]){
   const name=String(n||'').trim(),key=cmKey(name);if(key&&!seen.has(key))seen.set(key,name);
  }
  return [...seen.values()].sort((a,b)=>a.localeCompare(b,'pt-BR',{sensitivity:'base'}));
@@ -3843,7 +3864,7 @@ function feedStatus(message){const el=document.getElementById('fpStatus');if(el)
 function feedSetValues(){const select=document.getElementById('fpClient'),date=document.getElementById('fpMonth');if(select&&select!==document.activeElement)select.value=feedPlan.client;if(date&&date!==document.activeElement)date.value=feedPlan.month}
 function feedRender(){
  if(!isAdmin())return;
- const dl=document.getElementById('fpClientSuggestions');if(dl){const names=(typeof cmAllNames==='function'?cmAllNames():state.clients.map(x=>x.name)).filter(x=>!(typeof cmIsArchived==='function'&&cmIsArchived(x)));dl.innerHTML=[...new Set(names)].sort((a,b)=>a.localeCompare(b,'pt-BR')).map(n=>`<option value="${esc(n)}"></option>`).join('')}
+ const dl=document.getElementById('fpClientSuggestions');if(dl){const names=cmSelectableNames();dl.innerHTML=[...new Set(names)].sort((a,b)=>a.localeCompare(b,'pt-BR')).map(n=>`<option value="${esc(n)}"></option>`).join('')}
  feedSetValues();document.getElementById('fpCount').textContent=`${feedCount()} / 9`;
  document.getElementById('fpPhoneClient').textContent=feedClientLabel().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9_.]/g,'').slice(0,28)||'seu_cliente';
  document.getElementById('fpGrid').innerHTML=feedPlan.arts.map((art,i)=>{const src=feedImageSrc(art),style=feedImageStyle(art);return`<article class="fp-tile ${src?'filled':''} ${feedPlan.moveFrom===i?'moving':''}" data-fp-slot="${i}" draggable="${!!src}"><button type="button" class="fp-tile-main" data-fp-upload="${i}" title="${feedPlan.moveFrom!==null?'Trocar posição':'Adicionar ou substituir a arte'}" aria-label="${src?'Substituir':'Adicionar'} arte da posição ${i+1}"><span class="fp-tile-index">${i+1}</span>${src?`<img src="${src}" ${style} alt="Arte ${i+1}">`:'<span class="fp-tile-empty"><span class="fp-tile-plus">+</span><span>Adicionar arte</span></span>'}</button>${src?`<div class="fp-tile-actions"><button type="button" data-fp-edit="${i}">Editar</button><button type="button" data-fp-move="${i}">${feedPlan.moveFrom===i?'Cancelar':'Mover'}</button><button type="button" data-fp-remove="${i}">Remover</button></div>`:''}</article>`}).join('');
@@ -3991,10 +4012,10 @@ function start(){
 <script src="/modules/instagram-pdf.js" defer></script>
 <script src="/modules/instagram-library.js" defer></script>
 <script src="/modules/apify-finance.js" defer></script>
-<script src="/modules/instagram-ui.js" defer></script>
-<script src="/modules/social-scheduler-ui.js" defer></script>
+<script src="/modules/instagram-ui.js?v=20261023-clients" defer></script>
+<script src="/modules/social-scheduler-ui.js?v=20261023-clients" defer></script>
 <script src="/vendor/qrcode-generator-2.0.4.js" defer></script>
-<script src="/modules/scripts-ui.js?v=20261022-qr" defer></script>
+<script src="/modules/scripts-ui.js?v=20261023-clients" defer></script>
 <script src="/modules/monthly-panorama.js" defer></script>
 <script src="/modules/editor-calendar.js" defer></script>
 </body>

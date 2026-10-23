@@ -11,8 +11,7 @@
   function dates(){ const to=new Date(), from=new Date(to); from.setDate(from.getDate()-29); return {from:dateString(from),to:dateString(to)}; }
   function storedClients(){ try{return JSON.parse(localStorage.getItem('oneway-ig-profiles-v1')||'{}')}catch{return{}} }
   function clientNames(){
-    if(typeof state==='undefined'||!Array.isArray(state.clients))return[];
-    return [...new Set(state.clients.map(c=>String(c.name||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+    return cmSelectableNames();
   }
   function rememberClient(){ const c=$('igClient').value.trim(), user=normalize($('igUsername').value); if(!c||!user)return;const map=storedClients();map[c]=user;localStorage.setItem('oneway-ig-profiles-v1',JSON.stringify(map)); }
   async function token(){
