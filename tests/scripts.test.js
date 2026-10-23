@@ -101,7 +101,7 @@ test('compact reference QR codes interrupt card border without pushing text and 
   window:fakeWindow,document:mockDoc,FontFace,qrcode:mockQr,URL,crypto:require('node:crypto').webcrypto,structuredClone
  });
  const urls=['https://youtu.be/first','https://youtu.be/second','https://youtu.be/third'];
- const script={client:'One Way Agency',pdfFontScale:100,videos:[{title:'Bastidores da produção',mode:'full',duration:'30',text:'Um roteiro curto em uma página.',references:urls.join('\\n'),scenes:[]}]};
+ const script={client:'One Way Agency',pdfFontScale:100,videos:[{title:'Bastidores da produção',mode:'full',duration:'30',text:'Um roteiro curto em uma página.',references:urls.join('\n'),scenes:[]}]};
  const pages=await fakeWindow.owScripts.pagesFor(script);
  assert.equal(pages.length,1);
  assert.equal(pages.links[0].length,3);
