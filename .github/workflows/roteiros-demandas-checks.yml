@@ -1,0 +1,45 @@
+name: One Way - Roteiros e Demandas
+on:
+  push:
+    branches:
+      - main
+      - fix/roteiros-qr-borda-20261023
+    paths:
+      - index.html
+      - modules/scripts-ui.js
+      - tests/scripts.test.js
+      - tests/client-month-visibility.test.js
+      - .github/workflows/roteiros-demandas-checks.yml
+  pull_request:
+    paths:
+      - index.html
+      - modules/scripts-ui.js
+      - tests/scripts.test.js
+      - tests/client-month-visibility.test.js
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Conferir sintaxe do gerador
+        run: node --check modules/scripts-ui.js
+      - name: Conferir sintaxe do painel principal
+        run: |
+          python3 - <<'PY'
+          import re,subprocess,pathlib
+          html=pathlib.Path('index.html').read_text()
+          scripts=re.findall(r'<script\b[^>]*>(.*?)</script>',html,re.I|re.S)
+          for i,s in enumerate(scripts):
+            if s.strip() and not s.strip().startswith('JVBER'):
+              path=pathlib.Path('/tmp/oneway-check-'+str(i)+'.js')
+              path.write_text(s)
+              subprocess.run(['node','--check',str(path)],check=True)
+          PY
+      - name: Testar sistema e exportação de roteiros
+        run: npm test
