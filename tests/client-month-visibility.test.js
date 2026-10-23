@@ -10,9 +10,11 @@ function setup(role='admin'){
  vm.runInContext(html.slice(html.indexOf('const DEMAND_ASSIGNEES='),html.indexOf('function safeUrl'))+html.slice(html.indexOf('function clientVisibleInMonth'),html.indexOf('function toast('))+html.slice(html.indexOf('let clientDemandFilterKey='),html.indexOf('function canEditFinalMaterial')),context);
  return {state,run:s=>vm.runInContext(s,context)};
 }
-test('Orocasa stays visible in November with three João arts hidden by admin default',()=>{
- const {run}=setup();assert.equal(run('clientsForMonth().length'),1);assert.equal(run('demandsFor("oro").length'),0);
- const card=run('renderClient(state.clients[0])');assert.match(card,/3 demandas estão ocultas pelo filtro/);assert.match(card,/show-all-assignees/);
+test('admin sees all three João demands by default and card shows one real total',()=>{
+ const {run}=setup();assert.equal(run('clientsForMonth().length'),1);assert.equal(run('demandsFor("oro").length'),3);
+ const card=run('renderClient(state.clients[0])');assert.match(card,/3 demandas/);assert.doesNotMatch(card,/3 pelo filtro de responsável/);assert.doesNotMatch(card,/show-all-assignees/);
+ run("adminAssigneeFilter='others'");assert.equal(run('demandsFor("oro").length'),0);
+ const filteredCard=run('renderClient(state.clients[0])');assert.match(filteredCard,/3 demandas/);assert.match(filteredCard,/3 demandas estão ocultas pelo filtro/);assert.match(filteredCard,/show-all-assignees/);
  run("adminAssigneeFilter='all'");assert.equal(run('demandsFor("oro").length'),3);assert.doesNotMatch(run('renderClient(state.clients[0])'),/show-all-assignees/);
 });
 test('explicit responsible filter still narrows clients',()=>{const {run}=setup();run("adminAssigneeFilter='Gabriel'");assert.equal(run('clientsForMonth().length'),0)});
