@@ -144,6 +144,10 @@
   }
 
   function openCalendarDemand(id) {
+    if (currentArea === 'agenda' && isAdmin() && typeof window.OneWayAgendaQuickEdit === 'function') {
+      window.OneWayAgendaQuickEdit(id);
+      return;
+    }
     var item = state.demands.find(function (d) { return d.id === id; });
     if (!item || !areaAccessible(item)) return;
     selectedCalendarDemand = '';
@@ -621,7 +625,7 @@
 
   // A edição antiga recriava o registro sem os checks. Preserva-os ao salvar
   // título, descrição ou data; os campos permanecem no pacote criptografado.
-  smPersistItems = function (nextItems) {
+  smPersistItems = async function (nextItems) {
     var previous = new Map(smItems.map(function (item) { return [item.id, item]; }));
     var merged = nextItems.map(function (item) {
       var old = previous.get(item.id);
@@ -629,7 +633,9 @@
           !old.workflowChecks) return item;
       return Object.assign({}, item, { workflowChecks: old.workflowChecks });
     });
-    return previousPersistItems.call(this, merged);
+    var persisted = await previousPersistItems.call(this, merged);
+    if (persisted && currentArea === 'agenda') renderAgenda();
+    return persisted;
   };
 
   function refreshCurrentView() {
@@ -709,13 +715,7 @@
     if (!canSeeSocial()) return;
     var item = smItems.find(function (row) { return row.id === id; });
     if (!item) return;
-    currentArea = SOCIAL_AREA;
-    smMonth = item.date.slice(0, 7);
-    smSelectedClient = smNormalizeName(item.client);
-    smSearchText = '';
-    openClientId = null;
-    openDemandId = null;
-    renderAll();
+    // Mantém a Agenda aberta; o próprio modal seguro da Social Media permite editar.
     smOpenModal(id);
   }
 
@@ -918,4 +918,96 @@
     if (currentArea === 'agenda' && smUnlocked && smUpdatedAt !== last) renderAgenda();
     return result;
   };
+})();
+
+
+/* One Way · refinamento do fluxo de edição na Agenda.
+   Mantém os cadastros, permissões, arquivos, status e salvamento originais. */
+(function () {
+  'use strict';
+  if (typeof renderAgenda !== 'function' || typeof renderAll !== 'function' ||
+      typeof openDemandModal !== 'function' || typeof state === 'undefined') return;
+
+  var previousRenderAgenda = renderAgenda;
+  var previousRenderAll = renderAll;
+  var agendaEditing = false;
+  var editingId = null;
+
+  function beginEditFromAgenda(id) {
+    var demand = state.demands.find(function (item) { return item.id === id; });
+    if (!demand || !canAccessDemand(demand)) return false;
+    if (!isAdmin()) return false;
+    // O editor nativo exige uma área selecionada para preencher seus campos.
+    // Altera o contexto somente durante a abertura, sem trocar de tela.
+    var originalArea = currentArea;
+    try {
+      currentArea = demand.area;
+      openDemandModal(demand.id, demand.clientId);
+    } finally {
+      currentArea = originalArea;
+    }
+    var modal = document.getElementById('demandModal');
+    if (!modal || modal.classList.contains('hidden')) return false;
+    editingId = id;
+    agendaEditing = true;
+    // Título deixa claro que o usuário continua trabalhando na Agenda.
+    var heading = document.getElementById('demandModalTitle');
+    if (heading) heading.textContent = 'Editar demanda · Agenda';
+    return true;
+  }
+
+  window.OneWayAgendaQuickEdit = beginEditFromAgenda;
+
+  // O submit nativo persiste no Supabase e costuma mudar para a aba do cliente.
+  // Este adaptador só restaura o contexto da Agenda após a gravação concluída.
+  renderAll = function () {
+    if (agendaEditing && currentArea !== 'agenda') {
+      var modal = document.getElementById('demandModal');
+      // Só volta à Agenda depois que o submit nativo fechou o editor.
+      if (modal && modal.classList.contains('hidden') && isAdmin()) {
+        currentArea = 'agenda';
+        openClientId = null;
+        openDemandId = null;
+        agendaEditing = false;
+        editingId = null;
+      }
+    }
+    return previousRenderAll.apply(this, arguments);
+  };
+
+  renderAgenda = function () {
+    var result = previousRenderAgenda.apply(this, arguments);
+    if (currentArea !== 'agenda' || !isAdmin()) return result;
+
+    var root = document.getElementById('agendaList');
+    if (root) {
+      root.querySelectorAll('.agenda-item[data-agenda-id]').forEach(function (button) {
+        // O botão original já tem eventos, que são substituídos apenas no admin.
+        button.onclick = function (event) {
+          event.preventDefault();
+          beginEditFromAgenda(button.dataset.agendaId);
+        };
+        button.title = 'Abrir e editar sem sair da Agenda';
+        button.setAttribute('aria-label', 'Editar demanda na Agenda');
+      });
+    }
+    return result;
+  };
+
+  // Fechar o editor sem salvar não deve afetar a próxima navegação.
+  document.addEventListener('click', function (event) {
+    if (!agendaEditing) return;
+    var close = event.target.closest('[data-close="demandModal"]');
+    if (close) {
+      agendaEditing = false;
+      editingId = null;
+    }
+  }, true);
+
+  document.addEventListener('keydown', function (event) {
+    if (event.key !== 'Escape' || !agendaEditing) return;
+    // Fecha somente o contexto; mantém as permissões nativas do modal.
+    agendaEditing = false;
+    editingId = null;
+  }, true);
 })();
