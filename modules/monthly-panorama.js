@@ -727,6 +727,10 @@
     el.style.animationDelay = Math.min(index * 35, 300) + 'ms';
     var date = new Date(item.date + 'T12:00:00');
     var month = new Intl.DateTimeFormat('pt-BR', {month:'short'}).format(date).replace('.', '');
+    var created = String(item.createdAt || '').slice(0, 10);
+    var createdText = /^\d{4}-\d{2}-\d{2}$/.test(created)
+      ? 'Criada em ' + created.slice(8, 10) + '/' + created.slice(5, 7) + '/' + created.slice(0, 4)
+      : '';
     el.innerHTML = '<span class="agenda-date"><strong class="agenda-day">' +
       esc(String(date.getDate()).padStart(2, '0')) + '</strong><span class="agenda-month">' +
       esc(month) + '</span></span>' +
@@ -735,10 +739,14 @@
       esc(item.title || 'Sem título') + '</button>' +
       '<span class="ow-social-client">' + esc(item.client || 'Cliente') + '</span>' +
       (item.description ? '<span class="ow-social-agenda-desc">' + esc(item.description) + '</span>' : '') +
+      (createdText ? '<span class="agenda-created-date">' + esc(createdText) + '</span>' : '') +
       '</div>' +
       '<span class="area-chip ow-social-area-chip">Social Media</span>' +
+      '<span class="current-status ' + (isFinished(item) ? 'green' : 'yellow') +
+      '" aria-label="Situação da demanda">' + (isFinished(item) ? 'Finalizado' : 'Em andamento') + '</span>' +
       '<button type="button" class="agenda-arrow ow-social-edit-arrow" title="Editar demanda no Social Media" aria-label="Editar demanda no Social Media">›</button>';
-    el.querySelector('.ow-social-agenda-info').appendChild(stepControls(item, 'agenda'));
+    var info = el.querySelector('.ow-social-agenda-info');
+    info.insertBefore(stepControls(item, 'agenda'), info.firstChild);
     el.querySelectorAll('.ow-social-edit-title,.ow-social-edit-arrow').forEach(function (btn) {
       btn.addEventListener('click', function () { openOriginalSocialTask(item.id); });
     });
