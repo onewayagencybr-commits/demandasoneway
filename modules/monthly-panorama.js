@@ -730,6 +730,7 @@
     });
     var visibleCount = 0;
     shell.querySelectorAll('.ow-day[data-ow-date]').forEach(function (day) {
+      if (day.classList.contains('ow-day-outside')) return;
       var dayItems = dateMap.get(day.dataset.owDate) || [];
       var list = day.querySelector('.ow-day-items');
       if (!list || !dayItems.length) return;
