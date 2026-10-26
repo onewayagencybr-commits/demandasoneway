@@ -845,3 +845,163 @@ body.calendar-view{
  }
  #agendaContent .agenda-list>.agenda-item .area-chip{display:none!important}
 }
+
+
+/* One Way · edição direta da Agenda para toda a equipe · 2026-10-26 */
+#agendaContent .ow-agenda-inline-editor{
+  min-width:0;
+  width:100%;
+  margin:-1px 0 4px;
+  padding:17px 20px 18px;
+  border:1px solid rgba(191,214,255,.25);
+  border-radius:13px;
+  background:linear-gradient(120deg,rgba(13,38,82,.92),rgba(17,46,101,.83));
+  box-shadow:0 16px 36px rgba(0,11,35,.17),inset 4px 0 0 rgba(130,185,255,.52);
+  color:#eef4ff;
+  animation:contentReveal .26s ease both;
+}
+.ow-agenda-inline-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+  margin-bottom:13px;
+}
+.ow-agenda-inline-head>div{min-width:0}
+.ow-agenda-inline-head strong{
+  display:block;
+  color:#fff;
+  font-size:13px;
+  font-weight:660;
+  line-height:1.4;
+}
+.ow-agenda-inline-head span{
+  display:block;
+  margin-top:4px;
+  font-size:10px;
+  color:rgba(227,239,255,.69);
+}
+.ow-agenda-inline-close{
+  flex:0 0 auto;
+  border:1px solid rgba(203,225,255,.20);
+  border-radius:8px;
+  background:rgba(255,255,255,.06);
+  color:#e6f0ff;
+  padding:8px 12px;
+  font-size:10px;
+  cursor:pointer;
+}
+.ow-agenda-inline-close:hover{background:rgba(255,255,255,.12)}
+.ow-agenda-inline-desc{
+  margin:0 0 13px;
+  color:rgba(231,239,255,.77);
+  font-size:11px;
+  line-height:1.65;
+  white-space:pre-wrap;
+}
+.ow-agenda-editor-label{
+  display:block;
+  margin:8px 0 7px;
+  color:rgba(235,245,255,.82);
+  font-size:10px;
+  font-weight:680;
+}
+.ow-agenda-inline-status{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:6px;
+  margin:0 0 15px;
+}
+.ow-agenda-inline-status .status-btn{
+  border:1px solid rgba(189,211,242,.26);
+  background:rgba(255,255,255,.07);
+  color:#e8efff;
+  min-height:31px;
+  font-size:10px;
+  font-weight:590;
+  padding:7px 10px;
+}
+.ow-agenda-inline-status .status-btn.active{
+  border-color:rgba(180,213,255,.57);
+  background:rgba(110,163,243,.22);
+  color:#fff;
+}
+.ow-agenda-inline-status .status-btn:disabled{opacity:.55}
+.ow-agenda-link-editor{
+  min-width:0;
+  margin-top:9px;
+}
+.ow-agenda-link-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+}
+.ow-agenda-link-row input{
+  min-width:0;
+  flex:1 1 280px;
+  max-width:100%;
+  height:37px;
+  border:1px solid rgba(195,218,255,.33);
+  border-radius:8px;
+  background:rgba(7,24,59,.28);
+  color:#fff;
+  font-size:11px;
+  padding:8px 11px;
+  outline:0;
+}
+.ow-agenda-link-row input:focus{
+  border-color:#b0d4ff;
+  box-shadow:0 0 0 2px rgba(164,205,255,.14);
+}
+.ow-agenda-link-row input:disabled{opacity:.7}
+.ow-agenda-inline-save{
+  flex:0 0 auto;
+  min-height:37px;
+  padding:8px 14px;
+  border:1px solid rgba(193,223,255,.62);
+  border-radius:8px;
+  background:rgba(225,237,255,.94);
+  color:#163665;
+  font-size:10px;
+  font-weight:700;
+  cursor:pointer;
+}
+.ow-agenda-inline-save:disabled{opacity:.5;cursor:wait}
+.ow-agenda-link-open{
+  display:inline-block;
+  margin-top:9px;
+  color:#b8e2ff;
+  font-size:10px;
+  font-weight:600;
+  text-decoration:underline;
+  text-underline-offset:3px;
+}
+#agendaContent .agenda-item .ow-agenda-link-preview{
+  display:block;
+  color:#b5e4ff!important;
+  font-size:9px!important;
+  font-weight:580;
+  line-height:1.45;
+  margin-top:4px;
+}
+#demandModal .ow-agenda-modal-link-host{
+  margin:14px 0 8px;
+}
+#demandModal .ow-agenda-modal-link-editor{
+  padding:12px 14px;
+  border:1px solid rgba(168,202,251,.23);
+  border-radius:11px;
+  background:rgba(16,44,88,.48);
+}
+#demandModal .ow-agenda-modal-link-editor .ow-agenda-editor-label{
+  margin:0 0 8px;
+}
+@media(max-width:640px){
+  #agendaContent .ow-agenda-inline-editor{padding:13px 12px}
+  .ow-agenda-link-row{flex-wrap:wrap}
+  .ow-agenda-link-row input{width:100%;flex:1 1 100%}
+  .ow-agenda-inline-save{width:100%}
+  .ow-agenda-inline-head strong{font-size:12px}
+}
