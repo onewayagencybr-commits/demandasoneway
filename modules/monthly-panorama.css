@@ -349,3 +349,213 @@
   border-radius:7px;padding:4px 8px;
   font-size:9px;font-weight:850;
 }
+
+
+/* One Way · refinamento das pautas e checks Social Media · 2026-10-26 */
+/* Mesmo alinhamento dos cards existentes, sem quebra do rótulo Social Media. */
+#agendaContent .agenda-item.ow-social-agenda-item{
+  grid-template-columns:80px minmax(0,1fr) 112px 24px!important;
+  align-items:center;
+  column-gap:14px;
+  row-gap:0;
+  min-height:112px;
+  padding:13px 15px;
+  background:linear-gradient(125deg,rgba(13,37,83,.87),rgba(17,50,117,.64))!important;
+  border:1px solid rgba(114,192,235,.32)!important;
+  box-shadow:inset 4px 0 0 #55b7e0,0 9px 24px rgba(0,11,39,.12)!important;
+}
+#agendaContent .agenda-item.ow-social-agenda-item:hover{
+  border-color:rgba(132,209,245,.55)!important;
+  box-shadow:inset 4px 0 0 #55b7e0,0 14px 30px rgba(0,11,39,.17)!important;
+}
+#agendaContent .agenda-item.ow-social-agenda-item.ow-social-finished{
+  box-shadow:inset 4px 0 0 #27a674,0 9px 24px rgba(0,11,39,.12)!important;
+  opacity:.82;
+}
+#agendaContent .agenda-item.ow-social-agenda-item .agenda-date{
+  min-width:0;
+  align-self:center;
+}
+#agendaContent .agenda-item.ow-social-agenda-item .agenda-info{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:3px;
+}
+#agendaContent .agenda-item.ow-social-agenda-item .ow-social-edit-title{
+  display:block;
+  text-align:left;
+  max-width:100%;
+  padding:0;
+  border:0;
+  background:transparent;
+  color:#f4f8ff;
+  font:650 12px/1.4 Montserrat,Arial,sans-serif;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+  cursor:pointer;
+}
+#agendaContent .agenda-item.ow-social-agenda-item .ow-social-edit-title:hover{
+  text-decoration:underline;
+  text-underline-offset:3px;
+}
+#agendaContent .agenda-item.ow-social-agenda-item .ow-social-client{
+  font-size:10px;color:rgba(231,241,255,.82);margin:0;
+  max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+#agendaContent .agenda-item.ow-social-agenda-item .ow-social-agenda-desc{
+  display:block;
+  font-size:9px;
+  line-height:1.4;
+  margin:0 0 3px;
+  color:rgba(225,238,255,.54);
+  max-width:100%;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+#agendaContent .agenda-item.ow-social-agenda-item .ow-social-area-chip{
+  display:inline-flex!important;
+  justify-self:center;
+  align-items:center;
+  justify-content:center;
+  width:auto;
+  min-width:98px;
+  max-width:none!important;
+  padding:7px 9px;
+  font-size:9px;
+  letter-spacing:.015em;
+  text-transform:uppercase;
+  line-height:1.1;
+  white-space:nowrap!important;
+  word-break:normal!important;
+  overflow-wrap:normal!important;
+  border-radius:8px;
+}
+#agendaContent .agenda-item.ow-social-agenda-item .ow-social-edit-arrow{
+  appearance:none;
+  border:0;
+  border-radius:6px;
+  background:transparent;
+  color:#c9deff;
+  font-size:19px;
+  min-width:24px;
+  width:24px;
+  min-height:32px;
+  cursor:pointer;
+}
+#agendaContent .agenda-item.ow-social-agenda-item .ow-social-edit-arrow:hover{
+  background:rgba(255,255,255,.09);color:#fff;
+}
+/* Checks com estado visual legível e área clicável independente. */
+.ow-social-checks{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:5px;
+  min-width:0;
+  max-width:100%;
+}
+#agendaContent .ow-social-checks-agenda{margin-top:5px;overflow:visible;}
+.ow-social-checks .ow-social-check{
+  display:inline-flex;
+  flex:0 0 auto;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  min-height:24px;
+  margin:0;
+  padding:4px 8px;
+  border:1px solid rgba(168,197,240,.22);
+  border-radius:6px;
+  background:rgba(9,27,62,.28);
+  color:rgba(220,232,252,.78);
+  font:550 9px/1.2 Montserrat,Arial,sans-serif;
+  cursor:pointer;
+  white-space:nowrap;
+  transition:background .15s ease,border-color .15s ease,color .15s ease;
+}
+.ow-social-checks .ow-social-check:hover{
+  color:white;
+  border-color:rgba(183,216,255,.56);
+  background:rgba(111,159,220,.15);
+}
+.ow-social-checks .ow-social-check[aria-busy="true"]{
+  opacity:.55;pointer-events:none;
+}
+.ow-social-checks .ow-social-check.is-checked{
+  color:#f3fff9;
+  background:rgba(38,144,108,.27);
+  border-color:rgba(96,223,161,.51);
+}
+.ow-social-checks .ow-social-check.is-checked:last-child{
+  background:rgba(30,161,105,.42);border-color:#55d69a;
+}
+.ow-social-checks .ow-social-check-icon{
+  display:inline-grid!important;
+  place-items:center;
+  width:12px!important;
+  height:12px;
+  margin:0!important;
+  border:1px solid currentColor;
+  border-radius:3px;
+  flex:0 0 12px;
+  font-size:9px!important;
+  line-height:1;
+  opacity:.94;
+}
+.ow-social-checks .ow-social-check-label{
+  display:inline!important;
+  width:auto!important;
+  margin:0!important;
+  color:inherit!important;
+  font-size:inherit!important;
+  line-height:inherit!important;
+  text-overflow:clip!important;
+  overflow:visible!important;
+  white-space:nowrap!important;
+}
+.ow-social-checks .ow-social-check:focus-visible,
+.ow-social-edit-title:focus-visible,.ow-social-edit-arrow:focus-visible{
+  outline:2px solid #b0dbff;
+  outline-offset:2px;
+}
+/* Os mesmos checks ficam acessíveis também dentro da aba Social Media. */
+.ow-social-workflow{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:9px;
+  padding-top:9px;
+  border-top:1px solid rgba(205,227,255,.11);
+}
+.ow-social-workflow-caption{
+  font-size:9px;
+  color:rgba(224,236,255,.57);
+  letter-spacing:.012em;
+}
+.ow-social-task-finished{
+  border-left:3px solid #32c587!important;
+}
+.ow-cal-social-finished{
+  background:#d2f6e5!important;
+  border-color:#76cda4!important;
+  color:#175a3c!important;
+}
+@media(max-width:800px){
+  #agendaContent .agenda-item.ow-social-agenda-item{
+    grid-template-columns:65px minmax(0,1fr) 24px!important;
+    gap:9px;
+    padding:12px;
+  }
+  #agendaContent .agenda-item.ow-social-agenda-item .ow-social-area-chip{
+    display:none!important;
+  }
+  #agendaContent .ow-social-checks-agenda{gap:4px}
+}
+@media(max-width:510px){
+  #agendaContent .agenda-item.ow-social-agenda-item{grid-template-columns:47px minmax(0,1fr) 22px!important;}
+  .ow-social-checks .ow-social-check{font-size:8.5px;padding:4px 6px}
+}
