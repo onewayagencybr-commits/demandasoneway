@@ -1008,7 +1008,7 @@
     var result = previousOpenDemandModal.apply(this, arguments);
     var modal = document.getElementById('demandModal');
     if (!modal || modal.classList.contains('hidden')) return result;
-    modal.querySelectorAll('.ow-agenda-modal-link-editor').forEach(function (node) { node.remove(); });
+    modal.querySelectorAll('.ow-agenda-modal-link-host').forEach(function (node) { node.remove(); });
     if (id) {
       var demand = getDemand(id);
       var form = modal.querySelector('form');
@@ -1031,7 +1031,7 @@
     var demand = getDemand(id);
     if (!demand || isAdmin() || currentArea !== 'agenda') return false;
     var list = document.getElementById('agendaList');
-    var card = list?.querySelector('.agenda-item[data-agenda-id="' + CSS.escape(id) + '"]');
+    var card = Array.from(list?.querySelectorAll('.agenda-item[data-agenda-id]') || []).find(function (node) { return node.dataset.agendaId === id; });
     if (!card) {
       // Na visualização mensal o usuário pode retornar à Lista para editar.
       var switcher = document.querySelector('#owAgendaControls [data-ow-agenda-mode="list"]');
