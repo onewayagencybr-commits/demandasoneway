@@ -52,7 +52,7 @@
   }
   function agendaMonthlyDemands(month) {
     return state.demands.filter(function (d) {
-      return areaAccessible(d) && (agendaCalendarArea === 'all' || d.area === agendaCalendarArea) &&
+      return matchesAgendaAssignee(d) && (agendaCalendarArea === 'all' || d.area === agendaCalendarArea) &&
         validISO(d.postDate) && d.postDate.slice(0, 7) === month;
     }).sort(sortClientDemandsByPostDate);
   }

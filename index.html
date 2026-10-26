@@ -941,7 +941,7 @@ body.calendar-view{background-attachment:scroll!important}
       <div class="clients" id="clients"></div>
     </section>
 
-    <section id="agendaContent" class="hidden"><div class="agenda-wrap"><div class="agenda-summary"><div><h2>Agenda de postagens</h2><span>Demandas em andamento organizadas por prazo.</span></div><span id="agendaCount"></span></div><div class="agenda-view-tabs" id="agendaViewTabs"><button type="button" class="agenda-view-tab active" data-agenda-view="active">Agenda</button><button type="button" class="agenda-view-tab" data-agenda-view="finished">Finalizadas <span id="agendaFinishedCount">0</span></button></div><div class="agenda-list" id="agendaList"></div></div></section>
+    <section id="agendaContent" class="hidden"><div class="agenda-wrap"><div class="ow-assignee-toolbar hidden" id="owAgendaAssigneeToolbar"></div><div class="agenda-summary"><div><h2>Agenda de postagens</h2><span>Demandas em andamento organizadas por prazo.</span></div><span id="agendaCount"></span></div><div class="agenda-view-tabs" id="agendaViewTabs"><button type="button" class="agenda-view-tab active" data-agenda-view="active">Agenda</button><button type="button" class="agenda-view-tab" data-agenda-view="finished">Finalizadas <span id="agendaFinishedCount">0</span></button></div><div class="agenda-list" id="agendaList"></div></div></section>
 
 
     <!-- Social Media: trabalho editorial independente, somente administrador -->
@@ -1454,6 +1454,21 @@ function renderAssigneeToolbar(){
  el.innerHTML='<label for="owAssigneeFilter">Mostrar demandas de</label><select id="owAssigneeFilter">'+options.map(([key,label])=>'<option value="'+esc(key)+'"'+(key===adminAssigneeFilter?' selected':'')+'>'+esc(label)+'</option>').join('')+'</select><small>João e Pedro têm suas próprias áreas de trabalho.</small>';
  el.querySelector('select').onchange=e=>{adminAssigneeFilter=e.target.value;openClientId=null;openDemandId=null;renderStats();renderClients()}
 }
+let agendaAssigneeFilter='all';
+function matchesAgendaAssignee(d){
+ if(!canAccessDemand(d))return false;
+ if(!isAdmin()||agendaAssigneeFilter==='all')return true;
+ const person=demandAssignee(d);
+ return agendaAssigneeFilter==='unassigned'?!person:person===agendaAssigneeFilter;
+}
+function renderAgendaAssigneeToolbar(){
+ const el=document.getElementById('owAgendaAssigneeToolbar');if(!el)return;
+ el.classList.toggle('hidden',!isAdmin());
+ if(!isAdmin()){el.innerHTML='';return}
+ const options=[['all','Todas as demandas'],...DEMAND_ASSIGNEES.map(person=>[person,person]),['unassigned','Sem responsável']];
+ el.innerHTML='<label for="owAgendaAssigneeFilter">Mostrar demandas de</label><select id="owAgendaAssigneeFilter">'+options.map(([key,label])=>'<option value="'+esc(key)+'"'+(key===agendaAssigneeFilter?' selected':'')+'>'+esc(label)+'</option>').join('')+'</select>';
+ el.querySelector('select').onchange=e=>{agendaAssigneeFilter=e.target.value;renderAgenda()};
+}
 function safeUrl(v){try{const u=new URL(v);return ['http:','https:'].includes(u.protocol)?u.href:'#'}catch{return '#'}}
 function normalizeState(s){if(!s||typeof s!=='object')return seed();const clients=Array.isArray(s.clients)?s.clients:[];const derivedRecent=[...clients].sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||''))).map(c=>c.name).filter(Boolean);const recent=Array.isArray(s.recentClients)?s.recentClients:derivedRecent;return {version:7,clients,demands:Array.isArray(s.demands)?s.demands:[],deletedDemands:Array.isArray(s.deletedDemands)?s.deletedDemands:[],removedClientMonths:Array.isArray(s.removedClientMonths)?s.removedClientMonths:[],recentClients:[...new Set(recent)].slice(0,8),proposalHistory:Array.isArray(s.proposalHistory)?s.proposalHistory:[],analyticsReports:s.analyticsReports&&typeof s.analyticsReports==='object'?s.analyticsReports:{},financeItems:Array.isArray(s.financeItems)?s.financeItems:[],calendarEvents:Array.isArray(s.calendarEvents)?s.calendarEvents:[],socialMediaSecure:s.socialMediaSecure&&typeof s.socialMediaSecure==='object'?s.socialMediaSecure:null,clientDirectory:Array.isArray(s.clientDirectory)?s.clientDirectory:[],archivedClientKeys:Array.isArray(s.archivedClientKeys)?s.archivedClientKeys:[],clientMergeRecordBackups:Array.isArray(s.clientMergeRecordBackups)?s.clientMergeRecordBackups:[],updatedAt:Number(s.updatedAt)||0}}
 
@@ -1788,9 +1803,10 @@ function agendaInfoChip(label,isFilled,filledTitle,missingTitle){
 }
 function bindAgendaViewTabs(){document.querySelectorAll('#agendaViewTabs [data-agenda-view]').forEach(b=>{b.classList.toggle('active',b.dataset.agendaView===agendaView);b.onclick=()=>{agendaView=b.dataset.agendaView==='finished'?'finished':'active';renderAgenda()}})}
 function renderAgenda(){
+  renderAgendaAssigneeToolbar();
   const root=document.getElementById('agendaList'),q=document.getElementById('searchInput').value.trim().toLocaleLowerCase('pt-BR'),filterArea=agendaAreaFilter();
   const clientMap=new Map(state.clients.map(c=>[c.id,c]));
-  const base=state.demands.filter(d=>(!filterArea||d.area===filterArea)&&canAccessDemand(d)).filter(d=>!window.OneWayPanorama||window.OneWayPanorama.matchAgendaDemand(d)).filter(d=>{const c=clientMap.get(d.clientId),hay=`${d.title||''} ${d.description||''} ${c?.name||''}`.toLocaleLowerCase('pt-BR');return !q||hay.includes(q)});
+  const base=state.demands.filter(d=>(!filterArea||d.area===filterArea)&&canAccessDemand(d)).filter(matchesAgendaAssignee).filter(d=>!window.OneWayPanorama||window.OneWayPanorama.matchAgendaDemand(d)).filter(d=>{const c=clientMap.get(d.clientId),hay=`${d.title||''} ${d.description||''} ${c?.name||''}`.toLocaleLowerCase('pt-BR');return !q||hay.includes(q)});
   const finished=base.filter(agendaDemandIsFinalized),active=base.filter(d=>!agendaDemandIsFinalized(d));
   const awaitingPost=active.filter(agendaDemandAwaitingPost);
   const byActiveDeadline=(a,b)=>{const ao=agendaDemandIsOverdue(a),bo=agendaDemandIsOverdue(b);if(ao!==bo)return ao?-1:1;const ad=String(a.postDate||'9999-99-99'),bd=String(b.postDate||'9999-99-99');return ad.localeCompare(bd)||String(a.title||'').localeCompare(String(b.title||''),'pt-BR')};

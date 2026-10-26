@@ -69,3 +69,27 @@ test('assignment field is editable and persisted on new and existing demands',()
  assert.match(html,/description,assignee,status:statusesForArea/);
  assert.match(html,/isDemandVisible\(d\)/);
 });
+
+test('Agenda filters each responsible independently from the area filter',()=>{
+ const api=vm.runInNewContext(functions+';({matchesAgendaAssignee,setAgenda(x){agendaAssigneeFilter=x},setArea(x){adminAssigneeFilter=x}})',{
+  isAdmin:()=>true,isDesign:()=>false,isVideoUser:()=>false,canAccessArea:()=>true,
+  document:{getElementById:()=>null},esc:x=>x
+ });
+ assert.equal(fixtures.filter(api.matchesAgendaAssignee).length,fixtures.length);
+ for(const person of ['Gabriel','João','Pedro','Tiago','Fernando','Lucas']){
+  api.setAgenda(person);
+  assert.equal(ids(fixtures.filter(api.matchesAgendaAssignee)),ids(fixtures.filter(d=>d.assignee===person)));
+ }
+ api.setAgenda('unassigned');assert.equal(ids(fixtures.filter(api.matchesAgendaAssignee)),'a-old-unassigned,v-old-unassigned');
+ api.setArea('João');api.setAgenda('all');
+ assert.equal(fixtures.filter(api.matchesAgendaAssignee).length,fixtures.length);
+});
+test('Agenda filter cannot widen editor permissions',()=>{
+ for(const role of ['design','video']){
+  const api=vm.runInNewContext(functions+';agendaAssigneeFilter="Gabriel";({matchesAgendaAssignee})',{
+   isAdmin:()=>false,isDesign:()=>role==='design',isVideoUser:()=>role==='video',
+   canAccessArea:area=>area===(role==='design'?'arte':'video'),document:{getElementById:()=>null},esc:x=>x
+  });
+  assert.equal(ids(fixtures.filter(api.matchesAgendaAssignee)),role==='design'?'a-joao':'v-pedro');
+ }
+});
