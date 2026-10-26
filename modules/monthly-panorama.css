@@ -311,3 +311,41 @@
     height:20px!important;
   }
 }
+
+
+/* One Way · Social Media na Agenda · estilo isolado */
+.agenda-item.ow-social-agenda-item{
+  border-left:5px solid #50a9d2!important;
+  box-shadow:inset 1px 0 0 rgba(170,226,255,.14),0 9px 22px rgba(0,13,44,.12);
+}
+.agenda-item.ow-social-agenda-item:hover{
+  border-color:rgba(128,207,247,.8)!important;
+  box-shadow:inset 5px 0 0 #50a9d2,0 12px 28px rgba(0,13,44,.2)!important;
+}
+.ow-social-agenda-item .ow-social-agenda-desc{
+  display:block;max-width:100%;overflow:hidden;
+  white-space:nowrap;text-overflow:ellipsis;
+  opacity:.64;font-size:10px;
+}
+.ow-social-area-chip{
+  border-color:rgba(104,202,238,.35)!important;
+  background:rgba(54,155,205,.17)!important;
+  color:#d6f3ff!important;
+}
+.ow-social-plan-label{
+  border-color:rgba(104,202,238,.30)!important;
+  background:rgba(58,140,183,.18)!important;
+  color:#d6f3ff!important;
+}
+.ow-cal-socialMedia{
+  border-left-color:#2a89b6!important;
+  border-color:rgba(117,209,248,.35);
+  background:#d5f0ff;color:#225476;
+  cursor:pointer!important;
+}
+.ow-cal-socialMedia:active{cursor:pointer!important}
+.ow-legend-socialMedia{
+  background:#d5f0ff;color:#225476;
+  border-radius:7px;padding:4px 8px;
+  font-size:9px;font-weight:850;
+}
