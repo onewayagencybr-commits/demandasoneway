@@ -580,3 +580,155 @@
     font-size:8px;
   }
 }
+
+
+/* One Way · estabilidade visual, cabeçalho compacto e movimento fluido · 2026-10-26 */
+/* A largura do viewport não muda quando as abas têm alturas de conteúdo diferentes. */
+html{
+  overflow-y:scroll;
+  scrollbar-gutter:stable;
+}
+body{
+  min-width:0;
+  overflow-x:clip;
+}
+#app,#app .shell{
+  width:100%;
+  min-width:0;
+}
+#app .shell{margin-inline:auto}
+/* O calendário voltará a usar exatamente a mesma camada de fundo das demais abas. */
+body.calendar-view{
+  background:linear-gradient(135deg,var(--bg) 0%,var(--bg-2) 48%,var(--bg-3) 100%) fixed!important;
+  background-attachment:fixed!important;
+}
+/* Evita que a área de título altere largura/altura com a troca do setor. */
+#app:not(.home-mode) .hero{
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:15px;
+  margin:8px 0 18px;
+  transition:opacity .24s ease!important;
+}
+#app .hero .eyebrow{display:none!important}
+#app:not(.home-mode) .hero>div:first-child{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:baseline;
+  gap:7px 17px;
+  min-width:0;
+}
+#app:not(.home-mode) .hero h1{
+  margin:0;
+  min-width:0;
+  font-size:clamp(25px,2.3vw,33px);
+  line-height:1.22;
+  letter-spacing:-.04em;
+}
+#app:not(.home-mode) .hero p{
+  margin:0!important;
+  display:inline-block;
+  flex:0 0 auto;
+  white-space:normal;
+  color:rgba(213,228,255,.72);
+  font-size:12px;
+  line-height:1.35;
+  font-weight:450;
+}
+#app:not(.home-mode) .hero-controls{
+  min-width:0;
+  align-self:center;
+}
+#app:not(.home-mode) .nav-row{
+  transform:none!important;
+  transition:opacity .20s ease!important;
+}
+/* Movimentos menores, sem blur em grandes blocos (reduz tremor e repintura). */
+@keyframes contentReveal{
+  from{opacity:0;transform:translate3d(0,7px,0)}
+  to{opacity:1;transform:translate3d(0,0,0)}
+}
+@keyframes cardIn{
+  from{opacity:0;transform:translate3d(0,5px,0)}
+  to{opacity:1;transform:translate3d(0,0,0)}
+}
+@keyframes focusIn{
+  from{opacity:0;transform:translate3d(0,7px,0)}
+  to{opacity:1;transform:translate3d(0,0,0)}
+}
+@keyframes rise{
+  from{opacity:0;transform:translate3d(0,6px,0)}
+  to{opacity:1;transform:translate3d(0,0,0)}
+}
+@keyframes softReveal{
+  from{opacity:0;transform:translate3d(0,4px,0)}
+  to{opacity:1;transform:translate3d(0,0,0)}
+}
+@keyframes modalIn{
+  from{opacity:0;transform:translate3d(0,9px,0) scale(.994)}
+  to{opacity:1;transform:translate3d(0,0,0) scale(1)}
+}
+#areaContent:not(.hidden),#agendaContent:not(.hidden),#deletedContent:not(.hidden),
+#proposalHistoryContent:not(.hidden),#contractsContent:not(.hidden){
+  animation:contentReveal .28s cubic-bezier(.2,.75,.22,1) both!important;
+}
+#agendaContent .agenda-item,
+#agendaContent .agenda-item.ow-social-agenda-item{
+  animation-duration:.25s!important;
+  animation-delay:0ms!important;
+  animation-timing-function:cubic-bezier(.2,.75,.22,1)!important;
+}
+#app:not(.home-mode) .hero,
+#app:not(.home-mode) .nav-row{
+  will-change:auto;
+}
+#app .client,
+#app .demand,
+#app .agenda-item{
+  transition-property:background,border-color,box-shadow,opacity,transform!important;
+  transition-duration:.20s!important;
+  transition-timing-function:cubic-bezier(.2,.7,.22,1)!important;
+}
+#app .client:hover,
+#app .agenda-item:hover{
+  transform:translate3d(0,-1px,0);
+}
+#demandModal .modal{
+  animation:modalIn .28s cubic-bezier(.2,.76,.22,1) both;
+}
+/* O modal de edição permanece sobre a Agenda, com o fundo ainda reconhecível. */
+#demandModal:not(.hidden){
+  backdrop-filter:blur(7px);
+  -webkit-backdrop-filter:blur(7px);
+}
+@media(max-width:1100px){
+  #app:not(.home-mode) .hero{
+    grid-template-columns:minmax(0,1fr);
+    align-items:start;
+    gap:11px;
+  }
+  #app:not(.home-mode) .hero-controls{width:100%}
+}
+@media(max-width:700px){
+  html{scrollbar-gutter:auto}
+  #app:not(.home-mode) .hero{
+    margin:8px 0 14px;
+  }
+  #app:not(.home-mode) .hero>div:first-child{
+    gap:5px 10px;
+  }
+  #app:not(.home-mode) .hero h1{
+    font-size:clamp(22px,6vw,30px);
+  }
+  #app:not(.home-mode) .hero p{
+    font-size:11px;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  #app *,#demandModal .modal{
+    animation-duration:.01ms!important;
+    animation-delay:0ms!important;
+    transition-duration:.01ms!important;
+  }
+}
