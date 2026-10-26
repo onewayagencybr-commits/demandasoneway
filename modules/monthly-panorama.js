@@ -588,28 +588,116 @@
 /* One Way · Social Media na Agenda (visualização dos registros protegidos) */
 (function () {
   'use strict';
-  if (typeof renderAgenda !== 'function' || typeof smOpenModal !== 'function' ||
+  if (typeof renderAgenda !== 'function' || typeof renderSocialMedia !== 'function' ||
+      typeof smOpenModal !== 'function' || typeof smPersistItems !== 'function' ||
       typeof smRefreshFromRemote !== 'function') return;
 
   var previousRenderAgenda = renderAgenda;
+  var previousRenderSocialMedia = renderSocialMedia;
   var previousSocialRefresh = smRefreshFromRemote;
+  var previousPersistItems = smPersistItems;
   var SOCIAL_AREA = 'socialMedia';
+  var workflowSaving = false;
+  var STEPS = [
+    { key: 'programar', label: 'Programar' },
+    { key: 'verificarArquivos', label: 'Verificar arquivos' },
+    { key: 'aguardandoMaterial', label: 'Aguardando material' },
+    { key: 'finalizado', label: 'Finalizado' }
+  ];
 
-  // O planejamento Social Media continua criptografado e independente.
-  // Só o administrador autenticado, após o desbloqueio, pode vê-lo na Agenda.
-  function agendaSocialItems(area, withSearch) {
-    if (!isAdmin() || !adminAuthReady() || !smUnlocked || !Array.isArray(smItems) ||
-        agendaView !== 'active') return [];
-    if (area !== 'all' && area !== SOCIAL_AREA) return [];
-    // Esses registros não possuem responsável; não aparecem sob o filtro de outra pessoa.
+  function canSeeSocial() {
+    return isAdmin() && adminAuthReady() && smUnlocked && Array.isArray(smItems);
+  }
+  function checksOf(item) {
+    var saved = item && item.workflowChecks && typeof item.workflowChecks === 'object'
+      ? item.workflowChecks : {};
+    var result = {};
+    STEPS.forEach(function (step) { result[step.key] = saved[step.key] === true; });
+    return result;
+  }
+  function isFinished(item) {
+    return checksOf(item).finalizado;
+  }
+
+  // A edição antiga recriava o registro sem os checks. Preserva-os ao salvar
+  // título, descrição ou data; os campos permanecem no pacote criptografado.
+  smPersistItems = function (nextItems) {
+    var previous = new Map(smItems.map(function (item) { return [item.id, item]; }));
+    var merged = nextItems.map(function (item) {
+      var old = previous.get(item.id);
+      if (!old || Object.prototype.hasOwnProperty.call(item, 'workflowChecks') ||
+          !old.workflowChecks) return item;
+      return Object.assign({}, item, { workflowChecks: old.workflowChecks });
+    });
+    return previousPersistItems.call(this, merged);
+  };
+
+  function refreshCurrentView() {
+    if (currentArea === 'agenda') renderAgenda();
+    if (currentArea === 'socialMedia') renderSocialMedia();
+  }
+  async function toggleSocialStep(id, stepKey, button) {
+    if (!canSeeSocial() || workflowSaving || !STEPS.some(function (s) { return s.key === stepKey; }))
+      return;
+    var old = smItems.find(function (item) { return item.id === id; });
+    if (!old) return;
+    workflowSaving = true;
+    if (button) button.setAttribute('aria-busy', 'true');
+    try {
+      var updated = Object.assign({}, old, {
+        workflowChecks: Object.assign(checksOf(old), {
+          [stepKey]: !checksOf(old)[stepKey]
+        }),
+        updatedAt: new Date().toISOString()
+      });
+      var items = smItems.map(function (item) { return item.id === id ? updated : item; });
+      var saved = await smPersistItems(items);
+      if (saved) toast('Etapa de Social Media atualizada.', null, null, 'success');
+    } catch (error) {
+      console.error('Falha ao atualizar etapa do Social Media', error);
+      toast('Não foi possível atualizar o checklist de Social Media.');
+    } finally {
+      workflowSaving = false;
+      refreshCurrentView();
+    }
+  }
+
+  function stepControls(item, scope) {
+    var values = checksOf(item);
+    var row = document.createElement('div');
+    row.className = 'ow-social-checks ' + (scope === 'agenda' ? 'ow-social-checks-agenda' : 'ow-social-checks-task');
+    row.setAttribute('role', 'group');
+    row.setAttribute('aria-label', 'Acompanhamento da demanda de Social Media');
+    STEPS.forEach(function (step) {
+      var checked = values[step.key];
+      var button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'ow-social-check' + (checked ? ' is-checked' : '');
+      button.setAttribute('aria-pressed', String(checked));
+      button.setAttribute('aria-label', step.label + (checked ? ': marcado' : ': não marcado'));
+      button.innerHTML = '<span class="ow-social-check-icon" aria-hidden="true">' +
+        (checked ? '✓' : '·') + '</span><span class="ow-social-check-label">' + esc(step.label) + '</span>';
+      button.addEventListener('click', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        toggleSocialStep(item.id, step.key, button);
+      });
+      row.appendChild(button);
+    });
+    return row;
+  }
+
+  function socialRecords(area, search, finished) {
+    if (!canSeeSocial() || (area !== 'all' && area !== SOCIAL_AREA)) return [];
+    // Sem responsável: só aparece em "Todas as demandas" ou "Sem responsável".
     if (agendaAssigneeFilter !== 'all' && agendaAssigneeFilter !== 'unassigned') return [];
-    var query = withSearch ? String(document.getElementById('searchInput')?.value || '')
+    var query = search ? String(document.getElementById('searchInput')?.value || '')
       .trim().toLocaleLowerCase('pt-BR') : '';
     return smItems.filter(function (item) {
       if (!item || !/^\d{4}-\d{2}-\d{2}$/.test(String(item.date || ''))) return false;
-      if (!query) return true;
-      return [item.client, item.title, item.description].some(function (value) {
-        return String(value || '').toLocaleLowerCase('pt-BR').includes(query);
+      if (finished !== undefined && isFinished(item) !== finished) return false;
+      return !query || [item.client, item.title, item.description].some(function (text) {
+        return String(text || '').toLocaleLowerCase('pt-BR').includes(query);
       });
     }).sort(function (a, b) {
       return a.date.localeCompare(b.date) ||
@@ -618,7 +706,7 @@
   }
 
   function openOriginalSocialTask(id) {
-    if (!isAdmin() || !adminAuthReady() || !smUnlocked) return;
+    if (!canSeeSocial()) return;
     var item = smItems.find(function (row) { return row.id === id; });
     if (!item) return;
     currentArea = SOCIAL_AREA;
@@ -632,50 +720,62 @@
   }
 
   function makeAgendaCard(item, index) {
-    var el = document.createElement('button');
-    el.type = 'button';
-    el.className = 'agenda-item ow-social-agenda-item';
+    // Div, e não botão envolvendo botões: os quatro checks ficam realmente clicáveis.
+    var el = document.createElement('div');
+    el.className = 'agenda-item ow-social-agenda-item' + (isFinished(item) ? ' agenda-finished ow-social-finished' : '');
     el.dataset.owSocialAgendaId = item.id;
     el.style.animationDelay = Math.min(index * 35, 300) + 'ms';
     var date = new Date(item.date + 'T12:00:00');
     var month = new Intl.DateTimeFormat('pt-BR', {month:'short'}).format(date).replace('.', '');
-    // Sem check de aprovação/status fictício: esse módulo é um planejamento editorial.
     el.innerHTML = '<span class="agenda-date"><strong class="agenda-day">' +
       esc(String(date.getDate()).padStart(2, '0')) + '</strong><span class="agenda-month">' +
       esc(month) + '</span></span>' +
-      '<span class="agenda-info"><strong>' + esc(item.title || 'Pauta sem título') + '</strong>' +
-      '<span>' + esc(item.client || 'Cliente') + '</span>' +
+      '<div class="agenda-info ow-social-agenda-info">' +
+      '<button type="button" class="ow-social-edit-title" title="Editar no Social Media">' +
+      esc(item.title || 'Sem título') + '</button>' +
+      '<span class="ow-social-client">' + esc(item.client || 'Cliente') + '</span>' +
       (item.description ? '<span class="ow-social-agenda-desc">' + esc(item.description) + '</span>' : '') +
-      '<span class="agenda-created-date">Planejamento de Social Media</span></span>' +
+      '</div>' +
       '<span class="area-chip ow-social-area-chip">Social Media</span>' +
-      '<span class="current-status ow-social-plan-label">Pauta</span>' +
-      '<span class="agenda-arrow">›</span>';
-    el.addEventListener('click', function () { openOriginalSocialTask(item.id); });
+      '<button type="button" class="agenda-arrow ow-social-edit-arrow" title="Editar demanda no Social Media" aria-label="Editar demanda no Social Media">›</button>';
+    el.querySelector('.ow-social-agenda-info').appendChild(stepControls(item, 'agenda'));
+    el.querySelectorAll('.ow-social-edit-title,.ow-social-edit-arrow').forEach(function (btn) {
+      btn.addEventListener('click', function () { openOriginalSocialTask(item.id); });
+    });
     return el;
   }
 
   function renderSocialList(area) {
     var root = document.getElementById('agendaList');
-    if (!root || agendaView !== 'active' || root.classList.contains('hidden')) return;
-    var items = agendaSocialItems(area, true);
-    if (!items.length) return;
+    if (!root || root.classList.contains('hidden')) return;
+    var items = socialRecords(area, true, agendaView === 'finished');
+    if (!items.length) {
+      if (area === SOCIAL_AREA && root.querySelector('.empty')) {
+        root.querySelector('.empty').innerHTML = '<strong>Sem demandas de Social Media neste filtro.</strong>' +
+          '<span>Confira as outras datas ou a aba de demandas finalizadas.</span>';
+      }
+      return;
+    }
     var empty = root.querySelector('.empty');
     if (empty) empty.remove();
     items.forEach(function (item, index) { root.appendChild(makeAgendaCard(item, index)); });
-    // Ordena junto às áreas existentes sem recriar os botões nem seus eventos.
-    var realById = new Map(state.demands.map(function (d) { return [d.id, d]; }));
-    var socialById = new Map(items.map(function (d) { return [d.id, d]; }));
+    var byDemand = new Map(state.demands.map(function (d) { return [d.id, d]; }));
+    var bySocial = new Map(items.map(function (d) { return [d.id, d]; }));
     var today = typeof demandCreationCalendarDate === 'function'
       ? demandCreationCalendarDate() : calendarLocalISO(new Date());
     var cards = Array.from(root.querySelectorAll('.agenda-item'));
     cards.sort(function (a, b) {
-      var aSocial = socialById.get(a.dataset.owSocialAgendaId);
-      var bSocial = socialById.get(b.dataset.owSocialAgendaId);
-      var aDemand = aSocial || realById.get(a.dataset.agendaId);
-      var bDemand = bSocial || realById.get(b.dataset.agendaId);
+      var aSocial = bySocial.get(a.dataset.owSocialAgendaId);
+      var bSocial = bySocial.get(b.dataset.owSocialAgendaId);
+      var aDemand = aSocial || byDemand.get(a.dataset.agendaId);
+      var bDemand = bSocial || byDemand.get(b.dataset.agendaId);
       if (!aDemand || !bDemand) return 0;
       var aDate = String(aSocial?.date || aDemand.postDate || '9999-99-99');
       var bDate = String(bSocial?.date || bDemand.postDate || '9999-99-99');
+      if (agendaView === 'finished') {
+        return bDate.localeCompare(aDate) ||
+          String(aDemand.title || '').localeCompare(String(bDemand.title || ''), 'pt-BR');
+      }
       var aLate = aSocial ? aDate < today : agendaDemandIsOverdue(aDemand);
       var bLate = bSocial ? bDate < today : agendaDemandIsOverdue(bDemand);
       if (aLate !== bLate) return aLate ? -1 : 1;
@@ -684,26 +784,23 @@
     });
     cards.forEach(function (card) { root.appendChild(card); });
     var counter = document.getElementById('agendaCount');
-    if (counter) {
-      var total = cards.length;
-      counter.textContent = String(counter.textContent || '').replace(/^\d+ demanda(?:s)?/,
-        total + ' demanda' + (total === 1 ? '' : 's'));
-    }
+    if (counter) counter.textContent = String(counter.textContent || '').replace(
+      /^\d+ demanda(?:s)?/, cards.length + ' demanda' + (cards.length === 1 ? '' : 's'));
   }
 
   function makeCalendarCard(item) {
     var el = document.createElement('div');
-    el.className = 'ow-cal-demand ow-cal-socialMedia';
+    el.className = 'ow-cal-demand ow-cal-socialMedia' +
+      (isFinished(item) ? ' ow-cal-social-finished' : '');
     el.dataset.owSocialAgendaId = item.id;
     el.draggable = false;
     el.tabIndex = 0;
     el.setAttribute('role', 'button');
-    var fullTitle = (item.client || 'Cliente') + ' · ' + (item.title || 'Pauta') + ' · Social Media';
-    el.title = fullTitle;
-    el.setAttribute('aria-label', fullTitle);
-    el.innerHTML = '<span class="ow-cal-text">' + esc((item.client || 'Cliente') + ' · ' +
-      (item.title || 'Pauta')) + '</span>' +
-      '<button type="button" class="ow-cal-open" title="Abrir no Social Media" aria-label="Abrir no Social Media">↗</button>';
+    var title = (item.client || 'Cliente') + ' · ' + (item.title || 'Sem título');
+    el.title = title + ' · Social Media';
+    el.setAttribute('aria-label', 'Abrir ' + title + ' no Social Media');
+    el.innerHTML = '<span class="ow-cal-text">' + esc(title) + '</span>' +
+      '<button type="button" class="ow-cal-open" aria-label="Abrir no Social Media">↗</button>';
     el.addEventListener('click', function (event) {
       event.stopPropagation();
       openOriginalSocialTask(item.id);
@@ -720,9 +817,8 @@
 
   function renderSocialCalendar(area) {
     var shell = document.querySelector('#owAgendaCalendar .ow-month-shell');
-    if (!shell || agendaView !== 'active') return;
-    var items = agendaSocialItems(area, false);
-    // O panorama já tem seu próprio mês; não usamos o filtro mensal da aba Social Media.
+    if (!shell) return;
+    var items = socialRecords(area, false, agendaView === 'finished');
     var dateMap = new Map();
     items.forEach(function (item) {
       if (!dateMap.has(item.date)) dateMap.set(item.date, []);
@@ -756,34 +852,62 @@
       legend.querySelector('.ow-legend-count')?.before(chip);
       var counter = legend.querySelector('.ow-legend-count');
       if (counter) {
-        var base = Number.parseInt(counter.textContent, 10) || 0;
-        var total = base + visibleCount;
+        var countBefore = Number.parseInt(counter.textContent, 10) || 0;
+        var total = countBefore + visibleCount;
         counter.textContent = total + ' demanda' + (total === 1 ? '' : 's') + ' no mês';
       }
     }
     var foot = shell.querySelector('.ow-month-foot');
-    if (foot) foot.textContent += ' · Pautas de Social Media: clique para abrir e editar na aba própria.';
+    if (foot) foot.textContent += ' · Social Media: selecione uma demanda para editar os checks.';
   }
+
+  // Na aba Social Media os mesmos quatro checks ficam disponíveis nos cards originais.
+  renderSocialMedia = function () {
+    previousRenderSocialMedia.apply(this, arguments);
+    if (!canSeeSocial()) return;
+    var root = document.getElementById('smTaskList');
+    if (!root) return;
+    var items = smVisibleItems();
+    var cards = root.querySelectorAll('.sm-task');
+    cards.forEach(function (card, i) {
+      var item = items[i];
+      if (!item) return;
+      var line = document.createElement('div');
+      line.className = 'ow-social-workflow';
+      var caption = document.createElement('span');
+      caption.className = 'ow-social-workflow-caption';
+      caption.textContent = 'Acompanhamento';
+      line.appendChild(caption);
+      line.appendChild(stepControls(item, 'task'));
+      card.appendChild(line);
+      card.classList.toggle('ow-social-task-finished', isFinished(item));
+    });
+  };
 
   renderAgenda = function () {
     previousRenderAgenda.apply(this, arguments);
     if (currentArea !== 'agenda' || !isAdmin()) return;
-    var activeArea = document.querySelector('#owAgendaControls [data-ow-area].is-active')?.dataset.owArea || 'all';
+    var activeArea = document.querySelector(
+      '#owAgendaControls [data-ow-area].is-active')?.dataset.owArea || 'all';
     var description = document.querySelector('#agendaContent .agenda-summary span');
     if (activeArea === SOCIAL_AREA && description) {
-      description.textContent = 'Demandas de Social Media organizadas por data, no planejamento original.';
+      description.textContent = 'Demandas de Social Media com acompanhamento e datas.';
     }
-    if (agendaView !== 'active') return;
+    var finishedCount = document.getElementById('agendaFinishedCount');
+    if (finishedCount) {
+      var extra = socialRecords(activeArea, true, true).length;
+      var current = Number.parseInt(finishedCount.textContent, 10) || 0;
+      finishedCount.textContent = String(current + extra);
+    }
     var list = document.getElementById('agendaList');
     if (list && !list.classList.contains('hidden')) renderSocialList(activeArea);
     else renderSocialCalendar(activeArea);
   };
 
-  // Atualizações sincronizadas do Social Media também refletem na Agenda aberta.
   smRefreshFromRemote = async function () {
-    var previousTimestamp = smUpdatedAt;
+    var last = smUpdatedAt;
     var result = await previousSocialRefresh.apply(this, arguments);
-    if (currentArea === 'agenda' && smUnlocked && smUpdatedAt !== previousTimestamp) renderAgenda();
+    if (currentArea === 'agenda' && smUnlocked && smUpdatedAt !== last) renderAgenda();
     return result;
   };
 })();
