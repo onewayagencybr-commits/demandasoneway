@@ -144,7 +144,7 @@
   }
 
   function openCalendarDemand(id) {
-    if (currentArea === 'agenda' && isAdmin() && typeof window.OneWayAgendaQuickEdit === 'function') {
+    if (currentArea === 'agenda' && typeof window.OneWayAgendaQuickEdit === 'function') {
       window.OneWayAgendaQuickEdit(id);
       return;
     }
@@ -429,7 +429,7 @@
     var selected = state.clients.find(function (client) {
       return client.id === clientId && !client.mergedInto && !client.deletedAt && !cmIsArchived(client.name);
     });
-    if (!selected || !['Pedro', 'Gabriel'].includes(assignee) || !['07:00', '08:00'].includes(time)) {
+    if (!selected || !DEMAND_ASSIGNEES.includes(assignee) || !['07:00', '08:00'].includes(time)) {
       toast('Escolha um cliente, o responsável e um horário válido.');
       return;
     }
@@ -526,7 +526,8 @@
           return '<option value="' + esc(c.id) + '">' + esc(c.name) + '</option>';
         }).join('') + '</select></label>' +
         '<label>Responsável<select name="holidayAssignee" required>' +
-        '<option value="Gabriel">Gabriel</option><option value="Pedro">Pedro</option></select></label>' +
+        ['Gabriel', 'João'].concat(DEMAND_ASSIGNEES.filter(function (name) { return name !== 'Gabriel' && name !== 'João'; }))
+          .map(function (name) { return '<option value="' + esc(name) + '">' + esc(name) + '</option>'; }).join('') + '</select></label>' +
         '<label>Horário<select name="holidayTime"><option value="08:00">08:00</option>' +
         '<option value="07:00">07:00</option></select></label>' +
         '<button type="submit"' + (clients.length ? '' : ' disabled') + '>Criar demanda de Arte</button>' +
@@ -922,92 +923,249 @@
 
 
 /* One Way · refinamento do fluxo de edição na Agenda.
-   Mantém os cadastros, permissões, arquivos, status e salvamento originais. */
+   Reaproveita as permissões e funções de salvamento existentes. */
 (function () {
   'use strict';
   if (typeof renderAgenda !== 'function' || typeof renderAll !== 'function' ||
-      typeof openDemandModal !== 'function' || typeof state === 'undefined') return;
+      typeof openDemandModal !== 'function' || typeof saveFinalMaterialLink !== 'function' ||
+      typeof updateStatus !== 'function') return;
 
   var previousRenderAgenda = renderAgenda;
   var previousRenderAll = renderAll;
+  var previousOpenDemandModal = openDemandModal;
   var agendaEditing = false;
-  var editingId = null;
+  var currentExpandedId = '';
 
-  function beginEditFromAgenda(id) {
-    var demand = state.demands.find(function (item) { return item.id === id; });
-    if (!demand || !canAccessDemand(demand)) return false;
-    if (!isAdmin()) return false;
-    // O editor nativo exige uma área selecionada para preencher seus campos.
-    // Altera o contexto somente durante a abertura, sem trocar de tela.
-    var originalArea = currentArea;
+  function getDemand(id) {
+    return state.demands.find(function (item) {
+      return item.id === id && canAccessDemand(item);
+    });
+  }
+
+  function showMaterialLinkControls(container, demand, modalMode) {
+    if (!container || !demand || !['arte', 'video'].includes(demand.area)) return;
+    var outer = document.createElement('div');
+    outer.className = 'ow-agenda-link-editor' + (modalMode ? ' ow-agenda-modal-link-editor' : '');
+    var label = document.createElement('label');
+    label.className = 'ow-agenda-editor-label';
+    label.textContent = 'Link do material finalizado';
+    var line = document.createElement('div');
+    line.className = 'ow-agenda-link-row';
+    var field = document.createElement('input');
+    field.type = 'url';
+    field.inputMode = 'url';
+    field.placeholder = 'Cole o link do Drive, Frame.io, Canva...';
+    field.value = String(demand.finalLink || '');
+    field.setAttribute('aria-label', 'Link do material finalizado');
+    var save = document.createElement('button');
+    save.type = 'button';
+    save.className = 'ow-agenda-inline-save';
+    save.textContent = demand.finalLink ? 'Atualizar link' : 'Salvar link';
+    line.append(field, save);
+    outer.append(label, line);
+    if (demand.finalLink && safeUrl(demand.finalLink) !== '#') {
+      var open = document.createElement('a');
+      open.className = 'ow-agenda-link-open';
+      open.href = safeUrl(demand.finalLink);
+      open.target = '_blank';
+      open.rel = 'noopener';
+      open.textContent = 'Abrir material finalizado';
+      outer.appendChild(open);
+    }
+    if (canEditFinalMaterial(demand)) {
+      save.addEventListener('click', async function () {
+        if (save.disabled) return;
+        save.disabled = true;
+        var previousValue = demand.finalLink || '';
+        await saveFinalMaterialLink(demand.id, field.value);
+        save.disabled = false;
+        var newValue = state.demands.find(function (d) { return d.id === demand.id; })?.finalLink || '';
+        if (newValue !== previousValue || newValue === field.value.trim()) {
+          save.textContent = newValue ? 'Atualizar link' : 'Salvar link';
+          var existing = outer.querySelector('.ow-agenda-link-open');
+          if (existing) existing.remove();
+          if (newValue && safeUrl(newValue) !== '#') {
+            var a = document.createElement('a');
+            a.className = 'ow-agenda-link-open';
+            a.href = safeUrl(newValue);
+            a.target = '_blank';
+            a.rel = 'noopener';
+            a.textContent = 'Abrir material finalizado';
+            outer.appendChild(a);
+          }
+        }
+      });
+    } else {
+      field.disabled = true;
+      save.remove();
+    }
+    container.appendChild(outer);
+  }
+
+  // O editor administrativo funciona sobre a Agenda e mantém os campos
+  // originais (data, responsável, cliente, arquivos, descrição e status).
+  openDemandModal = function (id, clientId) {
+    var result = previousOpenDemandModal.apply(this, arguments);
+    var modal = document.getElementById('demandModal');
+    if (!modal || modal.classList.contains('hidden')) return result;
+    modal.querySelectorAll('.ow-agenda-modal-link-editor').forEach(function (node) { node.remove(); });
+    if (id) {
+      var demand = getDemand(id);
+      var form = modal.querySelector('form');
+      if (demand && form) {
+        var actions = form.querySelector('.modal-actions');
+        var location = actions ? actions.parentElement : form;
+        var anchor = document.createElement('div');
+        anchor.className = 'ow-agenda-modal-link-host';
+        showMaterialLinkControls(anchor, demand, true);
+        if (anchor.children.length) {
+          if (actions && location) location.insertBefore(anchor, actions);
+          else form.appendChild(anchor);
+        }
+      }
+    }
+    return result;
+  };
+
+  function showStaffEditor(id) {
+    var demand = getDemand(id);
+    if (!demand || isAdmin() || currentArea !== 'agenda') return false;
+    var list = document.getElementById('agendaList');
+    var card = list?.querySelector('.agenda-item[data-agenda-id="' + CSS.escape(id) + '"]');
+    if (!card) {
+      // Na visualização mensal o usuário pode retornar à Lista para editar.
+      var switcher = document.querySelector('#owAgendaControls [data-ow-agenda-mode="list"]');
+      if (switcher) {
+        switcher.click();
+        return showStaffEditor(id);
+      }
+      return false;
+    }
+    var existing = list.querySelector('.ow-agenda-inline-editor');
+    if (existing) {
+      var same = currentExpandedId === id;
+      existing.remove();
+      currentExpandedId = '';
+      if (same) return true;
+    }
+    currentExpandedId = id;
+    var editor = document.createElement('div');
+    editor.className = 'ow-agenda-inline-editor';
+    editor.setAttribute('aria-label', 'Editar demanda sem sair da Agenda');
+    var header = document.createElement('div');
+    header.className = 'ow-agenda-inline-head';
+    header.innerHTML = '<div><strong>' + esc(demand.title) + '</strong><span>' +
+      esc(AREAS[demand.area] || demand.area) + ' · ' + esc(fmtPostDate(demand.postDate)) +
+      '</span></div>';
+    var close = document.createElement('button');
+    close.type = 'button';
+    close.className = 'ow-agenda-inline-close';
+    close.textContent = 'Fechar ×';
+    close.addEventListener('click', function () { editor.remove(); currentExpandedId = ''; });
+    header.appendChild(close);
+    editor.appendChild(header);
+    if (demand.description) {
+      var description = document.createElement('p');
+      description.className = 'ow-agenda-inline-desc';
+      description.textContent = demand.description;
+      editor.appendChild(description);
+    }
+    var title = document.createElement('div');
+    title.className = 'ow-agenda-editor-label';
+    title.textContent = 'Atualizar status';
+    editor.appendChild(title);
+    var statusRow = document.createElement('div');
+    statusRow.className = 'ow-agenda-inline-status';
+    Object.entries(statusesForArea(demand.area)).forEach(function (entry) {
+      var key = entry[0], name = entry[1];
+      if (key === 'purple') return; // Aprovação do cliente: somente administrador.
+      var button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'status-btn' + (demand.status === key ? ' active' : '');
+      button.dataset.status = key;
+      button.textContent = name;
+      button.addEventListener('click', async function () {
+        if (!getDemand(id)) return;
+        button.disabled = true;
+        await updateStatus(id, key);
+      });
+      statusRow.appendChild(button);
+    });
+    editor.appendChild(statusRow);
+    showMaterialLinkControls(editor, demand, false);
+    card.insertAdjacentElement('afterend', editor);
+    return true;
+  }
+
+  function editFromAgenda(id) {
+    var demand = getDemand(id);
+    if (!demand) return false;
+    if (!isAdmin()) return showStaffEditor(id);
+    var oldArea = currentArea;
     try {
       currentArea = demand.area;
       openDemandModal(demand.id, demand.clientId);
     } finally {
-      currentArea = originalArea;
+      currentArea = oldArea;
     }
     var modal = document.getElementById('demandModal');
     if (!modal || modal.classList.contains('hidden')) return false;
-    editingId = id;
     agendaEditing = true;
-    // Título deixa claro que o usuário continua trabalhando na Agenda.
     var heading = document.getElementById('demandModalTitle');
     if (heading) heading.textContent = 'Editar demanda · Agenda';
     return true;
   }
 
-  window.OneWayAgendaQuickEdit = beginEditFromAgenda;
+  window.OneWayAgendaQuickEdit = editFromAgenda;
 
-  // O submit nativo persiste no Supabase e costuma mudar para a aba do cliente.
-  // Este adaptador só restaura o contexto da Agenda após a gravação concluída.
   renderAll = function () {
     if (agendaEditing && currentArea !== 'agenda') {
       var modal = document.getElementById('demandModal');
-      // Só volta à Agenda depois que o submit nativo fechou o editor.
       if (modal && modal.classList.contains('hidden') && isAdmin()) {
         currentArea = 'agenda';
         openClientId = null;
         openDemandId = null;
         agendaEditing = false;
-        editingId = null;
       }
     }
     return previousRenderAll.apply(this, arguments);
   };
 
   renderAgenda = function () {
+    currentExpandedId = '';
     var result = previousRenderAgenda.apply(this, arguments);
-    if (currentArea !== 'agenda' || !isAdmin()) return result;
-
+    if (currentArea !== 'agenda') return result;
     var root = document.getElementById('agendaList');
     if (root) {
-      root.querySelectorAll('.agenda-item[data-agenda-id]').forEach(function (button) {
-        // O botão original já tem eventos, que são substituídos apenas no admin.
-        button.onclick = function (event) {
+      root.querySelectorAll('.agenda-item[data-agenda-id]').forEach(function (card) {
+        card.onclick = function (event) {
           event.preventDefault();
-          beginEditFromAgenda(button.dataset.agendaId);
+          editFromAgenda(card.dataset.agendaId);
         };
-        button.title = 'Abrir e editar sem sair da Agenda';
-        button.setAttribute('aria-label', 'Editar demanda na Agenda');
+        card.title = 'Abrir e atualizar sem sair da Agenda';
+        card.setAttribute('aria-label', 'Abrir demanda na Agenda');
+        // Nas Finalizadas o endereço não deve ficar escondido.
+        var demand = getDemand(card.dataset.agendaId);
+        if (demand?.finalLink && safeUrl(demand.finalLink) !== '#') {
+          var info = card.querySelector('.agenda-info');
+          if (info && !info.querySelector('.ow-agenda-link-preview')) {
+            var hint = document.createElement('span');
+            hint.className = 'ow-agenda-link-preview';
+            hint.textContent = 'Material finalizado disponível · clique para abrir';
+            info.appendChild(hint);
+          }
+        }
       });
     }
     return result;
   };
 
-  // Fechar o editor sem salvar não deve afetar a próxima navegação.
+  // O modal pode ser fechado sem salvar. Nesse caso não mantém contexto pendente.
   document.addEventListener('click', function (event) {
     if (!agendaEditing) return;
-    var close = event.target.closest('[data-close="demandModal"]');
-    if (close) {
-      agendaEditing = false;
-      editingId = null;
-    }
+    if (event.target.closest('[data-close="demandModal"]')) agendaEditing = false;
   }, true);
-
   document.addEventListener('keydown', function (event) {
-    if (event.key !== 'Escape' || !agendaEditing) return;
-    // Fecha somente o contexto; mantém as permissões nativas do modal.
-    agendaEditing = false;
-    editingId = null;
+    if (event.key === 'Escape') agendaEditing = false;
   }, true);
 })();
