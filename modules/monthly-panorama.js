@@ -57,7 +57,7 @@
     }).sort(sortClientDemandsByPostDate);
   }
   function areaLabel(area) {
-    return AREAS[area] || area;
+    return area === 'socialMedia' ? 'Social Media' : (AREAS[area] || area);
   }
   function buildCalendar(items, month, scope) {
     month = safeMonth(month);
@@ -331,7 +331,7 @@
     var areaButtons = '';
     if (allowedAreaKeys().length > 1) {
       areaButtons = '<div class="ow-agenda-areas"><span>Filtrar</span>' +
-        [{ key: 'all', name: 'Tudo' }].concat(allowedAreaKeys().map(function (area) {
+        [{ key: 'all', name: 'Tudo' }].concat(allowedAreaKeys().concat(isAdmin() ? ['socialMedia'] : []).map(function (area) {
           return { key: area, name: areaLabel(area) };
         })).map(function (area) {
           return '<button type="button" data-ow-area="' + area.key +
@@ -582,4 +582,207 @@
   };
   if (currentUser && currentArea === 'commemorativeDates') renderCommemorativeDates();
   if (currentUser && currentArea === 'agenda') renderAgenda();
+})();
+
+
+/* One Way · Social Media na Agenda (visualização dos registros protegidos) */
+(function () {
+  'use strict';
+  if (typeof renderAgenda !== 'function' || typeof smOpenModal !== 'function' ||
+      typeof smRefreshFromRemote !== 'function') return;
+
+  var previousRenderAgenda = renderAgenda;
+  var previousSocialRefresh = smRefreshFromRemote;
+  var SOCIAL_AREA = 'socialMedia';
+
+  // O planejamento Social Media continua criptografado e independente.
+  // Só o administrador autenticado, após o desbloqueio, pode vê-lo na Agenda.
+  function agendaSocialItems(area, withSearch) {
+    if (!isAdmin() || !adminAuthReady() || !smUnlocked || !Array.isArray(smItems) ||
+        agendaView !== 'active') return [];
+    if (area !== 'all' && area !== SOCIAL_AREA) return [];
+    // Esses registros não possuem responsável; não aparecem sob o filtro de outra pessoa.
+    if (agendaAssigneeFilter !== 'all' && agendaAssigneeFilter !== 'unassigned') return [];
+    var query = withSearch ? String(document.getElementById('searchInput')?.value || '')
+      .trim().toLocaleLowerCase('pt-BR') : '';
+    return smItems.filter(function (item) {
+      if (!item || !/^\d{4}-\d{2}-\d{2}$/.test(String(item.date || ''))) return false;
+      if (!query) return true;
+      return [item.client, item.title, item.description].some(function (value) {
+        return String(value || '').toLocaleLowerCase('pt-BR').includes(query);
+      });
+    }).sort(function (a, b) {
+      return a.date.localeCompare(b.date) ||
+        String(a.title || '').localeCompare(String(b.title || ''), 'pt-BR');
+    });
+  }
+
+  function openOriginalSocialTask(id) {
+    if (!isAdmin() || !adminAuthReady() || !smUnlocked) return;
+    var item = smItems.find(function (row) { return row.id === id; });
+    if (!item) return;
+    currentArea = SOCIAL_AREA;
+    smMonth = item.date.slice(0, 7);
+    smSelectedClient = smNormalizeName(item.client);
+    smSearchText = '';
+    openClientId = null;
+    openDemandId = null;
+    renderAll();
+    smOpenModal(id);
+  }
+
+  function makeAgendaCard(item, index) {
+    var el = document.createElement('button');
+    el.type = 'button';
+    el.className = 'agenda-item ow-social-agenda-item';
+    el.dataset.owSocialAgendaId = item.id;
+    el.style.animationDelay = Math.min(index * 35, 300) + 'ms';
+    var date = new Date(item.date + 'T12:00:00');
+    var month = new Intl.DateTimeFormat('pt-BR', {month:'short'}).format(date).replace('.', '');
+    // Sem check de aprovação/status fictício: esse módulo é um planejamento editorial.
+    el.innerHTML = '<span class="agenda-date"><strong class="agenda-day">' +
+      esc(String(date.getDate()).padStart(2, '0')) + '</strong><span class="agenda-month">' +
+      esc(month) + '</span></span>' +
+      '<span class="agenda-info"><strong>' + esc(item.title || 'Pauta sem título') + '</strong>' +
+      '<span>' + esc(item.client || 'Cliente') + '</span>' +
+      (item.description ? '<span class="ow-social-agenda-desc">' + esc(item.description) + '</span>' : '') +
+      '<span class="agenda-created-date">Planejamento de Social Media</span></span>' +
+      '<span class="area-chip ow-social-area-chip">Social Media</span>' +
+      '<span class="current-status ow-social-plan-label">Pauta</span>' +
+      '<span class="agenda-arrow">›</span>';
+    el.addEventListener('click', function () { openOriginalSocialTask(item.id); });
+    return el;
+  }
+
+  function renderSocialList(area) {
+    var root = document.getElementById('agendaList');
+    if (!root || agendaView !== 'active' || root.classList.contains('hidden')) return;
+    var items = agendaSocialItems(area, true);
+    if (!items.length) return;
+    var empty = root.querySelector('.empty');
+    if (empty) empty.remove();
+    items.forEach(function (item, index) { root.appendChild(makeAgendaCard(item, index)); });
+    // Ordena junto às áreas existentes sem recriar os botões nem seus eventos.
+    var realById = new Map(state.demands.map(function (d) { return [d.id, d]; }));
+    var socialById = new Map(items.map(function (d) { return [d.id, d]; }));
+    var today = typeof demandCreationCalendarDate === 'function'
+      ? demandCreationCalendarDate() : calendarLocalISO(new Date());
+    var cards = Array.from(root.querySelectorAll('.agenda-item'));
+    cards.sort(function (a, b) {
+      var aSocial = socialById.get(a.dataset.owSocialAgendaId);
+      var bSocial = socialById.get(b.dataset.owSocialAgendaId);
+      var aDemand = aSocial || realById.get(a.dataset.agendaId);
+      var bDemand = bSocial || realById.get(b.dataset.agendaId);
+      if (!aDemand || !bDemand) return 0;
+      var aDate = String(aSocial?.date || aDemand.postDate || '9999-99-99');
+      var bDate = String(bSocial?.date || bDemand.postDate || '9999-99-99');
+      var aLate = aSocial ? aDate < today : agendaDemandIsOverdue(aDemand);
+      var bLate = bSocial ? bDate < today : agendaDemandIsOverdue(bDemand);
+      if (aLate !== bLate) return aLate ? -1 : 1;
+      return aDate.localeCompare(bDate) ||
+        String(aDemand.title || '').localeCompare(String(bDemand.title || ''), 'pt-BR');
+    });
+    cards.forEach(function (card) { root.appendChild(card); });
+    var counter = document.getElementById('agendaCount');
+    if (counter) {
+      var total = cards.length;
+      counter.textContent = String(counter.textContent || '').replace(/^\d+ demanda(?:s)?/,
+        total + ' demanda' + (total === 1 ? '' : 's'));
+    }
+  }
+
+  function makeCalendarCard(item) {
+    var el = document.createElement('div');
+    el.className = 'ow-cal-demand ow-cal-socialMedia';
+    el.dataset.owSocialAgendaId = item.id;
+    el.draggable = false;
+    el.tabIndex = 0;
+    el.setAttribute('role', 'button');
+    var fullTitle = (item.client || 'Cliente') + ' · ' + (item.title || 'Pauta') + ' · Social Media';
+    el.title = fullTitle;
+    el.setAttribute('aria-label', fullTitle);
+    el.innerHTML = '<span class="ow-cal-text">' + esc((item.client || 'Cliente') + ' · ' +
+      (item.title || 'Pauta')) + '</span>' +
+      '<button type="button" class="ow-cal-open" title="Abrir no Social Media" aria-label="Abrir no Social Media">↗</button>';
+    el.addEventListener('click', function (event) {
+      event.stopPropagation();
+      openOriginalSocialTask(item.id);
+    });
+    el.addEventListener('keydown', function (event) {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        event.stopPropagation();
+        openOriginalSocialTask(item.id);
+      }
+    });
+    return el;
+  }
+
+  function renderSocialCalendar(area) {
+    var shell = document.querySelector('#owAgendaCalendar .ow-month-shell');
+    if (!shell || agendaView !== 'active') return;
+    var items = agendaSocialItems(area, false);
+    // O panorama já tem seu próprio mês; não usamos o filtro mensal da aba Social Media.
+    var dateMap = new Map();
+    items.forEach(function (item) {
+      if (!dateMap.has(item.date)) dateMap.set(item.date, []);
+      dateMap.get(item.date).push(item);
+    });
+    var visibleCount = 0;
+    shell.querySelectorAll('.ow-day[data-ow-date]').forEach(function (day) {
+      var dayItems = dateMap.get(day.dataset.owDate) || [];
+      var list = day.querySelector('.ow-day-items');
+      if (!list || !dayItems.length) return;
+      dayItems.forEach(function (item) {
+        list.appendChild(makeCalendarCard(item));
+        visibleCount++;
+      });
+      var count = list.querySelectorAll('.ow-cal-demand').length;
+      var label = day.querySelector('.ow-day-top small');
+      if (!label) {
+        label = document.createElement('small');
+        day.querySelector('.ow-day-top')?.appendChild(label);
+      }
+      label.textContent = count + ' demanda' + (count === 1 ? '' : 's');
+      day.classList.toggle('ow-day-busy', count > 1);
+    });
+    if (!visibleCount) return;
+    var legend = shell.querySelector('.ow-month-legend');
+    if (legend) {
+      var chip = document.createElement('span');
+      chip.className = 'ow-legend-socialMedia';
+      chip.textContent = 'Social Media';
+      legend.querySelector('.ow-legend-count')?.before(chip);
+      var counter = legend.querySelector('.ow-legend-count');
+      if (counter) {
+        var base = Number.parseInt(counter.textContent, 10) || 0;
+        var total = base + visibleCount;
+        counter.textContent = total + ' demanda' + (total === 1 ? '' : 's') + ' no mês';
+      }
+    }
+    var foot = shell.querySelector('.ow-month-foot');
+    if (foot) foot.textContent += ' · Pautas de Social Media: clique para abrir e editar na aba própria.';
+  }
+
+  renderAgenda = function () {
+    previousRenderAgenda.apply(this, arguments);
+    if (currentArea !== 'agenda' || !isAdmin()) return;
+    var activeArea = document.querySelector('#owAgendaControls [data-ow-area].is-active')?.dataset.owArea || 'all';
+    var description = document.querySelector('#agendaContent .agenda-summary span');
+    if (activeArea === SOCIAL_AREA && description) {
+      description.textContent = 'Demandas de Social Media organizadas por data, no planejamento original.';
+    }
+    if (agendaView !== 'active') return;
+    var list = document.getElementById('agendaList');
+    if (list && !list.classList.contains('hidden')) renderSocialList(activeArea);
+    else renderSocialCalendar(activeArea);
+  };
+
+  // Atualizações sincronizadas do Social Media também refletem na Agenda aberta.
+  smRefreshFromRemote = async function () {
+    var previousTimestamp = smUpdatedAt;
+    var result = await previousSocialRefresh.apply(this, arguments);
+    if (currentArea === 'agenda' && smUnlocked && smUpdatedAt !== previousTimestamp) renderAgenda();
+    return result;
+  };
 })();
