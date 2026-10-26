@@ -98,6 +98,7 @@
           String(d.title || '') + ' | ' + statusLabel(d) + ' | ' + fmtPostDate(d.postDate);
         cells += '<div class="ow-cal-demand ow-cal-' + esc(d.area) + (d.id === selectedCalendarDemand ? ' ow-cal-selected' : '') +
           (d.status === 'purple' && d.area !== 'trafego' ? ' ow-cal-approval' : '') +
+          (d.status === 'salmon' && d.area !== 'trafego' ? ' ow-cal-oneway' : '') +
           '" data-ow-demand="' + esc(d.id) + '" draggable="' + (isAdmin() && !calendarSaving ? 'true' : 'false') +
           '" title="' + esc(description) + '" tabindex="0" role="button" aria-label="' + esc(description) + '">' +
           '<span class="ow-cal-text">' + esc(title) + '</span>' +
@@ -315,6 +316,13 @@
       var item = state.demands.find(function (d) { return d.id === button.dataset.agendaId; });
       button.classList.toggle('ow-awaiting-approval', !!item &&
         (item.area === 'arte' || item.area === 'video') && item.status === 'purple');
+      button.classList.toggle('ow-awaiting-oneway', !!item &&
+        (item.area === 'arte' || item.area === 'video') && item.status === 'salmon');
+      if (item && /^(07|08):00$/.test(String(item.postTime || ''))) {
+        var info = button.querySelector('.agenda-info');
+        if (info) { var hour = document.createElement('span'); hour.className = 'ow-post-time';
+          hour.textContent = 'Horário de postagem: ' + item.postTime; info.appendChild(hour); }
+      }
     });
 
     var controls = document.createElement('div');
@@ -335,7 +343,16 @@
       (!agendaCalendarMode ? ' class="is-active"' : '') + '>Lista</button>' +
       '<button type="button" data-ow-agenda-mode="calendar"' +
       (agendaCalendarMode ? ' class="is-active"' : '') + '>Panorama mensal</button></div>' + areaButtons;
-    wrap.insertBefore(controls, tabs);
+    var toolbarLine = wrap.querySelector('.ow-agenda-toolbar-line');
+    if (!toolbarLine) {
+      toolbarLine = document.createElement('div');
+      toolbarLine.className = 'ow-agenda-toolbar-line';
+      wrap.insertBefore(toolbarLine, tabs);
+    }
+    toolbarLine.appendChild(tabs);
+    toolbarLine.appendChild(controls);
+    var assigneeToolbar = document.getElementById('owAgendaAssigneeToolbar');
+    if (assigneeToolbar) toolbarLine.appendChild(assigneeToolbar);
     controls.querySelectorAll('[data-ow-area]').forEach(function (button) {
       button.addEventListener('click', function () {
         agendaCalendarArea = button.dataset.owArea;
@@ -364,4 +381,205 @@
   };
 
   if (typeof currentUser !== 'undefined' && currentUser && currentArea) renderAll();
+})();
+
+
+/* One Way · atribuição de artes comemorativas */
+(function () {
+  'use strict';
+  if (typeof renderCommemorativeDates !== 'function' ||
+      typeof STATUS_DEFAULT !== 'object' || typeof cmSelectableRecords !== 'function') return;
+
+  // Status do cliente permanece roxo; o salmão identifica a conferência interna.
+  STATUS_DEFAULT.purple = 'Aguardando aprovação cliente';
+  delete STATUS_DEFAULT.orange;
+  delete STATUS_DEFAULT.green;
+  STATUS_DEFAULT.salmon = 'Aguardando aprovação OneWay';
+  STATUS_DEFAULT.orange = 'Aguardando postagem';
+  STATUS_DEFAULT.green = 'Finalizado';
+
+  var originalDatesRender = renderCommemorativeDates;
+  var originalUpdateStatus = updateStatus;
+  var originalBindClientEvents = bindClientEvents;
+  var originalRenderDemand = renderDemand;
+
+  function holidayClientRecords() {
+    return cmSelectableRecords('arte');
+  }
+
+  function sameHolidayDemand(d, clientId, date, title) {
+    var client = state.clients.find(function (x) { return x.id === d.clientId; });
+    var selected = state.clients.find(function (x) { return x.id === clientId; });
+    return d.area === 'arte' && d.postDate === date && !!client && !!selected &&
+      cmSelectionKey(client.name) === cmSelectionKey(selected.name) &&
+      (d.commemorativeKey === date + '|' + title ||
+       d.title === 'Arte · ' + title || d.title === title);
+  }
+
+  async function assignHolidayArt(event, item, form, card) {
+    event.preventDefault();
+    if (!isAdmin() || !item || !/^\d{4}-\d{2}-\d{2}$/.test(String(item.date || ''))) return;
+    var clientId = form.querySelector('[name="holidayClient"]').value;
+    var assignee = form.querySelector('[name="holidayAssignee"]').value;
+    var time = form.querySelector('[name="holidayTime"]').value;
+    var selected = state.clients.find(function (client) {
+      return client.id === clientId && !client.mergedInto && !client.deletedAt && !cmIsArchived(client.name);
+    });
+    if (!selected || !['Pedro', 'Gabriel'].includes(assignee) || !['07:00', '08:00'].includes(time)) {
+      toast('Escolha um cliente, o responsável e um horário válido.');
+      return;
+    }
+    if (state.demands.some(function (d) { return sameHolidayDemand(d, clientId, item.date, item.title); })) {
+      toast('Esta arte comemorativa já está cadastrada para esse cliente nessa data.');
+      return;
+    }
+    var submit = form.querySelector('button[type="submit"]');
+    submit.disabled = true;
+    submit.textContent = 'Atribuindo…';
+    var month = item.date.slice(0, 7);
+    var clientNameKey = cmSelectionKey(selected.name);
+    var artClient = state.clients.find(function (c) {
+      return !c.mergedInto && !c.deletedAt && c.area === 'arte' &&
+        !cmIsArchived(c.name) && cmSelectionKey(c.name) === clientNameKey;
+    });
+    var createdClient = null;
+    if (!artClient) {
+      createdClient = {
+        id: uid(), name: selected.name, area: 'arte', type: 'fixed',
+        startMonth: month, createdAt: new Date().toISOString()
+      };
+      state.clients.push(createdClient);
+      artClient = createdClient;
+    }
+    var description = 'Arte para ' + item.title + '.';
+    if (item.note) description += '\n' + item.note;
+    if (item.suggestion && item.suggestion !== item.note) description += '\nPauta sugerida: ' + item.suggestion;
+    var demand = {
+      id: uid(), clientId: artClient.id, month: month, area: 'arte',
+      title: 'Arte · ' + item.title, description: description,
+      postDate: item.date, postTime: time, assignee: assignee, status: 'red',
+      commemorativeKey: item.date + '|' + item.title,
+      links: [], attachments: [], productionLinks: [], productionAttachments: [],
+      createdAt: new Date().toISOString(), createdDate: demandCreationCalendarDate()
+    };
+    state.demands.push(demand);
+    try {
+      // O cadastro só é confirmado quando foi compartilhado com os demais usuários.
+      var synced = await saveState({strictRemote: true});
+      if (!synced) throw new Error('Falha ao sincronizar a nova demanda');
+      renderCommemorativeDates();
+      toast('Arte atribuída a ' + assignee + ' para ' + fmtPostDate(item.date) + '.', 'Abrir demanda', function () {
+        currentArea = 'arte';
+        currentMonth = month;
+        adminAssigneeFilter = 'all';
+        openClientId = artClient.id;
+        openDemandId = demand.id;
+        renderAll();
+        var list = document.getElementById('clients');
+        if (list) list.scrollIntoView({behavior: 'smooth', block: 'start'});
+      }, 'success', 7000);
+    } catch (error) {
+      state.demands = state.demands.filter(function (d) { return d.id !== demand.id; });
+      if (createdClient) state.clients = state.clients.filter(function (c) { return c.id !== createdClient.id; });
+      state.updatedAt = Date.now();
+      if (typeof writeLocalCache === 'function') writeLocalCache(state);
+      console.error('Arte comemorativa não foi sincronizada:', error);
+      toast('Não foi possível sincronizar a demanda. Nenhuma arte foi cadastrada.');
+      submit.disabled = false;
+      submit.textContent = 'Criar demanda de Arte';
+    }
+  }
+
+  renderCommemorativeDates = function () {
+    originalDatesRender();
+    if (!isAdmin()) return;
+    var list = document.getElementById('commemorativeDateList');
+    if (!list) return;
+    var items = commemorativeDatesFor(commemorativeYear, commemorativeMonth);
+    if (commemorativeCategory !== 'all') items = items.filter(function (item) {
+      return item.cats.includes(commemorativeCategory);
+    });
+    var clients = holidayClientRecords();
+    list.querySelectorAll('.commemorative-date-card').forEach(function (card, index) {
+      var item = items[index];
+      if (!item || card.dataset.commDate !== item.date) return;
+      var panelId = 'ow-comm-panel-' + commemorativeYear + '-' + commemorativeMonth + '-' + index;
+      var toggle = document.createElement('button');
+      toggle.type = 'button';
+      toggle.className = 'commemorative-assign-toggle';
+      toggle.setAttribute('aria-controls', panelId);
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.innerHTML = 'Atribuir arte <span class="ow-comm-caret" aria-hidden="true">⌄</span>';
+      var panel = document.createElement('div');
+      panel.id = panelId;
+      panel.className = 'commemorative-assign-panel hidden';
+      panel.setAttribute('data-comm-assign-panel', '');
+      var form = document.createElement('form');
+      form.innerHTML =
+        '<label>Cliente<select name="holidayClient" required>' +
+        '<option value="">Selecionar cliente</option>' +
+        clients.map(function (c) {
+          return '<option value="' + esc(c.id) + '">' + esc(c.name) + '</option>';
+        }).join('') + '</select></label>' +
+        '<label>Responsável<select name="holidayAssignee" required>' +
+        '<option value="Gabriel">Gabriel</option><option value="Pedro">Pedro</option></select></label>' +
+        '<label>Horário<select name="holidayTime"><option value="08:00">08:00</option>' +
+        '<option value="07:00">07:00</option></select></label>' +
+        '<button type="submit"' + (clients.length ? '' : ' disabled') + '>Criar demanda de Arte</button>' +
+        '<p class="commemorative-assign-note">A arte entra automaticamente no mês e no dia da data comemorativa e aparece na Agenda.</p>';
+      if (!clients.length) form.querySelector('.commemorative-assign-note').textContent =
+        'Cadastre um cliente na Gestão de Clientes antes de atribuir esta arte.';
+      panel.appendChild(form);
+      card.appendChild(toggle);
+      card.appendChild(panel);
+      toggle.addEventListener('click', function () {
+        var open = panel.classList.contains('hidden');
+        list.querySelectorAll('[data-comm-assign-panel]').forEach(function (node) {
+          node.classList.add('hidden');
+        });
+        list.querySelectorAll('.commemorative-assign-toggle').forEach(function (button) {
+          button.setAttribute('aria-expanded', 'false');
+        });
+        panel.classList.toggle('hidden', !open);
+        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        if (open) form.querySelector('select').focus();
+      });
+      form.addEventListener('submit', function (event) {
+        assignHolidayArt(event, item, form, card);
+      });
+    });
+  };
+
+  // Aprovação de cliente é responsabilidade do administrativo; os editores
+  // podem marcar aprovação interna (salmão) e conservar os outros status.
+  updateStatus = async function (id, status) {
+    var demand = state.demands.find(function (d) { return d.id === id; });
+    if (demand && !isAdmin() && ['arte', 'video'].includes(demand.area) && status === 'purple') {
+      toast('A aprovação do cliente é registrada pelo administrador.');
+      return;
+    }
+    return originalUpdateStatus(id, status);
+  };
+  bindClientEvents = function (root) {
+    originalBindClientEvents(root);
+    if (!isAdmin()) root.querySelectorAll('.demand .status-btn[data-status="purple"]').forEach(function (button) {
+      button.disabled = true;
+      button.title = 'A aprovação do cliente é registrada pelo administrativo';
+    });
+    root.querySelectorAll('.ow-cal-demand').forEach(function (card) {
+      var d = state.demands.find(function (item) { return item.id === card.dataset.owDemand; });
+      card.classList.toggle('ow-cal-oneway', !!d && d.status === 'salmon' && d.area !== 'trafego');
+    });
+  };
+  renderDemand = function (d, index, showAreaLabel) {
+    var html = originalRenderDemand(d, index, showAreaLabel);
+    if (d && /^(07|08):00$/.test(String(d.postTime || ''))) {
+      var raw = '<p class="description">' + esc(fmtPostDate(d.postDate)) + '</p>';
+      html = html.replace(raw, '<p class="description">' + esc(fmtPostDate(d.postDate)) +
+        ' às ' + esc(d.postTime) + '</p>');
+    }
+    return html;
+  };
+  if (currentUser && currentArea === 'commemorativeDates') renderCommemorativeDates();
+  if (currentUser && currentArea === 'agenda') renderAgenda();
 })();
