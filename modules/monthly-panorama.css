@@ -60,3 +60,41 @@
 .agenda-item.ow-awaiting-approval .current-status.purple{border-color:#c8a0ff!important;box-shadow:0 0 0 2px rgba(169,92,253,.25)}
 @media(max-width:900px){.ow-month-shell{padding:12px}.ow-day{min-height:103px}.ow-calendar-grid{min-width:630px}.ow-agenda-controls{justify-content:flex-start}.ow-client-calendar{margin-top:10px}}
 @media(max-width:600px){.ow-month-head{align-items:flex-start;gap:10px}.ow-month-head h3{font-size:16px}.ow-month-head p{font-size:9px}.ow-month-nav{width:100%;justify-content:space-between}.ow-month-nav strong{flex:1}.ow-month-legend{gap:5px}.ow-legend-count{width:100%;margin-left:0}.ow-calendar-grid{min-width:595px}.ow-day{min-height:90px;padding:4px}.ow-cal-text{font-size:8px}.ow-mode-toggle{padding:7px 9px}.ow-agenda-mode button,.ow-agenda-areas button{font-size:9px;padding:8px}.agenda-item.ow-awaiting-approval:after{font-size:6px;right:5px}}
+
+
+/* One Way · demandas comemorativas e aprovação interna */
+.dot.salmon,.salmon{background:#e99d89}
+.current-status.salmon{background:#ad6158!important;color:#fff!important;border-color:#f4b5a4!important}
+.status-btn[data-status="salmon"]{background:#fff0ea!important;color:#8f463f!important;border-color:#efb5a4!important}
+.status-btn.active[data-status="salmon"]{background:#d88170!important;color:#fff!important;border-color:#f2ac99!important}
+.status-btn:disabled{cursor:not-allowed;opacity:.46;filter:grayscale(.25);transform:none!important}
+.ow-agenda-toolbar-line{display:flex;align-items:center;gap:9px;margin:0 0 12px;min-width:0}
+#agendaContent .ow-agenda-toolbar-line #agendaViewTabs{margin:0;flex:0 0 auto}
+#agendaContent .ow-agenda-toolbar-line .ow-agenda-controls{margin:0;flex:1 1 auto;justify-content:flex-end;gap:7px;min-width:0}
+#agendaContent .ow-agenda-toolbar-line .ow-agenda-mode,#agendaContent .ow-agenda-toolbar-line .ow-agenda-areas{flex-wrap:nowrap;gap:3px;padding:3px}
+#agendaContent .ow-agenda-toolbar-line .ow-agenda-mode button,#agendaContent .ow-agenda-toolbar-line .ow-agenda-areas button{padding:8px 9px;white-space:nowrap;font-size:9px}
+#agendaContent .ow-agenda-toolbar-line #owAgendaAssigneeToolbar{display:flex;flex:0 0 auto;align-items:center;flex-wrap:nowrap;gap:7px;margin:0;padding:3px 7px;border-radius:10px;box-shadow:none;background:rgba(255,255,255,.07);border-color:rgba(220,233,255,.15)}
+#agendaContent .ow-agenda-toolbar-line #owAgendaAssigneeToolbar.hidden{display:none!important}
+#agendaContent .ow-agenda-toolbar-line #owAgendaAssigneeToolbar label{font-size:9px;font-weight:600;white-space:nowrap;color:#dce9ff}
+#agendaContent .ow-agenda-toolbar-line #owAgendaAssigneeToolbar select{flex:0 1 140px;width:140px;max-width:140px;min-height:32px;padding:6px 7px;border-radius:7px;font-size:9px}
+#agendaContent .agenda-summary{margin:8px 0 10px}
+.agenda-item.ow-awaiting-oneway{border:1px solid rgba(238,164,141,.86)!important;box-shadow:inset 7px 0 0 #e79b85,0 12px 31px rgba(162,78,61,.17)!important;background:linear-gradient(100deg,rgba(222,122,104,.16),rgba(15,36,84,.74) 22%)!important}
+.agenda-item.ow-awaiting-oneway:after{content:'APROVAÇÃO ONE WAY';position:absolute;top:-9px;right:12px;display:inline-block;border-radius:999px;background:#b86858;color:#fff;font-size:7px;font-weight:900;letter-spacing:.055em;padding:4px 8px;box-shadow:0 5px 14px rgba(92,39,31,.28)}
+.agenda-item.ow-awaiting-approval:after{content:'APROVAÇÃO DO CLIENTE'!important}
+.ow-cal-oneway{outline:2px solid #e99d89;outline-offset:-1px;box-shadow:0 0 0 1px rgba(233,157,137,.3)}
+.ow-post-time{display:inline-block;margin-top:3px;font-size:9px;color:#d6e6ff}
+.commemorative-date-card{grid-template-columns:66px minmax(0,1fr) minmax(110px,auto) auto;align-items:start}
+.commemorative-assign-toggle{display:inline-flex;align-items:center;gap:10px;justify-content:center;align-self:center;min-height:34px;padding:7px 11px;white-space:nowrap;border-radius:9px;border:1px solid rgba(190,215,255,.27);background:rgba(255,255,255,.09);color:#e9f2ff;font-size:10px;font-weight:600;transition:background .18s ease}
+.commemorative-assign-toggle:hover,.commemorative-assign-toggle[aria-expanded="true"]{background:rgba(209,226,255,.18);border-color:rgba(209,226,255,.42)}
+.commemorative-assign-toggle .ow-comm-caret{display:inline-block;transition:transform .2s ease;font-size:14px}
+.commemorative-assign-toggle[aria-expanded="true"] .ow-comm-caret{transform:rotate(180deg)}
+.commemorative-assign-panel{grid-column:1 / -1;min-width:0;padding:13px 14px;margin-top:0;border:1px solid rgba(188,214,255,.22);border-radius:12px;background:rgba(5,19,49,.45)}
+.commemorative-assign-panel form{display:grid;grid-template-columns:minmax(160px,1fr) minmax(120px,.7fr) 115px auto;align-items:end;gap:10px}
+.commemorative-assign-panel label{display:flex;flex-direction:column;gap:5px;color:rgba(233,242,255,.8);font-size:9px;font-weight:600}
+.commemorative-assign-panel select{width:100%;min-height:36px;padding:6px 9px;border:1px solid rgba(176,203,247,.30);border-radius:8px;background:#102a55;color:#fff;font-size:11px;color-scheme:dark}
+.commemorative-assign-panel button[type="submit"]{min-height:36px;padding:8px 14px;border:1px solid rgba(177,204,255,.42);border-radius:8px;background:#e8f0ff;color:#12336f;font-size:10px;font-weight:700;white-space:nowrap}
+.commemorative-assign-panel button[type="submit"]:disabled{opacity:.55;cursor:wait}
+.commemorative-assign-note{grid-column:1/-1;margin:0;color:rgba(219,232,255,.58);font-size:9px;line-height:1.5}
+@media(max-width:1160px){.ow-agenda-toolbar-line{flex-wrap:wrap}.ow-agenda-toolbar-line .ow-agenda-controls{justify-content:flex-start!important}.ow-agenda-toolbar-line #owAgendaAssigneeToolbar{margin-left:auto!important}}
+@media(max-width:850px){.commemorative-date-card{grid-template-columns:56px minmax(0,1fr) auto}.commemorative-date-card .commemorative-tags{grid-column:2/-1;grid-row:2;justify-content:flex-start}.commemorative-assign-toggle{grid-column:3;grid-row:1}.commemorative-assign-panel form{grid-template-columns:repeat(2,minmax(0,1fr))}.ow-agenda-toolbar-line{align-items:stretch}}
+@media(max-width:560px){.commemorative-date-card{grid-template-columns:50px minmax(0,1fr);gap:10px}.commemorative-assign-toggle{grid-column:2;grid-row:auto;justify-self:start}.commemorative-date-card .commemorative-tags{grid-column:1/-1;grid-row:auto}.commemorative-assign-panel form{grid-template-columns:1fr}.commemorative-assign-panel button[type="submit"]{width:100%}#agendaContent .ow-agenda-toolbar-line .ow-agenda-controls{width:100%;flex-wrap:wrap;justify-content:flex-start!important}#agendaContent .ow-agenda-toolbar-line #owAgendaAssigneeToolbar{margin-left:0!important;width:100%;justify-content:space-between}#agendaContent .ow-agenda-toolbar-line #owAgendaAssigneeToolbar select{flex:1;max-width:180px}.agenda-item.ow-awaiting-oneway:after,.agenda-item.ow-awaiting-approval:after{font-size:6px;right:5px}}
