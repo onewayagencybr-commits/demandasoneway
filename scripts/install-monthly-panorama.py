@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Conecta somente o panorama mensal ao HTML atual sem alterar as demais funcionalidades."""
 from pathlib import Path
+import re
 
 root = Path(__file__).resolve().parents[1]
 index = root / "index.html"
@@ -28,7 +29,8 @@ assert '</script>' not in html[main_start+len('<script>'):main_end], (
 
 style_tag = '<link rel="stylesheet" href="/modules/monthly-panorama.css">'
 script_tag = '<script src="/modules/monthly-panorama.js" defer></script>'
-anchor = '<script src="/modules/scripts-ui.js" defer></script>'
+anchor_match = re.search(r'<script src="/modules/scripts-ui\.js(?:\?[^\"]*)?" defer></script>', html)
+anchor = anchor_match.group(0) if anchor_match else ''
 
 assert '</head>' in html, "Cabeçalho não encontrado"
 assert anchor in html, "Ponto de instalação do módulo não encontrado"
