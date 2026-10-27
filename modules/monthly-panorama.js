@@ -716,7 +716,10 @@
     if (!canSeeSocial()) return;
     var item = smItems.find(function (row) { return row.id === id; });
     if (!item) return;
-    // Mantém a Agenda aberta; o próprio modal seguro da Social Media permite editar.
+    if (currentArea === 'agenda' && typeof window.OneWaySocialInlineEditor === 'function') {
+      window.OneWaySocialInlineEditor(id);
+      return;
+    }
     smOpenModal(id);
   }
 
@@ -749,7 +752,10 @@
     var info = el.querySelector('.ow-social-agenda-info');
     info.insertBefore(stepControls(item, 'agenda'), info.firstChild);
     el.querySelectorAll('.ow-social-edit-title,.ow-social-edit-arrow').forEach(function (btn) {
-      btn.addEventListener('click', function () { openOriginalSocialTask(item.id); });
+      btn.addEventListener('click', function (event) {
+        event.stopPropagation();
+        openOriginalSocialTask(item.id);
+      });
     });
     return el;
   }
@@ -1329,4 +1335,209 @@
       shineTarget.style.setProperty('--ow-pointer-y', Math.round(shineY-rect.top)+'px');
     });
   },{passive:true});
+})();
+
+
+/* One Way · editor expansível de Social Media na Agenda · 2026-10-27 */
+(function(){
+  'use strict';
+  if (typeof renderAgenda !== 'function' || typeof smPersistItems !== 'function' ||
+      typeof smOpenModal !== 'function') return;
+
+  var prevRenderAgenda=renderAgenda;
+  var activeId='';
+  var updating=false;
+
+  function eligible(){
+    return currentArea==='agenda' && isAdmin() && adminAuthReady() &&
+      smUnlocked && Array.isArray(smItems);
+  }
+  function social(id){
+    return eligible() ? smItems.find(function(item){return item.id===id;}) : null;
+  }
+  function socialCard(id){
+    return Array.from(document.querySelectorAll('#agendaList>.ow-social-agenda-item'))
+      .find(function(el){return el.dataset.owSocialAgendaId===id;});
+  }
+  function checks(item) {
+    var stored=item.workflowChecks && typeof item.workflowChecks==='object'?item.workflowChecks:{};
+    return {
+      programar:stored.programar===true,
+      verificarArquivos:stored.verificarArquivos===true,
+      aguardandoMaterial:stored.aguardandoMaterial===true,
+      finalizado:stored.finalizado===true
+    };
+  }
+  function stage(item){
+    var v=String(item.status||'');
+    if (Object.prototype.hasOwnProperty.call(STATUS_DEFAULT,v))return v;
+    return checks(item).finalizado?'green':'red';
+  }
+  function closeExisting(){
+    document.querySelectorAll('#agendaList>.ow-agenda-inline-editor').forEach(function(node){node.remove();});
+    document.querySelectorAll('#agendaList>.agenda-item[aria-expanded]').forEach(function(node){
+      node.setAttribute('aria-expanded','false');
+    });
+  }
+  function mount(id,restoring){
+    var item=social(id);
+    if(!item)return false;
+    var card=socialCard(id);
+    if (!card) {
+      var calendarMode=document.querySelector('#owAgendaControls [data-ow-agenda-mode="calendar"].is-active');
+      var button=document.querySelector('#owAgendaControls [data-ow-agenda-mode="list"]');
+      if(calendarMode&&button){activeId=id;button.click();return true;}
+      return false;
+    }
+    var opened=document.querySelector('#agendaList>.ow-agenda-inline-editor');
+    if(!restoring && activeId===id && opened){
+      activeId='';
+      closeExisting();card.focus();return true;
+    }
+    closeExisting();
+    activeId=id;
+    card.setAttribute('aria-expanded','true');
+    var panel=document.createElement('section');
+    panel.className='ow-agenda-inline-editor ow-agenda-native-detail ow-social-inline-editor';
+    panel.setAttribute('aria-label','Editar demanda de Social Media');
+    var clients=smAllClients();
+    if (!clients.some(function(n){return smNormalizeName(n)===smNormalizeName(item.client);}))
+      clients.unshift(item.client);
+    var selected=stage(item);
+    panel.innerHTML=
+      '<header class="ow-agenda-inline-head"><div><strong>'+esc(item.title||'Demanda de Social Media')+'</strong>'+
+      '<span>'+esc(item.client||'Cliente')+' · '+esc(item.date||'')+' · Social Media</span></div>'+
+      '<button type="button" class="ow-agenda-inline-close" data-social-close>Fechar ×</button></header>'+
+      '<div class="detail-panel ow-social-edit-panel">'+
+      '<form class="ow-social-agenda-form">'+
+      '<div class="detail-label">Informações da demanda</div>'+
+      '<div class="ow-agenda-fields-grid">'+
+      '<label>Cliente<select name="client" required>'+clients.map(function(n){
+        return '<option value="'+esc(n)+'"'+(smNormalizeName(n)===smNormalizeName(item.client)?' selected':'')+'>'+esc(n)+'</option>';
+      }).join('')+'</select></label>'+
+      '<label>Data da demanda<input name="date" type="date" required value="'+esc(item.date||'')+'"></label>'+
+      '<label class="ow-agenda-fields-description">Título<input name="title" required maxlength="240" value="'+esc(item.title||'')+'"></label>'+
+      '<label class="ow-agenda-fields-description">Descrição<textarea name="description" rows="4">'+esc(item.description||'')+'</textarea></label>'+
+      '</div>'+
+      '<div class="ow-social-inline-section"><div class="detail-label">Situação da demanda</div>'+
+      '<div class="status-edit ow-social-statuses" role="group" aria-label="Situação da demanda">'+
+      Object.entries(STATUS_DEFAULT).map(function(entry){
+        var key=entry[0],name=entry[1];
+        return '<button type="button" class="status-btn'+(selected===key?' active':'')+
+          '" data-sm-stage="'+esc(key)+'" aria-pressed="'+String(selected===key)+'">'+esc(name)+'</button>';
+      }).join('')+'</div><input type="hidden" name="stage" value="'+esc(selected)+'"></div>'+
+      '<div class="ow-social-inline-section"><div class="detail-label">Checklist de acompanhamento</div>'+
+      '<div class="ow-social-inline-checks">'+
+      [['programar','Programar'],['verificarArquivos','Verificar arquivos'],
+       ['aguardandoMaterial','Aguardando material'],['finalizado','Finalizado']].map(function(entry){
+        return '<label class="ow-social-inline-check"><input type="checkbox" name="'+entry[0]+'"'+
+          (checks(item)[entry[0]]?' checked':'')+'><span>'+entry[1]+'</span></label>';
+      }).join('')+'</div></div>'+
+      '<div class="ow-social-inline-section"><label class="ow-agenda-editor-label">Link do material finalizado</label>'+
+      '<input class="ow-social-final-link" type="url" name="finalLink" placeholder="Drive, Canva, Frame.io ou outro link (opcional)" value="'+esc(item.finalLink||'')+'">'+
+      (item.finalLink && safeUrl(item.finalLink)!=='#'?'<a class="ow-agenda-link-open" href="'+esc(safeUrl(item.finalLink))+
+      '" target="_blank" rel="noopener">Abrir material finalizado</a>':'')+
+      '</div>'+
+      '<footer class="ow-agenda-fields-actions"><button type="button" class="ghost small" data-social-cancel>Cancelar</button>'+
+      '<button type="submit" class="ow-agenda-inline-save">Salvar alterações</button></footer></form></div>';
+    card.insertAdjacentElement('afterend',panel);
+    var form=panel.querySelector('form');
+    panel.querySelector('[data-social-close]').onclick=panel.querySelector('[data-social-cancel]').onclick=function(){
+      activeId='';closeExisting();card.focus();
+    };
+    function setStage(value){
+      if(!Object.prototype.hasOwnProperty.call(STATUS_DEFAULT,value))return;
+      form.elements.namedItem('stage').value=value;
+      form.querySelectorAll('[data-sm-stage]').forEach(function(b){
+        var on=b.dataset.smStage===value;
+        b.classList.toggle('active',on);
+        b.setAttribute('aria-pressed',String(on));
+      });
+      if(value==='green')form.elements.namedItem('finalizado').checked=true;
+      else if(form.elements.namedItem('finalizado').checked)form.elements.namedItem('finalizado').checked=false;
+    }
+    panel.querySelectorAll('[data-sm-stage]').forEach(function(b){
+      b.onclick=function(){setStage(b.dataset.smStage);};
+    });
+    form.elements.namedItem('finalizado').addEventListener('change',function(e){
+      if(e.target.checked)setStage('green');
+      else if(form.elements.namedItem('stage').value==='green')setStage('red');
+    });
+    form.addEventListener('submit',async function(event){
+      event.preventDefault();
+      if(updating || !social(id))return;
+      var raw=new FormData(form);
+      var client=String(raw.get('client')||'').trim();
+      var date=String(raw.get('date')||'');
+      var title=String(raw.get('title')||'').trim();
+      var description=String(raw.get('description')||'').trim();
+      var value=String(raw.get('stage')||'red');
+      var finalLink=String(raw.get('finalLink')||'').trim();
+      if(!client||!title||!/^\d{4}-\d{2}-\d{2}$/.test(date)||
+         !Object.prototype.hasOwnProperty.call(STATUS_DEFAULT,value)){
+        toast('Revise cliente, data, título e situação da demanda.');return;
+      }
+      if(finalLink){
+        finalLink=safeUrl(/^https?:\/\//i.test(finalLink)?finalLink:'https://'+finalLink);
+        if(finalLink==='#'){toast('Link finalizado inválido.');return;}
+      }
+      var old=social(id);
+      if(!old)return;
+      updating=true;
+      var submit=form.querySelector('[type="submit"]');
+      submit.disabled=true;
+      var currentChecks=Object.assign({},old.workflowChecks||{});
+      ['programar','verificarArquivos','aguardandoMaterial','finalizado'].forEach(function(key){
+        currentChecks[key]=raw.has(key);
+      });
+      if(value==='green')currentChecks.finalizado=true;
+      if(value!=='green'&&currentChecks.finalizado)value='green';
+      var updated=Object.assign({},old,{client:client,date:date,title:title,description:description,
+        status:value,finalLink:finalLink,workflowChecks:currentChecks,updatedAt:new Date().toISOString()});
+      try{
+        var success=await smPersistItems(smItems.map(function(v){return v.id===id?updated:v;}));
+        if(success){
+          toast('Social Media atualizado na Agenda.',null,null,'success');
+          renderAgenda();
+        }
+      }catch(err){
+        console.error('Falha ao salvar Social Media na Agenda',err);
+        toast('Não foi possível salvar. Tente novamente.');
+      }finally{
+        updating=false;
+        if(submit.isConnected)submit.disabled=false;
+      }
+    });
+    if(!restoring){
+      panel.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'nearest'});
+    }
+    return true;
+  }
+
+  window.OneWaySocialInlineEditor=function(id){return mount(id,false);};
+
+  renderAgenda=function(){
+    var restore=activeId;
+    var result=prevRenderAgenda.apply(this,arguments);
+    if(currentArea!=='agenda'||!eligible()){activeId='';return result;}
+    var root=document.getElementById('agendaList');
+    if(!root||root.classList.contains('hidden'))return result;
+    root.querySelectorAll('.ow-social-agenda-item').forEach(function(card){
+      card.tabIndex=0;
+      card.setAttribute('role','button');
+      card.setAttribute('aria-expanded','false');
+      card.title='Abrir e editar Social Media abaixo da demanda';
+      card.addEventListener('click',function(event){
+        if(event.target.closest('.ow-social-check')||event.target.closest('.ow-social-edit-title,.ow-social-edit-arrow'))return;
+        mount(card.dataset.owSocialAgendaId,false);
+      });
+      card.addEventListener('keydown',function(event){
+        if(event.target!==card || !['Enter',' '].includes(event.key))return;
+        event.preventDefault();
+        mount(card.dataset.owSocialAgendaId,false);
+      });
+    });
+    if(restore&&socialCard(restore))mount(restore,true);
+    return result;
+  };
 })();
