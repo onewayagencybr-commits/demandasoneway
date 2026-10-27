@@ -2214,3 +2214,27 @@ body.calendar-view{
     transition:none!important;
   }
 }
+
+
+/* One Way · painel com altura verdadeiramente reversível · 2026-10-27 */
+/* Padding pertence ao conteúdo, não ao bloco cuja altura chega a zero. */
+#agendaContent #agendaList.agenda-list>.agenda-item+.ow-agenda-inline-editor.ow-agenda-native-detail{
+  padding:0!important;
+  border-bottom-width:0!important;
+  box-shadow:inset 6px 0 0 var(--ow-accent),
+    inset 0 -1px 0 rgba(var(--ow-spot-rgb),.30),
+    0 14px 29px rgba(0,8,30,.15)!important;
+  contain:none!important;
+}
+#agendaContent #agendaList.agenda-list>.agenda-item+.ow-agenda-inline-editor.ow-agenda-native-detail>.ow-agenda-detail-interior{
+  box-sizing:border-box;
+  display:block;
+  width:100%;
+  padding:18px 20px 11px;
+  min-width:0;
+}
+@media(max-width:700px){
+  #agendaContent #agendaList.agenda-list>.agenda-item+.ow-agenda-inline-editor.ow-agenda-native-detail>.ow-agenda-detail-interior{
+    padding:13px 11px 9px;
+  }
+}
