@@ -27,8 +27,12 @@ assert '</script>' not in html[main_start+len('<script>'):main_end], (
     "Uma tag de fechamento literal ainda interrompe o JavaScript principal"
 )
 
-style_tag = '<link rel="stylesheet" href="/modules/monthly-panorama.css">'
-script_tag = '<script src="/modules/monthly-panorama.js" defer></script>'
+# Aceita URLs com query versionada para atualizar cache do Safari sem
+# reinstalar um CSS/JS duplicado nem desordenar a folha dos editores.
+style_match = re.search(r'<link rel="stylesheet" href="/modules/monthly-panorama\.css(?:\?[^"]*)?">', html)
+script_match = re.search(r'<script src="/modules/monthly-panorama\.js(?:\?[^"]*)?" defer></script>', html)
+style_tag = style_match.group(0) if style_match else '<link rel="stylesheet" href="/modules/monthly-panorama.css">'
+script_tag = script_match.group(0) if script_match else '<script src="/modules/monthly-panorama.js" defer></script>'
 anchor_match = re.search(r'<script src="/modules/scripts-ui\.js(?:\?[^\"]*)?" defer></script>', html)
 anchor = anchor_match.group(0) if anchor_match else ''
 
