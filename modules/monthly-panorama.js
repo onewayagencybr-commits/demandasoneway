@@ -1160,6 +1160,21 @@
     card.parentElement.insertBefore(group,card);
     group.appendChild(card);
     group.appendChild(panel);
+    // Um clique na superfície livre do detalhe recolhe a demanda.
+    // Botões, links, formulários, campos e texto selecionado continuam intocados.
+    group.addEventListener('click',function(event){
+      var detail=event.target.closest('.ow-agenda-inline-editor');
+      if(!detail || !group.contains(detail) || detail.dataset.owClosing==='true')return;
+      if(event.target.closest('button,a,input,select,textarea,label,form,[contenteditable],[role="button"],[role="checkbox"],.detail-actions'))return;
+      if(window.getSelection?.()?.toString().trim())return;
+      var identifier=card.dataset.agendaId;
+      if(identifier){
+        showAgendaDetails(identifier);
+      }else if(card.dataset.owSocialAgendaId &&
+          typeof window.OneWaySocialInlineEditor==='function'){
+        window.OneWaySocialInlineEditor(card.dataset.owSocialAgendaId);
+      }
+    });
     return group;
   }
   function owAgendaFlow(panel,opening,animated,onDone){
