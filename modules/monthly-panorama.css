@@ -2238,3 +2238,137 @@ body.calendar-view{
     padding:13px 11px 9px;
   }
 }
+
+
+/* One Way · contorno único sem quina durante a transição · 2026-10-27 */
+/* Um único elemento possui borda, raio, preenchimento e luz. O botão de
+   demanda e os detalhes são conteúdo interno, sem caixas independentes. */
+#agendaContent #agendaList.agenda-list>.ow-agenda-group{
+  --ow-accent:#77baff;
+  --ow-spot-rgb:116,185,255;
+  box-sizing:border-box;
+  display:block;
+  position:relative;
+  isolation:isolate;
+  width:100%;
+  min-width:0;
+  margin:0 0 8px!important;
+  border:1px solid rgba(var(--ow-spot-rgb),.39);
+  border-radius:14px;
+  background:linear-gradient(95deg,
+    rgba(var(--ow-spot-rgb),.145) 0%,
+    rgba(10,32,75,.89) 25%,
+    rgba(9,30,72,.88) 100%);
+  box-shadow:inset 6px 0 0 var(--ow-accent),0 14px 34px rgba(0,9,35,.15);
+  transition:border-color .55s ease,box-shadow .6s cubic-bezier(.18,.76,.22,1);
+}
+#agendaContent #agendaList.agenda-list>.ow-agenda-group:hover{
+  border-color:rgba(var(--ow-spot-rgb),.60);
+  box-shadow:inset 6px 0 0 var(--ow-accent),0 19px 42px rgba(0,9,35,.19);
+}
+#agendaContent #agendaList.agenda-list>.ow-agenda-group>.agenda-item{
+  box-sizing:border-box!important;
+  display:grid!important;
+  grid-template-columns:92px minmax(0,1fr) 82px auto 18px!important;
+  gap:14px!important;
+  width:100%!important;
+  height:143px!important;
+  min-height:143px!important;
+  max-height:143px!important;
+  margin:0!important;
+  padding:12px 14px!important;
+  border:0!important;
+  border-radius:14px 14px 0 0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  outline-offset:-3px;
+  transform:none!important;
+}
+#agendaContent #agendaList.agenda-list>.ow-agenda-group>.agenda-item:hover{
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  transform:none!important;
+}
+#agendaContent #agendaList.agenda-list>.ow-agenda-group>.ow-agenda-inline-editor.ow-agenda-native-detail{
+  box-sizing:border-box!important;
+  display:block;
+  position:relative;
+  min-height:0!important;
+  max-height:none!important;
+  width:100%!important;
+  height:auto;
+  padding:0!important;
+  margin:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  outline:0!important;
+  animation:none!important;
+  overflow:hidden;
+  transform:none!important;
+}
+#agendaContent #agendaList.agenda-list>.ow-agenda-group>.ow-agenda-inline-editor>.ow-agenda-detail-interior{
+  box-sizing:border-box!important;
+  width:100%;
+  padding:0 19px 17px!important;
+}
+#agendaContent #agendaList.agenda-list>.ow-agenda-group .detail-panel,
+#agendaContent #agendaList.agenda-list>.ow-agenda-group .ow-social-edit-panel{
+  background:transparent!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  margin:0!important;
+  padding:11px 9px 7px!important;
+}
+/* A área de detalhes começa imediatamente abaixo da demanda, sem linha nem
+   mudança de raio. A borda é desenhada exclusivamente pelo elemento pai. */
+#agendaContent #agendaList.agenda-list>.ow-agenda-group .demand,
+#agendaContent #agendaList.agenda-list>.ow-agenda-group .demand-detail{
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+@media(hover:hover) and (pointer:fine){
+  #app #agendaContent #agendaList.agenda-list>.ow-agenda-group::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    z-index:0;
+    pointer-events:none;
+    border-radius:inherit;
+    background:radial-gradient(440px circle at var(--ow-pointer-x,50%) var(--ow-pointer-y,50%),
+      rgba(var(--ow-spot-rgb),.15),rgba(var(--ow-spot-rgb),.05) 43%,transparent 79%);
+    opacity:0;
+    transition:opacity .6s ease;
+  }
+  #app #agendaContent #agendaList.agenda-list>.ow-agenda-group:hover::before{opacity:1}
+  #app #agendaContent #agendaList.agenda-list>.ow-agenda-group>.agenda-item::before{
+    display:none!important;
+  }
+}
+@media(max-width:950px){
+  #agendaContent #agendaList.agenda-list>.ow-agenda-group>.agenda-item{
+    grid-template-columns:66px minmax(0,1fr) 75px auto 16px!important;
+    gap:9px!important;
+    padding:11px!important;
+  }
+}
+@media(max-width:640px){
+  #agendaContent #agendaList.agenda-list>.ow-agenda-group>.agenda-item{
+    grid-template-columns:60px minmax(0,1fr) auto 14px!important;
+    gap:8px!important;
+    height:151px!important;
+    min-height:151px!important;
+    max-height:151px!important;
+    padding:10px!important;
+  }
+  #agendaContent #agendaList.agenda-list>.ow-agenda-group>.agenda-item .area-chip{
+    display:none!important;
+  }
+  #agendaContent #agendaList.agenda-list>.ow-agenda-group>.ow-agenda-inline-editor>.ow-agenda-detail-interior{
+    padding:0 11px 12px!important;
+  }
+}
