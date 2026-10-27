@@ -1341,6 +1341,12 @@
     var search = document.getElementById('searchInput');
     var hero = document.getElementById('heroControls');
     if (!search || !hero) return;
+    // O campo deixa a área do título livre. Todas as abas mantêm a mesma
+    // posição de título/navegação; filtros aparecem somente na faixa inferior.
+    var nav=document.querySelector('#app .nav-row');
+    if (nav && hero.previousElementSibling!==nav) {
+      nav.insertAdjacentElement('afterend',hero);
+    }
     if (currentArea === 'agenda') {
       var line = document.querySelector('#agendaContent .ow-agenda-toolbar-line');
       if (line) {
@@ -1440,9 +1446,9 @@
   var shineFrame=0,shineTarget=null,shineX=0,shineY=0;
   document.addEventListener('pointermove',function(event){
     if (event.pointerType==='touch') return;
-    var target=event.target.closest?.('.client, #agendaContent .agenda-item, .stats .stat, .sm-task, .ow-agenda-inline-editor, .ow-month-shell');
+    var target=event.target.closest?.('.ow-agenda-group, .client, #agendaContent .agenda-item, .stats .stat, .sm-task, .ow-agenda-inline-editor, .ow-month-shell');
     if (!target) return;
-    shineTarget=target;
+    shineTarget=target.closest('.ow-agenda-group')||target;
     shineX=event.clientX;
     shineY=event.clientY;
     if (shineFrame) return;
