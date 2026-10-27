@@ -1895,3 +1895,247 @@ body.calendar-view{
     padding:13px!important;
   }
 }
+
+
+/* One Way · Agenda unificada por status, brilho cromático e controles em linha · 2026-10-27 */
+/* Todas as faixas têm a mesma largura física (6 px). Somente a cor muda. */
+#agendaContent .agenda-list>.agenda-item{
+  --ow-accent:#77baff;
+  --ow-spot-rgb:116,185,255;
+  box-shadow:inset 6px 0 0 var(--ow-accent),0 12px 34px rgba(0,8,30,.12)!important;
+  border-color:rgba(var(--ow-spot-rgb),.28)!important;
+  transition:box-shadow .5s cubic-bezier(.18,.76,.22,1),
+    border-color .5s ease,background .45s ease!important;
+}
+#agendaContent .agenda-list>.agenda-item:hover{
+  box-shadow:inset 6px 0 0 var(--ow-accent),0 16px 38px rgba(0,8,30,.19)!important;
+  border-color:rgba(var(--ow-spot-rgb),.52)!important;
+}
+#agendaContent .agenda-list>.agenda-item:is(.agenda-priority,.agenda-overdue,.ow-tone-red){
+  --ow-accent:#ed616b;
+  --ow-spot-rgb:237,97,107;
+}
+#agendaContent .agenda-list>.agenda-item:is(.ow-awaiting-approval,.ow-tone-purple){
+  --ow-accent:#b470ed;
+  --ow-spot-rgb:180,112,237;
+}
+#agendaContent .agenda-list>.agenda-item:is(.ow-awaiting-oneway,.ow-tone-salmon){
+  --ow-accent:#e99d89;
+  --ow-spot-rgb:233,157,137;
+}
+#agendaContent .agenda-list>.agenda-item:is(.agenda-awaiting-post,.ow-tone-orange,.ow-tone-yellow){
+  --ow-accent:#f4af49;
+  --ow-spot-rgb:244,175,73;
+}
+#agendaContent .agenda-list>.agenda-item:is(.agenda-finished,.ow-social-finished,.ow-tone-green){
+  --ow-accent:#35ba87;
+  --ow-spot-rgb:53,186,135;
+}
+/* A luz segue o cursor, mas assume exatamente o espectro de cada status. */
+@media(hover:hover) and (pointer:fine){
+  #app #agendaContent .agenda-list>.agenda-item::before{
+    background:radial-gradient(360px circle at var(--ow-pointer-x,50%) var(--ow-pointer-y,50%),
+      rgba(var(--ow-spot-rgb),.21) 0%,rgba(var(--ow-spot-rgb),.09) 38%,
+      rgba(var(--ow-spot-rgb),.025) 59%,transparent 77%)!important;
+    transition:opacity .65s cubic-bezier(.18,.76,.22,1)!important;
+  }
+}
+/* O conteúdo aberto é continuação do mesmo cartão: mesmo raio, espessura,
+   brilho e coloração; nunca uma caixa azul desvinculada. */
+#agendaContent .agenda-list>.agenda-item[aria-expanded="true"]{
+  border-radius:14px 14px 0 0!important;
+  border-bottom:0!important;
+  box-shadow:inset 6px 0 0 var(--ow-accent),0 7px 24px rgba(0,8,30,.15)!important;
+  background:linear-gradient(112deg,rgba(var(--ow-spot-rgb),.12) 0%,
+    rgba(8,27,65,.73) 36%,rgba(8,27,65,.69) 100%)!important;
+}
+#agendaContent .agenda-list>.agenda-item+.ow-agenda-native-detail{
+  --ow-accent:#77baff;
+  --ow-spot-rgb:116,185,255;
+}
+#agendaContent .agenda-list>.agenda-item:is(.agenda-priority,.agenda-overdue,.ow-tone-red)+.ow-agenda-native-detail{
+  --ow-accent:#ed616b;--ow-spot-rgb:237,97,107;
+}
+#agendaContent .agenda-list>.agenda-item:is(.ow-awaiting-approval,.ow-tone-purple)+.ow-agenda-native-detail{
+  --ow-accent:#b470ed;--ow-spot-rgb:180,112,237;
+}
+#agendaContent .agenda-list>.agenda-item:is(.ow-awaiting-oneway,.ow-tone-salmon)+.ow-agenda-native-detail{
+  --ow-accent:#e99d89;--ow-spot-rgb:233,157,137;
+}
+#agendaContent .agenda-list>.agenda-item:is(.agenda-awaiting-post,.ow-tone-orange,.ow-tone-yellow)+.ow-agenda-native-detail{
+  --ow-accent:#f4af49;--ow-spot-rgb:244,175,73;
+}
+#agendaContent .agenda-list>.agenda-item:is(.agenda-finished,.ow-social-finished,.ow-tone-green)+.ow-agenda-native-detail{
+  --ow-accent:#35ba87;--ow-spot-rgb:53,186,135;
+}
+#agendaContent .agenda-list>.agenda-item+.ow-agenda-inline-editor.ow-agenda-native-detail{
+  box-sizing:border-box!important;
+  margin:-9px 0 12px!important;
+  width:100%!important;
+  min-width:0!important;
+  padding:18px 20px 11px!important;
+  border:1px solid rgba(var(--ow-spot-rgb),.33)!important;
+  border-top:0!important;
+  border-radius:0 0 14px 14px!important;
+  background:linear-gradient(135deg,
+    rgba(var(--ow-spot-rgb),.14) 0%,rgba(12,38,82,.91) 42%,
+    rgba(8,29,72,.92) 100%)!important;
+  box-shadow:inset 6px 0 0 var(--ow-accent),0 20px 44px rgba(0,8,30,.19)!important;
+  transform-origin:top center;
+  animation:owAgendaDrop .72s cubic-bezier(.16,.74,.22,1) both!important;
+}
+#agendaContent .ow-agenda-native-detail>.detail-panel,
+#agendaContent .ow-agenda-native-detail .detail-panel,
+#agendaContent .ow-social-inline-editor .ow-social-edit-panel{
+  background:rgba(var(--ow-spot-rgb),.042)!important;
+  border:1px solid rgba(var(--ow-spot-rgb),.16)!important;
+  box-shadow:none!important;
+}
+#agendaContent .ow-agenda-native-detail .detail-label{
+  color:rgba(226,238,255,.69);
+}
+#agendaContent .ow-agenda-native-detail.ow-agenda-closing{
+  pointer-events:none;
+  animation:none!important;
+}
+@media(hover:hover) and (pointer:fine){
+  #app #agendaContent .ow-agenda-native-detail::before{
+    background:radial-gradient(450px circle at var(--ow-pointer-x,50%) var(--ow-pointer-y,50%),
+      rgba(var(--ow-spot-rgb),.085),transparent 75%)!important;
+  }
+}
+/* Uma linha real no desktop para Agenda, Finalizadas, modo, filtros,
+   responsável e pesquisa. Só rola na horizontal quando não couber. */
+@media(min-width:1051px){
+  #agendaContent .ow-agenda-toolbar-line{
+    display:flex!important;
+    flex-flow:row nowrap!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:7px!important;
+    max-width:1120px!important;
+    min-height:56px!important;
+    width:100%!important;
+    padding:7px 9px!important;
+    margin:0 auto 13px!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    scrollbar-width:thin;
+    scrollbar-color:rgba(189,213,255,.30) transparent;
+  }
+  #agendaContent .ow-agenda-toolbar-line #agendaViewTabs{
+    flex:0 0 auto!important;
+    margin:0!important;
+    min-height:38px!important;
+  }
+  #agendaContent .ow-agenda-toolbar-line .ow-agenda-controls{
+    display:flex!important;
+    flex:0 0 auto!important;
+    flex-flow:row nowrap!important;
+    align-items:center!important;
+    justify-content:center!important;
+    width:auto!important;
+    min-width:max-content!important;
+    gap:5px!important;
+    margin:0!important;
+  }
+  #agendaContent .ow-agenda-toolbar-line .ow-agenda-mode,
+  #agendaContent .ow-agenda-toolbar-line .ow-agenda-areas{
+    flex:0 0 auto!important;
+    flex-flow:row nowrap!important;
+    width:auto!important;
+    min-width:0!important;
+  }
+  #agendaContent .ow-agenda-toolbar-line .ow-agenda-person-filters{
+    display:flex!important;
+    flex:0 0 auto!important;
+    flex-flow:row nowrap!important;
+    justify-content:center!important;
+    align-items:center!important;
+    width:auto!important;
+    min-width:0!important;
+    gap:6px!important;
+    padding:0!important;
+    margin:0!important;
+  }
+  #agendaContent .ow-agenda-person-filters #owAgendaAssigneeToolbar{
+    flex:0 0 auto!important;
+    display:flex!important;
+    width:auto!important;
+    padding:3px 5px!important;
+    min-height:36px!important;
+    max-width:none!important;
+    margin:0!important;
+  }
+  #agendaContent .ow-agenda-person-filters #owAgendaAssigneeToolbar label{
+    font-size:9px!important;
+  }
+  #agendaContent .ow-agenda-person-filters #owAgendaAssigneeToolbar select{
+    flex:0 0 122px!important;
+    min-width:122px!important;
+    width:122px!important;
+    max-width:122px!important;
+    height:32px!important;
+    min-height:32px!important;
+    font-size:9px!important;
+    padding:5px 6px!important;
+  }
+  #agendaContent .ow-agenda-person-filters #searchInput.ow-agenda-search{
+    flex:0 0 165px!important;
+    min-width:165px!important;
+    width:165px!important;
+    max-width:165px!important;
+    height:36px!important;
+    min-height:36px!important;
+    padding:6px 8px 6px 30px!important;
+    background-position:9px center!important;
+    font-size:9px!important;
+    margin:0!important;
+  }
+  #agendaContent .ow-agenda-toolbar-line .ow-agenda-mode button,
+  #agendaContent .ow-agenda-toolbar-line .ow-agenda-areas button,
+  #agendaContent .ow-agenda-toolbar-line .agenda-view-tab{
+    padding:7px 7px!important;
+    font-size:8.5px!important;
+    min-height:31px!important;
+  }
+}
+@media(max-width:1050px){
+  #agendaContent .ow-agenda-toolbar-line{
+    flex-wrap:wrap!important;
+    justify-content:center!important;
+    row-gap:8px!important;
+  }
+  #agendaContent .ow-agenda-person-filters{
+    flex:0 1 auto!important;
+    justify-content:center!important;
+  }
+}
+/* Cards de clientes uniformes, inclusive títulos de duas linhas. */
+#areaContent .clients:not(.focus-mode) .client:not(.open)>.client-top{
+  min-height:94px;
+  height:94px;
+}
+#areaContent .clients:not(.focus-mode) .client:not(.open) .client-head{
+  min-height:94px;
+  height:94px;
+  padding:14px 15px!important;
+}
+#areaContent .clients:not(.focus-mode) .client:not(.open) .client-options{
+  height:94px;
+  min-height:94px;
+}
+#areaContent .clients:not(.focus-mode) .client:not(.open) .client-name{
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  line-clamp:2;
+  overflow:hidden;
+  font-size:clamp(13px,1.05vw,15px);
+  line-height:1.35;
+}
+@media(prefers-reduced-motion:reduce){
+  #agendaContent .agenda-list>.agenda-item+.ow-agenda-inline-editor.ow-agenda-native-detail{
+    animation:none!important;
+  }
+}
