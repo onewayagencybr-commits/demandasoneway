@@ -3347,7 +3347,8 @@ body.calendar-view{
     to{opacity:1;transform:translateY(0)}
   }
   #app .ow-mobile-hub .ow-mob-extra[hidden],
-  #app .ow-mobile-hub .ow-mob-no-tools{display:none!important}
+  #app .ow-mobile-hub.ow-mob-no-tools .ow-mob-tools,
+  #app .ow-mobile-hub.ow-mob-no-areas .ow-mob-areas{display:none!important}
 
   /* Campos da área passam a ter dimensões de toque, evitando zoom do iPhone. */
   #app .shell>.hero-controls:not(.hidden){
