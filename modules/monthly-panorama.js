@@ -1156,12 +1156,13 @@
     }
     if (panel.dataset.owClosing === 'true') return;
     panel.dataset.owClosing='true';
+    panel.classList.add('ow-agenda-closing');
     var h=panel.getBoundingClientRect().height;
     panel.style.boxSizing='border-box';
     panel.style.height=h+'px';
     panel.style.overflow='hidden';
     panel.style.minHeight='0';
-    var duration=550;
+    var duration=650;
     var animation=panel.animate([
       {height:h+'px',opacity:1,transform:'translate3d(0,0,0)',paddingTop:'19px',paddingBottom:'7px'},
       {height:'0px',opacity:0,transform:'translate3d(0,-8px,0)',paddingTop:'0px',paddingBottom:'0px'}
