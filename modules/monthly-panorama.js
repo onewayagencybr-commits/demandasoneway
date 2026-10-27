@@ -1285,17 +1285,40 @@
 
   // A busca deve permanecer disponível na Agenda e os links do painel
   // devem refletir as mudanças sem redirecionar para clientes.
-  ['addLink','removeLink','addProductionLink','removeProductionLink',
-   'addProductionFiles','removeProductionFile','addFiles','removeFile'].forEach(function (key) {
-    try {
-      var original=eval(key);
-      if (typeof original !== 'function') return;
-      var enhanced=async function () {
-        var value=await original.apply(this,arguments);
-        if (currentArea==='agenda') renderAgenda();
-        return value;
-      };
-      eval(key+' = enhanced');
-    } catch (e) { console.warn('Integração opcional da Agenda:',key,e); }
+  [
+    {get:function(){return addLink;},set:function(fn){addLink=fn;}},
+    {get:function(){return removeLink;},set:function(fn){removeLink=fn;}},
+    {get:function(){return addProductionLink;},set:function(fn){addProductionLink=fn;}},
+    {get:function(){return removeProductionLink;},set:function(fn){removeProductionLink=fn;}},
+    {get:function(){return addProductionFiles;},set:function(fn){addProductionFiles=fn;}},
+    {get:function(){return removeProductionFile;},set:function(fn){removeProductionFile=fn;}},
+    {get:function(){return addFiles;},set:function(fn){addFiles=fn;}},
+    {get:function(){return removeFile;},set:function(fn){removeFile=fn;}}
+  ].forEach(function (hook) {
+    if (typeof hook.get()!=='function') return;
+    var original=hook.get();
+    hook.set(async function () {
+      var value=await original.apply(this,arguments);
+      if (currentArea==='agenda') renderAgenda();
+      return value;
+    });
   });
+  // Luz suave seguindo o ponteiro, somente sobre superfícies transparentes.
+  var shineFrame=0,shineTarget=null,shineX=0,shineY=0;
+  document.addEventListener('pointermove',function(event){
+    if (event.pointerType==='touch' || !isAdmin() && !isDesign() && !isVideoUser()) return;
+    var target=event.target.closest?.('.client, #agendaContent .agenda-item, .stats .stat, .sm-task, .ow-agenda-inline-editor, .ow-month-shell');
+    if (!target) return;
+    shineTarget=target;
+    shineX=event.clientX;
+    shineY=event.clientY;
+    if (shineFrame) return;
+    shineFrame=requestAnimationFrame(function(){
+      shineFrame=0;
+      if (!shineTarget?.isConnected) return;
+      var rect=shineTarget.getBoundingClientRect();
+      shineTarget.style.setProperty('--ow-pointer-x', Math.round(shineX-rect.left)+'px');
+      shineTarget.style.setProperty('--ow-pointer-y', Math.round(shineY-rect.top)+'px');
+    });
+  },{passive:true});
 })();
