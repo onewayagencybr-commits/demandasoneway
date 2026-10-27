@@ -1725,8 +1725,11 @@
     // Nesse caso a mídia de toque reconhece o telefone mesmo com viewport largo.
     var cssPhone=window.matchMedia('(max-width:700px)').matches;
     var compactTouch=window.matchMedia('(pointer:coarse) and (max-width:1000px)').matches;
-    var actualPhone=/iPhone|iPod|Android.*Mobile/i.test(navigator.userAgent) &&
-      Math.min(window.screen.width||9999,window.screen.height||9999)<=700;
+    var physicalNarrow=Math.min(window.screen.width||9999,window.screen.height||9999)<=700;
+    var touchHardware=(navigator.maxTouchPoints||0)>0 ||
+      window.matchMedia('(pointer:coarse)').matches;
+    var actualPhone=physicalNarrow&&touchHardware;
+    if(actualPhone)document.documentElement.classList.add('ow-phone-device');
     return cssPhone||compactTouch||actualPhone;
   }
   function makeDelegate(source,title,kind){
