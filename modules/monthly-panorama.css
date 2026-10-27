@@ -2139,3 +2139,78 @@ body.calendar-view{
     animation:none!important;
   }
 }
+
+
+/* One Way · fluxo contínuo de abertura e fechamento da Agenda · 2026-10-27 */
+/* Grade sem espaçamento entre cartão e detalhe. A distância regular de 8 px
+   fica nos próprios cartões, evitando alteração brusca no fim da transição. */
+#agendaContent #agendaList.agenda-list{
+  row-gap:0!important;
+  column-gap:0!important;
+  align-items:start;
+}
+#agendaContent #agendaList.agenda-list>.agenda-item{
+  margin:0 0 8px!important;
+}
+/* Card e detalhe agora são uma superfície contínua: mesmos matiz, brilho
+   lateral, largura e fundo horizontal, que não reinicia no eixo vertical. */
+#agendaContent #agendaList.agenda-list>.agenda-item[aria-expanded="true"]{
+  border-bottom-width:0!important;
+  border-bottom-color:transparent!important;
+  border-radius:14px 14px 0 0!important;
+  background:linear-gradient(90deg,
+    rgba(var(--ow-spot-rgb),.135) 0%,
+    rgba(8,27,65,.83) 43%,rgba(8,27,65,.83) 100%)!important;
+  box-shadow:inset 6px 0 0 var(--ow-accent)!important;
+  margin-bottom:8px!important;
+  transition:background .5s ease,border-color .5s ease!important;
+}
+#agendaContent #agendaList.agenda-list>.agenda-item+.ow-agenda-inline-editor.ow-agenda-native-detail{
+  box-sizing:border-box!important;
+  position:relative;
+  min-height:0!important;
+  max-height:none!important;
+  width:100%!important;
+  margin:-8px 0 8px!important;
+  padding:18px 20px 11px!important;
+  border:1px solid rgba(var(--ow-spot-rgb),.33)!important;
+  border-top:0!important;
+  border-radius:0 0 14px 14px!important;
+  background:linear-gradient(90deg,
+    rgba(var(--ow-spot-rgb),.135) 0%,
+    rgba(8,27,65,.83) 43%,rgba(8,27,65,.83) 100%)!important;
+  box-shadow:inset 6px 0 0 var(--ow-accent),0 14px 29px rgba(0,8,30,.15)!important;
+  transform:none!important;
+  transform-origin:top center;
+  animation:none!important;
+  overflow:hidden;
+  contain:layout;
+}
+/* A medida dinâmica do conteúdo é animada pelo próprio editor: sem movimento
+   vertical artificial e sem trocar subitamente as margens ao removê-lo. */
+#agendaContent #agendaList.agenda-list>.ow-agenda-inline-editor.ow-agenda-closing{
+  pointer-events:none!important;
+  animation:none!important;
+  box-shadow:inset 6px 0 0 var(--ow-accent)!important;
+}
+#agendaContent #agendaList.agenda-list>.ow-agenda-inline-editor .detail-panel{
+  border-radius:10px!important;
+  margin-top:0!important;
+  box-shadow:none!important;
+}
+#agendaContent #agendaList.agenda-list>.agenda-item[aria-expanded="true"]:focus-visible{
+  outline:2px solid rgba(var(--ow-spot-rgb),.65);
+  outline-offset:-4px;
+}
+@media(max-width:700px){
+  #agendaContent #agendaList.agenda-list>.agenda-item+.ow-agenda-inline-editor.ow-agenda-native-detail{
+    padding:13px 11px 9px!important;
+  }
+}
+/* Não aplicamos animações aos usuários que preferem reduzir movimento. */
+@media(prefers-reduced-motion:reduce){
+  #agendaContent #agendaList.agenda-list>.agenda-item+.ow-agenda-inline-editor.ow-agenda-native-detail{
+    animation:none!important;
+    transition:none!important;
+  }
+}
