@@ -513,7 +513,7 @@
       toggle.className = 'commemorative-assign-toggle';
       toggle.setAttribute('aria-controls', panelId);
       toggle.setAttribute('aria-expanded', 'false');
-      toggle.innerHTML = 'Atribuir arte <span class="ow-comm-caret" aria-hidden="true">⌄</span>';
+      toggle.innerHTML = 'Atribuir demanda <span class="ow-comm-caret" aria-hidden="true">⌄</span>';
       var panel = document.createElement('div');
       panel.id = panelId;
       panel.className = 'commemorative-assign-panel hidden';
@@ -1027,145 +1027,275 @@
     return result;
   };
 
-  function showStaffEditor(id) {
+  // Agenda · expande o mesmo componente de detalhes usado dentro do cliente.
+  // Assim os status, arquivos, referências e link finalizado reutilizam as
+  // funções originais e todas as permissões permanecem em vigor.
+  function getAgendaCard(id) {
+    return Array.from(document.querySelectorAll('#agendaList>.agenda-item[data-agenda-id]'))
+      .find(function (el) { return el.dataset.agendaId === id; });
+  }
+
+  function buildAdminFields(demand, host) {
+    if (!isAdmin()) return;
+    var actionArea = host.querySelector('.detail-actions');
+    var toggle = host.querySelector('.edit-demand');
+    if (!actionArea || !toggle) return;
+    toggle.textContent = 'Editar informações';
+    var panel = document.createElement('div');
+    panel.className = 'ow-agenda-fields-panel';
+    panel.hidden = true;
+    var form = document.createElement('form');
+    form.className = 'ow-agenda-fields-form';
+    var clientList = state.clients.filter(function (c) {
+      return !c.mergedInto && (c.area === demand.area || c.id === demand.clientId);
+    }).sort(function (a,b) { return a.name.localeCompare(b.name, 'pt-BR'); });
+    var staff = DEMAND_ASSIGNEES;
+    form.innerHTML =
+      '<div class="ow-agenda-fields-grid">' +
+      '<label>Título da demanda<input name="title" required maxlength="240" value="' + esc(demand.title||'') + '"></label>' +
+      '<label>Data da postagem<input name="postDate" type="date" required value="' + esc(demand.postDate||'') + '"></label>' +
+      '<label>Cliente<select name="clientId">' + clientList.map(function (c) {
+        return '<option value="' + esc(c.id) + '"' + (c.id === demand.clientId ? ' selected' : '') +
+          '>' + esc(c.name) + '</option>';
+      }).join('') + '</select></label>' +
+      '<label>Responsável<select name="assignee"><option value="">Sem responsável</option>' +
+      staff.map(function (name) {
+        return '<option value="' + esc(name) + '"' + (demand.assignee === name ? ' selected' : '') +
+          '>' + esc(name) + '</option>';
+      }).join('') + '</select></label>' +
+      '<label class="ow-agenda-fields-description">Descrição<textarea name="description" rows="3">' +
+      esc(demand.description||'') + '</textarea></label></div>' +
+      '<div class="ow-agenda-fields-actions"><button type="button" class="ghost small ow-agenda-fields-cancel">Cancelar</button>' +
+      '<button type="submit" class="ow-agenda-inline-save">Salvar alterações</button></div>';
+    panel.appendChild(form);
+    actionArea.insertAdjacentElement('beforebegin', panel);
+    toggle.onclick = function (e) {
+      e.preventDefault();
+      panel.hidden = !panel.hidden;
+      toggle.setAttribute('aria-expanded',String(!panel.hidden));
+      if (!panel.hidden) form.elements.namedItem('title')?.focus();
+    };
+    form.querySelector('.ow-agenda-fields-cancel').onclick = function () {
+      panel.hidden = true;
+      toggle.setAttribute('aria-expanded', 'false');
+    };
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      if (!isAdmin() || !getDemand(demand.id)) return;
+      var fd = new FormData(form);
+      var title = String(fd.get('title')||'').trim();
+      var postDate = String(fd.get('postDate')||'');
+      var clientId = String(fd.get('clientId')||'');
+      var assignee = String(fd.get('assignee')||'');
+      var description = String(fd.get('description')||'').trim();
+      if (!title || !/^\d{4}-\d{2}-\d{2}$/.test(postDate) ||
+          !state.clients.some(function (c) { return c.id === clientId && (c.area === demand.area || c.id === demand.clientId); }) ||
+          (assignee && !DEMAND_ASSIGNEES.includes(assignee))) {
+        toast('Confira os campos da demanda antes de salvar.');return;
+      }
+      var current = getDemand(demand.id);
+      if (!current) return;
+      var fields = ['title','postDate','month','description','assignee','clientId'];
+      var backup = {};
+      fields.forEach(function (key) { backup[key] = current[key]; });
+      Object.assign(current,{title:title,postDate:postDate,month:postDate.slice(0,7),
+        description:description,assignee:assignee,clientId:clientId});
+      var submit = form.querySelector('[type="submit"]');
+      submit.disabled=true;
+      try {
+        if (!await saveState({strictRemote:true})) {
+          Object.assign(current,backup);
+          toast('Não foi possível salvar. Nenhuma alteração foi aplicada.');
+          return;
+        }
+        toast('Demanda atualizada na Agenda.',null,null,'success');
+        renderAgenda();
+      } catch (err) {
+        Object.assign(current,backup);
+        console.error('Falha ao editar demanda pela Agenda',err);
+        toast('Não foi possível salvar a demanda.');
+      } finally {
+        submit.disabled=false;
+      }
+    });
+  }
+
+  function showAgendaDetails(id) {
     var demand = getDemand(id);
-    if (!demand || isAdmin() || currentArea !== 'agenda') return false;
+    if (!demand || currentArea !== 'agenda') return false;
     var list = document.getElementById('agendaList');
-    var card = Array.from(list?.querySelectorAll('.agenda-item[data-agenda-id]') || []).find(function (node) { return node.dataset.agendaId === id; });
-    if (!card) {
-      // Na visualização mensal o usuário pode retornar à Lista para editar.
-      var switcher = document.querySelector('#owAgendaControls [data-ow-agenda-mode="list"]');
-      if (switcher) {
-        switcher.click();
-        return showStaffEditor(id);
+    var card = getAgendaCard(id);
+    if (!card || list?.classList.contains('hidden')) {
+      currentExpandedId = id;
+      var mode = document.querySelector('#owAgendaControls [data-ow-agenda-mode="list"]');
+      if (mode && !mode.classList.contains('is-active')) {
+        mode.click();return true;
       }
       return false;
     }
-    var existing = list.querySelector('.ow-agenda-inline-editor');
-    if (existing) {
-      var same = currentExpandedId === id;
-      existing.remove();
+    if (currentExpandedId === id && list.querySelector('.ow-agenda-inline-editor')) {
+      list.querySelector('.ow-agenda-inline-editor')?.remove();
       currentExpandedId = '';
-      if (same) return true;
+      card.setAttribute('aria-expanded','false');
+      return true;
     }
     currentExpandedId = id;
+    list.querySelectorAll('.ow-agenda-inline-editor').forEach(function (e) { e.remove(); });
+    list.querySelectorAll('.agenda-item[aria-expanded]').forEach(function (e) {
+      e.setAttribute('aria-expanded','false');
+    });
+    card.setAttribute('aria-expanded','true');
+    var oldOpen = openDemandId;
+    var detailMarkup;
+    try {
+      openDemandId = id;
+      detailMarkup = renderDemand(demand, 0, true);
+    } finally {
+      openDemandId = oldOpen;
+    }
     var editor = document.createElement('div');
-    editor.className = 'ow-agenda-inline-editor';
-    editor.setAttribute('aria-label', 'Editar demanda sem sair da Agenda');
-    var header = document.createElement('div');
-    header.className = 'ow-agenda-inline-head';
-    header.innerHTML = '<div><strong>' + esc(demand.title) + '</strong><span>' +
-      esc(AREAS[demand.area] || demand.area) + ' · ' + esc(fmtPostDate(demand.postDate)) +
-      '</span></div>';
+    editor.className = 'ow-agenda-inline-editor ow-agenda-native-detail';
+    editor.setAttribute('aria-label','Detalhes de ' + (demand.title||'demanda'));
+    editor.innerHTML = detailMarkup;
+    var titleRow = editor.querySelector('.demand-row');
+    if (titleRow) titleRow.remove();
+    card.insertAdjacentElement('afterend', editor);
+
+    var actions = document.createElement('div');
+    actions.className = 'ow-agenda-inline-head';
+    var name = document.createElement('div');
+    name.innerHTML = '<strong>' + esc(demand.title||'Demanda') + '</strong><span>' +
+      esc(AREAS[demand.area]||demand.area) + ' · ' + esc(fmtPostDate(demand.postDate)) +
+      ' · ' + esc(demandAssignee(demand)||'Sem responsável') + '</span>';
     var close = document.createElement('button');
     close.type = 'button';
     close.className = 'ow-agenda-inline-close';
     close.textContent = 'Fechar ×';
-    close.addEventListener('click', function () { editor.remove(); currentExpandedId = ''; });
-    header.appendChild(close);
-    editor.appendChild(header);
-    if (demand.description) {
-      var description = document.createElement('p');
-      description.className = 'ow-agenda-inline-desc';
-      description.textContent = demand.description;
-      editor.appendChild(description);
+    close.onclick = function () {
+      editor.remove();
+      currentExpandedId = '';
+      card.setAttribute('aria-expanded','false');
+      card.focus();
+    };
+    actions.append(name,close);
+    editor.prepend(actions);
+    bindClientEvents(editor);
+    buildAdminFields(demand,editor);
+    return true;
+  }
+
+  window.OneWayAgendaQuickEdit = showAgendaDetails;
+
+  // A navegação é apenas reorganizada no DOM: nenhum botão é recriado e
+  // seus eventos, IDs e permissões continuam exatamente os mesmos.
+  function arrangeNavigation() {
+    if (!isAdmin()) return;
+    var nav = document.querySelector('#app .nav-row');
+    var left = nav?.querySelector('.area-nav-cluster');
+    var tools = nav?.querySelector('.admin-utility-tabs');
+    if (!left || !tools) return;
+    var group = left.querySelector('.ow-nav-core-tools');
+    if (!group) {
+      group = document.createElement('div');
+      group.className = 'ow-nav-core-tools';
     }
-    var title = document.createElement('div');
-    title.className = 'ow-agenda-editor-label';
-    title.textContent = 'Atualizar status';
-    editor.appendChild(title);
-    var statusRow = document.createElement('div');
-    statusRow.className = 'ow-agenda-inline-status';
-    Object.entries(statusesForArea(demand.area)).forEach(function (entry) {
-      var key = entry[0], name = entry[1];
-      if (key === 'purple') return; // Aprovação do cliente: somente administrador.
-      var button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'status-btn' + (demand.status === key ? ' active' : '');
-      button.dataset.status = key;
-      button.textContent = name;
-      button.addEventListener('click', async function () {
-        if (!getDemand(id)) return;
-        button.disabled = true;
-        await updateStatus(id, key);
-      });
-      statusRow.appendChild(button);
+    ['adminAgendaTab','manageClientsTab','weekCalendarTab'].forEach(function (id) {
+      var button = document.getElementById(id);
+      if (button) group.appendChild(button);
     });
-    editor.appendChild(statusRow);
-    showMaterialLinkControls(editor, demand, false);
-    card.insertAdjacentElement('afterend', editor);
-    return true;
+    var trash = document.getElementById('trashTab');
+    if (trash && trash.parentElement === left) left.insertBefore(group,trash);
+    else left.appendChild(group);
+    ['scriptsTab','instagramReportsTab','feedPlannerTab','commemorativeDatesTab'].forEach(function (id) {
+      var button = document.getElementById(id);
+      if (button) tools.appendChild(button);
+    });
   }
 
-  function editFromAgenda(id) {
-    var demand = getDemand(id);
-    if (!demand) return false;
-    if (!isAdmin()) return showStaffEditor(id);
-    var oldArea = currentArea;
-    try {
-      currentArea = demand.area;
-      openDemandModal(demand.id, demand.clientId);
-    } finally {
-      currentArea = oldArea;
-    }
-    var modal = document.getElementById('demandModal');
-    if (!modal || modal.classList.contains('hidden')) return false;
-    agendaEditing = true;
-    var heading = document.getElementById('demandModalTitle');
-    if (heading) heading.textContent = 'Editar demanda · Agenda';
-    return true;
-  }
-
-  window.OneWayAgendaQuickEdit = editFromAgenda;
-
-  renderAll = function () {
-    if (agendaEditing && currentArea !== 'agenda') {
-      var modal = document.getElementById('demandModal');
-      if (modal && modal.classList.contains('hidden') && isAdmin()) {
-        currentArea = 'agenda';
-        openClientId = null;
-        openDemandId = null;
-        agendaEditing = false;
+  function positionSearch() {
+    var search = document.getElementById('searchInput');
+    var hero = document.getElementById('heroControls');
+    if (!search || !hero) return;
+    if (currentArea === 'agenda') {
+      var line = document.querySelector('#agendaContent .ow-agenda-toolbar-line');
+      if (line) {
+        search.classList.add('ow-agenda-search');
+        search.placeholder = 'Buscar cliente ou demanda';
+        line.appendChild(search);
+      }
+    } else {
+      search.classList.remove('ow-agenda-search');
+      if (search.parentElement !== hero) {
+        var month = document.getElementById('monthSelect');
+        if (month && month.parentElement === hero) hero.insertBefore(search,month);
+        else hero.prepend(search);
       }
     }
-    return previousRenderAll.apply(this, arguments);
+  }
+
+  function animateHeading(nextArea,previousArea) {
+    if (nextArea===previousArea || !nextArea || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    ['pageTitle','pageSubtitle'].forEach(function (id,index) {
+      var el=document.getElementById(id);
+      if (!el || typeof el.animate!=='function') return;
+      el.getAnimations().forEach(function (a) { a.cancel(); });
+      el.animate([
+        {opacity:0,transform:'translate3d(0,11px,0)',filter:'blur(2.5px)'},
+        {opacity:1,transform:'translate3d(0,0,0)',filter:'blur(0)'}
+      ],{duration:index?780:720,delay:index?75:0,easing:'cubic-bezier(.16,.75,.24,1)',fill:'both'});
+    });
+  }
+
+  var lastArea = currentArea;
+  renderAll = function () {
+    if (currentArea !== 'agenda') positionSearch();
+    var before=lastArea;
+    var result=previousRenderAll.apply(this,arguments);
+    arrangeNavigation();
+    positionSearch();
+    animateHeading(currentArea,before);
+    lastArea=currentArea;
+    return result;
   };
 
   renderAgenda = function () {
-    currentExpandedId = '';
-    var result = previousRenderAgenda.apply(this, arguments);
-    if (currentArea !== 'agenda') return result;
-    var root = document.getElementById('agendaList');
-    if (root) {
-      root.querySelectorAll('.agenda-item[data-agenda-id]').forEach(function (card) {
-        card.onclick = function (event) {
-          event.preventDefault();
-          editFromAgenda(card.dataset.agendaId);
-        };
-        card.title = 'Abrir e atualizar sem sair da Agenda';
-        card.setAttribute('aria-label', 'Abrir demanda na Agenda');
-        // Nas Finalizadas o endereço não deve ficar escondido.
-        var demand = getDemand(card.dataset.agendaId);
-        if (demand?.finalLink && safeUrl(demand.finalLink) !== '#') {
-          var info = card.querySelector('.agenda-info');
-          if (info && !info.querySelector('.ow-agenda-link-preview')) {
-            var hint = document.createElement('span');
-            hint.className = 'ow-agenda-link-preview';
-            hint.textContent = 'Material finalizado disponível · clique para abrir';
-            info.appendChild(hint);
-          }
-        }
-      });
+    var openId=currentExpandedId;
+    var result=previousRenderAgenda.apply(this,arguments);
+    if (currentArea !== 'agenda') {
+      currentExpandedId='';
+      return result;
+    }
+    positionSearch();
+    var list=document.getElementById('agendaList');
+    if (!list) return result;
+    list.querySelectorAll('.agenda-item[data-agenda-id]').forEach(function (card) {
+      card.onclick=function (e) {
+        e.preventDefault();
+        showAgendaDetails(card.dataset.agendaId);
+      };
+      card.setAttribute('aria-expanded','false');
+      card.title='Ver detalhes sem sair da Agenda';
+    });
+    if (openId && !list.classList.contains('hidden') && getAgendaCard(openId)) {
+      currentExpandedId='';
+      showAgendaDetails(openId);
     }
     return result;
   };
 
-  // O modal pode ser fechado sem salvar. Nesse caso não mantém contexto pendente.
-  document.addEventListener('click', function (event) {
-    if (!agendaEditing) return;
-    if (event.target.closest('[data-close="demandModal"]')) agendaEditing = false;
-  }, true);
-  document.addEventListener('keydown', function (event) {
-    if (event.key === 'Escape') agendaEditing = false;
-  }, true);
+  // A busca deve permanecer disponível na Agenda e os links do painel
+  // devem refletir as mudanças sem redirecionar para clientes.
+  ['addLink','removeLink','addProductionLink','removeProductionLink',
+   'addProductionFiles','removeProductionFile','addFiles','removeFile'].forEach(function (key) {
+    try {
+      var original=eval(key);
+      if (typeof original !== 'function') return;
+      var enhanced=async function () {
+        var value=await original.apply(this,arguments);
+        if (currentArea==='agenda') renderAgenda();
+        return value;
+      };
+      eval(key+' = enhanced');
+    } catch (e) { console.warn('Integração opcional da Agenda:',key,e); }
+  });
 })();
