@@ -1694,3 +1694,135 @@
     return result;
   };
 })();
+
+
+/* One Way · mobile workspace navigation · 2026-10-27 */
+(function () {
+  'use strict';
+  if (typeof renderAll !== 'function') return;
+  var formerRenderAll=renderAll;
+  var expandedMore=false;
+
+  var primaryTools=[
+    {id:'adminAgendaTab',title:'Agenda'},
+    {id:'manageClientsTab',title:'Clientes'},
+    {id:'weekCalendarTab',title:'Calendário'}
+  ];
+  var additionalTools=[
+    {id:'scriptsTab',title:'Roteiros'},
+    {id:'instagramReportsTab',title:'Relatórios IG'},
+    {id:'feedPlannerTab',title:'Planejar Feed'},
+    {id:'commemorativeDatesTab',title:'Datas comemorativas'},
+    {id:'trashTab',title:'Lixeira'}
+  ];
+
+  function permitted(el) {
+    return Boolean(el && !el.classList.contains('hidden') &&
+      !el.disabled && el.getAttribute('aria-hidden')!=='true');
+  }
+  function mobileWidth(){
+    return window.matchMedia('(max-width:700px)').matches;
+  }
+  function makeDelegate(source,title,kind){
+    var button=document.createElement('button');
+    button.type='button';
+    button.className='ow-mob-nav-button ow-mob-'+kind;
+    button.textContent=title;
+    var active=source.classList.contains('active');
+    button.classList.toggle('is-active',active);
+    if(active)button.setAttribute('aria-current','page');
+    button.addEventListener('click',function(){
+      if(!permitted(source))return;
+      expandedMore=false;
+      source.click();
+      // Most events rerender through renderAll, but sync again in case
+      // the invoked workflow only opens a modal.
+      syncMobileNav();
+    });
+    return button;
+  }
+  function group(title,tag,className){
+    var wrapper=document.createElement('section');
+    wrapper.className='ow-mob-section '+className;
+    var heading=document.createElement('div');
+    heading.className='ow-mob-label';
+    heading.textContent=title;
+    var row=document.createElement(tag||'div');
+    row.className='ow-mob-items';
+    wrapper.append(heading,row);
+    return {wrapper,row};
+  }
+
+  function syncMobileNav(){
+    var app=document.getElementById('app');
+    var desktop=app?.querySelector('.nav-row');
+    if(!desktop)return;
+    var hub=app.querySelector('.ow-mobile-hub');
+    if(!mobileWidth()) {
+      if(hub)hub.hidden=true;
+      return;
+    }
+    if(!hub){
+      hub=document.createElement('nav');
+      hub.className='ow-mobile-hub';
+      hub.setAttribute('aria-label','Navegação do sistema no celular');
+      desktop.insertAdjacentElement('afterend',hub);
+    }
+    hub.hidden=false;
+    var areaTabs=Array.from(desktop.querySelectorAll('#tabs .tab')).filter(permitted);
+    var areaGroup=group('Áreas de trabalho','div','ow-mob-areas');
+    areaTabs.forEach(function(button){
+      var label=button.textContent.trim();
+      areaGroup.row.appendChild(makeDelegate(button,label,'area'));
+    });
+    var availablePrimary=primaryTools.map(function(tool){
+      return {tool,source:document.getElementById(tool.id)};
+    }).filter(function(v){return permitted(v.source);});
+    var availableExtra=additionalTools.map(function(tool){
+      return {tool,source:document.getElementById(tool.id)};
+    }).filter(function(v){return permitted(v.source);});
+    var toolsGroup=group('Ferramentas','div','ow-mob-tools');
+    availablePrimary.forEach(function(v){
+      toolsGroup.row.appendChild(makeDelegate(v.source,v.tool.title,'shortcut'));
+    });
+    if(availableExtra.length){
+      var more=document.createElement('button');
+      more.type='button';
+      more.className='ow-mob-nav-button ow-mob-more-toggle';
+      var hasActiveExtra=availableExtra.some(function(v){return v.source.classList.contains('active')});
+      if(hasActiveExtra)more.classList.add('has-active-tool');
+      more.textContent=expandedMore?'Menos opções':'Mais opções';
+      more.setAttribute('aria-expanded',String(expandedMore));
+      more.setAttribute('aria-controls','ow-mobile-more-tools');
+      more.addEventListener('click',function(){
+        expandedMore=!expandedMore;
+        syncMobileNav();
+      });
+      toolsGroup.row.appendChild(more);
+      var extra=document.createElement('div');
+      extra.id='ow-mobile-more-tools';
+      extra.className='ow-mob-extra';
+      extra.hidden=!expandedMore;
+      availableExtra.forEach(function(v){
+        extra.appendChild(makeDelegate(v.source,v.tool.title,'extra'));
+      });
+      toolsGroup.wrapper.appendChild(extra);
+    }
+    hub.replaceChildren(areaGroup.wrapper,toolsGroup.wrapper);
+    hub.classList.toggle('ow-mob-no-areas',areaTabs.length===0);
+    hub.classList.toggle('ow-mob-no-tools',availablePrimary.length===0&&availableExtra.length===0);
+  }
+
+  renderAll=function(){
+    var result=formerRenderAll.apply(this,arguments);
+    syncMobileNav();
+    return result;
+  };
+  window.addEventListener('resize',function(){
+    if (!mobileWidth())expandedMore=false;
+    syncMobileNav();
+  },{passive:true});
+  if (document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',syncMobileNav,{once:true});
+  } else syncMobileNav();
+})();
