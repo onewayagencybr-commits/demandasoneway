@@ -1721,7 +1721,13 @@
       !el.disabled && el.getAttribute('aria-hidden')!=='true');
   }
   function mobileWidth(){
-    return window.matchMedia('(max-width:700px)').matches;
+    // Alguns Safaris desenham o site de celular num layout virtual de 980px.
+    // Nesse caso a mídia de toque reconhece o telefone mesmo com viewport largo.
+    var cssPhone=window.matchMedia('(max-width:700px)').matches;
+    var compactTouch=window.matchMedia('(pointer:coarse) and (max-width:1000px)').matches;
+    var actualPhone=/iPhone|iPod|Android.*Mobile/i.test(navigator.userAgent) &&
+      Math.min(window.screen.width||9999,window.screen.height||9999)<=700;
+    return cssPhone||compactTouch||actualPhone;
   }
   function makeDelegate(source,title,kind){
     var button=document.createElement('button');
