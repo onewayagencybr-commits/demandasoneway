@@ -665,6 +665,10 @@
         }),
         updatedAt: new Date().toISOString()
       });
+      if (stepKey === 'finalizado') {
+        updated.status = updated.workflowChecks.finalizado ? 'green' :
+          (old.status === 'green' ? 'yellow' : (old.status || 'yellow'));
+      }
       var items = smItems.map(function (item) { return item.id === id ? updated : item; });
       var saved = await smPersistItems(items);
       if (saved) toast('Etapa de Social Media atualizada.', null, null, 'success');
@@ -743,6 +747,10 @@
     var createdText = /^\d{4}-\d{2}-\d{2}$/.test(created)
       ? 'Criada em ' + created.slice(8, 10) + '/' + created.slice(5, 7) + '/' + created.slice(0, 4)
       : '';
+    var statusKey = item.status && STATUS_DEFAULT[item.status] ? item.status :
+      (isFinished(item) ? 'green' : 'yellow');
+    var statusName = item.status && STATUS_DEFAULT[item.status] ?
+      STATUS_DEFAULT[item.status] : (isFinished(item) ? 'Finalizado' : 'Em andamento');
     el.innerHTML = '<span class="agenda-date"><strong class="agenda-day">' +
       esc(String(date.getDate()).padStart(2, '0')) + '</strong><span class="agenda-month">' +
       esc(month) + '</span></span>' +
@@ -754,8 +762,8 @@
       (createdText ? '<span class="agenda-created-date">' + esc(createdText) + '</span>' : '') +
       '</div>' +
       '<span class="area-chip ow-social-area-chip">Social Media</span>' +
-      '<span class="current-status ' + (isFinished(item) ? 'green' : 'yellow') +
-      '" aria-label="Situação da demanda">' + (isFinished(item) ? 'Finalizado' : 'Em andamento') + '</span>' +
+      '<span class="current-status ' + esc(statusKey) +
+      '" aria-label="Situação da demanda">' + esc(statusName) + '</span>' +
       '<button type="button" class="agenda-arrow ow-social-edit-arrow" title="Editar demanda no Social Media" aria-label="Editar demanda no Social Media">›</button>';
     var info = el.querySelector('.ow-social-agenda-info');
     info.insertBefore(stepControls(item, 'agenda'), info.firstChild);
@@ -1381,7 +1389,7 @@
   function stage(item){
     var v=String(item.status||'');
     if (Object.prototype.hasOwnProperty.call(STATUS_DEFAULT,v))return v;
-    return checks(item).finalizado?'green':'red';
+    return checks(item).finalizado?'green':'yellow';
   }
   function closeExisting(){
     document.querySelectorAll('#agendaList>.ow-agenda-inline-editor').forEach(function(node){node.remove();});
@@ -1471,7 +1479,7 @@
     });
     form.elements.namedItem('finalizado').addEventListener('change',function(e){
       if(e.target.checked)setStage('green');
-      else if(form.elements.namedItem('stage').value==='green')setStage('red');
+      else if(form.elements.namedItem('stage').value==='green')setStage('yellow');
     });
     form.addEventListener('submit',async function(event){
       event.preventDefault();
