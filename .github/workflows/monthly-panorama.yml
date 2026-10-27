@@ -31,9 +31,11 @@ jobs:
           node --check modules/social-scheduler-ui.js
           python3 - <<'PY'
           from pathlib import Path
+          import re
           text=Path('index.html').read_text()
-          assert text.count('src="/modules/monthly-panorama.js"') == 1
-          assert text.count('href="/modules/monthly-panorama.css"') == 1
+          # Query strings são usadas para atualizar o cache no Safari.
+          assert len(re.findall(r'<script src="/modules/monthly-panorama\.js(?:\?[^"]*)?" defer></script>', text)) == 1
+          assert len(re.findall(r'<link rel="stylesheet" href="/modules/monthly-panorama\.css(?:\?[^"]*)?">', text)) == 1
           assert text.count('src="/modules/editor-calendar.js"') == 1
           assert text.count('href="/modules/editor-calendar.css"') == 1
           assert '<script src="/modules/panorama-mensal.js" defer></script>' not in text
