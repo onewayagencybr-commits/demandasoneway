@@ -1216,6 +1216,8 @@
       var button = document.getElementById(id);
       if (button) tools.appendChild(button);
     });
+    // A lixeira fica na extremidade do menu, fora das três áreas prioritárias.
+    if (trash) tools.appendChild(trash);
   }
 
   function positionSearch() {
