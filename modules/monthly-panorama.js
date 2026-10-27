@@ -1219,9 +1219,17 @@
     if (currentArea === 'agenda') {
       var line = document.querySelector('#agendaContent .ow-agenda-toolbar-line');
       if (line) {
+        var group=line.querySelector('.ow-agenda-person-filters');
+        if (!group) {
+          group=document.createElement('div');
+          group.className='ow-agenda-person-filters';
+          line.appendChild(group);
+        }
+        var people=document.getElementById('owAgendaAssigneeToolbar');
+        if (people) group.appendChild(people);
         search.classList.add('ow-agenda-search');
         search.placeholder = 'Buscar cliente ou demanda';
-        line.appendChild(search);
+        group.appendChild(search);
       }
     } else {
       search.classList.remove('ow-agenda-search');
@@ -1306,7 +1314,7 @@
   // Luz suave seguindo o ponteiro, somente sobre superfícies transparentes.
   var shineFrame=0,shineTarget=null,shineX=0,shineY=0;
   document.addEventListener('pointermove',function(event){
-    if (event.pointerType==='touch' || !isAdmin() && !isDesign() && !isVideoUser()) return;
+    if (event.pointerType==='touch') return;
     var target=event.target.closest?.('.client, #agendaContent .agenda-item, .stats .stat, .sm-task, .ow-agenda-inline-editor, .ow-month-shell');
     if (!target) return;
     shineTarget=target;
