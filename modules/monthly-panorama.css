@@ -1386,3 +1386,46 @@ body.calendar-view{
     animation:none!important;
   }
 }
+
+
+/* One Way · busca integrada ao filtro de responsável */
+#agendaContent .ow-agenda-toolbar-line .ow-agenda-person-filters{
+  display:flex;
+  flex:0 1 auto;
+  flex-flow:row nowrap;
+  justify-content:flex-end;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+  margin-left:auto;
+}
+#agendaContent .ow-agenda-person-filters #owAgendaAssigneeToolbar{
+  display:flex;
+  flex:0 0 auto;
+  min-width:0;
+  margin:0!important;
+}
+#agendaContent .ow-agenda-person-filters #searchInput.ow-agenda-search{
+  flex:0 1 230px!important;
+  width:230px!important;
+  max-width:250px!important;
+  margin:0!important;
+}
+@media(max-width:1050px){
+  #agendaContent .ow-agenda-toolbar-line .ow-agenda-person-filters{
+    flex:1 1 100%;
+    justify-content:flex-start;
+    margin-left:0;
+  }
+}
+@media(max-width:650px){
+  #agendaContent .ow-agenda-toolbar-line .ow-agenda-person-filters{
+    flex-flow:row wrap;
+    width:100%;
+  }
+  #agendaContent .ow-agenda-person-filters #searchInput.ow-agenda-search{
+    flex:1 1 100%!important;
+    width:100%!important;
+    max-width:100%!important;
+  }
+}
