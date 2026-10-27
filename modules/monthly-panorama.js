@@ -751,6 +751,7 @@
       (isFinished(item) ? 'green' : 'yellow');
     var statusName = item.status && STATUS_DEFAULT[item.status] ?
       STATUS_DEFAULT[item.status] : (isFinished(item) ? 'Finalizado' : 'Em andamento');
+    el.classList.add('ow-tone-'+statusKey);
     el.innerHTML = '<span class="agenda-date"><strong class="agenda-day">' +
       esc(String(date.getDate()).padStart(2, '0')) + '</strong><span class="agenda-month">' +
       esc(month) + '</span></span>' +
@@ -1142,6 +1143,34 @@
     });
   }
 
+  function owDismissAgendaPanel(panel, animated, onDone) {
+    if (!panel) { if (onDone) onDone(); return; }
+    var card=panel.previousElementSibling;
+    function finish() {
+      if (panel.isConnected) panel.remove();
+      if (card && card.classList.contains('agenda-item')) card.setAttribute('aria-expanded','false');
+      if (onDone) onDone();
+    }
+    if (!animated || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      finish(); return;
+    }
+    if (panel.dataset.owClosing === 'true') return;
+    panel.dataset.owClosing='true';
+    var h=panel.getBoundingClientRect().height;
+    panel.style.boxSizing='border-box';
+    panel.style.height=h+'px';
+    panel.style.overflow='hidden';
+    panel.style.minHeight='0';
+    var duration=550;
+    var animation=panel.animate([
+      {height:h+'px',opacity:1,transform:'translate3d(0,0,0)',paddingTop:'19px',paddingBottom:'7px'},
+      {height:'0px',opacity:0,transform:'translate3d(0,-8px,0)',paddingTop:'0px',paddingBottom:'0px'}
+    ],{duration:duration,easing:'cubic-bezier(.38,0,.22,1)',fill:'forwards'});
+    animation.onfinish=finish;
+    animation.oncancel=finish;
+  }
+  window.OneWayAgendaDismissPanel=owDismissAgendaPanel;
+
   function showAgendaDetails(id) {
     var demand = getDemand(id);
     if (!demand || currentArea !== 'agenda') return false;
@@ -1156,13 +1185,14 @@
       return false;
     }
     if (currentExpandedId === id && list.querySelector('.ow-agenda-inline-editor')) {
-      list.querySelector('.ow-agenda-inline-editor')?.remove();
+      owDismissAgendaPanel(list.querySelector('.ow-agenda-inline-editor'),true);
       currentExpandedId = '';
-      card.setAttribute('aria-expanded','false');
       return true;
     }
     currentExpandedId = id;
-    list.querySelectorAll('.ow-agenda-inline-editor').forEach(function (e) { e.remove(); });
+    list.querySelectorAll('.ow-agenda-inline-editor').forEach(function (e) {
+      owDismissAgendaPanel(e,false);
+    });
     list.querySelectorAll('.agenda-item[aria-expanded]').forEach(function (e) {
       e.setAttribute('aria-expanded','false');
     });
@@ -1183,24 +1213,9 @@
     if (titleRow) titleRow.remove();
     card.insertAdjacentElement('afterend', editor);
 
-    var actions = document.createElement('div');
-    actions.className = 'ow-agenda-inline-head';
-    var name = document.createElement('div');
-    name.innerHTML = '<strong>' + esc(demand.title||'Demanda') + '</strong><span>' +
-      esc(AREAS[demand.area]||demand.area) + ' · ' + esc(fmtPostDate(demand.postDate)) +
-      ' · ' + esc(demandAssignee(demand)||'Sem responsável') + '</span>';
-    var close = document.createElement('button');
-    close.type = 'button';
-    close.className = 'ow-agenda-inline-close';
-    close.textContent = 'Fechar ×';
-    close.onclick = function () {
-      editor.remove();
-      currentExpandedId = '';
-      card.setAttribute('aria-expanded','false');
-      card.focus();
-    };
-    actions.append(name,close);
-    editor.prepend(actions);
+    // O cartão já apresenta título e situação. Repeti-los em outra barra
+    // criava uma divisória visual desnecessária.
+    editor.setAttribute('data-ow-parent-id',id);
     bindClientEvents(editor);
     buildAdminFields(demand,editor);
     return true;
@@ -1410,7 +1425,10 @@
     var opened=document.querySelector('#agendaList>.ow-agenda-inline-editor');
     if(!restoring && activeId===id && opened){
       activeId='';
-      closeExisting();card.focus();return true;
+      if (typeof window.OneWayAgendaDismissPanel==='function') {
+        window.OneWayAgendaDismissPanel(opened,true);
+      } else closeExisting();
+      card.focus();return true;
     }
     closeExisting();
     activeId=id;
@@ -1422,10 +1440,8 @@
     if (!clients.some(function(n){return smNormalizeName(n)===smNormalizeName(item.client);}))
       clients.unshift(item.client);
     var selected=stage(item);
+    card.classList.add('ow-tone-'+selected);
     panel.innerHTML=
-      '<header class="ow-agenda-inline-head"><div><strong>'+esc(item.title||'Demanda de Social Media')+'</strong>'+
-      '<span>'+esc(item.client||'Cliente')+' · '+esc(item.date||'')+' · Social Media</span></div>'+
-      '<button type="button" class="ow-agenda-inline-close" data-social-close>Fechar ×</button></header>'+
       '<div class="detail-panel ow-social-edit-panel">'+
       '<form class="ow-social-agenda-form">'+
       '<div class="detail-label">Informações da demanda</div>'+
@@ -1456,13 +1472,10 @@
       (item.finalLink && safeUrl(item.finalLink)!=='#'?'<a class="ow-agenda-link-open" href="'+esc(safeUrl(item.finalLink))+
       '" target="_blank" rel="noopener">Abrir material finalizado</a>':'')+
       '</div>'+
-      '<footer class="ow-agenda-fields-actions"><button type="button" class="ghost small" data-social-cancel>Cancelar</button>'+
-      '<button type="submit" class="ow-agenda-inline-save">Salvar alterações</button></footer></form></div>';
+      '<footer class="ow-agenda-fields-actions"><button type="submit" class="ow-agenda-inline-save">Salvar alterações</button></footer></form></div>';
     card.insertAdjacentElement('afterend',panel);
     var form=panel.querySelector('form');
-    panel.querySelector('[data-social-close]').onclick=panel.querySelector('[data-social-cancel]').onclick=function(){
-      activeId='';closeExisting();card.focus();
-    };
+    // Para recolher basta clicar novamente no mesmo cartão da Agenda.
     function setStage(value){
       if(!Object.prototype.hasOwnProperty.call(STATUS_DEFAULT,value))return;
       form.elements.namedItem('stage').value=value;
