@@ -1054,7 +1054,7 @@
   // Assim os status, arquivos, referências e link finalizado reutilizam as
   // funções originais e todas as permissões permanecem em vigor.
   function getAgendaCard(id) {
-    return Array.from(document.querySelectorAll('#agendaList>.agenda-item[data-agenda-id]'))
+    return Array.from(document.querySelectorAll('#agendaList .agenda-item[data-agenda-id]'))
       .find(function (el) { return el.dataset.agendaId === id; });
   }
 
@@ -1143,97 +1143,107 @@
     });
   }
 
-  // A Agenda usa a mesma transição dimensional para abrir e recolher.
-  // A faixa da lista tem espaçamento fixo: ao atingir altura 0 a remoção
-  // não desloca os cards (sem "salto" no último quadro).
-  function owAgendaFlow(panel, opening, animated, onDone) {
-    if (!panel) { if (onDone) onDone(); return; }
-    // Uma única área interna recebe os espaçamentos visuais. A área externa
-    // fica sem padding vertical e pode passar de altura natural até 0 sem salto.
-    if (opening && !panel.querySelector(':scope > .ow-agenda-detail-interior')) {
+  // O contorno é um único elemento pai; o detalhe só aumenta sua altura.
+  // Assim as quatro bordas e os raios não mudam durante a transformação.
+  function owAgendaWrapCard(card,panel) {
+    var group=card?.parentElement;
+    if (group?.classList.contains('ow-agenda-group')) {
+      if (panel.parentElement!==group) group.appendChild(panel);
+      return group;
+    }
+    if (!card || !panel || !card.parentElement) return null;
+    group=document.createElement('div');
+    group.className='ow-agenda-group';
+    var computed=getComputedStyle(card);
+    group.style.setProperty('--ow-accent',computed.getPropertyValue('--ow-accent').trim()||'#77baff');
+    group.style.setProperty('--ow-spot-rgb',computed.getPropertyValue('--ow-spot-rgb').trim()||'116,185,255');
+    card.parentElement.insertBefore(group,card);
+    group.appendChild(card);
+    group.appendChild(panel);
+    return group;
+  }
+  function owAgendaFlow(panel,opening,animated,onDone){
+    if(!panel){if(onDone)onDone();return;}
+    var card=panel.previousElementSibling;
+    if(opening && card && card.classList.contains('agenda-item'))
+      owAgendaWrapCard(card,panel);
+    if (!panel.querySelector(':scope > .ow-agenda-detail-interior')) {
       var interior=document.createElement('div');
       interior.className='ow-agenda-detail-interior';
-      while (panel.firstChild) interior.appendChild(panel.firstChild);
+      while(panel.firstChild) interior.appendChild(panel.firstChild);
       panel.appendChild(interior);
     }
-    var card=panel.previousElementSibling;
+    card=panel.previousElementSibling;
+    var group=panel.parentElement;
     var reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var existing=panel._owFlowAnimation;
-    var renderedHeight=panel.getBoundingClientRect().height;
-    var styles=getComputedStyle(panel);
-    var pt=parseFloat(styles.paddingTop)||0;
-    var pb=parseFloat(styles.paddingBottom)||0;
-    var bottomBorder=parseFloat(styles.borderBottomWidth)||0;
-    if (existing) {
-      existing.onfinish=null;
-      existing.oncancel=null;
-      existing.cancel();
+    var previous=panel._owFlowAnimation;
+    var from=panel.getBoundingClientRect().height;
+    if(previous){
+      previous.onfinish=null;
+      previous.oncancel=null;
+      previous.cancel();
       panel._owFlowAnimation=null;
+      panel.style.height=from+'px';
     }
     panel.style.setProperty('animation','none','important');
-    panel.style.boxSizing='border-box';
     panel.style.overflow='hidden';
-    panel.style.minHeight='0';
-    function finish() {
-      panel._owFlowAnimation=null;
-      if (!opening) {
-        if (panel.isConnected) panel.remove();
-        if (card && card.classList.contains('agenda-item'))
-          card.setAttribute('aria-expanded','false');
-      } else {
-        panel.dataset.owClosing='false';
-        panel.classList.remove('ow-agenda-closing');
-        panel.style.removeProperty('overflow');
-      }
-      if (onDone) onDone();
-    }
-    if (!animated || reduced || !panel.animate) {
-      finish();
-      return;
-    }
-    if (opening) {
+    panel.style.minHeight='0px';
+    panel.style.boxSizing='border-box';
+    var interior=panel.querySelector(':scope > .ow-agenda-detail-interior');
+    var natural=interior ? interior.scrollHeight : panel.scrollHeight;
+    if(opening && card)card.setAttribute('aria-expanded','true');
+    if(opening){
       panel.dataset.owClosing='false';
       panel.classList.remove('ow-agenda-closing');
-    } else {
-      if (panel.dataset.owClosing==='true' && !existing) return;
+    }else{
       panel.dataset.owClosing='true';
       panel.classList.add('ow-agenda-closing');
     }
-    var startHeight=opening?(existing?renderedHeight:0):renderedHeight;
-    // A abertura mede a altura natural, incluindo textos de várias linhas.
-    // O fechamento começa no quadro real, mesmo se a abertura estiver em curso.
-    var endHeight=opening?(panel._owNaturalHeight||renderedHeight):0;
-    if (opening && !existing) {
-      endHeight=panel.getBoundingClientRect().height;
-      panel._owNaturalHeight=endHeight;
+    function finish(){
+      panel._owFlowAnimation=null;
+      if(opening){
+        panel.style.height='auto';
+        panel.style.removeProperty('overflow');
+        panel.dataset.owClosing='false';
+        panel.classList.remove('ow-agenda-closing');
+      }else{
+        if(panel.isConnected)panel.remove();
+        if(card && card.classList.contains('agenda-item')){
+          card.setAttribute('aria-expanded','false');
+          if(group?.classList.contains('ow-agenda-group')&&group.isConnected){
+            group.parentElement.insertBefore(card,group);
+            group.remove();
+          }
+        }
+      }
+      if(onDone)onDone();
     }
-    var frames=opening ? [
-      {height:startHeight+'px',paddingTop:(existing?pt:0)+'px',
-       paddingBottom:(existing?pb:0)+'px',borderBottomWidth:(existing?bottomBorder:0)+'px',opacity:existing?1:0},
-      {height:endHeight+'px',paddingTop:pt+'px',
-       paddingBottom:pb+'px',borderBottomWidth:bottomBorder+'px',opacity:1}
-    ] : [
-      {height:startHeight+'px',paddingTop:pt+'px',
-       paddingBottom:pb+'px',borderBottomWidth:bottomBorder+'px',opacity:1},
-      {height:'0px',paddingTop:'0px',paddingBottom:'0px',borderBottomWidth:'0px',opacity:0}
-    ];
-    var motion=panel.animate(frames,{
-      duration:opening?740:680,
-      easing:opening?'cubic-bezier(.16,.76,.24,1)':'cubic-bezier(.32,0,.22,1)',
-      fill:'both'
+    if(!animated || reduced || !panel.animate){
+      finish();return;
+    }
+    var start=opening?(previous?from:0):from;
+    var stop=opening?natural:0;
+    if(Math.abs(start-stop)<.5){finish();return;}
+    var motion=panel.animate([
+      {height:start+'px',opacity:opening && !previous?0.8:1},
+      {height:stop+'px',opacity:opening?1:.94}
+    ],{
+      duration:opening?760:700,
+      easing:'cubic-bezier(.25,.68,.22,1)',
+      fill:'forwards'
     });
     panel._owFlowAnimation=motion;
     motion.onfinish=function(){
-      if (panel._owFlowAnimation!==motion) return;
+      if(panel._owFlowAnimation!==motion)return;
       motion.onfinish=null;
       motion.cancel();
       finish();
     };
   }
-  function owDismissAgendaPanel(panel,animated,onDone) {
+  function owDismissAgendaPanel(panel,animated,onDone){
     owAgendaFlow(panel,false,animated,onDone);
   }
-  function owExpandAgendaPanel(panel,animated) {
+  function owExpandAgendaPanel(panel,animated){
     owAgendaFlow(panel,true,animated);
   }
   window.OneWayAgendaDismissPanel=owDismissAgendaPanel;
@@ -1465,7 +1475,7 @@
     return eligible() ? smItems.find(function(item){return item.id===id;}) : null;
   }
   function socialCard(id){
-    return Array.from(document.querySelectorAll('#agendaList>.ow-social-agenda-item'))
+    return Array.from(document.querySelectorAll('#agendaList .ow-social-agenda-item'))
       .find(function(el){return el.dataset.owSocialAgendaId===id;});
   }
   function checks(item) {
@@ -1483,8 +1493,12 @@
     return checks(item).finalizado?'green':'yellow';
   }
   function closeExisting(){
-    document.querySelectorAll('#agendaList>.ow-agenda-inline-editor').forEach(function(node){node.remove();});
-    document.querySelectorAll('#agendaList>.agenda-item[aria-expanded]').forEach(function(node){
+    document.querySelectorAll('#agendaList .ow-agenda-inline-editor').forEach(function(node){
+      if(typeof window.OneWayAgendaDismissPanel==='function')
+        window.OneWayAgendaDismissPanel(node,false);
+      else node.remove();
+    });
+    document.querySelectorAll('#agendaList .agenda-item[aria-expanded]').forEach(function(node){
       node.setAttribute('aria-expanded','false');
     });
   }
@@ -1498,7 +1512,7 @@
       if(calendarMode&&button){activeId=id;button.click();return true;}
       return false;
     }
-    var opened=document.querySelector('#agendaList>.ow-agenda-inline-editor');
+    var opened=document.querySelector('#agendaList .ow-agenda-inline-editor');
     if (!restoring && opened?.dataset.owClosing==='true' &&
         opened.previousElementSibling===card &&
         typeof window.OneWayAgendaExpandPanel==='function') {
