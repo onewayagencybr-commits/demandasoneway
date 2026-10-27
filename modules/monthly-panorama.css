@@ -3092,7 +3092,7 @@ body.calendar-view{
 .ow-mobile-hub{display:none}
 .ow-mobile-hub[hidden]{display:none!important}
 
-@media (max-width:700px) {
+@media (max-width:700px), (pointer:coarse) and (max-width:1000px), (max-device-width:700px) {
   html,body{
     width:100%;max-width:100%;
     overflow-x:clip!important;
@@ -3743,7 +3743,7 @@ body.calendar-view{
     max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;
   }
 }
-@media(max-width:365px){
+@media(max-width:365px), (max-device-width:365px){
   #app .ow-mobile-hub:not([hidden]){padding:13px 10px!important}
   #app .ow-mobile-hub .ow-mob-nav-button{font-size:11.5px!important;padding:10px 6px!important}
   #agendaContent #agendaList.agenda-list>.agenda-item,
@@ -3754,7 +3754,7 @@ body.calendar-view{
   }
   #agendaContent #agendaList.agenda-list .agenda-item .agenda-day{font-size:23px!important}
 }
-@media(max-width:700px) and (prefers-reduced-motion:reduce){
+@media(max-width:700px) and (prefers-reduced-motion:reduce), (pointer:coarse) and (max-width:1000px) and (prefers-reduced-motion:reduce), (max-device-width:700px) and (prefers-reduced-motion:reduce){
   #app .ow-mobile-hub *,#app .ow-mobile-hub .ow-mob-extra:not([hidden]){
     animation:none!important;
     transition:none!important;
