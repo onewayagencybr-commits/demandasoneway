@@ -630,9 +630,17 @@
     var previous = new Map(smItems.map(function (item) { return [item.id, item]; }));
     var merged = nextItems.map(function (item) {
       var old = previous.get(item.id);
-      if (!old || Object.prototype.hasOwnProperty.call(item, 'workflowChecks') ||
-          !old.workflowChecks) return item;
-      return Object.assign({}, item, { workflowChecks: old.workflowChecks });
+      if (!old) return item;
+      var mergedItem = Object.assign({}, item);
+      // O editor antigo da aba Social Media envia somente os campos básicos.
+      // Preserva os campos seguros adicionados pela Agenda quando não enviados.
+      ['workflowChecks', 'status', 'finalLink'].forEach(function (key) {
+        if (!Object.prototype.hasOwnProperty.call(mergedItem, key) &&
+            Object.prototype.hasOwnProperty.call(old, key)) {
+          mergedItem[key] = old[key];
+        }
+      });
+      return mergedItem;
     });
     var persisted = await previousPersistItems.call(this, merged);
     if (persisted && currentArea === 'agenda') renderAgenda();
