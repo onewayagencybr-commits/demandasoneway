@@ -1835,3 +1835,134 @@
     document.addEventListener('DOMContentLoaded',syncMobileNav,{once:true});
   } else syncMobileNav();
 })();
+
+
+/* One Way · calendário semanal por responsável · 2026-10-27 */
+(function(){
+  'use strict';
+  if(typeof calendarItemsByDate!=='function'||typeof renderWeekCalendar!=='function'||
+     typeof calendarWeekTitle!=='function'||typeof isAdmin!=='function')return;
+
+  var originalCalendarItemsByDate=calendarItemsByDate;
+  var originalRenderWeekCalendar=renderWeekCalendar;
+  var originalCalendarWeekTitle=calendarWeekTitle;
+  var calendarPerson='all';
+
+  function normalized(name){
+    var result=String(name||'').trim().normalize('NFD')
+      .replace(/[\u0300-\u036f]/g,'').toLowerCase();
+    return result==='thiago'?'tiago':result;
+  }
+  function currentPerson(){
+    if(!isAdmin())return 'all';
+    if(calendarPerson==='all'||calendarPerson==='unassigned')return calendarPerson;
+    return DEMAND_ASSIGNEES.includes(calendarPerson)?calendarPerson:'all';
+  }
+  function labelOf(value){
+    if(value==='all')return 'Todos os responsáveis';
+    if(value==='unassigned')return 'Sem responsável';
+    return value;
+  }
+  function matchesPerson(demand){
+    var value=currentPerson();
+    if(value==='all')return true;
+    var stored=String(demand?.assignee||'').trim();
+    if(value==='unassigned')return !stored||!DEMAND_ASSIGNEES.some(function(n){
+      return normalized(n)===normalized(stored);
+    });
+    return normalized(stored)===normalized(value);
+  }
+
+  // Um único filtro para o calendário na tela e seus quatro tipos de saída:
+  // PDF, JPEG, copiar resumo e baixar TXT. Não modifica as demandas do banco.
+  calendarItemsByDate=function(iso){
+    var data=originalCalendarItemsByDate(iso);
+    if(!isAdmin()||currentPerson()==='all')return data;
+    return {
+      posts:(data.posts||[]).filter(matchesPerson),
+      // Compromissos e datas especiais são coletivos e não têm responsável.
+      events:[],
+      dates:[]
+    };
+  };
+
+  calendarWeekTitle=function(){
+    var original=originalCalendarWeekTitle();
+    var value=currentPerson();
+    if(value==='all')return original;
+    return original+' · '+(value==='unassigned'?'Sem responsável':'Responsável: '+value);
+  };
+
+  function attachPersonSelector(){
+    if(!isAdmin())return;
+    var filters=document.getElementById('wkFilters');
+    if(!filters)return;
+    var wrapper=document.getElementById('owWeekPersonField');
+    if(!wrapper){
+      wrapper=document.createElement('label');
+      wrapper.id='owWeekPersonField';
+      wrapper.className='ow-week-person-field';
+      wrapper.htmlFor='owWeekPersonSelect';
+      var caption=document.createElement('span');
+      caption.className='ow-week-person-title';
+      caption.textContent='Responsável';
+      var select=document.createElement('select');
+      select.id='owWeekPersonSelect';
+      select.setAttribute('aria-label','Filtrar calendário semanal por responsável');
+      var people=[['all','Todos os responsáveis']]
+        .concat(DEMAND_ASSIGNEES.map(function(name){return [name,name];}))
+        .concat([['unassigned','Sem responsável']]);
+      people.forEach(function(entry){
+        var option=document.createElement('option');
+        option.value=entry[0];
+        option.textContent=entry[1];
+        select.appendChild(option);
+      });
+      select.addEventListener('change',function(){
+        if(!isAdmin())return;
+        var requested=select.value;
+        calendarPerson=requested==='unassigned'||requested==='all'||
+          DEMAND_ASSIGNEES.includes(requested)?requested:'all';
+        // Compromissos e datas comemorativas não são atribuídos a pessoas.
+        if(calendarPerson!=='all'&&
+           (calendarViewFilter==='compromissos'||calendarViewFilter==='datas')){
+          calendarViewFilter='todos';
+        }
+        renderWeekCalendar();
+      });
+      wrapper.append(caption,select);
+      filters.appendChild(wrapper);
+    }
+    var selector=wrapper.querySelector('select');
+    if(selector)selector.value=currentPerson();
+    var details=document.getElementById('owWeekPersonHint');
+    if(!details){
+      details=document.createElement('p');
+      details.id='owWeekPersonHint';
+      details.className='ow-week-person-hint';
+      filters.insertAdjacentElement('afterend',details);
+    }
+    var value=currentPerson();
+    details.hidden=value==='all';
+    details.textContent=value==='all'?'':(
+      (value==='unassigned'?'Somente demandas sem responsável.':
+       'Somente demandas atribuídas a '+value+'.')+
+      ' Os arquivos PDF, JPEG e resumos seguem este filtro.'
+    );
+    filters.classList.toggle('ow-week-person-selected',value!=='all');
+  }
+
+  renderWeekCalendar=function(){
+    if(!isAdmin())return originalRenderWeekCalendar.apply(this,arguments);
+    attachPersonSelector();
+    var result=originalRenderWeekCalendar.apply(this,arguments);
+    // Os controles originais redesenham os dias; o seletor não perde o estado.
+    attachPersonSelector();
+    return result;
+  };
+
+  // Interface pronta também quando o Calendário for aberto pela primeira vez.
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',attachPersonSelector,{once:true});
+  }else attachPersonSelector();
+})();
