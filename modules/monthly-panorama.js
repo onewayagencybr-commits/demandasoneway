@@ -1148,6 +1148,14 @@
   // não desloca os cards (sem "salto" no último quadro).
   function owAgendaFlow(panel, opening, animated, onDone) {
     if (!panel) { if (onDone) onDone(); return; }
+    // Uma única área interna recebe os espaçamentos visuais. A área externa
+    // fica sem padding vertical e pode passar de altura natural até 0 sem salto.
+    if (opening && !panel.querySelector(':scope > .ow-agenda-detail-interior')) {
+      var interior=document.createElement('div');
+      interior.className='ow-agenda-detail-interior';
+      while (panel.firstChild) interior.appendChild(panel.firstChild);
+      panel.appendChild(interior);
+    }
     var card=panel.previousElementSibling;
     var reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var existing=panel._owFlowAnimation;
