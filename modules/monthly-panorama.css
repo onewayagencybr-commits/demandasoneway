@@ -2505,3 +2505,157 @@ body.calendar-view{
     max-width:100%!important;
   }
 }
+
+
+/* One Way · refinamento da superfície contínua e tipografia estável · 2026-10-27 */
+/* Mesmo fundo quando fechado e expandido: nenhuma emenda horizontal. */
+#agendaContent #agendaList.agenda-list>.agenda-item,
+#agendaContent #agendaList.agenda-list>.ow-agenda-group{
+  background:linear-gradient(90deg,
+    rgba(var(--ow-spot-rgb,116,185,255),.105) 0%,
+    rgba(8,27,65,.79) 34%,
+    rgba(8,27,65,.79) 100%)!important;
+  background-attachment:scroll!important;
+}
+#agendaContent #agendaList.agenda-list>.ow-agenda-group{
+  border:1px solid rgba(var(--ow-spot-rgb),.28)!important;
+  border-radius:14px!important;
+  box-shadow:inset 6px 0 0 var(--ow-accent),
+    0 12px 34px rgba(0,8,30,.12)!important;
+}
+#agendaContent #agendaList.agenda-list>.ow-agenda-group:hover{
+  border-color:rgba(var(--ow-spot-rgb),.45)!important;
+  box-shadow:inset 6px 0 0 var(--ow-accent),
+    0 16px 38px rgba(0,8,30,.17)!important;
+}
+/* O cartão preserva as medidas INTERNAS do estado fechado: 144px totais
+   fechados = 1px de borda em cima/baixo + 142px da área interna aberta. */
+#agendaContent #agendaList.agenda-list>.ow-agenda-group>.agenda-item{
+  height:142px!important;
+  min-height:142px!important;
+  max-height:142px!important;
+  font-family:inherit!important;
+  font-weight:inherit!important;
+  letter-spacing:inherit!important;
+  line-height:normal!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+  filter:none!important;
+  animation:none!important;
+  transition:none!important;
+}
+#agendaContent #agendaList.agenda-list>.agenda-item{
+  /* Evita mudança na suavização de fontes ao alternar a composição GPU. */
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+/* Estes seletores antes valiam apenas para o card direto da lista.
+   O mesmo tratamento agora acompanha o card dentro do contorno único. */
+#agendaContent #agendaList.agenda-list>.ow-agenda-group>.agenda-item>.agenda-info{
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+  align-items:flex-start!important;
+  gap:0!important;
+  min-width:0!important;
+  min-height:0!important;
+  max-height:100%!important;
+  overflow:hidden!important;
+}
+#agendaContent #agendaList.agenda-list>.ow-agenda-group>.agenda-item>.agenda-info>strong,
+#agendaContent #agendaList.agenda-list>.ow-agenda-group>.agenda-item>.agenda-info>span:not(.agenda-info-checks),
+#agendaContent #agendaList.agenda-list>.ow-agenda-group>.agenda-item>.agenda-info>.ow-social-edit-title{
+  max-width:100%!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+#agendaContent #agendaList.agenda-list>.ow-agenda-group>.agenda-item .agenda-info-checks,
+#agendaContent #agendaList.agenda-list>.ow-agenda-group>.agenda-item .ow-social-checks-agenda{
+  display:flex!important;
+  flex:0 0 auto;
+  align-items:center!important;
+  flex-wrap:nowrap!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-height:23px;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  gap:5px!important;
+  margin:0 0 8px!important;
+  scrollbar-width:none;
+}
+#agendaContent #agendaList.agenda-list>.ow-agenda-group>.agenda-item .agenda-info-checks::-webkit-scrollbar,
+#agendaContent #agendaList.agenda-list>.ow-agenda-group>.agenda-item .ow-social-checks-agenda::-webkit-scrollbar{
+  display:none;
+}
+/* Tipografia dos selos e títulos idêntica com a demanda aberta ou fechada. */
+#agendaContent #agendaList.agenda-list>.agenda-item .agenda-info strong,
+#agendaContent #agendaList.agenda-list>.ow-agenda-group>.agenda-item .agenda-info strong,
+#agendaContent #agendaList.agenda-list>.agenda-item .ow-social-edit-title,
+#agendaContent #agendaList.agenda-list>.ow-agenda-group>.agenda-item .ow-social-edit-title{
+  font-weight:500!important;
+  font-size:12px!important;
+  line-height:1.4!important;
+  letter-spacing:0!important;
+  transform:none!important;
+}
+#agendaContent #agendaList.agenda-list>.agenda-item .current-status,
+#agendaContent #agendaList.agenda-list>.ow-agenda-group>.agenda-item .current-status{
+  font-weight:500!important;
+  font-size:9px!important;
+  line-height:1.2!important;
+  letter-spacing:.035em!important;
+  white-space:nowrap!important;
+  align-self:center!important;
+  transform:none!important;
+}
+#agendaContent #agendaList.agenda-list>.agenda-item .area-chip,
+#agendaContent #agendaList.agenda-list>.ow-agenda-group>.agenda-item .area-chip{
+  font-size:9px!important;
+  font-weight:650!important;
+  line-height:1.2!important;
+  letter-spacing:.055em!important;
+  white-space:nowrap!important;
+  align-self:center!important;
+}
+/* O brilho passa por toda a superfície e fica menos concentrado no cabeçalho. */
+@media(hover:hover) and (pointer:fine){
+  #app #agendaContent #agendaList.agenda-list>.ow-agenda-group::before{
+    background:radial-gradient(610px circle at var(--ow-pointer-x,50%) var(--ow-pointer-y,50%),
+      rgba(var(--ow-spot-rgb),.07),rgba(var(--ow-spot-rgb),.025) 50%,
+      transparent 84%)!important;
+    opacity:0;
+  }
+  #app #agendaContent #agendaList.agenda-list>.ow-agenda-group:hover::before{
+    opacity:1;
+  }
+}
+/* Abrir não muda mais a aparência da faixa superior. A parte interna mantém
+   o mesmo azul até o último pixel da expansão. */
+#agendaContent #agendaList.agenda-list>.ow-agenda-group>.agenda-item[aria-expanded="true"]{
+  border-radius:0!important;
+  background:transparent!important;
+}
+#agendaContent #agendaList.agenda-list>.ow-agenda-group>.ow-agenda-inline-editor{
+  cursor:default;
+}
+#agendaContent #agendaList.agenda-list>.ow-agenda-group>.ow-agenda-inline-editor>.ow-agenda-detail-interior{
+  background:transparent!important;
+}
+#agendaContent #agendaList.agenda-list>.ow-agenda-group>.ow-agenda-inline-editor .detail-panel{
+  background:transparent!important;
+  box-shadow:none!important;
+}
+/* Área vazia clicável; controles e textos selecionáveis mantêm o comportamento normal. */
+#agendaContent #agendaList.agenda-list>.ow-agenda-group>.ow-agenda-inline-editor>.ow-agenda-detail-interior{
+  cursor:default;
+}
+@media(max-width:640px){
+  #agendaContent #agendaList.agenda-list>.ow-agenda-group>.agenda-item{
+    height:150px!important;
+    min-height:150px!important;
+    max-height:150px!important;
+  }
+}
