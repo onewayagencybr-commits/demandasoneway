@@ -1143,34 +1143,93 @@
     });
   }
 
-  function owDismissAgendaPanel(panel, animated, onDone) {
+  // A Agenda usa a mesma transição dimensional para abrir e recolher.
+  // A faixa da lista tem espaçamento fixo: ao atingir altura 0 a remoção
+  // não desloca os cards (sem "salto" no último quadro).
+  function owAgendaFlow(panel, opening, animated, onDone) {
     if (!panel) { if (onDone) onDone(); return; }
     var card=panel.previousElementSibling;
-    function finish() {
-      if (panel.isConnected) panel.remove();
-      if (card && card.classList.contains('agenda-item')) card.setAttribute('aria-expanded','false');
-      if (onDone) onDone();
+    var reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var existing=panel._owFlowAnimation;
+    var renderedHeight=panel.getBoundingClientRect().height;
+    var styles=getComputedStyle(panel);
+    var pt=parseFloat(styles.paddingTop)||0;
+    var pb=parseFloat(styles.paddingBottom)||0;
+    var bottomBorder=parseFloat(styles.borderBottomWidth)||0;
+    if (existing) {
+      existing.onfinish=null;
+      existing.oncancel=null;
+      existing.cancel();
+      panel._owFlowAnimation=null;
     }
-    if (!animated || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      finish(); return;
-    }
-    if (panel.dataset.owClosing === 'true') return;
-    panel.dataset.owClosing='true';
-    panel.classList.add('ow-agenda-closing');
-    var h=panel.getBoundingClientRect().height;
+    panel.style.setProperty('animation','none','important');
     panel.style.boxSizing='border-box';
-    panel.style.height=h+'px';
     panel.style.overflow='hidden';
     panel.style.minHeight='0';
-    var duration=650;
-    var animation=panel.animate([
-      {height:h+'px',opacity:1,transform:'translate3d(0,0,0)',paddingTop:'19px',paddingBottom:'7px'},
-      {height:'0px',opacity:0,transform:'translate3d(0,-8px,0)',paddingTop:'0px',paddingBottom:'0px'}
-    ],{duration:duration,easing:'cubic-bezier(.38,0,.22,1)',fill:'forwards'});
-    animation.onfinish=finish;
-    animation.oncancel=finish;
+    function finish() {
+      panel._owFlowAnimation=null;
+      if (!opening) {
+        if (panel.isConnected) panel.remove();
+        if (card && card.classList.contains('agenda-item'))
+          card.setAttribute('aria-expanded','false');
+      } else {
+        panel.dataset.owClosing='false';
+        panel.classList.remove('ow-agenda-closing');
+        panel.style.removeProperty('overflow');
+      }
+      if (onDone) onDone();
+    }
+    if (!animated || reduced || !panel.animate) {
+      finish();
+      return;
+    }
+    if (opening) {
+      panel.dataset.owClosing='false';
+      panel.classList.remove('ow-agenda-closing');
+    } else {
+      if (panel.dataset.owClosing==='true' && !existing) return;
+      panel.dataset.owClosing='true';
+      panel.classList.add('ow-agenda-closing');
+    }
+    var startHeight=opening?(existing?renderedHeight:0):renderedHeight;
+    // A abertura mede a altura natural, incluindo textos de várias linhas.
+    // O fechamento começa no quadro real, mesmo se a abertura estiver em curso.
+    var endHeight=opening?(panel._owNaturalHeight||renderedHeight):0;
+    if (opening && !existing) {
+      endHeight=panel.getBoundingClientRect().height;
+      panel._owNaturalHeight=endHeight;
+    }
+    var frames=opening ? [
+      {height:startHeight+'px',paddingTop:(existing?pt:0)+'px',
+       paddingBottom:(existing?pb:0)+'px',borderBottomWidth:(existing?bottomBorder:0)+'px',opacity:existing?1:0},
+      {height:endHeight+'px',paddingTop:pt+'px',
+       paddingBottom:pb+'px',borderBottomWidth:bottomBorder+'px',opacity:1}
+    ] : [
+      {height:startHeight+'px',paddingTop:pt+'px',
+       paddingBottom:pb+'px',borderBottomWidth:bottomBorder+'px',opacity:1},
+      {height:'0px',paddingTop:'0px',paddingBottom:'0px',borderBottomWidth:'0px',opacity:0}
+    ];
+    var motion=panel.animate(frames,{
+      duration:opening?740:680,
+      easing:opening?'cubic-bezier(.16,.76,.24,1)':'cubic-bezier(.32,0,.22,1)',
+      fill:'both'
+    });
+    panel._owFlowAnimation=motion;
+    motion.onfinish=function(){
+      if (panel._owFlowAnimation!==motion) return;
+      motion.onfinish=null;
+      motion.cancel();
+      finish();
+    };
+  }
+  function owDismissAgendaPanel(panel,animated,onDone) {
+    owAgendaFlow(panel,false,animated,onDone);
+  }
+  function owExpandAgendaPanel(panel,animated) {
+    owAgendaFlow(panel,true,animated);
   }
   window.OneWayAgendaDismissPanel=owDismissAgendaPanel;
+  window.OneWayAgendaExpandPanel=owExpandAgendaPanel;
 
   function showAgendaDetails(id) {
     var demand = getDemand(id);
@@ -1184,6 +1243,13 @@
         mode.click();return true;
       }
       return false;
+    }
+    var pendingPanel=list.querySelector('.ow-agenda-inline-editor[data-ow-closing="true"]');
+    if (pendingPanel && pendingPanel.previousElementSibling === card) {
+      currentExpandedId=id;
+      card.setAttribute('aria-expanded','true');
+      owExpandAgendaPanel(pendingPanel,true);
+      return true;
     }
     if (currentExpandedId === id && list.querySelector('.ow-agenda-inline-editor')) {
       owDismissAgendaPanel(list.querySelector('.ow-agenda-inline-editor'),true);
@@ -1219,6 +1285,7 @@
     editor.setAttribute('data-ow-parent-id',id);
     bindClientEvents(editor);
     buildAdminFields(demand,editor);
+    owExpandAgendaPanel(editor,true);
     return true;
   }
 
@@ -1424,6 +1491,14 @@
       return false;
     }
     var opened=document.querySelector('#agendaList>.ow-agenda-inline-editor');
+    if (!restoring && opened?.dataset.owClosing==='true' &&
+        opened.previousElementSibling===card &&
+        typeof window.OneWayAgendaExpandPanel==='function') {
+      activeId=id;
+      card.setAttribute('aria-expanded','true');
+      window.OneWayAgendaExpandPanel(opened,true);
+      return true;
+    }
     if(!restoring && activeId===id && opened){
       activeId='';
       if (typeof window.OneWayAgendaDismissPanel==='function') {
@@ -1540,6 +1615,9 @@
         if(submit.isConnected)submit.disabled=false;
       }
     });
+    if (typeof window.OneWayAgendaExpandPanel==='function' && !restoring) {
+      window.OneWayAgendaExpandPanel(panel,true);
+    }
     if(!restoring){
       panel.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'nearest'});
     }
