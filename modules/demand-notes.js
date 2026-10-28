@@ -155,7 +155,7 @@
   if(typeof renderAll==='function'){
     const originalRenderAll=renderAll;
     renderAll=function(){
-      document.getElementById('app')?.classList.toggle('ow-team-view',isDesign()||isVideoUser());
+      document.getElementById('app')?.classList.toggle('ow-team-view',isDesign()||isVideoUser()||userAccess()==='status');
       return originalRenderAll.apply(this,arguments);
     };
   }
@@ -186,7 +186,7 @@
     addNote(form.dataset.owDemandId,input?.value||'');
   });
   if(document.getElementById('app')){
-    document.getElementById('app').classList.toggle('ow-team-view',isDesign()||isVideoUser());
+    document.getElementById('app').classList.toggle('ow-team-view',isDesign()||isVideoUser()||userAccess()==='status');
     decorateClients();
     decorateAgenda();
   }
