@@ -1,0 +1,60 @@
+/* One Way · observações de demandas */
+.ow-notes-indicator{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;vertical-align:middle;margin-left:8px;padding:4px 9px;border-radius:999px;border:1px solid rgba(245,180,104,.38);background:rgba(219,138,49,.15);color:#ffdcab;font-family:Montserrat,Arial,sans-serif;font-size:10px;font-weight:650;line-height:1.15;white-space:nowrap;letter-spacing:0}
+.ow-notes-indicator:before{content:"";width:6px;height:6px;flex:0 0 6px;background:#ffbb65;border-radius:50%;box-shadow:0 0 0 3px rgba(255,187,101,.10)}
+.ow-notes-in-agenda{margin:7px 0 0;width:max-content;padding:4px 9px}
+.ow-notes-panel{min-width:0;margin-top:17px;border:1px solid rgba(197,217,255,.20);border-radius:14px;background:linear-gradient(140deg,rgba(17,43,88,.80),rgba(8,28,66,.78));overflow:hidden;color:#eef4ff;box-shadow:0 12px 28px rgba(0,13,38,.11);font-family:Montserrat,Arial,sans-serif}
+.ow-notes-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 16px;background:transparent;border:0;color:#f5f8ff;text-align:left;cursor:pointer;font:inherit}
+.ow-notes-toggle:hover{background:rgba(255,255,255,.055)}
+.ow-notes-toggle:focus-visible,.ow-note-delete:focus-visible,.ow-note-submit:focus-visible{outline:2px solid #bfd3ff;outline-offset:-2px}
+.ow-notes-toggle-title{display:inline-flex;align-items:center;min-width:0;gap:8px;font-size:12px;font-weight:650;letter-spacing:.005em}
+.ow-notes-glyph{font-size:17px;font-weight:400;color:#c6d7fa}
+.ow-notes-total{display:inline-grid;place-items:center;min-width:21px;height:21px;padding:0 6px;border-radius:999px;background:rgba(255,186,103,.17);color:#ffdcab;font-size:10px;font-weight:750}
+.ow-notes-toggle-action{flex:0 0 auto;color:#b8cee9;font-size:10px;font-weight:550}
+.ow-notes-toggle-action span{margin-left:5px;font-size:15px}
+.ow-notes-content{padding:0 16px 16px;border-top:1px solid rgba(197,217,255,.14)}
+.ow-notes-thread{display:flex;flex-direction:column;gap:9px;max-height:325px;overflow-y:auto;padding:14px 2px 12px;scrollbar-width:thin}
+.ow-notes-empty{font-size:11px;line-height:1.6;color:#b5c8e4;padding:5px 0}
+.ow-note-entry{min-width:0;border:1px solid rgba(193,214,255,.16);border-radius:11px;padding:12px 13px;background:rgba(255,255,255,.045)}
+.ow-note-entry-head{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;margin-bottom:7px}
+.ow-note-author{font-size:11px;font-weight:700;color:#fff}
+.ow-note-time{font-size:9px;font-weight:450;color:#b6c9e6}
+.ow-note-entry p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;color:#dce9ff;font-size:11px;line-height:1.7;font-weight:450}
+.ow-note-delete{margin-left:auto;padding:4px 7px;color:#ffb4b4;background:transparent;border:1px solid rgba(255,147,147,.25);border-radius:7px;cursor:pointer;font-family:inherit;font-size:9px;font-weight:600}
+.ow-note-delete:hover{background:rgba(239,68,68,.12)}
+.ow-notes-form{display:flex;flex-direction:column;gap:8px;padding-top:12px;border-top:1px solid rgba(197,217,255,.13)}
+.ow-notes-form label{font-size:10px;color:#cedcf2;font-weight:650}
+.ow-notes-form textarea{width:100%;min-height:83px;max-height:220px;resize:vertical;box-sizing:border-box;border:1px solid rgba(202,221,255,.24);border-radius:10px;background:rgba(2,17,46,.40);color:#fff;padding:11px 12px;font:450 11px/1.65 Montserrat,Arial,sans-serif;outline:none}
+.ow-notes-form textarea::placeholder{color:#9bb5d5}
+.ow-notes-form textarea:focus{border-color:rgba(153,190,255,.78);box-shadow:0 0 0 3px rgba(108,154,243,.12)}
+.ow-notes-form-foot{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ow-notes-form-foot>span{color:#b5c8e4;font-size:9px;line-height:1.5}
+.ow-note-submit{flex:0 0 auto;padding:10px 13px;border-radius:9px;border:1px solid rgba(175,204,255,.32);background:#e8efff;color:#15336b;cursor:pointer;font:700 10px Montserrat,Arial,sans-serif;transition:background .2s ease}
+.ow-note-submit:hover{background:#fff}
+/* Refino das buscas nos logins de produção: sem interferir na tela de administrador */
+@media(min-width:921px){
+ .ow-team-view .hero{grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:20px}
+ .ow-team-view .hero-controls:not(.hidden){display:flex;flex-wrap:nowrap;gap:9px;align-items:center;justify-content:flex-end;min-width:0}
+ .ow-team-view .hero-controls .search{flex:0 1 260px;width:260px;min-width:0;max-width:260px;height:41px;padding:9px 12px;border-radius:11px;font-size:11px;font-weight:500;box-sizing:border-box}
+ .ow-team-view .hero-controls .month-select{flex:0 0 154px;width:154px;min-width:0;height:41px;padding:9px 11px;border-radius:11px;font-size:11px;box-sizing:border-box}
+}
+.ow-team-view #areaContent>.ow-assignee-toolbar{display:flex;align-items:center;min-height:46px;box-sizing:border-box;max-width:100%;margin:1px 0 14px;padding:10px 15px;border-radius:12px;border-color:rgba(196,215,255,.18);background:rgba(19,48,101,.42);box-shadow:none}
+.ow-team-view #areaContent .ow-assignee-current{display:inline-flex;align-items:center;gap:5px;font:500 11px/1.5 Montserrat,Arial,sans-serif;letter-spacing:0;color:#cbdcf6}
+.ow-team-view #areaContent .ow-assignee-current b{font-size:11px;font-weight:650;color:#fff}
+.ow-team-view #areaContent .stats{margin-top:0}
+@media(max-width:920px){
+ .ow-team-view .hero{grid-template-columns:minmax(0,1fr);gap:12px}
+ .ow-team-view .hero-controls:not(.hidden){display:grid;grid-template-columns:minmax(0,1fr) 155px;gap:9px;min-width:0;max-width:100%}
+ .ow-team-view .hero-controls .search,.ow-team-view .hero-controls .month-select{min-width:0;width:100%;max-width:100%;height:42px;box-sizing:border-box;font-size:12px}
+}
+@media(max-width:600px){
+ .ow-team-view .hero-controls:not(.hidden){grid-template-columns:minmax(0,1fr);gap:8px}
+ .ow-team-view #areaContent>.ow-assignee-toolbar{padding:11px 13px;margin-bottom:13px}
+ .ow-team-view #areaContent .ow-assignee-current{font-size:10px;white-space:normal;flex-wrap:wrap}
+ .ow-notes-panel{margin-top:14px}
+ .ow-notes-toggle{padding:12px}
+ .ow-notes-toggle-title{font-size:11px}
+ .ow-notes-content{padding:0 12px 13px}
+ .ow-notes-form-foot{flex-wrap:wrap}
+ .ow-note-submit{min-height:38px}
+ .ow-notes-indicator{font-size:9px;padding:4px 7px}
+}
