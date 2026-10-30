@@ -12,3 +12,10 @@
 #formCoverFields{margin:12px 0 0}
 .ow-cover-panel select:focus-visible,.ow-cover-panel button:focus-visible{outline:2px solid #a9c8ff;outline-offset:3px}
 @media(max-width:600px){.ow-cover-panel{padding:13px}.ow-cover-controls{align-items:stretch;flex-direction:column}.ow-cover-controls button{width:100%}}
+
+.ow-cover-controls{flex-wrap:wrap}
+.ow-cover-controls .ow-cover-observation-field{flex:1 0 100%}
+.ow-cover-observation-field{display:block;min-width:0;margin-top:12px;color:#d9e5f8;font-size:11px;line-height:1.6}
+.ow-cover-observation-field textarea{display:block;box-sizing:border-box;width:100%;min-height:76px;margin-top:6px;padding:11px 12px;resize:vertical;border:1px solid rgba(193,215,255,.3);border-radius:9px;background:#10264b;color:#fff;font:inherit;line-height:1.5}
+.ow-cover-observation-field textarea::placeholder{color:#91a5c4}
+.ow-cover-observation-field textarea:focus-visible{outline:2px solid #a9c8ff;outline-offset:2px}

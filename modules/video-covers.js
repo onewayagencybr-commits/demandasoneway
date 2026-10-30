@@ -2,6 +2,12 @@
 (function () {
   'use strict';
   const pending = new Set();
+  const MAX_COVER_OBSERVATION_LENGTH = 1800;
+  function coverObservation(value) {
+    const text = String(value || '').trim();
+    if (text.length > MAX_COVER_OBSERVATION_LENGTH) throw new Error('A observação da capa deve ter até 1.800 caracteres.');
+    return text;
+  }
   const byId = id => state.demands.find(d => d.id === id);
   function findCover(videoId) {
     return [...state.demands, ...state.deletedDemands].find(d => d.sourceVideoId === videoId || d.id === 'cover-' + videoId);
@@ -17,6 +23,7 @@
   function stage(video, request) {
     if (!request) return null;
     validate(video, request.assignee);
+    const observation = coverObservation(request.observation);
     const sourceClient = state.clients.find(c => c.id === video.clientId);
     const month = video.postDate.slice(0, 7);
     let client = state.clients.find(c => c.area === 'arte' && !c.mergedInto && cmSelectionKey(c.name) === cmSelectionKey(sourceClient.name));
@@ -28,13 +35,19 @@
     }
     const removed = state.removedClientMonths.filter(r => r.clientId === client.id && r.area === 'arte' && r.month === month);
     state.removedClientMonths = state.removedClientMonths.filter(r => !removed.includes(r));
+    const createdAt = new Date().toISOString();
     const cover = {
       id: 'cover-' + video.id, sourceVideoId: video.id, sourceVideoTitle: video.title,
       clientId: client.id, month, area: 'arte', title: 'Capa — ' + video.title,
       postDate: video.postDate, description: 'Produzir a capa do vídeo: ' + video.title,
       assignee: request.assignee, status: 'red', links: [], attachments: [],
       productionLinks: [], productionAttachments: [],
-      createdAt: new Date().toISOString(), createdDate: demandCreationCalendarDate()
+      ...(observation ? {notes: [{
+        id: uid(), text: observation, kind: 'cover-observation',
+        author: typeof currentUser === 'string' && currentUser ? currentUser : 'Equipe One Way',
+        createdAt
+      }]} : {}),
+      createdAt, createdDate: demandCreationCalendarDate()
     };
     state.demands.push(cover);
     return {cover, rollback() {
@@ -44,6 +57,19 @@
     }};
   }
   function updateForm() {
+    const fields = document.getElementById('formCoverFields');
+    if (fields && !fields.querySelector('[data-cover-form-observation]')) {
+      const label = document.createElement('label');
+      label.className = 'ow-cover-observation-field';
+      label.textContent = 'Observações sobre a capa (opcional)';
+      const textarea = document.createElement('textarea');
+      textarea.rows = 3;
+      textarea.maxLength = MAX_COVER_OBSERVATION_LENGTH;
+      textarea.dataset.coverFormObservation = '';
+      textarea.placeholder = 'Ex.: usar determinada foto, título, cores ou referência visual';
+      label.appendChild(textarea);
+      fields.appendChild(label);
+    }
     const section = document.getElementById('formVideoCover');
     if (!section) return;
     const cover = findCover(document.getElementById('editDemandId').value);
@@ -63,6 +89,8 @@
   function resetForm() {
     document.getElementById('formProduceCover').checked = false;
     document.getElementById('formCoverAssignee').value = '';
+    const observationField = document.querySelector('[data-cover-form-observation]');
+    if (observationField) observationField.value = '';
     updateForm();
   }
   function readForm() {
@@ -71,7 +99,7 @@
     if (!DEMAND_ASSIGNEES.includes(assignee)) throw new Error('Escolha o responsável pela capa.');
     const id = document.getElementById('editDemandId').value;
     if (id && findCover(id)) throw new Error('Este vídeo já possui uma demanda de capa.');
-    return {assignee};
+    return {assignee, observation: coverObservation(document.querySelector('[data-cover-form-observation]')?.value)};
   }
   function detailHTML(d) {
     if (d.sourceVideoId) {
@@ -89,15 +117,15 @@
     }
     if (!isAdmin()) return '';
     const disabled = !d.postDate || pending.has(d.id);
-    return '<section class="ow-cover-panel"><strong>Capa do vídeo</strong><p>Nova demanda em Arte, com o mesmo cliente e prazo: ' + esc(fmtPostDate(d.postDate)) + '.</p><div class="ow-cover-controls"><label>Responsável pela capa<select data-cover-assignee="' + esc(d.id) + '" aria-label="Responsável pela capa de ' + esc(d.title) + '"><option value="">Selecione o responsável</option>' + DEMAND_ASSIGNEES.map(p => '<option>' + esc(p) + '</option>').join('') + '</select></label><button type="button" class="primary" data-produce-cover="' + esc(d.id) + '"' + (disabled ? ' disabled' : '') + '>Produzir capa</button></div>' + (!d.postDate ? '<small>Edite o vídeo e defina a data antes de criar a capa.</small>' : '') + '</section>';
+    return '<section class="ow-cover-panel"><strong>Capa do vídeo</strong><p>Nova demanda em Arte, com o mesmo cliente e prazo: ' + esc(fmtPostDate(d.postDate)) + '.</p><div class="ow-cover-controls"><label>Responsável pela capa<select data-cover-assignee="' + esc(d.id) + '" aria-label="Responsável pela capa de ' + esc(d.title) + '"><option value="">Selecione o responsável</option>' + DEMAND_ASSIGNEES.map(p => '<option>' + esc(p) + '</option>').join('') + '</select></label><label class="ow-cover-observation-field">Observações sobre a capa (opcional)<textarea rows="3" maxlength="1800" data-cover-observation="' + esc(d.id) + '" placeholder="Ex.: foto, texto, cores e referência visual"></textarea></label><button type="button" class="primary" data-produce-cover="' + esc(d.id) + '"' + (disabled ? ' disabled' : '') + '>Produzir capa</button></div>' + (!d.postDate ? '<small>Edite o vídeo e defina a data antes de criar a capa.</small>' : '') + '</section>';
   }
-  async function create(videoId, assignee) {
+  async function create(videoId, assignee, observation) {
     if (pending.has(videoId)) return;
     let transaction;
     pending.add(videoId);
     try {
       if (!supabaseClient) throw new Error('A conexão está indisponível. Tente novamente para atribuir a capa à equipe.');
-      transaction = stage(byId(videoId), {assignee});
+      transaction = stage(byId(videoId), {assignee, observation});
       if (!await saveState({strictRemote: true})) throw new Error('Não foi possível sincronizar a capa. Tente novamente.');
       renderAll();
       toast('Capa atribuída a ' + assignee + ', com o mesmo prazo do vídeo.', null, null, 'success');
@@ -127,9 +155,11 @@
     const button = event.target.closest('[data-produce-cover]');
     if (!button) return;
     event.preventDefault();
-    const assignee = button.closest('.ow-cover-panel').querySelector('select').value;
+    const panel = button.closest('.ow-cover-panel');
+    const assignee = panel.querySelector('select').value;
+    const observation = panel.querySelector('[data-cover-observation]')?.value || '';
     button.disabled = true; button.textContent = 'Criando capa...';
-    await create(button.dataset.produceCover, assignee);
+    await create(button.dataset.produceCover, assignee, observation);
     button.disabled = false; button.textContent = 'Produzir capa';
   });
 })();

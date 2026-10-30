@@ -60,3 +60,33 @@ test('double click while saving creates and persists only one cover',async()=>{
   const first=f.api.create('v1','João');await f.api.create('v1','Lucas');done(true);await first;
   assert.equal(f.state.demands.length,2);assert.equal(f.saves(),1);assert.equal(f.state.demands[1].assignee,'João');
 });
+
+test('cover observation is saved only on the independent art demand',()=>{
+  const {state,video,api}=fixture();
+  const {cover}=api.stage(video,{assignee:'João',observation:'Usar foto da fachada e texto discreto'});
+  assert.equal(cover.area,'arte');
+  assert.equal(cover.status,'red');
+  assert.equal(cover.notes[0].text,'Usar foto da fachada e texto discreto');
+  assert.equal(cover.notes[0].kind,'cover-observation');
+  assert.equal(video.notes[0].text,'Nota do vídeo');
+  assert.equal(video.notes.length,1);
+  video.status='yellow';
+  assert.equal(cover.status,'red','finalizing or editing the video does not change the cover status');
+  video.status='green';
+  assert.equal(cover.status,'red');
+  cover.status='green';
+  video.status='yellow';
+  assert.equal(cover.status,'green');
+  assert.equal(video.status,'yellow','finalizing the cover does not change the video status');
+  assert.equal(state.demands.length,2);
+});
+test('oversized cover observation does not create an art client or demand',()=>{
+  const {state,video,api}=fixture();const before=JSON.stringify(state);
+  assert.throws(()=>api.stage(video,{assignee:'João',observation:'x'.repeat(1801)}),/1.800 caracteres/);
+  assert.equal(JSON.stringify(state),before);
+});
+test('cover without observation does not borrow video observations',()=>{
+  const {video,api}=fixture();const {cover}=api.stage(video,{assignee:'João'});
+  assert.equal(cover.notes,undefined);
+  assert.equal(video.notes.length,1);
+});
