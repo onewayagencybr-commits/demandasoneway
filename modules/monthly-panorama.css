@@ -3861,3 +3861,13 @@ body.calendar-view{
     margin:-6px 0 13px;
   }
 }
+
+/* One Way | Aprovação interna em laranja fluorescente (antes salmão) */
+.dot.salmon,.salmon{background:#ff7600!important}
+.current-status.salmon{background:#ff7600!important;color:#171c29!important;border-color:#ffab2e!important;box-shadow:0 0 0 1px rgba(255,118,0,.17),0 0 18px rgba(255,118,0,.22)!important}
+.status-btn[data-status="salmon"]{background:#fff2d7!important;color:#c75000!important;border-color:#ff9d20!important}
+.status-btn.active[data-status="salmon"]{background:#ff7600!important;color:#101626!important;border-color:#ffbe4d!important}
+.agenda-item.ow-awaiting-oneway{border-color:rgba(255,130,0,.92)!important;box-shadow:inset 7px 0 0 #ff7600,0 12px 31px rgba(255,105,0,.2)!important}
+.agenda-item.ow-awaiting-oneway:after{background:#ff7600!important;color:#101626!important}
+.ow-cal-oneway{outline-color:#ff7600!important;box-shadow:0 0 0 1px rgba(255,118,0,.36)!important}
+#agendaContent .agenda-list>.agenda-item.ow-awaiting-oneway{--ow-line:#ff7600!important}
