@@ -749,10 +749,12 @@
     el.style.animationDelay = Math.min(index * 35, 300) + 'ms';
     var date = new Date(item.date + 'T12:00:00');
     var month = new Intl.DateTimeFormat('pt-BR', {month:'short'}).format(date).replace('.', '');
-    var created = String(item.createdAt || '').slice(0, 10);
-    var createdText = /^\d{4}-\d{2}-\d{2}$/.test(created)
-      ? 'Criada em ' + created.slice(8, 10) + '/' + created.slice(5, 7) + '/' + created.slice(0, 4)
-      : '';
+    var createdRaw=String(item.createdAt||'');
+    var created=createdRaw.slice(0,10);
+    var dateOnly=/^\d{4}-\d{2}-\d{2}$/.test(created)?created.slice(8,10)+'/'+created.slice(5,7)+'/'+created.slice(0,4):'';
+    var stamp=createdRaw.includes('T')?new Date(createdRaw):null;
+    var timeStamp=stamp&&Number.isFinite(stamp.getTime())?new Intl.DateTimeFormat('pt-BR',{timeZone:'America/Cuiaba',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).format(stamp):'';
+    var createdText=timeStamp?'Criada em '+timeStamp:(dateOnly?'Criada em '+dateOnly:'');
     var statusKey = item.status && STATUS_DEFAULT[item.status] ? item.status :
       (isFinished(item) ? 'green' : 'yellow');
     var statusName = item.status && STATUS_DEFAULT[item.status] ?
