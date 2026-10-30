@@ -69,10 +69,12 @@
       '*Data:* ' + labelDate(appointment.date) + (appointment.time ? ' às ' + appointment.time : '')
     ];
     if (!onlyEquipment && appointment.description) lines.push('*Observações:* ' + line(appointment.description));
-    lines.push('','*Equipamentos para levar (' + gear.total + '):*');
-    if (gear.total) lines.push.apply(lines,gear.lines);
-    else lines.push('Nenhum equipamento selecionado.');
-    if (gear.total) lines.push('Marque cada item ao conferir antes de sair.');
+    if (onlyEquipment || gear.total) {
+      lines.push('','*Equipamentos para levar (' + gear.total + '):*');
+      if (gear.total) lines.push.apply(lines,gear.lines);
+      else lines.push('Nenhum equipamento selecionado.');
+      if (gear.total) lines.push('Marque cada item ao conferir antes de sair.');
+    }
     return lines.join('\n').trim();
   }
   function formatDemand(d) {
@@ -171,9 +173,17 @@
     try {
       clients.querySelectorAll('.demand[data-demand-id]').forEach(function(card) {
         if (card.querySelector('[data-ow-share="demand"]')) return;
-        var target=card.querySelector('.detail-actions') || card.querySelector('.detail-panel');
-        if (!target) return;
-        target.insertBefore(actionButton('Copiar demanda','demand'),target.firstChild);
+        var actions=card.querySelector('.detail-actions');
+        if (actions) {
+          actions.insertBefore(actionButton('Copiar demanda','demand'),actions.firstChild);
+          return;
+        }
+        var panel=card.querySelector('.detail-panel');
+        if (!panel) return;
+        var wrap=document.createElement('div');
+        wrap.className='ow-share-demand-actions';
+        wrap.appendChild(actionButton('Copiar demanda','demand'));
+        panel.appendChild(wrap);
       });
     } finally {pendingCardScan=false;}
   }
