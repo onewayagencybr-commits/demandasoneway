@@ -386,3 +386,10 @@
   #app .nav-row.ow-premium-nav *::before,
   #app .nav-row.ow-premium-nav *::after {animation:none!important;transition:none!important}
 }
+
+/* Keep access control visibility, including the trash bin on Home. */
+#app .nav-row.ow-premium-nav .admin-utility-tabs.ow-secondary-nav>.admin-agenda-tab.hidden,
+#app .nav-row.ow-premium-nav .admin-utility-tabs.ow-secondary-nav>.trash-tab.hidden,
+#app .nav-row.ow-premium-nav .admin-utility-tabs.ow-secondary-nav>.hidden {
+ display:none!important;
+}
