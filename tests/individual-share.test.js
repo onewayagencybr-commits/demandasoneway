@@ -25,7 +25,7 @@ function fixture(options = {}) {
     wkEventDate:'2026-10-30',wkEventTime:'09:00',wkEventDescription:'Rota Oeste – Scania',
     wkEventClient:'c1'
   };
-  const nodes=Object.fromEntries(Object.entries(fields).map(([k,v])=>[k,{value:v}]));
+  const nodes=Object.fromEntries(Object.entries(fields).map(([k,v])=>[k,{value:v,addEventListener(){}}]));
   const selected=[{value:'sony-a6700'},{value:'ronin-rs3'},{value:'lark-m2'}];
   const document={
     head:{appendChild(){}},body:{appendChild(){}},
