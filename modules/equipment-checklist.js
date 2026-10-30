@@ -131,7 +131,7 @@
       state.calendarEvents.find(function(item) { return item.id === id; }) : null;
     var selected = new Set(selectedIds(event && event.equipmentChecklist));
     inputs.forEach(function(input) { input.checked = selected.has(input.value); });
-    details.open = selected.size > 0 || document.getElementById('wkEventType').value === 'Gravação';
+    details.open = false; // Fecha por padrão; o usuário abre quando quiser revisar.
     updateCount();
   }
 
@@ -144,7 +144,7 @@
     });
   });
   document.getElementById('wkEventType').addEventListener('change', function(event) {
-    if (event.target.value === 'Gravação') details.open = true;
+    details.open = false; // Não expande automaticamente ao trocar o tipo.
   });
   new MutationObserver(function() {
     if (!modal.classList.contains('hidden')) hydrate();
