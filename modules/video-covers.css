@@ -1,0 +1,14 @@
+.ow-cover-panel{margin-top:17px;padding:16px;border:1px solid rgba(180,207,255,.23);border-radius:13px;background:rgba(24,55,110,.35);font-family:Montserrat,Arial,sans-serif;min-width:0}
+.ow-cover-panel strong{display:block;font-size:12px;font-weight:600;color:#f2f6ff}
+.ow-cover-panel p,.ow-cover-panel small{display:block;margin:7px 0;font-size:11px;line-height:1.6;color:#bfd0ea;overflow-wrap:anywhere}
+.ow-cover-panel>.ghost{margin-top:8px}
+.ow-cover-controls{display:flex;align-items:flex-end;gap:10px;margin-top:12px}
+.ow-cover-controls label{flex:1;min-width:0;color:#d9e5f8;font-size:11px;line-height:1.7}
+.ow-cover-controls select{display:block;width:100%;margin-top:5px;box-sizing:border-box;padding:10px 12px;background:#10264b;color:#fff;border:1px solid rgba(193,215,255,.3);border-radius:9px;font:inherit}
+.ow-cover-controls button{flex-shrink:0;min-height:40px;font-size:11px}
+.ow-cover-panel button:disabled{opacity:.5;cursor:not-allowed}
+.ow-cover-check{display:flex!important;align-items:center;gap:9px;cursor:pointer;font-size:12px!important;color:#eef4ff!important}
+.ow-cover-check input{width:17px!important;height:17px;flex:0 0 17px;accent-color:#9cbaff;margin:0}
+#formCoverFields{margin:12px 0 0}
+.ow-cover-panel select:focus-visible,.ow-cover-panel button:focus-visible{outline:2px solid #a9c8ff;outline-offset:3px}
+@media(max-width:600px){.ow-cover-panel{padding:13px}.ow-cover-controls{align-items:stretch;flex-direction:column}.ow-cover-controls button{width:100%}}
