@@ -4,6 +4,7 @@
   'use strict';
   let openedNotesId=null;
   let savingNote=false;
+  let agendaDetailsObserver=null;
   const MAX_NOTE_LENGTH=1800;
 
   function listNotes(d){
@@ -43,7 +44,7 @@
         (mayDelete?'<button type="button" class="ow-note-delete" data-ow-delete-note="'+esc(n.id)+'" data-ow-demand-id="'+esc(d.id)+'" aria-label="Excluir esta observação">Excluir</button>':'')+
         '</div><p>'+esc(n.text)+'</p></article>';
     }).join(''):'<div class="ow-notes-empty">Ainda não há observações. Escreva a primeira para a equipe.</div>';
-    return '<section class="ow-notes-panel" aria-label="Notas e observações da demanda">'+
+    return '<section class="ow-notes-panel" data-ow-notes-demand="'+esc(d.id)+'" aria-label="Notas e observações da demanda">'+
       '<button type="button" class="ow-notes-toggle" data-ow-toggle-notes="'+esc(d.id)+'" aria-expanded="'+(opened?'true':'false')+'">'+
         '<span class="ow-notes-toggle-title"><span class="ow-notes-glyph" aria-hidden="true">✎</span> Notas e observações'+(entries.length?'<span class="ow-notes-total">'+entries.length+'</span>':'')+'</span>'+
         '<span class="ow-notes-toggle-action">'+(opened?'Fechar':'Abrir notas')+' <span aria-hidden="true">'+(opened?'⌃':'⌄')+'</span></span></button>'+
@@ -55,41 +56,75 @@
         '</form></div>':'')+
       '</section>';
   }
+  function updateBadge(host,d,context){
+    if(!host)return;
+    host.querySelectorAll('.ow-notes-indicator').forEach(node=>node.remove());
+    const chip=badge(d,context);
+    if(chip)host.appendChild(chip);
+  }
+  function insertNotesPanel(d,detail){
+    if(!detail||detail.querySelector('.ow-notes-panel'))return;
+    const template=document.createElement('template');
+    template.innerHTML=panelHTML(d);
+    const panel=template.content.firstElementChild;
+    const actions=detail.querySelector('.detail-actions');
+    if(actions && actions.parentElement===detail)detail.insertBefore(panel,actions);
+    else detail.appendChild(panel);
+  }
   function decorateClients(){
     document.querySelectorAll('#clients .demand[data-demand-id]').forEach(el=>{
       const d=getDemand(el.dataset.demandId);
       if(!canRead(d))return;
-      const rowTitle=el.querySelector('.demand-row .demand-title');
-      if(rowTitle&&!rowTitle.querySelector('.ow-notes-indicator')){
-        const chip=badge(d,'demand');
-        if(chip)rowTitle.appendChild(chip);
-      }
-      const detail=el.querySelector('.detail-panel');
-      if(!detail||detail.querySelector('.ow-notes-panel'))return;
-      const template=document.createElement('template');
-      template.innerHTML=panelHTML(d);
-      const panel=template.content.firstElementChild;
-      const actions=detail.querySelector('.detail-actions');
-      detail.insertBefore(panel,actions||null);
+      updateBadge(el.querySelector('.demand-row .demand-title'),d,'demand');
+      insertNotesPanel(d,el.querySelector('.detail-panel'));
     });
   }
+  function decorateAgendaDetails(){
+    // A Agenda usa um editor próprio criado depois do clique no cartão.
+    // Ele também existe nos logins de design/vídeo, não só no de administrador.
+    document.querySelectorAll('#agendaList .ow-agenda-inline-editor[data-ow-parent-id]').forEach(editor=>{
+      const d=getDemand(editor.dataset.owParentId);
+      if(!canRead(d))return;
+      insertNotesPanel(d,editor.querySelector('.detail-panel')||editor);
+    });
+  }
+  function watchAgendaDetails(){
+    const list=document.getElementById('agendaList');
+    if(!list || agendaDetailsObserver)return;
+    agendaDetailsObserver=new MutationObserver(()=>decorateAgendaDetails());
+    agendaDetailsObserver.observe(list,{childList:true,subtree:true});
+  }
   function decorateAgenda(){
-    document.querySelectorAll('#agendaList [data-agenda-id]').forEach(row=>{
+    document.querySelectorAll('#agendaList .agenda-item[data-agenda-id]').forEach(row=>{
       const d=getDemand(row.dataset.agendaId);
       if(!canRead(d))return;
-      const info=row.querySelector('.agenda-info');
-      if(info&&!info.querySelector('.ow-notes-indicator')){
-        const chip=badge(d,'agenda');
-        if(chip)info.appendChild(chip);
-      }
+      updateBadge(row.querySelector('.agenda-info'),d,'agenda');
       if(!row.dataset.owNotesWired){
         row.dataset.owNotesWired='true';
         row.addEventListener('click',()=>{openedNotesId=row.dataset.agendaId},true);
       }
     });
+    decorateAgendaDetails();
+    watchAgendaDetails();
   }
-  function refreshClients(){
-    if(typeof renderClients==='function')renderClients();
+  function refreshVisibleNotes(id){
+    // Atualiza só o bloco de notas para não fechar a demanda aberta na Agenda.
+    const d=getDemand(id);
+    if(!canRead(d))return;
+    document.querySelectorAll('.ow-notes-panel[data-ow-notes-demand]').forEach(panel=>{
+      if(panel.dataset.owNotesDemand!==id)return;
+      const template=document.createElement('template');
+      template.innerHTML=panelHTML(d);
+      panel.replaceWith(template.content.firstElementChild);
+    });
+    document.querySelectorAll('#clients .demand[data-demand-id]').forEach(el=>{
+      if(el.dataset.demandId===id)updateBadge(el.querySelector('.demand-row .demand-title'),d,'demand');
+    });
+    document.querySelectorAll('#agendaList .agenda-item[data-agenda-id]').forEach(el=>{
+      if(el.dataset.agendaId===id)updateBadge(el.querySelector('.agenda-info'),d,'agenda');
+    });
+    decorateClients();
+    decorateAgendaDetails();
   }
   async function addNote(id,message){
     const d=getDemand(id);
@@ -107,7 +142,7 @@
       const ok=await saveState({strictRemote:true});
       if(!ok)throw new Error('Falha na sincronização');
       openedNotesId=id;
-      refreshClients();
+      refreshVisibleNotes(id);
       toast('Nota compartilhada com a equipe.',null,null,'success');
     }catch(err){
       if(previous===undefined)delete d.notes;else d.notes=previous;d.activityLog=previousActivity;
@@ -130,7 +165,7 @@
     try{
       const ok=await saveState({strictRemote:true});
       if(!ok)throw new Error('Falha na sincronização');
-      refreshClients();
+      refreshVisibleNotes(id);
       toast('Nota excluída.',null,null,'success');
     }catch(err){
       d.notes=previous;d.activityLog=previousActivity;
@@ -172,7 +207,7 @@
       const d=getDemand(id);
       if(!canRead(d))return;
       openedNotesId=openedNotesId===id?null:id;
-      refreshClients();
+      refreshVisibleNotes(id);
       return;
     }
     const del=event.target.closest('[data-ow-delete-note]');
