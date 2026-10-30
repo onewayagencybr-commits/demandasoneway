@@ -3484,6 +3484,14 @@ async function submitWeekEvent(evt){
  const before=(state.calendarEvents||[]).map(x=>({...x}));const oldWeek=calendarWeekStart;
  state.calendarEvents=state.calendarEvents||[];
  const record={id:id||uid(),title,date,time,type,clientId,description,updatedAt:new Date().toISOString()};
+ // Salva os equipamentos no próprio evento ANTES do snapshot enviado ao Supabase.
+ // Não depende da ordem de listeners ou de interceptar saveCalendarAdminState.
+ const equipment=window.OWEquipmentChecklist;
+ if(equipment&&typeof equipment.selected==='function'){
+  const checked=equipment.selected();
+  record.equipmentChecklist=typeof equipment.selectedIds==='function'
+   ? equipment.selectedIds(checked) : (Array.isArray(checked)?checked:[]);
+ }
  const i=state.calendarEvents.findIndex(x=>x.id===id);if(i>=0)state.calendarEvents[i]={...state.calendarEvents[i],...record};else state.calendarEvents.push(record);
  if(!await saveCalendarAdminState()){state.calendarEvents=before;writeLocalCache(state);return}
  calendarWeekStart=calendarMonday(date);closeModal('weekEventModal');renderWeekCalendar();toast('Compromisso salvo e sincronizado.',null,null,'success');
