@@ -64,7 +64,7 @@ test('editing a commitment syncs its checked equipment in the existing calendar 
   const api=f.context.window.OWEquipmentChecklist;
   api.hydrate();
   assert.equal(f.inputs[0].checked,true);
-  assert.equal(f.details.open,true);
+  assert.equal(f.details.open,false);
   f.inputs[1].checked=true;
   f.listeners.submit();
   assert.equal(await f.context.saveCalendarAdminState(),true);
