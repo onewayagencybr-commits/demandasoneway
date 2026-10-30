@@ -659,11 +659,13 @@
     workflowSaving = true;
     if (button) button.setAttribute('aria-busy', 'true');
     try {
-      var updated = Object.assign({}, old, {
-        workflowChecks: Object.assign(checksOf(old), {
-          [stepKey]: !checksOf(old)[stepKey]
-        }),
-        updatedAt: new Date().toISOString()
+      var now=new Date().toISOString();
+      var checkedNow=!checksOf(old)[stepKey];
+      var workflowCheckedAt=Object.assign({},old.workflowCheckedAt||{});
+      if(checkedNow)workflowCheckedAt[stepKey]=now;else delete workflowCheckedAt[stepKey];
+      var updated=Object.assign({},old,{
+        workflowChecks:Object.assign(checksOf(old),{[stepKey]:checkedNow}),
+        workflowCheckedAt:workflowCheckedAt,updatedAt:now
       });
       if (stepKey === 'finalizado') {
         updated.status = updated.workflowChecks.finalizado ? 'green' :
@@ -693,9 +695,13 @@
       button.type = 'button';
       button.className = 'ow-social-check' + (checked ? ' is-checked' : '');
       button.setAttribute('aria-pressed', String(checked));
-      button.setAttribute('aria-label', step.label + (checked ? ': marcado' : ': não marcado'));
+      var checkedStamp=checked&&item.workflowCheckedAt&&item.workflowCheckedAt[step.key];
+      var checkedDate=checkedStamp?new Date(checkedStamp):null;
+      var checkedLabel=checkedDate&&Number.isFinite(checkedDate.getTime())?new Intl.DateTimeFormat('pt-BR',{timeZone:'America/Cuiaba',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}).format(checkedDate):'';
+      button.setAttribute('aria-label', step.label + (checked ? ': marcado'+(checkedLabel?' em '+checkedLabel:'') : ': não marcado'));
+      if(checkedLabel)button.title='Conferido em '+checkedLabel;
       button.innerHTML = '<span class="ow-social-check-icon" aria-hidden="true">' +
-        (checked ? '✓' : '·') + '</span><span class="ow-social-check-label">' + esc(step.label) + '</span>';
+        (checked ? '✓' : '·') + '</span><span class="ow-social-check-label">' + esc(step.label) + (checkedLabel?'<small style="display:block;font-size:9px;opacity:.7;margin-top:3px">'+esc(checkedLabel)+'</small>':'') + '</span>';
       button.addEventListener('click', function (event) {
         event.preventDefault();
         event.stopPropagation();
@@ -1642,8 +1648,13 @@
       });
       if(value==='green')currentChecks.finalizado=true;
       if(value!=='green'&&currentChecks.finalizado)value='green';
+      var updatedAt=new Date().toISOString(),workflowCheckedAt=Object.assign({},old.workflowCheckedAt||{});
+      Object.keys(currentChecks).forEach(function(k){
+        if(currentChecks[k]&&!((old.workflowChecks||{})[k]))workflowCheckedAt[k]=updatedAt;
+        else if(!currentChecks[k])delete workflowCheckedAt[k];
+      });
       var updated=Object.assign({},old,{client:client,date:date,title:title,description:description,
-        status:value,finalLink:finalLink,workflowChecks:currentChecks,updatedAt:new Date().toISOString()});
+        status:value,finalLink:finalLink,workflowChecks:currentChecks,workflowCheckedAt:workflowCheckedAt,updatedAt:updatedAt});
       try{
         var success=await smPersistItems(smItems.map(function(v){return v.id===id?updated:v;}));
         if(success){
