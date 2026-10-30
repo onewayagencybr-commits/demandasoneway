@@ -170,7 +170,7 @@
   if (typeof document.createElement !== 'function' || !document.head ||
       !document.getElementById('wkEventForm')) return;
   var script = document.createElement('script');
-  script.src = '/modules/equipment-checklist.js?v=20261029-1';
+  script.src = '/modules/equipment-checklist.js?v=20261030-audit';
   script.async = true;
   document.head.appendChild(script);
 })();
