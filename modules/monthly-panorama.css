@@ -3871,3 +3871,128 @@ body.calendar-view{
 .agenda-item.ow-awaiting-oneway:after{background:#ff7600!important;color:#101626!important}
 .ow-cal-oneway{outline-color:#ff7600!important;box-shadow:0 0 0 1px rgba(255,118,0,.36)!important}
 #agendaContent .agenda-list>.agenda-item.ow-awaiting-oneway{--ow-line:#ff7600!important}
+
+
+/* One Way — ajuste integrado 30/10: navegação enxuta sem rolagem no desktop */
+@media (min-width:701px) {
+ #app.sm-enabled .nav-row,
+ #app.sm-enabled.home-mode .nav-row {
+   display:flex!important;align-items:center!important;justify-content:center!important;
+   flex-wrap:nowrap!important;width:100%!important;max-width:100%!important;
+   box-sizing:border-box!important;min-width:0!important;
+   overflow:visible!important;gap:6px!important;
+   padding:5px 0!important;margin:10px auto 16px!important;
+   scrollbar-width:none!important;scroll-behavior:auto!important;
+ }
+ #app.sm-enabled .nav-row::-webkit-scrollbar{display:none!important}
+ #app.sm-enabled .nav-row .area-nav-cluster,
+ #app.sm-enabled.home-mode .nav-row .area-nav-cluster {
+   flex:0 1 auto!important;min-width:0!important;width:auto!important;max-width:100%!important;
+   gap:5px!important;transform:none!important;
+ }
+ #app.sm-enabled .nav-row .tabs,#app.sm-enabled.home-mode .nav-row .tabs{
+   flex:0 1 auto!important;min-width:0!important;width:auto!important;max-width:none!important;
+   height:43px!important;min-height:43px!important;padding:3px!important;gap:2px!important;
+   transform:none!important;overflow:visible!important;
+ }
+ #app.sm-enabled .nav-row .tabs .tab,
+ #app.sm-enabled.home-mode .nav-row .tabs .tab {
+   flex:0 1 auto!important;min-width:0!important;height:35px!important;min-height:35px!important;
+   padding:7px 10px!important;font-size:10.5px!important;font-weight:650!important;
+   transition:background .16s ease,color .16s ease!important;animation:none!important;
+ }
+ #app.sm-enabled .nav-row .tabs .tab[data-area="trafego"]{margin-left:7px!important}
+ #app.sm-enabled .nav-row .tabs .social-media-tab{margin-left:5px!important}
+ #app.sm-enabled .nav-row .ow-nav-core-tools,#app.sm-enabled.home-mode .nav-row .ow-nav-core-tools{
+   flex:0 1 auto!important;min-width:0!important;width:auto!important;height:43px!important;min-height:43px!important;
+   gap:3px!important;padding:3px 0 3px 6px!important;
+ }
+ #app.sm-enabled .nav-row .admin-utility-tabs,#app.sm-enabled.home-mode .nav-row .admin-utility-tabs{
+   flex:0 1 auto!important;min-width:0!important;width:auto!important;max-width:none!important;
+   min-height:43px!important;gap:3px!important;margin:0!important;padding:0!important;
+ }
+ #app.sm-enabled .nav-row .admin-agenda-tab,
+ #app.sm-enabled.home-mode .nav-row .admin-agenda-tab,
+ #app.sm-enabled .nav-row .ow-nav-core-tools .admin-agenda-tab{
+   height:37px!important;min-height:37px!important;max-height:37px!important;
+   padding:0 9px!important;font-size:10px!important;white-space:nowrap!important;
+   transition:background .16s ease,border-color .16s ease!important;animation:none!important;
+ }
+ #app.sm-enabled .nav-row .trash-tab,#app.sm-enabled.home-mode .nav-row .trash-tab{
+   flex:0 0 35px!important;width:35px!important;min-width:35px!important;
+   height:37px!important;min-height:37px!important;margin:0!important;
+ }
+ #app.sm-enabled.home-mode .nav-row .area-nav-cluster,
+ #app.sm-enabled.home-mode .nav-row .admin-utility-tabs{transform:none!important}
+}
+@media (min-width:701px) and (max-width:1440px) {
+ #app.sm-enabled .nav-row,#app.sm-enabled.home-mode .nav-row{
+    flex-wrap:wrap!important;gap:5px 9px!important;overflow:visible!important;
+ }
+ #app.sm-enabled .nav-row .area-nav-cluster,#app.sm-enabled.home-mode .nav-row .area-nav-cluster{
+    flex:0 0 auto!important;
+ }
+ #app.sm-enabled .nav-row .admin-utility-tabs,#app.sm-enabled.home-mode .nav-row .admin-utility-tabs{
+    flex:0 0 auto!important;min-width:0!important;
+ }
+}
+/* Agenda: todas as áreas e todos os status na mesma posição, não no tamanho do texto */
+@media(min-width:701px){
+ #agendaContent #agendaList.agenda-list>.agenda-item,
+ #agendaContent #agendaList.agenda-list>.ow-agenda-group>.agenda-item{
+   display:grid!important;grid-template-columns:90px minmax(0,1fr) 112px 202px 18px!important;
+   column-gap:12px!important;align-items:center!important;
+ }
+ #agendaContent #agendaList.agenda-list .agenda-item .agenda-date{grid-column:1!important;grid-row:1!important}
+ #agendaContent #agendaList.agenda-list .agenda-item>.agenda-info{grid-column:2!important;grid-row:1!important;min-width:0!important}
+ #agendaContent #agendaList.agenda-list .agenda-item>.area-chip{
+   grid-column:3!important;grid-row:1!important;justify-self:center!important;
+   text-align:center!important;width:fit-content!important;max-width:108px!important;
+   min-width:54px!important;box-sizing:border-box!important;
+ }
+ #agendaContent #agendaList.agenda-list .agenda-item>.current-status{
+   grid-column:4!important;grid-row:1!important;justify-self:center!important;
+   text-align:center!important;max-width:198px!important;box-sizing:border-box!important;
+ }
+ #agendaContent #agendaList.agenda-list .agenda-item>.agenda-arrow{grid-column:5!important;grid-row:1!important;justify-self:center!important}
+}
+@media(min-width:701px) and (max-width:950px){
+ #agendaContent #agendaList.agenda-list>.agenda-item,
+ #agendaContent #agendaList.agenda-list>.ow-agenda-group>.agenda-item{
+  grid-template-columns:68px minmax(0,1fr) 84px 170px 16px!important;column-gap:8px!important;
+ }
+ #agendaContent #agendaList.agenda-list .agenda-item>.current-status{
+   max-width:166px!important;font-size:8px!important;
+ }
+}
+/* Laranja fluorescente coerente nos indicadores, corpo, contorno e detalhes */
+#app .dot.salmon,#app .stat .dot.salmon{background:#ff7600!important;box-shadow:0 0 9px rgba(255,118,0,.62)!important}
+#app .current-status.salmon,#agendaContent .current-status.salmon{
+  background:#ff7600!important;color:#12203a!important;border-color:#ffa032!important;
+  box-shadow:0 0 0 1px rgba(255,184,59,.32),0 0 18px rgba(255,118,0,.32)!important;
+}
+#app .status-btn[data-status="salmon"]{background:rgba(255,118,0,.17)!important;color:#ffad4b!important;border:1px solid rgba(255,139,16,.66)!important}
+#app .status-btn.active[data-status="salmon"]{background:#ff7600!important;color:#13203a!important;border-color:#ffbf56!important}
+#agendaContent #agendaList.agenda-list>.agenda-item:is(.ow-awaiting-oneway,.ow-tone-salmon),
+#agendaContent #agendaList.agenda-list>.ow-agenda-group:has(>.agenda-item.ow-awaiting-oneway){
+  --ow-line:#ff7600!important;--ow-accent:#ff7600!important;--ow-spot-rgb:255,118,0!important;
+}
+#agendaContent #agendaList.agenda-list>.agenda-item:is(.ow-awaiting-oneway,.ow-tone-salmon){
+  border-color:rgba(255,118,0,.8)!important;
+  box-shadow:inset 5px 0 0 #ff7600,0 7px 24px rgba(255,118,0,.19)!important;
+  background:linear-gradient(90deg,rgba(255,118,0,.17),rgba(7,24,60,.68) 24%)!important;
+}
+#agendaContent #agendaList.agenda-list>.agenda-item:is(.ow-awaiting-oneway,.ow-tone-salmon)::after,
+#agendaContent #agendaList.agenda-list>.ow-agenda-group>.agenda-item.ow-awaiting-oneway::after{
+ background:#ff7600!important;color:#15223a!important;border-color:#ffa43f!important;
+ box-shadow:0 3px 13px rgba(255,118,0,.35)!important;
+}
+#agendaContent #agendaList.agenda-list>.agenda-item:is(.ow-awaiting-oneway,.ow-tone-salmon) .current-status.salmon{
+ background:#ff7600!important;color:#13213a!important;
+}
+#agendaContent .ow-agenda-inline-editor .ow-social-statuses .status-btn.active[data-sm-stage="salmon"]{
+ background:#ff7600!important;color:#15213a!important;border-color:#ffbe55!important;
+}
+#agendaContent .ow-agenda-inline-editor .ow-social-statuses .status-btn[data-sm-stage="salmon"]:not(.active){
+ background:rgba(255,118,0,.13)!important;color:#ffa23c!important;border-color:rgba(255,118,0,.55)!important;
+}
