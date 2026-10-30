@@ -199,6 +199,9 @@
     };
   }
   document.addEventListener('click',event=>{
+    // Captura os cliques dentro das notas antes do fechamento por clique livre da Agenda.
+    // Assim ler, selecionar e editar observações não recolhe a demanda.
+    if(event.target.closest('.ow-notes-panel'))event.stopPropagation();
     const toggle=event.target.closest('[data-ow-toggle-notes]');
     if(toggle){
       event.preventDefault();
@@ -216,7 +219,7 @@
       event.stopPropagation();
       deleteNote(del.dataset.owDemandId,del.dataset.owDeleteNote);
     }
-  });
+  },true);
   document.addEventListener('submit',event=>{
     const form=event.target.closest('form.ow-notes-form');
     if(!form)return;
