@@ -1171,7 +1171,7 @@
     group.addEventListener('click',function(event){
       var detail=event.target.closest('.ow-agenda-inline-editor');
       if(!detail || !group.contains(detail) || detail.dataset.owClosing==='true')return;
-      if(event.target.closest('button,a,input,select,textarea,label,form,[contenteditable],[role="button"],[role="checkbox"],.detail-actions'))return;
+      if(event.target.closest('button,a,input,select,textarea,label,form,details,summary,.ow-demand-audit,[contenteditable],[role="button"],[role="checkbox"],.detail-actions'))return;
       if(window.getSelection?.()?.toString().trim())return;
       var identifier=card.dataset.agendaId;
       if(identifier){
