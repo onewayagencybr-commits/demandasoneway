@@ -98,9 +98,11 @@
     if(!value){toast('Escreva a observação antes de adicionar.');return}
     if(value.length>MAX_NOTE_LENGTH){toast('Observação muito longa.');return}
     const previous=Array.isArray(d.notes)?d.notes.slice():undefined;
+    const previousActivity=d.activityLog;
     const note={id:uid(),text:value,author:currentUser||'Equipe One Way',createdAt:new Date().toISOString()};
     savingNote=true;
     d.notes=[...listNotes(d),note];
+    if(typeof appendDemandActivity==='function')appendDemandActivity(d,'note','Observação adicionada');
     try{
       const ok=await saveState({strictRemote:true});
       if(!ok)throw new Error('Falha na sincronização');
@@ -108,7 +110,7 @@
       refreshClients();
       toast('Nota compartilhada com a equipe.',null,null,'success');
     }catch(err){
-      if(previous===undefined)delete d.notes;else d.notes=previous;
+      if(previous===undefined)delete d.notes;else d.notes=previous;d.activityLog=previousActivity;
       writeLocalCache(state);
       toast('Não foi possível salvar a nota para a equipe. Tente novamente.');
       console.error('Notas de demanda:',err);
@@ -121,7 +123,9 @@
     if(!entry||(!isAdmin()&&entry.author!==currentUser))return;
     if(!window.confirm('Excluir esta observação?'))return;
     const previous=Array.isArray(d.notes)?d.notes.slice():[];
+    const previousActivity=d.activityLog;
     d.notes=previous.filter(n=>n.id!==noteId);
+    if(typeof appendDemandActivity==='function')appendDemandActivity(d,'note','Observação excluída');
     savingNote=true;
     try{
       const ok=await saveState({strictRemote:true});
@@ -129,7 +133,7 @@
       refreshClients();
       toast('Nota excluída.',null,null,'success');
     }catch(err){
-      d.notes=previous;
+      d.notes=previous;d.activityLog=previousActivity;
       writeLocalCache(state);
       toast('Não foi possível excluir a nota. Tente novamente.');
       console.error('Exclusão de nota:',err);
