@@ -888,6 +888,7 @@ body.calendar-view{background-attachment:scroll!important}
 <link rel="stylesheet" href="/modules/monthly-panorama.css?v=20261027-touch2">
 <link rel="stylesheet" href="/modules/editor-calendar.css">
 <link rel="stylesheet" href="/modules/demand-notes.css?v=20261028">
+<link rel="stylesheet" href="/modules/video-covers.css?v=20261029">
 <style id="ow-assignee-styles">
 .ow-assignee-toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:18px;padding:15px 18px;border:1px solid rgba(184,211,255,.24);border-radius:14px;background:linear-gradient(135deg,rgba(19,49,103,.75),rgba(11,31,73,.58));color:#e2edff}
 .ow-assignee-toolbar.hidden{display:none!important}
@@ -1084,6 +1085,11 @@ body.calendar-view{background-attachment:scroll!important}
     <div class="field"><label>Data da postagem</label><input id="formPostDate" type="date" required><small class="demand-retro-hint">Você pode escolher qualquer data, inclusive de meses anteriores. O sistema organiza automaticamente a demanda no mês escolhido.</small></div>
     <div class="field"><label>Descrição</label><textarea id="formDescription" placeholder="Briefing, observações, entregáveis..."></textarea></div>
     <div class="field"><label for="formAssignee">Responsável pela demanda</label><select id="formAssignee"><option value="">Sem responsável (definir depois)</option><option>Gabriel</option><option>João</option><option>Pedro</option><option>Tiago</option><option>Fernando</option><option>Lucas</option></select><small class="demand-area-helper">Arte do João aparece no Design Login; vídeo do Pedro aparece no Vídeos Login. Os demais são acompanhados no administrativo.</small></div>
+    <section id="formVideoCover" class="ow-cover-panel hidden">
+      <label class="ow-cover-check"><input type="checkbox" id="formProduceCover">Produzir capa</label>
+      <small id="formCoverHint">Cria uma nova demanda em Arte, com o mesmo cliente e a mesma data do vídeo.</small>
+      <div id="formCoverFields" class="field hidden"><label for="formCoverAssignee">Responsável pela capa</label><select id="formCoverAssignee" disabled><option value="">Selecione o responsável</option><option>Gabriel</option><option>João</option><option>Pedro</option><option>Tiago</option><option>Fernando</option><option>Lucas</option></select></div>
+    </section>
     <div class="demand-reference-card">
       <div class="demand-reference-head"><div><strong>Referências</strong><span>Adicione o link de inspiração/briefing e arquivos que a equipe precisa receber.</span></div><span class="demand-reference-badge">Opcional</span></div>
       <div class="demand-reference-grid">
@@ -1875,7 +1881,7 @@ function productionAssetsBlock(d){if(!['arte','video'].includes(d.area))return '
 function renderDemand(d,i,showAreaLabel=false){
   const expanded=openDemandId===d.id;
   const refsBlock=d.area==='trafego'?'':`<div><div class="detail-label">Referências</div><div class="refs">${(d.links||[]).map((link,idx)=>`<div class="ref-item"><a href="${esc(safeUrl(link))}" target="_blank" rel="noopener">${esc(link)}</a>${isAdmin()?`<button class="mini-link danger remove-link" data-index="${idx}">Remover</button>`:''}</div>`).join('')}${(d.attachments||[]).map(f=>`<div class="ref-item"><span>${esc(f.name)}</span><div><button class="mini-link open-file" data-file-id="${f.id}">Abrir</button>${isAdmin()?`<button class="mini-link danger remove-file" data-file-id="${f.id}">Remover</button>`:''}</div></div>`).join('')||(!d.links?.length?'<span style="font-size:11px;color:rgba(235,243,255,.6)">Nenhuma referência adicionada.</span>':'')}</div>${isAdmin()?`<div class="ref-add"><input class="link-input" placeholder="Cole um link"><button class="soft-btn small add-link">Adicionar</button></div><div class="file-upload"><label>+ Adicionar arquivo<input class="file-input" type="file" multiple></label></div>`:''}</div>`;
-  return `<div class="demand ${expanded?'expanded':''}" data-demand-id="${d.id}"><button class="demand-row"><span class="demand-title"><span class="demand-index">${String(i+1).padStart(2,'0')}</span>${esc(d.title)}<span class="ow-assignee-chip">${esc(demandAssignee(d)||'Sem responsável')}</span><span class="demand-date">${esc(fmtPostDate(d.postDate))}</span>${showAreaLabel?`<span class="demand-area-label">${esc(AREAS[d.area]||d.area)}</span>`:""}</span><span class="current-status ${d.status}">${statusLabel(d)}</span><span class="demand-caret">⌄</span></button><div class="demand-detail"><div class="detail-overflow"><div class="detail-panel"><div class="detail-grid ${d.area==='trafego'?'traffic-detail-grid':''}"><div><div class="detail-label">Descrição</div><p class="description">${esc(d.description||'Sem descrição cadastrada.')}</p><div class="detail-label" style="margin-top:17px">Data da postagem</div><p class="description">${esc(fmtPostDate(d.postDate))}</p><div class="detail-label" style="margin-top:17px">Atualizar status</div><div class="status-edit">${Object.entries(statusesForArea(d.area)).map(([k,v])=>`<button class="status-btn ${d.status===k?'active':''}" data-status="${k}">${v}</button>`).join('')}</div>${agendaDemandAwaitingPost(d)?'<div class="demand-posting-reminder">Material aprovado. Falta publicar — a demanda permanece na Agenda.</div>':''}${productionAssetsBlock(d)}${finalMaterialBlock(d)}</div>${refsBlock}</div>${isAdmin()?`<div class="detail-actions"><button class="ghost small edit-demand">Editar</button><button class="ghost small danger delete-demand">Excluir</button></div>`:''}</div></div></div></div>`
+  return `<div class="demand ${expanded?'expanded':''}" data-demand-id="${d.id}"><button class="demand-row"><span class="demand-title"><span class="demand-index">${String(i+1).padStart(2,'0')}</span>${esc(d.title)}<span class="ow-assignee-chip">${esc(demandAssignee(d)||'Sem responsável')}</span><span class="demand-date">${esc(fmtPostDate(d.postDate))}</span>${showAreaLabel?`<span class="demand-area-label">${esc(AREAS[d.area]||d.area)}</span>`:""}</span><span class="current-status ${d.status}">${statusLabel(d)}</span><span class="demand-caret">⌄</span></button><div class="demand-detail"><div class="detail-overflow"><div class="detail-panel"><div class="detail-grid ${d.area==='trafego'?'traffic-detail-grid':''}"><div><div class="detail-label">Descrição</div><p class="description">${esc(d.description||'Sem descrição cadastrada.')}</p><div class="detail-label" style="margin-top:17px">Data da postagem</div><p class="description">${esc(fmtPostDate(d.postDate))}</p><div class="detail-label" style="margin-top:17px">Atualizar status</div><div class="status-edit">${Object.entries(statusesForArea(d.area)).map(([k,v])=>`<button class="status-btn ${d.status===k?'active':''}" data-status="${k}">${v}</button>`).join('')}</div>${agendaDemandAwaitingPost(d)?'<div class="demand-posting-reminder">Material aprovado. Falta publicar — a demanda permanece na Agenda.</div>':''}${productionAssetsBlock(d)}${finalMaterialBlock(d)}</div>${refsBlock}</div>${window.OWVideoCovers?.detailHTML(d)||''}${isAdmin()?`<div class="detail-actions"><button class="ghost small edit-demand">Editar</button><button class="ghost small danger delete-demand">Excluir</button></div>`:''}</div></div></div></div>`
 }
 function bindClientEvents(root){root.querySelectorAll('.show-all-assignees').forEach(b=>b.onclick=()=>{if(!isAdmin())return;adminAssigneeFilter='all';renderAssigneeToolbar();renderStats();renderClients()});root.querySelectorAll('.client-head').forEach(b=>b.onclick=()=>{const id=b.closest('.client').dataset.clientId;if(openClientId===id){openClientId=null;openDemandId=null}else{openClientId=id;openDemandId=null}clientDemandFilterKey=null;renderClients();if(openClientId)setTimeout(()=>document.getElementById('clients').scrollIntoView({behavior:'smooth',block:'start'}),40)});root.querySelectorAll('.client-area-filter-btn').forEach(b=>b.onclick=e=>{
   e.stopPropagation();
@@ -2621,6 +2627,7 @@ function setDemandArea(area,preferredClientId=null){
  demandClientOptions(area,previousId);
  const oldStatus=document.getElementById('formStatus').value;
  setFormStatus(oldStatus,area);
+ window.OWVideoCovers?.updateForm();
 }
 function openDemandModal(id=null,clientId=null){
  if(!isAdmin()||!Object.keys(AREAS).includes(currentArea))return;
@@ -2640,6 +2647,7 @@ function openDemandModal(id=null,clientId=null){
  const productionInput=document.getElementById('formProductionFiles');productionInput.value='';renderDemandProductionFileSelection();
  const existingProduction=document.getElementById('formExistingProduction'),productionLinkCount=d?.productionLinks?.length||0,productionFileCount=d?.productionAttachments?.length||0,totalProduction=productionLinkCount+productionFileCount;existingProduction.classList.toggle('hidden',!d||!totalProduction);existingProduction.textContent=d&&totalProduction?`Esta demanda já possui ${productionLinkCount} link${productionLinkCount===1?'':'s'} e ${productionFileCount} arquivo${productionFileCount===1?'':'s'} para produção. Novos itens serão acrescentados sem apagar os atuais.`:'';
  setFormStatus(d?.status||'red',formDemandArea);
+ window.OWVideoCovers?.resetForm();
  document.getElementById('demandModal').classList.remove('hidden');
 }
 
@@ -2648,6 +2656,10 @@ async function submitDemand(e){
   e.preventDefault();
   if(!isAdmin())return;
   const form=e.currentTarget,submitBtn=form.querySelector('button[type="submit"]');
+  if(submitBtn?.disabled)return;
+  let coverRequest=null,coverTransaction=null,coverError=null;
+  try{coverRequest=window.OWVideoCovers?.readForm()||null}catch(error){toast(error.message);return}
+  if(coverRequest&&!supabaseClient){toast('Conexão indisponível. Tente novamente para atribuir a capa à equipe.');return}
   const id=document.getElementById('editDemandId').value,clientId=document.getElementById('formClient').value,title=document.getElementById('formTitle').value.trim(),postDate=document.getElementById('formPostDate').value,description=document.getElementById('formDescription').value.trim(),assignee=document.getElementById('formAssignee').value,status=document.getElementById('formStatus').value,referenceRaw=document.getElementById('formReferenceLink').value.trim(),referenceLink=normalizeReferenceLinkValue(referenceRaw),referenceFiles=document.getElementById('formReferenceFiles').files,productionRaw=document.getElementById('formProductionLink').value.trim(),productionLink=normalizeReferenceLinkValue(productionRaw),productionFiles=document.getElementById('formProductionFiles').files;
   if(!clientId||!title||!postDate){toast('Preencha cliente, nome e data da postagem.');return}
   if(assignee&&!DEMAND_ASSIGNEES.includes(assignee)){toast('Responsável inválido.');return}
@@ -2674,12 +2686,19 @@ async function submitDemand(e){
   if(productionLink&&!d.productionLinks.includes(productionLink))d.productionLinks.push(productionLink);
   if(referenceFiles?.length)addedFiles=await stageDemandFiles(d,referenceFiles,'reference');
   if(productionFiles?.length)addedProductionFiles=await stageDemandFiles(d,productionFiles,'production');
-  const ok=await saveState();
+  let ok=false;
+  try{
+    coverTransaction=window.OWVideoCovers?.stage(d,coverRequest)||null;
+    ok=await saveState({strictRemote:!!coverRequest});
+  }catch(error){coverError=error}
   if(!ok){
+    coverTransaction?.rollback();
     for(const f of [...addedFiles,...addedProductionFiles])await deleteStoredFile(f);
     if(id&&rollback)Object.assign(state.demands.find(x=>x.id===id),rollback);
      if(newId)state.demands=state.demands.filter(x=>x.id!==newId);
      if(createdAreaClientId)state.clients=state.clients.filter(c=>c.id!==createdAreaClientId);
+    writeLocalCache(state);
+    toast(coverError?.message||'Não foi possível salvar a demanda e sua capa. Tente novamente.');
     if(submitBtn){submitBtn.disabled=false;submitBtn.textContent='Salvar demanda'}
     return;
   }
@@ -2688,7 +2707,7 @@ async function submitDemand(e){
   if(submitBtn){submitBtn.disabled=false;submitBtn.textContent='Salvar demanda'}
   const refCount=(referenceLink?1:0)+addedFiles.length,productionCount=(productionLink?1:0)+addedProductionFiles.length;
   const extras=[refCount?`${refCount} referência${refCount===1?'':'s'}`:'',productionCount?`${productionCount} item${productionCount===1?'':'s'} para produção`:''].filter(Boolean).join(' · ');
-  toast(extras?`Demanda salva · ${extras}.`:'Demanda salva.',null,null,'success');
+  toast(coverTransaction?`Vídeo salvo e capa atribuída a ${coverTransaction.cover.assignee}, com o mesmo prazo.`:(extras?`Demanda salva · ${extras}.`:'Demanda salva.'),null,null,'success');
 }
 async function updateStatus(id,status){const d=state.demands.find(x=>x.id===id);if(!canAccessDemand(d)||!statusesForArea(d.area)[status])return;const old=d.status;d.status=status;if(!await saveState()){d.status=old;return}if(currentArea==='agenda'){renderAgenda()}else{renderStats();renderClients()}toast('Status atualizado.')}
 async function deleteDemand(id){if(!isAdmin()||!confirm('Mover esta demanda para Excluídos?'))return;const idx=state.demands.findIndex(d=>d.id===id);if(idx<0)return;const d=state.demands.splice(idx,1)[0];d.deletedAt=new Date().toISOString();d.deletedBy=currentUser;state.deletedDemands.push(d);if(!await saveState()){state.deletedDemands.pop();delete d.deletedAt;delete d.deletedBy;state.demands.splice(idx,0,d);return}openDemandId=null;renderStats();renderClients();toast('Demanda movida para Excluídos.','Desfazer',()=>restoreDemand(id))}
@@ -4050,6 +4069,7 @@ function start(){
 <script src="/modules/monthly-panorama.js?v=20261027-touch2" defer></script>
 <script src="/modules/editor-calendar.js" defer></script>
 <script src="/modules/demand-notes.js?v=20261028" defer></script>
+<script src="/modules/video-covers.js?v=20261029" defer></script>
 </body>
 </html>
 <script async data-explicit-opt-in="true" data-deployment-id="dpl_Ao14UeTAg11RytLdLPreqf8HrSbi" src="https://vercel.live/_next-live/feedback/feedback.js"></script>
