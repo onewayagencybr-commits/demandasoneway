@@ -144,3 +144,14 @@
   script.async = true;
   document.head.appendChild(script);
 })();
+
+
+/* Histórico de Relatórios de Tráfego: módulo isolado e aditivo. */
+(function () {
+  if (typeof document.createElement !== 'function' || !document.head ||
+      !document.getElementById('trafficReportBtn')) return;
+  var script = document.createElement('script');
+  script.src = '/modules/traffic-report-history.js?v=20261029-1';
+  script.async = true;
+  document.head.appendChild(script);
+})();
