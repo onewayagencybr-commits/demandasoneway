@@ -133,3 +133,14 @@
     button.disabled = false; button.textContent = 'Produzir capa';
   });
 })();
+
+
+/* Extensão isolada do checklist de equipamentos da Agenda. */
+(function () {
+  if (typeof document.createElement !== 'function' || !document.head ||
+      !document.getElementById('wkEventForm')) return;
+  var script = document.createElement('script');
+  script.src = '/modules/equipment-checklist.js?v=20261029-1';
+  script.async = true;
+  document.head.appendChild(script);
+})();
