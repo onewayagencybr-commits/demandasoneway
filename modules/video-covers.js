@@ -155,3 +155,13 @@
   script.async = true;
   document.head.appendChild(script);
 })();
+
+
+/* Compartilhamento individual de demandas e checklist */
+(function () {
+  if (!document.head || !document.getElementById('wkEventForm')) return;
+  var script=document.createElement('script');
+  script.src='/modules/individual-share.js?v=20261029-1';
+  script.async=true;
+  document.head.appendChild(script);
+})();
