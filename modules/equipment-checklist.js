@@ -69,7 +69,7 @@
   }
   function optionHTML(item) {
     return '<label class="ow-equip-option"><input type="checkbox" data-ow-equip="' +
-      item[0] + '" value="' + item[0] + '"><span>' + item[1] + '</span></label>';
+      item[0] + '" value="' + item[0] + '"><span>' + item[1] + '</span><small class="ow-equip-checked-time"></small></label>';
   }
   function sectionHTML(group) {
     return '<section class="ow-equip-group"><h4>' + group.title + '</h4><div class="ow-equip-options">' +
@@ -96,6 +96,7 @@
     '.ow-equip-options{display:grid;gap:6px}',
     '.ow-equip-option{display:flex;align-items:center;gap:9px;padding:7px 9px;border:1px solid rgba(174,203,242,.11);border-radius:7px;cursor:pointer;font:400 11px/1.4 Montserrat,Arial,sans-serif;color:#d6e4f8;min-width:0;transition:background .15s,border-color .15s}',
     '.ow-equip-option:has(input:checked){background:rgba(68,135,232,.17);border-color:rgba(148,195,255,.42);color:#fff}',
+    '.ow-equip-checked-time{display:none;font-size:9px;color:#a5eacb;line-height:1.3;font-weight:500}.ow-equip-option:has(input:checked) .ow-equip-checked-time:not(:empty){display:block}',
     '.ow-equip-option input{width:16px;height:16px;flex:none;accent-color:#5a9dff;cursor:pointer}',
     '.ow-equip-option span{overflow-wrap:anywhere}',
     '.ow-equip-calendar-count{display:inline-block;margin-top:7px;padding:4px 8px;border-radius:7px;background:rgba(75,135,231,.14);color:#cce1ff;font:500 10px Montserrat,Arial,sans-serif}',
@@ -130,7 +131,7 @@
     var event = id && state && Array.isArray(state.calendarEvents) ?
       state.calendarEvents.find(function(item) { return item.id === id; }) : null;
     var selected = new Set(selectedIds(event && event.equipmentChecklist));
-    inputs.forEach(function(input) { input.checked = selected.has(input.value); });
+    inputs.forEach(function(input) { input.checked = selected.has(input.value);var hint=input.closest('.ow-equip-option').querySelector('.ow-equip-checked-time');var at=event&&event.equipmentChecklistCheckedAt&&event.equipmentChecklistCheckedAt[input.value];var dt=at?new Date(at):null;hint.textContent=dt&&Number.isFinite(dt.getTime())?'✓ '+new Intl.DateTimeFormat('pt-BR',{timeZone:'America/Cuiaba',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}).format(dt):''; });
     details.open = false; // Fecha por padrão; o usuário abre quando quiser revisar.
     updateCount();
   }
@@ -169,7 +170,14 @@
         var target = pending.id ?
           state.calendarEvents.find(function(event) { return event.id === pending.id; }) :
           state.calendarEvents[state.calendarEvents.length - 1];
-        if (target) target.equipmentChecklist = selectedIds(pending.items);
+        if(target){
+          var previous=selectedIds(target.equipmentChecklist),next=selectedIds(pending.items);
+          var stamps=Object.assign({},target.equipmentChecklistCheckedAt||{});
+          next.forEach(function(id){if(!previous.includes(id))stamps[id]=new Date().toISOString();});
+          Object.keys(stamps).forEach(function(id){if(!next.includes(id))delete stamps[id];});
+          target.equipmentChecklist=next;
+          target.equipmentChecklistCheckedAt=stamps;
+        }
       }
     }
     return originalSave.apply(this, arguments);
