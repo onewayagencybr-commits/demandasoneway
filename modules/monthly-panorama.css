@@ -3996,3 +3996,39 @@ body.calendar-view{
 #agendaContent .ow-agenda-inline-editor .ow-social-statuses .status-btn[data-sm-stage="salmon"]:not(.active){
  background:rgba(255,118,0,.13)!important;color:#ffa23c!important;border-color:rgba(255,118,0,.55)!important;
 }
+
+
+/* One Way | horários explícitos, sem expandir histórico */
+#app .ow-demand-audit{margin-top:15px!important;padding:14px 16px!important;border-radius:12px!important}
+#app .ow-demand-audit-heading{display:flex;align-items:center;gap:8px;color:#f1f6ff;font-size:11px;font-weight:650;letter-spacing:.01em}
+#app .ow-demand-audit-heading span{font-size:9px;font-weight:600;opacity:.65}
+#app .ow-demand-audit-list{display:grid!important;gap:11px!important;padding-top:12px!important}
+#app .ow-demand-audit-event{display:flex!important;align-items:flex-start;gap:10px}
+#app .agenda-created-date{font-size:10px!important;font-weight:650!important;opacity:1!important;color:#d4e7ff!important;letter-spacing:0!important}
+#agendaContent .agenda-item .agenda-info>.agenda-created-date{margin-top:5px!important}
+#agendaContent .agenda-item .agenda-last-action{
+ display:block!important;max-width:100%!important;min-width:0!important;
+ color:#b5d6ff!important;font-size:9px!important;font-weight:500!important;
+ line-height:1.4!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;
+ opacity:.94!important;margin-top:3px!important;
+}
+#app .final-material-timestamp{
+ display:flex;align-items:center;gap:9px;margin-top:11px;padding:10px 12px;
+ border:1px solid rgba(67,211,145,.29);background:rgba(32,150,110,.11);
+ border-radius:10px;color:#e8fff4;
+}
+#app .final-material-timestamp .ow-audit-tick{
+ display:inline-grid;place-items:center;width:23px;height:23px;flex:0 0 23px;
+ border-radius:50%;background:rgba(33,196,118,.23);color:#91ffc7;font-size:13px;font-weight:800;
+}
+#app .final-material-timestamp>div{display:flex;flex-direction:column;gap:2px;min-width:0}
+#app .final-material-timestamp strong{font-size:11px;font-weight:650;color:#e6fff0}
+#app .final-material-timestamp small{font-size:10px;color:rgba(226,255,238,.7)}
+#app .final-material-timestamp.last-edited{margin-top:6px;background:rgba(84,143,218,.07);border-color:rgba(130,180,248,.21)}
+/* Fundo sofisticado e estático, sem círculos girando sobre o cabeçalho */
+body::before,body::after{animation:none!important;will-change:auto!important}
+@media(max-width:700px){
+ #agendaContent .agenda-item .agenda-created-date{font-size:9px!important;line-height:1.35!important}
+ #agendaContent .agenda-item .agenda-last-action{font-size:8.5px!important;line-height:1.35!important}
+ #app .final-material-timestamp{padding:9px 10px}
+}
