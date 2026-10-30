@@ -7,6 +7,7 @@
  const $=id=>document.getElementById(id);
  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const pretty=d=>{const n=new Date(d);return Number.isFinite(n.getTime())?n.toLocaleDateString('pt-BR'):'—'};
+ const prettyTime=d=>{const n=new Date(d);return Number.isFinite(n.getTime())?new Intl.DateTimeFormat('pt-BR',{timeZone:'America/Cuiaba',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).format(n):''};
  const money=n=>typeof n==='number'&&Number.isFinite(n)?'US$ '+n.toFixed(4).replace('.',','):'';
  let data=[],inited=false,loading=false,refreshAgain=false,lastRefreshAt=0;
  async function bearer(){
@@ -91,7 +92,7 @@
   if(!data.length){$('igSavedRows').innerHTML='<p class="ig-muted">Nenhuma análise salva. Os próximos relatórios guardarão somente os dados, não o PDF.</p>';return;}
   $('igSavedRows').innerHTML=data.map(r=>{
    const info=r.kind==='old'?'PDF anterior':'Dados salvos · '+(r.bytes>0?Math.max(1,Math.ceil(r.bytes/1024))+' KB':'JSON');
-   return '<article class="ig-saved-item"><div class="ig-saved-description"><strong>'+esc(r.clientName)+' <span class="ig-saved-handle">@'+esc(r.username)+'</span></strong><span>'+esc(pretty(r.from))+' a '+esc(pretty(r.to))+' · '+info+' · expira '+esc(pretty(r.expiresAt))+(r.costUsd!=null?' · Apify: '+money(r.costUsd):'')+'</span></div><div class="ig-saved-actions">'+(r.kind==='json'?'<button class="ig-secondary" type="button" data-action="select" data-ref="'+esc(r.ref)+'">Ver métricas</button>':'')+'<button class="ig-secondary" type="button" data-action="view" data-ref="'+esc(r.ref)+'">Abrir ↗</button><button class="ig-secondary" type="button" data-action="download" data-ref="'+esc(r.ref)+'">Baixar PDF</button><button class="ig-secondary ig-delete" type="button" data-action="delete" data-ref="'+esc(r.ref)+'">Excluir</button></div></article>';
+   return '<article class="ig-saved-item"><div class="ig-saved-description"><strong>'+esc(r.clientName)+' <span class="ig-saved-handle">@'+esc(r.username)+'</span></strong><span>'+esc(pretty(r.from))+' a '+esc(pretty(r.to))+' · '+info+(r.createdAt?' · Gerado em '+esc(prettyTime(r.createdAt)):'')+' · expira '+esc(pretty(r.expiresAt))+(r.costUsd!=null?' · Apify: '+money(r.costUsd):'')+'</span></div><div class="ig-saved-actions">'+(r.kind==='json'?'<button class="ig-secondary" type="button" data-action="select" data-ref="'+esc(r.ref)+'">Ver métricas</button>':'')+'<button class="ig-secondary" type="button" data-action="view" data-ref="'+esc(r.ref)+'">Abrir ↗</button><button class="ig-secondary" type="button" data-action="download" data-ref="'+esc(r.ref)+'">Baixar PDF</button><button class="ig-secondary ig-delete" type="button" data-action="delete" data-ref="'+esc(r.ref)+'">Excluir</button></div></article>';
   }).join('');
  }
  async function refresh(){
