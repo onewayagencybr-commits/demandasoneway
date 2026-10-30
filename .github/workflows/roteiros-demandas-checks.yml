@@ -10,6 +10,8 @@ on:
       - tests/scripts.test.js
       - tests/client-month-visibility.test.js
       - tests/demand-assignee.test.js
+      - tests/calendar-equipment-persistence.test.js
+      - tests/individual-share.test.js
       - .github/workflows/roteiros-demandas-checks.yml
   pull_request:
     paths:
@@ -18,6 +20,8 @@ on:
       - tests/scripts.test.js
       - tests/client-month-visibility.test.js
       - tests/demand-assignee.test.js
+      - tests/calendar-equipment-persistence.test.js
+      - tests/individual-share.test.js
 jobs:
   validate:
     runs-on: ubuntu-latest
