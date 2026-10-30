@@ -18,7 +18,7 @@
     var source = state && state.analyticsReports && state.analyticsReports[KEY];
     return Array.isArray(source) ? source.filter(function(item) {
       return item && item.id && item.data && typeof item.data === 'object';
-    }) : [];
+    }).map(copy) : [];
   }
   function existingLegacy() {
     var reports = state && state.analyticsReports || {};
