@@ -1335,29 +1335,37 @@
   // A navegação é apenas reorganizada no DOM: nenhum botão é recriado e
   // seus eventos, IDs e permissões continuam exatamente os mesmos.
   function arrangeNavigation() {
-    if (!isAdmin()) return;
-    var nav = document.querySelector('#app .nav-row');
-    var left = nav?.querySelector('.area-nav-cluster');
-    var tools = nav?.querySelector('.admin-utility-tabs');
-    if (!left || !tools) return;
-    var group = left.querySelector('.ow-nav-core-tools');
-    if (!group) {
-      group = document.createElement('div');
-      group.className = 'ow-nav-core-tools';
+    // Mantem os mesmos botoes e handlers. Somente altera a composicao visual.
+    var nav=document.querySelector('#app .nav-row');
+    var main=nav?.querySelector('.area-nav-cluster');
+    var tools=nav?.querySelector('.admin-utility-tabs');
+    if(!nav||!main||!tools)return;
+    nav.classList.add('ow-premium-nav');
+    main.classList.add('ow-primary-nav');
+    tools.classList.add('ow-secondary-nav');
+    nav.classList.toggle('ow-premium-collaborator',!isAdmin());
+    nav.classList.toggle('ow-premium-admin',isAdmin());
+    // O CSS tem o mesmo acabamento para todos os perfis;
+    // nao expomos ferramentas reservadas ao administrador.
+    if(!isAdmin())return;
+    var oldCore=main.querySelector('.ow-nav-core-tools');
+    if(oldCore){
+      Array.from(oldCore.children).forEach(function(button){tools.appendChild(button)});
+      oldCore.remove();
     }
-    ['adminAgendaTab','manageClientsTab','weekCalendarTab'].forEach(function (id) {
-      var button = document.getElementById(id);
-      if (button) group.appendChild(button);
+    [
+      'adminAgendaTab',
+      'manageClientsTab',
+      'weekCalendarTab',
+      'scriptsTab',
+      'instagramReportsTab',
+      'feedPlannerTab',
+      'commemorativeDatesTab',
+      'trashTab'
+    ].forEach(function(id){
+      var button=document.getElementById(id);
+      if(button)tools.appendChild(button);
     });
-    var trash = document.getElementById('trashTab');
-    if (trash && trash.parentElement === left) left.insertBefore(group,trash);
-    else left.appendChild(group);
-    ['scriptsTab','instagramReportsTab','feedPlannerTab','commemorativeDatesTab'].forEach(function (id) {
-      var button = document.getElementById(id);
-      if (button) tools.appendChild(button);
-    });
-    // A lixeira fica na extremidade do menu, fora das três áreas prioritárias.
-    if (trash) tools.appendChild(trash);
   }
 
   function positionSearch() {
