@@ -641,3 +641,92 @@ body,
 @media(prefers-reduced-motion:reduce) {
   body,#loginScreen.login {animation:none!important}
 }
+
+/* One Way login compact + ambient mouse 2026-10-31 */
+/* A calm, restrained interaction: only the background responds to a fine pointer.
+   No parallax on content, and none for touch or reduced-motion settings. */
+@media (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference) {
+  html.ow-mouse-ambient body,
+  html.ow-mouse-ambient #loginScreen.login {
+    animation:none!important;
+    background-size:cover,125% 125%,108% 108%!important;
+    background-position:
+      center,
+      calc(50% + var(--ow-bg-shift-x,0px)) calc(50% + var(--ow-bg-shift-y,0px)),
+      calc(50% + var(--ow-bg-shift-x,0px)) calc(50% + var(--ow-bg-shift-y,0px))!important;
+  }
+}
+/* The login was 940 x 525; make it a compact, balanced desktop access panel.
+   Keep the same four login buttons, administrative form and auth behavior. */
+@media(min-width:721px){
+  #loginScreen .login-card,
+  #loginScreen .login-card.login-choice-active {
+    width:min(740px,calc(100vw - 42px))!important;
+    min-height:355px!important;
+    grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr)!important;
+    border-radius:21px!important;
+  }
+  #loginScreen .login-intro {
+    padding:28px 29px!important;
+    gap:33px!important;
+    justify-content:center!important;
+  }
+  #loginScreen .login-intro .brand{gap:11px!important}
+  #loginScreen .login-intro .brand-logo{width:98px!important}
+  #loginScreen .login-intro .brand-copy strong{font-size:11px!important;line-height:1.35!important}
+  #loginScreen .login-intro .brand-copy span{font-size:8px!important}
+  #loginScreen .login-intro-message{padding-bottom:0!important}
+  #loginScreen .login-eyebrow{font-size:8px!important;letter-spacing:.14em!important}
+  #loginScreen .login-intro h1{
+    font-size:25px!important;
+    line-height:1.16!important;
+    margin:9px 0 7px!important;
+    letter-spacing:-.042em!important;
+  }
+  #loginScreen .login-intro p{
+    font-size:10px!important;
+    line-height:1.6!important;
+    max-width:255px!important;
+  }
+  #loginScreen .login-panel{padding:24px 26px!important}
+  #loginScreen .login-panel-label{
+    font-size:11px!important;
+    margin-bottom:11px!important;
+  }
+  #loginScreen .login-access-grid{gap:8px!important}
+  #loginScreen .login-access-btn,
+  #loginScreen .login-access-btn.admin{
+    min-height:56px!important;
+    padding:10px 11px!important;
+    border-radius:11px!important;
+  }
+  #loginScreen .login-access-btn strong{font-size:11px!important}
+  #loginScreen .login-access-btn span{font-size:8px!important;line-height:1.35!important}
+  #loginScreen .admin-login-box{
+    margin-top:10px!important;
+    padding:14px!important;
+    border-radius:11px!important;
+  }
+  #loginScreen .login-error{margin-top:6px!important}
+}
+@media(min-width:721px) and (max-height:590px){
+  #loginScreen .login-card,
+  #loginScreen .login-card.login-choice-active {min-height:0!important}
+  #loginScreen .login-intro{padding:21px 27px!important;gap:22px!important}
+  #loginScreen .login-panel{padding:18px 25px!important}
+}
+@media(max-width:720px){
+  #loginScreen .login-card,
+  #loginScreen .login-card.login-choice-active{
+    width:min(430px,100%)!important;
+    border-radius:19px!important;
+  }
+  #loginScreen .login-intro {padding:22px 22px 9px!important}
+  #loginScreen .login-panel {padding:16px 22px 22px!important}
+  #loginScreen .login-access-btn,
+  #loginScreen .login-access-btn.admin {min-height:58px!important}
+}
+@media(prefers-reduced-motion:reduce) {
+  html.ow-mouse-ambient body,
+  html.ow-mouse-ambient #loginScreen.login {animation:none!important}
+}
