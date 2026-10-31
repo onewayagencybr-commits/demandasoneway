@@ -337,3 +337,97 @@ body {
   #app#app .nav-row *,#app#app .nav-row *::before,
   #loginScreen .login-access-btn {transition:none!important;transform:none!important}
 }
+
+/* ONEWAY TEAL RIPPLE 2026-10-31 */
+/* Visual only. No modification to business logic or role-based visibility. */
+body {
+  background-color:#041e25!important;
+  background-image:
+    radial-gradient(ellipse 52% 65% at 22% 70%,rgba(95,214,192,.10),transparent 78%),
+    linear-gradient(180deg,rgba(1,13,24,.09),rgba(0,14,24,.25)),
+    url("/modules/oneway-ripple-teal.svg")!important;
+  background-size:125% 125%,cover,cover!important;
+  background-repeat:no-repeat!important;
+  background-attachment:fixed!important;
+  background-position:0% 30%,center,center;
+  animation:owTealSurfaceGlow 38s ease-in-out infinite alternate;
+}
+@keyframes owTealSurfaceGlow {
+  0% {background-position:0% 30%,center,center}
+  100% {background-position:100% 70%,center,center}
+}
+#loginScreen.login {
+  background-color:#041e25!important;
+  background-image:
+    radial-gradient(ellipse 58% 63% at 22% 64%,rgba(112,221,198,.10),transparent 78%),
+    linear-gradient(180deg,rgba(0,16,25,.10),rgba(0,18,27,.22)),
+    url("/modules/oneway-ripple-teal.svg")!important;
+  background-size:125% 125%,cover,cover!important;
+  background-position:0% 25%,center,center;
+  background-repeat:no-repeat!important;
+  animation:owTealSurfaceGlow 38s ease-in-out infinite alternate;
+}
+#loginScreen .login-card {
+  background:linear-gradient(145deg,rgba(5,42,48,.90),rgba(3,26,41,.88))!important;
+  border-color:rgba(142,224,201,.31)!important;
+  box-shadow:0 32px 95px rgba(0,15,24,.43),inset 0 1px 0 rgba(218,255,243,.09)!important;
+}
+#loginScreen .login-access-btn {
+  background:linear-gradient(145deg,rgba(67,167,147,.15),rgba(27,112,127,.09))!important;
+  border-color:rgba(131,219,192,.28)!important;
+}
+#loginScreen .login-access-btn:hover,
+#loginScreen .login-access-btn:focus-visible {
+  background:linear-gradient(145deg,rgba(74,193,164,.27),rgba(26,136,146,.13))!important;
+  border-color:rgba(145,240,211,.75)!important;
+  box-shadow:0 16px 36px rgba(0,20,30,.29),inset 0 1px 0 rgba(221,255,244,.12)!important;
+}
+#app#app .topbar {
+  background:rgba(2,26,34,.82)!important;
+  border-bottom-color:rgba(146,217,202,.25)!important;
+  box-shadow:0 8px 30px rgba(0,14,26,.16)!important;
+}
+#app#app .hero {
+  background:linear-gradient(118deg,rgba(2,35,46,.74),rgba(4,53,62,.50) 62%,rgba(1,27,43,.65))!important;
+  border-color:rgba(143,222,199,.25)!important;
+  box-shadow:inset 0 1px 0 rgba(225,255,245,.07),0 20px 50px rgba(0,17,31,.15)!important;
+}
+#app#app .hero .eyebrow{color:#b4f1df!important}
+@media (min-width:701px) {
+  #app#app .nav-row .area-nav-cluster,
+  #app#app .nav-row .admin-utility-tabs {
+    background:linear-gradient(148deg,rgba(4,43,55,.87),rgba(3,32,49,.78))!important;
+    border-color:rgba(143,218,200,.30)!important;
+    box-shadow:0 18px 48px rgba(0,16,28,.23),inset 0 1px 0 rgba(231,255,248,.085)!important;
+  }
+  #app#app .nav-row .area-nav-cluster::before,
+  #app#app .nav-row .admin-utility-tabs::before {color:#b0dccf!important}
+}
+#app#app .nav-row .tabs .tab,
+#app#app .nav-row .admin-utility-tabs button {
+  background:linear-gradient(145deg,rgba(88,180,166,.09),rgba(45,110,144,.065))!important;
+  border-color:rgba(147,214,199,.24)!important;
+}
+#app#app .nav-row .tabs .tab:hover,
+#app#app .nav-row .admin-utility-tabs button:hover {
+  background:linear-gradient(145deg,rgba(73,183,159,.26),rgba(36,119,148,.14))!important;
+  border-color:rgba(156,244,214,.66)!important;
+  box-shadow:0 11px 29px rgba(0,24,36,.23),inset 0 1px 0 rgba(229,255,247,.13)!important;
+}
+#app#app .nav-row .tabs .tab.active,
+#app#app .nav-row .admin-utility-tabs button.active {
+  background:linear-gradient(145deg,rgba(28,130,132,.53),rgba(14,95,115,.36))!important;
+  border-color:rgba(147,240,215,.88)!important;
+  box-shadow:0 10px 27px rgba(0,38,47,.25),inset 0 1px 0 rgba(236,255,248,.16)!important;
+}
+#app .stat,#app .ow-assignee-toolbar {border-color:rgba(148,215,202,.24)!important}
+#app .ow-mobile-hub:not([hidden]) {
+  background:linear-gradient(145deg,rgba(3,48,56,.94),rgba(3,27,43,.91))!important;
+  border-color:rgba(150,221,204,.3)!important;
+}
+@media (hover:none),(max-width:700px) {
+  body,#loginScreen.login {background-attachment:scroll!important;animation:none!important}
+}
+@media (prefers-reduced-motion:reduce) {
+  body,#loginScreen.login {animation:none!important}
+}
