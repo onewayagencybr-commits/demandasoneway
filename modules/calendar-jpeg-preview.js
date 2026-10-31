@@ -139,3 +139,13 @@
 
   window.OneWayJpegPreview = { open: open };
 })();
+
+/* One Way ambient motion bootstrap */
+(function () {
+  if (window.__owAmbientScriptRequested || !document.head) return;
+  window.__owAmbientScriptRequested = true;
+  var script = document.createElement('script');
+  script.src = '/modules/oneway-mouse-ambient.js?v=20261031-ambient1';
+  script.async = true;
+  document.head.appendChild(script);
+})();
