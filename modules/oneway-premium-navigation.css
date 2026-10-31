@@ -698,3 +698,34 @@ body,
 body,#loginScreen.login {
   animation:none!important;
 }
+
+/* ONE WAY — clean navy background, no stripe texture */
+/* Lightweight static background. Keep the existing cards, login proportions,
+   user chip, role navigation and all application behaviors unchanged. */
+body,
+#loginScreen.login {
+  background-color:#040e20!important;
+  background-image:
+    radial-gradient(ellipse 75% 85% at 3% 95%,rgba(21,59,127,.27) 0%,rgba(21,59,127,0) 74%),
+    radial-gradient(ellipse 62% 70% at 96% 11%,rgba(20,58,130,.17) 0%,rgba(20,58,130,0) 77%),
+    linear-gradient(125deg,#040c1a 0%,#07172f 46%,#081a37 74%,#040d1e 100%)!important;
+  background-size:cover!important;
+  background-position:center!important;
+  background-repeat:no-repeat!important;
+  background-attachment:fixed!important;
+  animation:none!important;
+}
+/* Legacy glow pseudo-elements ran two perpetual animations with expensive blur.
+   Remove them too, leaving a genuinely static and inexpensive surface. */
+body::before,
+body::after {
+  content:none!important;
+  display:none!important;
+  animation:none!important;
+  filter:none!important;
+  will-change:auto!important;
+}
+/* Avoid fixed background repaint cost on touch screens. */
+@media(max-width:700px),(pointer:coarse) {
+  body,#loginScreen.login {background-attachment:scroll!important}
+}
