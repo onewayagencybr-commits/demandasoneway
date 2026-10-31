@@ -150,3 +150,190 @@
 #app#app .nav-row #feedPlannerTab {order:6;}
 #app#app .nav-row #commemorativeDatesTab {order:7;}
 #app#app .nav-row #trashTab {order:8;}
+
+/* One Way — azul cinematografico / motion refinado (2026-10-31) */
+/* Camada exclusivamente visual: sem tocar em permissoes, eventos, dados ou estados. */
+:root {
+  --ow-glass-line: rgba(136,211,255,.24);
+  --ow-glass-deep: rgba(3,25,56,.7);
+  --ow-motion: cubic-bezier(.22,.8,.28,1);
+}
+body {
+  background-color:#041327!important;
+  background-image:
+    radial-gradient(ellipse 62% 64% at 13% 29%,rgba(0,172,241,.38) 0%,rgba(8,106,184,.18) 43%,transparent 75%),
+    radial-gradient(ellipse 57% 65% at 88% 16%,rgba(24,120,236,.36) 0%,rgba(5,64,137,.12) 53%,transparent 78%),
+    radial-gradient(ellipse 69% 60% at 72% 92%,rgba(13,90,175,.27),transparent 78%),
+    linear-gradient(125deg,#041020 0%,#062c56 43%,#061c3a 72%,#031124 100%)!important;
+  background-attachment:fixed!important;
+  background-size:120% 120%,120% 120%,120% 120%,cover!important;
+  animation:owBlueHorizon 32s ease-in-out infinite alternate;
+}
+@keyframes owBlueHorizon {
+  0%   {background-position:0% 16%,100% 0%,54% 100%,center}
+  100% {background-position:18% 5%,78% 17%,38% 82%,center}
+}
+/* A mesma atmosfera em todos os acessos, incluindo colaborador e visitante. */
+#loginScreen.login {
+  background-color:#041327!important;
+  background-image:
+    radial-gradient(ellipse 67% 72% at 12% 32%,rgba(0,176,242,.4),transparent 78%),
+    radial-gradient(ellipse 55% 62% at 88% 18%,rgba(22,112,235,.34),transparent 74%),
+    linear-gradient(130deg,#041221 0%,#06335b 44%,#071934 100%)!important;
+  background-size:118% 118%,118% 118%,cover!important;
+  animation:owLoginHorizon 27s ease-in-out infinite alternate;
+}
+@keyframes owLoginHorizon {
+  0%{background-position:0% 22%,100% 0%,center}
+  100%{background-position:13% 3%,80% 20%,center}
+}
+#loginScreen .login-card {
+  background:linear-gradient(150deg,rgba(7,41,82,.89),rgba(3,19,47,.83))!important;
+  border:1px solid rgba(142,213,255,.27)!important;
+  box-shadow:0 34px 96px rgba(1,11,31,.35),inset 0 1px 0 rgba(255,255,255,.09)!important;
+  backdrop-filter:blur(26px) saturate(135%)!important;
+}
+#loginScreen .login-access-btn {
+  border-color:rgba(133,201,248,.22)!important;
+  background:linear-gradient(145deg,rgba(83,176,242,.13),rgba(40,111,205,.075))!important;
+  transition:transform .38s var(--ow-motion),background .38s ease,border-color .38s ease,box-shadow .38s ease!important;
+}
+#loginScreen .login-access-btn:hover,
+#loginScreen .login-access-btn:focus-visible {
+  border-color:rgba(141,222,255,.7)!important;
+  background:linear-gradient(145deg,rgba(68,182,239,.24),rgba(41,116,205,.13))!important;
+  box-shadow:0 16px 35px rgba(0,13,37,.26),inset 0 1px 0 rgba(220,246,255,.13)!important;
+}
+#app#app .topbar {
+  background:rgba(3,20,45,.77)!important;
+  border-bottom:1px solid rgba(141,206,250,.21)!important;
+  box-shadow:0 8px 32px rgba(0,13,32,.12)!important;
+  backdrop-filter:blur(24px) saturate(120%)!important;
+}
+#app#app .hero {
+  position:relative;
+  padding:clamp(18px,2.2vw,30px);
+  border:1px solid rgba(134,209,252,.2);
+  border-radius:22px;
+  background:linear-gradient(125deg,rgba(5,34,73,.54),rgba(7,62,112,.23) 62%,rgba(3,28,61,.36));
+  box-shadow:inset 0 1px 0 rgba(233,248,255,.05),0 22px 52px rgba(1,14,39,.12);
+  backdrop-filter:blur(16px);
+}
+#app#app .hero .eyebrow {color:#a8e2ff!important;letter-spacing:.16em}
+#app#app .hero h1 {text-shadow:0 6px 30px rgba(0,16,42,.18)}
+#app#app .hero p {color:rgba(225,242,255,.78)}
+/* Painel de navegacao com vidro azulado, sem mudar a grade nem a visibilidade por perfil. */
+@media (min-width:701px) {
+  #app#app .nav-row .area-nav-cluster,
+  #app#app .nav-row .admin-utility-tabs {
+    background:linear-gradient(150deg,rgba(8,53,98,.79),rgba(3,27,62,.73))!important;
+    border:1px solid var(--ow-glass-line)!important;
+    border-radius:20px!important;
+    box-shadow:0 22px 48px rgba(1,13,40,.17),inset 0 1px 0 rgba(226,246,255,.085)!important;
+    backdrop-filter:blur(24px) saturate(128%)!important;
+    animation:owNavSurfaceIn .7s var(--ow-motion) both;
+  }
+  #app#app .nav-row .admin-utility-tabs {animation-delay:.1s}
+  #app#app .nav-row .area-nav-cluster::before,
+  #app#app .nav-row .admin-utility-tabs::before {
+    color:#a6d8fb!important;
+    font-weight:600!important;
+    letter-spacing:.17em!important;
+  }
+  #app#app .nav-row .area-nav-cluster.role-limited {max-width:680px!important}
+  #app#app .nav-row:has(.area-nav-cluster.role-limited) {max-width:720px!important}
+  #app#app .nav-row:has(.area-nav-cluster.role-limited) .tabs {
+    grid-template-columns:repeat(auto-fit,minmax(145px,1fr))!important;
+  }
+}
+@keyframes owNavSurfaceIn {
+  from{opacity:.35;filter:brightness(.86)}
+  to{opacity:1;filter:brightness(1)}
+}
+/* Icones preservados: a animacao e aplicada sem recriar SVGs nem trocar comandos. */
+#app#app .nav-row .tabs .tab,
+#app#app .nav-row .admin-utility-tabs button {
+  border-color:rgba(148,211,250,.2)!important;
+  border-radius:13px!important;
+  background:linear-gradient(150deg,rgba(112,192,242,.085),rgba(51,108,203,.05))!important;
+  box-shadow:inset 0 1px 0 rgba(229,244,255,.02)!important;
+  transform:translateY(0)!important;
+  transition:background .42s ease,border-color .42s ease,box-shadow .42s ease,color .32s ease,transform .42s var(--ow-motion)!important;
+}
+#app#app .nav-row .tabs .tab::before,
+#app#app .nav-row .admin-utility-tabs button::before {
+  opacity:.88!important;
+  transform:scale(1)!important;
+  transition:transform .44s var(--ow-motion),opacity .3s ease!important;
+}
+#app#app .nav-row .tabs .tab:hover,
+#app#app .nav-row .admin-utility-tabs button:hover {
+  background:linear-gradient(150deg,rgba(78,178,242,.22),rgba(53,121,221,.13))!important;
+  border-color:rgba(149,221,255,.63)!important;
+  box-shadow:0 12px 28px rgba(0,14,42,.17),inset 0 1px 0 rgba(232,248,255,.12)!important;
+  transform:translateY(-2px)!important;
+}
+#app#app .nav-row .tabs .tab:hover::before,
+#app#app .nav-row .admin-utility-tabs button:hover::before {
+  opacity:1!important;
+  transform:scale(1.1)!important;
+}
+#app#app .nav-row .tabs .tab.active,
+#app#app .nav-row .admin-utility-tabs button.active {
+  background:linear-gradient(145deg,rgba(45,132,230,.47),rgba(25,94,184,.28))!important;
+  border-color:rgba(139,221,255,.92)!important;
+  box-shadow:0 0 0 1px rgba(135,222,255,.1),0 10px 26px rgba(3,44,105,.22),inset 0 1px 0 rgba(236,252,255,.12)!important;
+  transform:translateY(0)!important;
+}
+#app#app .nav-row .tabs .tab.active::before,
+#app#app .nav-row .admin-utility-tabs button.active::before {opacity:1!important}
+#app#app .nav-row button:active {transform:translateY(0) scale(.985)!important}
+/* Transicao de conteudo em qualquer perfil, sem alterar a logica de navegacao. */
+#app #areaContent:not(.hidden),
+#app #agendaContent:not(.hidden),
+#app #socialMediaContent:not(.hidden),
+#app #manageClientsContent:not(.hidden),
+#app #weekCalendarContent:not(.hidden),
+#app #scriptsContent:not(.hidden),
+#app #instagramReportsContent:not(.hidden),
+#app #commemorativeDatesContent:not(.hidden),
+#app #monthlyPanoramaContent:not(.hidden) {
+  animation:owWorkspaceReveal .5s ease-out both;
+}
+@keyframes owWorkspaceReveal {from{opacity:0}to{opacity:1}}
+#app .stat,
+#app .ow-assignee-toolbar,
+#app .agenda-summary {
+  border-color:rgba(142,212,255,.24);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.045);
+  transition:border-color .4s ease,box-shadow .4s ease,background-color .4s ease;
+}
+#app .stat:hover {border-color:rgba(150,220,255,.49);box-shadow:0 5px 18px rgba(0,19,50,.13)}
+#app .ow-mobile-hub:not([hidden]) {
+  background:linear-gradient(145deg,rgba(8,49,93,.91),rgba(3,24,56,.87))!important;
+  border-color:rgba(142,211,255,.28)!important;
+  box-shadow:0 18px 40px rgba(0,12,35,.2)!important;
+}
+#app .ow-mobile-hub .ow-mob-nav-button {
+  transition:background-color .35s ease,border-color .35s ease,box-shadow .35s ease!important;
+}
+@media(max-width:700px),(pointer:coarse) and (max-width:1000px) {
+  body,#loginScreen.login {animation:none!important}
+  #app#app .hero {padding:19px 17px;border-radius:17px}
+  #app#app .nav-row .tabs .tab,
+  #app#app .nav-row .admin-utility-tabs button {transform:none!important}
+  #app#app .nav-row .tabs .tab:hover,
+  #app#app .nav-row .admin-utility-tabs button:hover {transform:none!important}
+}
+@media(prefers-reduced-motion:reduce) {
+  body,#loginScreen.login,#loginScreen .login-card,
+  #app #areaContent,#app #agendaContent,#app #socialMediaContent,
+  #app #manageClientsContent,#app #weekCalendarContent,
+  #app #scriptsContent,#app #instagramReportsContent,
+  #app #commemorativeDatesContent,#app #monthlyPanoramaContent,
+  #app#app .nav-row .area-nav-cluster,#app#app .nav-row .admin-utility-tabs {
+    animation:none!important;
+  }
+  #app#app .nav-row *,#app#app .nav-row *::before,
+  #loginScreen .login-access-btn {transition:none!important;transform:none!important}
+}
