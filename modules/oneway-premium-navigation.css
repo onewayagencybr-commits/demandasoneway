@@ -642,91 +642,59 @@ body,
   body,#loginScreen.login {animation:none!important}
 }
 
-/* One Way login compact + ambient mouse 2026-10-31 */
-/* A calm, restrained interaction: only the background responds to a fine pointer.
-   No parallax on content, and none for touch or reduced-motion settings. */
-@media (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference) {
-  html.ow-mouse-ambient body,
-  html.ow-mouse-ambient #loginScreen.login {
-    animation:none!important;
-    background-size:cover,125% 125%,108% 108%!important;
-    background-position:
-      center,
-      calc(50% + var(--ow-bg-shift-x,0px)) calc(50% + var(--ow-bg-shift-y,0px)),
-      calc(50% + var(--ow-bg-shift-x,0px)) calc(50% + var(--ow-bg-shift-y,0px))!important;
-  }
+/* One Way — compacto APENAS o identificador do usuario na barra superior.
+   A pagina inicial de login volta as dimensoes originais. */
+#app#app .topbar .top-actions .user-chip {
+  display:flex;
+  flex:0 0 auto;
+  align-items:center;
+  gap:7px!important;
+  min-height:34px;
+  padding:3px 9px 3px 4px!important;
+  border-radius:999px;
+  background:rgba(34,52,83,.38)!important;
+  border:1px solid rgba(166,194,236,.16)!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
 }
-/* The login was 940 x 525; make it a compact, balanced desktop access panel.
-   Keep the same four login buttons, administrative form and auth behavior. */
-@media(min-width:721px){
-  #loginScreen .login-card,
-  #loginScreen .login-card.login-choice-active {
-    width:min(740px,calc(100vw - 42px))!important;
-    min-height:355px!important;
-    grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr)!important;
-    border-radius:21px!important;
-  }
-  #loginScreen .login-intro {
-    padding:28px 29px!important;
-    gap:33px!important;
-    justify-content:center!important;
-  }
-  #loginScreen .login-intro .brand{gap:11px!important}
-  #loginScreen .login-intro .brand-logo{width:98px!important}
-  #loginScreen .login-intro .brand-copy strong{font-size:11px!important;line-height:1.35!important}
-  #loginScreen .login-intro .brand-copy span{font-size:8px!important}
-  #loginScreen .login-intro-message{padding-bottom:0!important}
-  #loginScreen .login-eyebrow{font-size:8px!important;letter-spacing:.14em!important}
-  #loginScreen .login-intro h1{
-    font-size:25px!important;
-    line-height:1.16!important;
-    margin:9px 0 7px!important;
-    letter-spacing:-.042em!important;
-  }
-  #loginScreen .login-intro p{
-    font-size:10px!important;
-    line-height:1.6!important;
-    max-width:255px!important;
-  }
-  #loginScreen .login-panel{padding:24px 26px!important}
-  #loginScreen .login-panel-label{
-    font-size:11px!important;
-    margin-bottom:11px!important;
-  }
-  #loginScreen .login-access-grid{gap:8px!important}
-  #loginScreen .login-access-btn,
-  #loginScreen .login-access-btn.admin{
-    min-height:56px!important;
-    padding:10px 11px!important;
-    border-radius:11px!important;
-  }
-  #loginScreen .login-access-btn strong{font-size:11px!important}
-  #loginScreen .login-access-btn span{font-size:8px!important;line-height:1.35!important}
-  #loginScreen .admin-login-box{
-    margin-top:10px!important;
-    padding:14px!important;
-    border-radius:11px!important;
-  }
-  #loginScreen .login-error{margin-top:6px!important}
+#app#app .topbar .top-actions .user-chip .avatar {
+  width:24px!important;
+  height:24px!important;
+  flex:0 0 24px;
+  font-size:10px!important;
+  font-weight:500!important;
+  background:rgba(181,200,238,.16)!important;
 }
-@media(min-width:721px) and (max-height:590px){
-  #loginScreen .login-card,
-  #loginScreen .login-card.login-choice-active {min-height:0!important}
-  #loginScreen .login-intro{padding:21px 27px!important;gap:22px!important}
-  #loginScreen .login-panel{padding:18px 25px!important}
+#app#app .topbar .top-actions .user-chip .user-meta {
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:1px;
+  min-width:0;
+  max-width:124px;
 }
-@media(max-width:720px){
-  #loginScreen .login-card,
-  #loginScreen .login-card.login-choice-active{
-    width:min(430px,100%)!important;
-    border-radius:19px!important;
+#app#app .topbar .top-actions .user-chip .user-meta strong {
+  font-size:10px!important;
+  line-height:1.25!important;
+  font-weight:500!important;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+#app#app .topbar .top-actions .user-chip .user-meta span {
+  font-size:8px!important;
+  line-height:1.25!important;
+  opacity:.8;
+  white-space:nowrap;
+}
+@media(max-width:640px) {
+  #app#app .topbar .top-actions .user-chip {
+    gap:0!important;
+    padding:3px!important;
   }
-  #loginScreen .login-intro {padding:22px 22px 9px!important}
-  #loginScreen .login-panel {padding:16px 22px 22px!important}
-  #loginScreen .login-access-btn,
-  #loginScreen .login-access-btn.admin {min-height:58px!important}
+  #app#app .topbar .top-actions .user-chip .user-meta {display:none!important}
 }
-@media(prefers-reduced-motion:reduce) {
-  html.ow-mouse-ambient body,
-  html.ow-mouse-ambient #loginScreen.login {animation:none!important}
+/* Sem parallax nem animacao do fundo: menos repaint, mantendo o degradê parado. */
+body,#loginScreen.login {
+  animation:none!important;
 }
