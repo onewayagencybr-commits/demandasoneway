@@ -1995,7 +1995,7 @@ function clientReportData(clientId){
   if(!origin)return null;
   const normalized=String(origin.name||'').trim().toLocaleLowerCase('pt-BR');
   const relatedIds=state.clients.filter(c=>String(c.name||'').trim().toLocaleLowerCase('pt-BR')===normalized).map(c=>c.id);
-  const demands=state.demands.filter(d=>d.month===currentMonth&&['arte','video'].includes(d.area)&&relatedIds.includes(d.clientId)).map(d=>({...d,description:''}));
+  const demands=state.demands.filter(d=>d.month===currentMonth&&['arte','video'].includes(d.area)&&relatedIds.includes(d.clientId)&&!/\bcapas?\b/i.test(String(d.title||''))).map(d=>({...d,description:''}));
   const arte=demands.filter(d=>d.area==='arte').sort((a,b)=>String(a.postDate||'9999').localeCompare(String(b.postDate||'9999')));
   const video=demands.filter(d=>d.area==='video').sort((a,b)=>String(a.postDate||'9999').localeCompare(String(b.postDate||'9999')));
   return {client:origin,demands,arte,video,approved:demands.filter(d=>d.status==='green').length};
