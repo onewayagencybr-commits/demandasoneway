@@ -7,6 +7,14 @@
   const esc = (s) => String(s??'').replace(/[&<>"']/g, v=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[v]));
   const normalize = s => String(s||'').trim().replace(/^@/,'').toLowerCase();
   const dateString = d => { const x = new Date(d); return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`; };
+  // O mesmo nome elegante é usado no download novo e no histórico.
+  function igPDFName(clientName,from,to){
+    const formatDate=value=>/^\d{4}-\d{2}-\d{2}$/.test(String(value||''))?String(value).slice(8,10)+'.'+String(value).slice(5,7)+'.'+String(value).slice(0,4):String(value||'');
+    const period=[formatDate(from),formatDate(to)].filter(Boolean).join(' a ');
+    if(window.onewayClientFilename)return window.onewayClientFilename('Relatório de Instagram',clientName||'Cliente',period,'pdf');
+    return ('Relatório de Instagram - '+String(clientName||'Cliente')+' - '+period+'.pdf').replace(/[<>:"/\\|?*]/g,' ');
+  }
+  window.owInstagramPDFName=igPDFName;
   function notify(message, error=false) { const el=$('igStatus'); if(!el)return;el.textContent=message;el.style.color=error?'#ffc1c8':'#cbd9ff'; }
   function dates(){ const to=new Date(), from=new Date(to); from.setDate(from.getDate()-29); return {from:dateString(from),to:dateString(to)}; }
   function storedClients(){ try{return JSON.parse(localStorage.getItem('oneway-ig-profiles-v1')||'{}')}catch{return{}} }
@@ -201,7 +209,7 @@
       const blob=await buildPDFBlob(report);
       const url=URL.createObjectURL(blob),link=document.createElement('a');
       link.href=url;
-      link.download='One_Way_Instagram_'+report.username.replace(/[^a-z0-9_]/gi,'_')+'_'+report.from+'_a_'+report.to+'.pdf';
+      link.download=igPDFName(report.clientName||$('igClient')?.value||report.username,report.from,report.to);
       document.body.appendChild(link);link.click();link.remove();
       setTimeout(()=>URL.revokeObjectURL(url),90000);
       notify('PDF baixado. A biblioteca guarda somente os dados da análise, por 30 dias.');

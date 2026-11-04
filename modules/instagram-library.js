@@ -74,9 +74,9 @@
     const objectURL=URL.createObjectURL(pdf);
     if(action==='view'){
      if(popup){popup.location.replace(objectURL);}
-     else{const a=document.createElement('a');a.href=objectURL;a.download=row.name.replace(/\.json$/i,'.pdf');document.body.appendChild(a);a.click();a.remove();}
+     else{const a=document.createElement('a');a.href=objectURL;a.download=window.owInstagramPDFName?.(row.clientName||row.username,row.from,row.to)||row.name.replace(/\.json$/i,'.pdf');document.body.appendChild(a);a.click();a.remove();}
     }else{
-     const a=document.createElement('a');a.href=objectURL;a.download='One_Way_Instagram_'+row.username+'_'+row.from+'_a_'+row.to+'.pdf';
+     const a=document.createElement('a');a.href=objectURL;a.download=window.owInstagramPDFName?.(row.clientName||row.username,row.from,row.to)||row.name.replace(/\.json$/i,'.pdf');
      document.body.appendChild(a);a.click();a.remove();
     }
     setTimeout(()=>URL.revokeObjectURL(objectURL),300000);

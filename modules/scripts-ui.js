@@ -183,7 +183,11 @@ function bindClientPicker(){
 }
 function validate(d){if(d?.client?.length>180||d?.title?.length>180||d?.videos?.some(v=>v.title?.length>180))throw Error('Títulos e cliente devem ter até 180 caracteres.');if(!d||typeof d.client!=='string'||typeof d.title!=='string'||!Array.isArray(d.videos)||!d.videos.length)throw Error('Formato de roteiro inválido.');const string=x=>typeof x==='string'?x:'';return {id:uid(),client:d.client,title:d.title,pdfFontScale:fontScale(d.pdfFontScale),videos:d.videos.map(v=>{if(!v||!['scenes','full'].includes(v.mode)||!Array.isArray(v.scenes))throw Error('Vídeo inválido.');return {title:string(v.title),references:string(v.references),duration:String(v.duration??''),mode:v.mode,text:string(v.text),scenes:(v.scenes.length?v.scenes:[scene()]).map(s=>({text:string(s.text),visual:string(s.visual),seconds:String(s.seconds??'')}))};})};}
 function download(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);}
-const filename=()=>`One Way - Roteiros - ${doc.client||'Cliente'} - ${doc.videos[0]?.title||doc.title||'Roteiros'}`.replace(/[<>:"/\\|?*\u0000-\u001f]/g,'-').slice(0,180);
+ const filename=()=>{
+   const base=window.onewayClientFilename?window.onewayClientFilename('Roteiro de Gravação',doc.client||'Cliente','',''):'Roteiro de Gravação - '+(doc.client||'Cliente');
+   const title=String(doc.videos[0]?.title||doc.title||'').trim().replace(/[<>:"/\\|?*\u0000-\u001f]/g,' ').replace(/\s+/g,' ');
+   return (base+(title?' - '+title:'')).slice(0,180).trim();
+ };
 async function action(act,b){if(!allowed())return;
  if(act==='reset-font'){setFontScale(100);return;}
 if(act==='save'||act==='save-video'){
