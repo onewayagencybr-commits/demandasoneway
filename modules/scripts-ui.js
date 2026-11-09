@@ -2,7 +2,7 @@
 (()=>{
 'use strict';
 const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const uid=()=>crypto.randomUUID(),scene=()=>({text:'',visual:'',seconds:''}),video=()=>({title:'',references:'',duration:'',mode:'scenes',text:'',scenes:[scene()]}),blank=()=>({id:uid(),client:'',title:'',pdfFontScale:100,videos:[video()]});
+const uid=()=>crypto.randomUUID(),scene=()=>({text:'',visual:'',seconds:''}),video=()=>({id:uid(),title:'',references:'',duration:'',mode:'scenes',text:'',scenes:[scene()]}),blank=()=>({id:uid(),client:'',title:'',pdfFontScale:100,videos:[video()]});
 let doc=blank(),dirty=false,busy=false;
 const fontScale=value=>{const n=Number(value);return value==null||value===''||!Number.isFinite(n)?100:Math.min(115,Math.max(70,Math.round(n/5)*5));};
 let liveTimer=null,liveRevision=0,cachedPages=[],cachedKey='';
@@ -82,8 +82,21 @@ function seconds(v){if(v.duration!=='')return Math.max(0,Number(v.duration)||0);
 function duration(v){const n=seconds(v);return n?`${Math.floor(n/60)?Math.floor(n/60)+'min ':''}${n%60}s`:'A definir';}
 function field(label,name,value,type='text',extra=''){return `<label>${label}<input data-field="${name}" type="${type}" ${type==='text'?'maxlength="180"':''} value="${esc(value)}" ${extra}></label>`;}
 function buttons(kind,i,last){return `<button data-act="${kind}-up" ${i===0?'disabled':''} aria-label="Mover ${kind==='v'?'vídeo':'cena'} para cima">↑</button><button data-act="${kind}-down" ${last?'disabled':''} aria-label="Mover ${kind==='v'?'vídeo':'cena'} para baixo">↓</button><button data-act="${kind}-copy">Duplicar</button><button class="rs-danger" data-act="${kind}-delete">Excluir</button>`;}
+function scriptDemandLookup(videoId){
+ if(!videoId||typeof state==='undefined')return null;
+ const active=(state.demands||[]).find(d=>d.sourceScriptId===doc.id&&d.sourceScriptVideoId===videoId);
+ if(active)return {demand:active,deleted:false};
+ const removed=(state.deletedDemands||[]).find(d=>d.sourceScriptId===doc.id&&d.sourceScriptVideoId===videoId);
+ return removed?{demand:removed,deleted:true}:null;
+}
+function scriptDemandButton(v){
+ const linked=scriptDemandLookup(v.id);
+ if(linked?.deleted)return '<button type="button" class="rs-script-demand-disabled" disabled title="Restaure a demanda em Excluídos antes de criar outra">Demanda em Excluídos</button>';
+ if(linked)return '<button type="button" class="rs-script-demand-created" data-act="open-demand" title="Abrir demanda de vídeo vinculada">✓ Abrir demanda</button>';
+ return '<button type="button" class="rs-script-demand-create" data-act="create-demand">+ Criar demanda de vídeo</button>';
+}
 function render(){if(!allowed())return;const root=$('scriptsContent');if(!root)return;
-root.innerHTML=`<div class="rs-panel"><div class="rs-bar rs-head"><div><span class="rs-pill">PRODUÇÃO AUDIOVISUAL</span><h2>Roteiros para gravar.</h2></div><div class="rs-bar"><button data-act="new">Novo roteiro</button><button data-act="save">Salvar roteiro</button><button data-act="preview">Visualizar PDF</button><button class="rs-primary" data-act="pdf">Baixar PDF</button></div></div><div class="rs-meta rs-client-line"><div class="rs-client-picker">${field('Cliente','client',doc.client,'text','id="rsClientInput" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="rsClientOptions" placeholder="Busque ou digite o cliente"')}<div id="rsClientOptions" class="rs-client-options" role="listbox" aria-label="Clientes" hidden></div></div></div><p class="rs-muted">Escreva ou cole seu roteiro. Use texto completo ou organize cena por cena. A duração automática considera aproximadamente 138 palavras por minuto; você pode definir o tempo manualmente.</p><div class="rs-drafts"><label>Roteiros salvos na nuvem<select id="rsDrafts"><option value="">Carregando roteiros…</option></select></label><p class="rs-muted" id="rsCloudCount">Roteiros compartilhados entre os administradores.</p><div class="rs-bar" style="margin-top:10px"><button data-act="load">Abrir roteiro</button><button data-act="delete-draft">Excluir roteiro</button><button data-act="refresh-cloud">Atualizar lista</button><button id="rsMigrate" data-act="migrate" hidden>Migrar roteiros antigos deste navegador</button></div><p id="rsStatus" role="status" aria-live="polite">${dirty?'Alterações ainda não salvas.':'Pronto para criar o PDF. Salve na nuvem para continuar em outro computador.'}</p></div></div><section class="rs-print-panel" aria-label="Ajustes e visualização do PDF"><div class="rs-print-header"><div><span class="rs-pill">PRÉVIA DE IMPRESSÃO</span><h3>Tamanho do texto no PDF</h3><p>Reduza para aproveitar melhor a página A4. Veja o resultado e a quantidade de páginas antes de baixar.</p></div><div class="rs-print-count" id="rsPageCount" aria-live="polite">Preparando prévia…</div></div><div class="rs-print-settings"><label class="rs-font-slider-label" for="rsFontScale">Texto do roteiro <output id="rsFontScaleValue" for="rsFontScale">100%</output><input id="rsFontScale" data-preview-scale="1" type="range" min="70" max="115" step="5" value="100" aria-label="Tamanho do texto no PDF"><span class="rs-scale-ends"><span>Menor · 70%</span><span>Original · 100%</span><span>Maior · 115%</span></span></label><button type="button" data-act="reset-font">Restaurar 100%</button></div><div class="rs-live-preview" id="rsLivePreviewPages" aria-label="Prévia das páginas do PDF"><span class="rs-live-placeholder">Preencha o roteiro para visualizar as páginas aqui.</span></div></section><div class="rs-video-library"><div><span class="rs-pill">ROTEIRO DE GRAVAÇÃO</span><h3>Vídeos deste roteiro <span class="rs-video-count">(${doc.videos.length})</span></h3><p>Adicione os vídeos e salve tudo no mesmo roteiro do cliente. Não é necessário criar um documento por vídeo.</p></div><button class="rs-primary" data-act="add-video">+ Adicionar vídeo</button></div><div id="rsVideos">${doc.videos.map((v,i)=>`<article class="rs-video" data-video="${i}"><div class="rs-bar rs-head"><h3>Vídeo ${String(i+1).padStart(2,'0')}</h3><div class="rs-bar rs-video-controls"><button data-act="save-video" aria-label="Salvar vídeo ${i+1} neste roteiro">Salvar vídeo ${String(i+1).padStart(2,'0')}</button>${buttons('v',i,i===doc.videos.length-1)}</div></div><div class="rs-meta">${field('Título do vídeo','title',v.title)}${field('Duração prevista (segundos) · opcional','duration',v.duration,'number','min="0" step="1" placeholder="Estimar pelo roteiro"')}</div><label class="rs-references">Links de referência · opcional<textarea data-field="references" rows="2" placeholder="https://www.instagram.com/reel/…">${esc(v.references||'')}</textarea><span class="rs-muted">Um link por linha (até 3). O link e o QR Code com a logo One Way aparecem à direita do título no PDF.</span></label><div class="rs-meta"><label>Formato do roteiro<select data-field="mode"><option value="scenes" ${v.mode==='scenes'?'selected':''}>Cena por cena</option><option value="full" ${v.mode==='full'?'selected':''}>Texto completo</option></select></label><div class="rs-muted" style="align-self:end" data-duration="${i}">Duração estimada: ${duration(v)}</div></div>${v.mode==='full'?`<label>Roteiro completo<textarea data-field="text" rows="10" placeholder="Cole ou escreva aqui o texto completo do vídeo…">${esc(v.text)}</textarea></label>`:v.scenes.map((s,j)=>`<section class="rs-scene" data-scene="${j}"><div class="rs-bar rs-head"><strong>Cena ${j+1}</strong><div class="rs-bar">${buttons('s',j,j===v.scenes.length-1)}</div></div><div class="rs-meta"><label>Texto / fala<textarea data-field="text" placeholder="O que será falado nesta cena…">${esc(s.text)}</textarea></label><label>Imagem / ação / orientação de gravação<textarea data-field="visual" placeholder="Enquadramento, ação, imagens de apoio…">${esc(s.visual)}</textarea></label></div>${field('Duração da cena (segundos) · opcional','seconds',s.seconds,'number','min="0" step="1"')}</section>`).join('')+'<button style="margin-top:18px" data-act="add-scene">+ Adicionar cena</button>'}</article>`).join('')}</div><div class="rs-videos-footer"><button class="rs-primary" data-act="add-video">+ Adicionar próximo vídeo</button><button data-act="save">Salvar roteiro completo</button></div>`;
+root.innerHTML=`<div class="rs-panel"><div class="rs-bar rs-head"><div><span class="rs-pill">PRODUÇÃO AUDIOVISUAL</span><h2>Roteiros para gravar.</h2></div><div class="rs-bar"><button data-act="new">Novo roteiro</button><button data-act="save">Salvar roteiro</button><button data-act="preview">Visualizar PDF</button><button class="rs-primary" data-act="pdf">Baixar PDF</button></div></div><div class="rs-meta rs-client-line"><div class="rs-client-picker">${field('Cliente','client',doc.client,'text','id="rsClientInput" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="rsClientOptions" placeholder="Busque ou digite o cliente"')}<div id="rsClientOptions" class="rs-client-options" role="listbox" aria-label="Clientes" hidden></div></div></div><p class="rs-muted">Escreva ou cole seu roteiro. Use texto completo ou organize cena por cena. A duração automática considera aproximadamente 138 palavras por minuto; você pode definir o tempo manualmente.</p><div class="rs-drafts"><label>Roteiros salvos na nuvem<select id="rsDrafts"><option value="">Carregando roteiros…</option></select></label><p class="rs-muted" id="rsCloudCount">Roteiros compartilhados entre os administradores.</p><div class="rs-bar" style="margin-top:10px"><button data-act="load">Abrir roteiro</button><button data-act="delete-draft">Excluir roteiro</button><button data-act="refresh-cloud">Atualizar lista</button><button id="rsMigrate" data-act="migrate" hidden>Migrar roteiros antigos deste navegador</button></div><p id="rsStatus" role="status" aria-live="polite">${dirty?'Alterações ainda não salvas.':'Pronto para criar o PDF. Salve na nuvem para continuar em outro computador.'}</p></div></div><section class="rs-print-panel" aria-label="Ajustes e visualização do PDF"><div class="rs-print-header"><div><span class="rs-pill">PRÉVIA DE IMPRESSÃO</span><h3>Tamanho do texto no PDF</h3><p>Reduza para aproveitar melhor a página A4. Veja o resultado e a quantidade de páginas antes de baixar.</p></div><div class="rs-print-count" id="rsPageCount" aria-live="polite">Preparando prévia…</div></div><div class="rs-print-settings"><label class="rs-font-slider-label" for="rsFontScale">Texto do roteiro <output id="rsFontScaleValue" for="rsFontScale">100%</output><input id="rsFontScale" data-preview-scale="1" type="range" min="70" max="115" step="5" value="100" aria-label="Tamanho do texto no PDF"><span class="rs-scale-ends"><span>Menor · 70%</span><span>Original · 100%</span><span>Maior · 115%</span></span></label><button type="button" data-act="reset-font">Restaurar 100%</button></div><div class="rs-live-preview" id="rsLivePreviewPages" aria-label="Prévia das páginas do PDF"><span class="rs-live-placeholder">Preencha o roteiro para visualizar as páginas aqui.</span></div></section><div class="rs-video-library"><div><span class="rs-pill">ROTEIRO DE GRAVAÇÃO</span><h3>Vídeos deste roteiro <span class="rs-video-count">(${doc.videos.length})</span></h3><p>Adicione os vídeos e salve tudo no mesmo roteiro do cliente. Não é necessário criar um documento por vídeo.</p></div><button class="rs-primary" data-act="add-video">+ Adicionar vídeo</button></div><div id="rsVideos">${doc.videos.map((v,i)=>`<article class="rs-video" data-video="${i}"><div class="rs-bar rs-head"><h3>Vídeo ${String(i+1).padStart(2,'0')}</h3><div class="rs-bar rs-video-controls"><button data-act="save-video" aria-label="Salvar vídeo ${i+1} neste roteiro">Salvar vídeo ${String(i+1).padStart(2,'0')}</button>${scriptDemandButton(v)}${buttons('v',i,i===doc.videos.length-1)}</div></div><div class="rs-meta">${field('Título do vídeo','title',v.title)}${field('Duração prevista (segundos) · opcional','duration',v.duration,'number','min="0" step="1" placeholder="Estimar pelo roteiro"')}</div><label class="rs-references">Links de referência · opcional<textarea data-field="references" rows="2" placeholder="https://www.instagram.com/reel/…">${esc(v.references||'')}</textarea><span class="rs-muted">Um link por linha (até 3). O link e o QR Code com a logo One Way aparecem à direita do título no PDF.</span></label><div class="rs-meta"><label>Formato do roteiro<select data-field="mode"><option value="scenes" ${v.mode==='scenes'?'selected':''}>Cena por cena</option><option value="full" ${v.mode==='full'?'selected':''}>Texto completo</option></select></label><div class="rs-muted" style="align-self:end" data-duration="${i}">Duração estimada: ${duration(v)}</div></div>${v.mode==='full'?`<label>Roteiro completo<textarea data-field="text" rows="10" placeholder="Cole ou escreva aqui o texto completo do vídeo…">${esc(v.text)}</textarea></label>`:v.scenes.map((s,j)=>`<section class="rs-scene" data-scene="${j}"><div class="rs-bar rs-head"><strong>Cena ${j+1}</strong><div class="rs-bar">${buttons('s',j,j===v.scenes.length-1)}</div></div><div class="rs-meta"><label>Texto / fala<textarea data-field="text" placeholder="O que será falado nesta cena…">${esc(s.text)}</textarea></label><label>Imagem / ação / orientação de gravação<textarea data-field="visual" placeholder="Enquadramento, ação, imagens de apoio…">${esc(s.visual)}</textarea></label></div>${field('Duração da cena (segundos) · opcional','seconds',s.seconds,'number','min="0" step="1"')}</section>`).join('')+'<button style="margin-top:18px" data-act="add-scene">+ Adicionar cena</button>'}</article>`).join('')}</div><div class="rs-videos-footer"><button class="rs-primary" data-act="add-video">+ Adicionar próximo vídeo</button><button data-act="save">Salvar roteiro completo</button></div>`;
 checkCloudOwner();updateCloudList();if(!cloudLoaded&&!cloudLoading)void refreshCloud().catch(e=>status('Nuvem indisponível: '+e.message));
 root.oninput=e=>{if(e.target.dataset.previewScale){setFontScale(e.target.value);return;}const f=e.target.dataset.field;if(!f)return;const vi=e.target.closest('[data-video]'),si=e.target.closest('[data-scene]');let target=vi?doc.videos[Number(vi.dataset.video)]:doc;if(si)target=target.scenes[Number(si.dataset.scene)];target[f]=e.target.value;dirty=true;status('Alterações ainda não salvas.');if(vi){root.querySelector(`[data-duration="${vi.dataset.video}"]`).textContent='Duração estimada: '+duration(doc.videos[Number(vi.dataset.video)]);}if(f==='mode')render();else scheduleLivePreview(650);};
 root.onclick=async e=>{const b=e.target.closest('[data-act]');if(!b||busy)return;try{await action(b.dataset.act,b);}catch(error){status(error.message||'Não foi possível concluir.');}};
@@ -181,7 +194,7 @@ function bindClientPicker(){
  picker.addEventListener('focusout',e=>{if(!picker.contains(e.relatedTarget))close();});
  input.addEventListener('keydown',e=>{if(e.key==='Escape'||e.key==='Tab'){close();return;}if(e.key==='Enter'&&!list.hidden&&active>=0){e.preventDefault();select(active);return;}if(e.key!=='ArrowDown'&&e.key!=='ArrowUp')return;e.preventDefault();if(list.hidden)show();if(!matches.length)return;active=(active+(e.key==='ArrowDown'?1:active<0?0:-1)+matches.length)%matches.length;for(const b of list.querySelectorAll('[role=option]'))b.setAttribute('aria-selected',String(Number(b.dataset.clientIndex)===active));const item=$('rsClientOption'+active);input.setAttribute('aria-activedescendant',item.id);item.scrollIntoView({block:'nearest'});});
 }
-function validate(d){if(d?.client?.length>180||d?.title?.length>180||d?.videos?.some(v=>v.title?.length>180))throw Error('Títulos e cliente devem ter até 180 caracteres.');if(!d||typeof d.client!=='string'||typeof d.title!=='string'||!Array.isArray(d.videos)||!d.videos.length)throw Error('Formato de roteiro inválido.');const string=x=>typeof x==='string'?x:'';return {id:uid(),client:d.client,title:d.title,pdfFontScale:fontScale(d.pdfFontScale),videos:d.videos.map(v=>{if(!v||!['scenes','full'].includes(v.mode)||!Array.isArray(v.scenes))throw Error('Vídeo inválido.');return {title:string(v.title),references:string(v.references),duration:String(v.duration??''),mode:v.mode,text:string(v.text),scenes:(v.scenes.length?v.scenes:[scene()]).map(s=>({text:string(s.text),visual:string(s.visual),seconds:String(s.seconds??'')}))};})};}
+function validate(d){if(d?.client?.length>180||d?.title?.length>180||d?.videos?.some(v=>v.title?.length>180))throw Error('Títulos e cliente devem ter até 180 caracteres.');if(!d||typeof d.client!=='string'||typeof d.title!=='string'||!Array.isArray(d.videos)||!d.videos.length)throw Error('Formato de roteiro inválido.');const string=x=>typeof x==='string'?x:'';return {id:uid(),client:d.client,title:d.title,pdfFontScale:fontScale(d.pdfFontScale),videos:d.videos.map(v=>{if(!v||!['scenes','full'].includes(v.mode)||!Array.isArray(v.scenes))throw Error('Vídeo inválido.');return {id:typeof v.id==='string'&&/^[a-f0-9-]{36}$/i.test(v.id)?v.id:uid(),title:string(v.title),references:string(v.references),duration:String(v.duration??''),mode:v.mode,text:string(v.text),scenes:(v.scenes.length?v.scenes:[scene()]).map(s=>({text:string(s.text),visual:string(s.visual),seconds:String(s.seconds??'')}))};})};}
 function download(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);}
  const filename=()=>{
    const base=window.onewayClientFilename?window.onewayClientFilename('Roteiro de Gravação',doc.client||'Cliente','',''):'Roteiro de Gravação - '+(doc.client||'Cliente');
@@ -227,9 +240,136 @@ if(act==='pdf'||act==='preview'){
  }finally{busy=false;b.disabled=false;}
  return;
 }
+if(act==='create-demand'){openScriptDemandModal(Number(b.closest('[data-video]')?.dataset.video));return;}
+if(act==='open-demand'){openScriptDemandRecord(Number(b.closest('[data-video]')?.dataset.video));return;}
 const vi=Number(b.closest('[data-video]')?.dataset.video),si=Number(b.closest('[data-scene]')?.dataset.scene);
-if(act==='add-video'){doc.videos.push(video());dirty=true;render();if(doc.client.trim()){try{await saveDocument();updateCloudList();status(`Novo vídeo salvo na nuvem no roteiro de ${doc.client}. Preencha o conteúdo e clique Salvar roteiro.`);}catch(error){status('Novo vídeo adicionado, mas ainda NÃO salvo na nuvem: '+error.message+'. Tente Salvar roteiro.');}}else status('Novo vídeo adicionado. Escolha o cliente e clique Salvar roteiro para guardar na nuvem.');const added=$('scriptsContent')?.querySelector(`[data-video="${doc.videos.length-1}"]`);if(added&&typeof added.scrollIntoView==='function')added.scrollIntoView({behavior:'smooth',block:'start'});return;}else if(act==='add-scene')doc.videos[vi].scenes.push(scene());else {const [kind,op]=act.split('-'),list=kind==='v'?doc.videos:doc.videos[vi].scenes,i=kind==='v'?vi:si;if(op==='delete'){if(!confirm(`Excluir ${kind==='v'?'este vídeo e todas as cenas':'esta cena'}?`))return;list.splice(i,1);if(!list.length)list.push(kind==='v'?video():scene());}else if(op==='copy')list.splice(i+1,0,structuredClone(list[i]));else {const to=i+(op==='up'?-1:1);if(to<0||to>=list.length)return;[list[i],list[to]]=[list[to],list[i]];}}
+if(act==='add-video'){doc.videos.push(video());dirty=true;render();if(doc.client.trim()){try{await saveDocument();updateCloudList();status(`Novo vídeo salvo na nuvem no roteiro de ${doc.client}. Preencha o conteúdo e clique Salvar roteiro.`);}catch(error){status('Novo vídeo adicionado, mas ainda NÃO salvo na nuvem: '+error.message+'. Tente Salvar roteiro.');}}else status('Novo vídeo adicionado. Escolha o cliente e clique Salvar roteiro para guardar na nuvem.');const added=$('scriptsContent')?.querySelector(`[data-video="${doc.videos.length-1}"]`);if(added&&typeof added.scrollIntoView==='function')added.scrollIntoView({behavior:'smooth',block:'start'});return;}else if(act==='add-scene')doc.videos[vi].scenes.push(scene());else {const [kind,op]=act.split('-'),list=kind==='v'?doc.videos:doc.videos[vi].scenes,i=kind==='v'?vi:si;if(op==='delete'){if(!confirm(`Excluir ${kind==='v'?'este vídeo e todas as cenas':'esta cena'}?`))return;list.splice(i,1);if(!list.length)list.push(kind==='v'?video():scene());}else if(op==='copy'){const copy=structuredClone(list[i]);if(kind==='v')copy.id=uid();list.splice(i+1,0,copy);}else {const to=i+(op==='up'?-1:1);if(to<0||to>=list.length)return;[list[i],list[to]]=[list[to],list[i]];}}
 dirty=true;render();}
+
+
+/* Roteiro → demanda: preserva o vídeo original e cria uma demanda independente. */
+function scriptDemandDescription(v,postTime){
+ const parts=['HORÁRIO PREVISTO DE POSTAGEM: '+postTime,'','ROTEIRO DE GRAVAÇÃO','Duração prevista: '+duration(v),''];
+ if(v.mode==='full'){
+  parts.push('ROTEIRO COMPLETO',String(v.text||'').trim());
+ }else{
+  for(const [index,sc] of (v.scenes||[]).entries()){
+   parts.push('CENA '+String(index+1).padStart(2,'0'));
+   if(String(sc.text||'').trim())parts.push('Texto / fala: '+sc.text.trim());
+   if(String(sc.visual||'').trim())parts.push('Imagem / ação: '+sc.visual.trim());
+   if(sc.seconds!==''&&sc.seconds!=null)parts.push('Duração da cena: '+sc.seconds+'s');
+   parts.push('');
+  }
+ }
+ const refs=String(v.references||'').trim();
+ if(refs)parts.push('REFERÊNCIAS',refs);
+ return parts.join('\n').trim();
+}
+function scriptDemandPayload(source,index,form){
+ const v=source?.videos?.[index],client=String(source?.client||'').trim();
+ if(!v||!client)throw Error('Informe o cliente e escolha um vídeo do roteiro.');
+ const title=String(v.title||'').trim();
+ if(!title)throw Error('Informe o título do vídeo antes de criar a demanda.');
+ if(v.mode==='full'?!String(v.text||'').trim():!(v.scenes||[]).some(sc=>String(sc.text||'').trim()||String(sc.visual||'').trim()))throw Error('Preencha o conteúdo do roteiro antes de criar a demanda.');
+ const postDate=String(form.postDate||'').trim(),postTime=String(form.postTime||'').trim(),assignee=String(form.assignee||'').trim();
+ const [year,month,day]=postDate.split('-').map(Number);
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(postDate)||!Number.isFinite(year)||new Date(Date.UTC(year,month-1,day)).toISOString().slice(0,10)!==postDate)throw Error('Escolha uma data válida para a postagem.');
+ if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(postTime))throw Error('Escolha o horário previsto para a postagem.');
+ if(typeof DEMAND_ASSIGNEES==='undefined'||!DEMAND_ASSIGNEES.includes(assignee))throw Error('Selecione um responsável pela demanda.');
+ const links=referenceURLs(v.references);
+ return {
+  clientName:client,title,postDate,postTime,assignee,
+  description:scriptDemandDescription(v,postTime),links,
+  sourceScriptId:source.id,sourceScriptVideoId:v.id,sourceScriptVideoTitle:title,
+  scriptSnapshot:structuredClone(v)
+ };
+}
+async function createScriptDemand(index,fields){
+ if(!allowed()||typeof state==='undefined'||typeof saveState!=='function')throw Error('Acesso restrito aos administradores.');
+ if(!cloudReady()||!supabaseClient)throw Error('É necessário estar conectado à nuvem para criar a demanda.');
+ const payload=scriptDemandPayload(doc,index,fields);
+ if(scriptDemandLookup(payload.sourceScriptVideoId))throw Error('Este vídeo já possui uma demanda vinculada. Confira também Excluídos.');
+ // Salva inclusive os IDs dos vídeos importados de roteiros antigos.
+ await saveDocument();
+ if(scriptDemandLookup(payload.sourceScriptVideoId))throw Error('Este vídeo já possui uma demanda vinculada.');
+ const month=payload.postDate.slice(0,7),createdAt=new Date().toISOString();
+ const norm=cmSelectionKey(payload.clientName);
+ const existing=(state.clients||[]).find(c=>!c.mergedInto&&!c.deletedAt&&c.area==='video'&&cmSelectionKey(c.name)===norm);
+ const source=(state.clients||[]).find(c=>!c.mergedInto&&!c.deletedAt&&cmSelectionKey(c.name)===norm);
+ let client=existing,createdClientId=null,record=null,removed=[];
+ if(!client){
+  client={id:uid(),name:source?.name||payload.clientName,area:'video',type:source?.type||'fixed',startMonth:month,createdAt};
+  state.clients.push(client);createdClientId=client.id;
+ }
+ try{
+  removed=(state.removedClientMonths||[]).filter(r=>r.clientId===client.id&&r.area==='video'&&r.month===month);
+  state.removedClientMonths=(state.removedClientMonths||[]).filter(r=>!removed.includes(r));
+  record={
+   id:uid(),clientId:client.id,month,area:'video',title:payload.title,
+   postDate:payload.postDate,postTime:payload.postTime,description:payload.description,
+   assignee:payload.assignee,status:'red',links:payload.links,attachments:[],
+   productionLinks:[],productionAttachments:[],
+   sourceScriptId:payload.sourceScriptId,sourceScriptVideoId:payload.sourceScriptVideoId,
+   sourceScriptVideoTitle:payload.sourceScriptVideoTitle,scriptSnapshot:payload.scriptSnapshot,
+   createdAt,createdDate:demandCreationCalendarDate()
+  };
+  if(typeof appendDemandActivity==='function')appendDemandActivity(record,'created','Demanda criada a partir de roteiro');
+  state.demands.push(record);
+  if(!await saveState({strictRemote:true}))throw Error('Não foi possível sincronizar a demanda na nuvem. Tente novamente.');
+  return record;
+ }catch(error){
+  if(record)state.demands=state.demands.filter(d=>d.id!==record.id);
+  if(createdClientId&&!state.demands.some(d=>d.clientId===createdClientId))state.clients=state.clients.filter(c=>c.id!==createdClientId);
+  state.removedClientMonths.push(...removed.filter(r=>!state.removedClientMonths.some(x=>x.id===r.id)));
+  if(typeof writeLocalCache==='function')writeLocalCache(state);
+  throw error;
+ }
+}
+function openScriptDemandRecord(index){
+ const linked=scriptDemandLookup(doc.videos[index]?.id);
+ if(!linked||linked.deleted)throw Error('Demanda não encontrada. Confira a lista de Excluídos.');
+ const d=linked.demand;
+ currentArea='video';currentMonth=d.month;
+ adminAssigneeFilter='all';
+ const search=document.getElementById('searchInput');if(search)search.value='';
+ clientDemandFilters=['video'];clientDemandFilterKey=null;
+ openClientId=d.clientId;openDemandId=d.id;
+ renderAll();
+}
+function openScriptDemandModal(index){
+ if(!allowed())return;
+ const v=doc.videos[index];if(!v)throw Error('Vídeo não encontrado.');
+ if(scriptDemandLookup(v.id))throw Error('Este vídeo já possui uma demanda vinculada.');
+ if(!doc.client.trim()||!v.title.trim())throw Error('Informe o cliente e o título do vídeo antes de criar a demanda.');
+ if(v.mode==='full'?!v.text.trim():!v.scenes.some(s=>s.text.trim()||s.visual.trim()))throw Error('Preencha o roteiro do vídeo antes de criar a demanda.');
+ document.getElementById('rsDemandModal')?.remove();
+ const overlay=document.createElement('div');
+ overlay.id='rsDemandModal';overlay.className='rs-demand-overlay';overlay.setAttribute('role','dialog');
+ overlay.setAttribute('aria-modal','true');overlay.setAttribute('aria-label','Criar demanda de vídeo a partir do roteiro');
+ overlay.innerHTML=`<div class="rs-demand-dialog"><div class="rs-demand-heading"><div><span class="rs-pill">ROTEIRO → DEMANDA</span><h2>Criar demanda de vídeo</h2><p>O roteiro completo, as cenas e os links de referência acompanham a demanda.</p></div><button class="rs-demand-close" type="button" aria-label="Fechar">×</button></div><div class="rs-demand-origin"><small>CLIENTE</small><strong>${esc(doc.client)}</strong><small>VÍDEO</small><strong>${esc(v.title)}</strong></div><form id="rsDemandForm"><div class="rs-demand-fields"><label>Data prevista da postagem<input name="postDate" type="date" required></label><label>Horário da postagem<input name="postTime" type="time" required></label><label>Responsável<select name="assignee" required><option value="">Selecione o colaborador</option>${DEMAND_ASSIGNEES.map(name=>'<option value="'+esc(name)+'">'+esc(name)+'</option>').join('')}</select></label></div><p class="rs-demand-hint">O vídeo será criado como demanda independente na aba Vídeos, com o status Não feito. O roteiro original continuará salvo.</p><p class="rs-demand-error" role="alert" hidden></p><div class="rs-demand-actions"><button type="button" data-cancel>Cancelar</button><button type="submit" class="rs-primary">Criar demanda</button></div></form></div>`;
+ document.body.appendChild(overlay);
+ const form=overlay.querySelector('form'),submit=form.querySelector('[type="submit"]'),errorLabel=overlay.querySelector('.rs-demand-error');
+ form.elements.postDate.value=typeof demandCreationCalendarDate==='function'?demandCreationCalendarDate():new Date().toISOString().slice(0,10);
+ const close=()=>{overlay.remove();document.removeEventListener('keydown',onKey);};
+ const onKey=e=>{if(e.key==='Escape'&&!busy)close();};
+ overlay.querySelector('.rs-demand-close').onclick=()=>{if(!busy)close();};
+ overlay.querySelector('[data-cancel]').onclick=()=>{if(!busy)close();};
+ overlay.addEventListener('click',e=>{if(e.target===overlay&&!busy)close();});
+ document.addEventListener('keydown',onKey);
+ form.addEventListener('submit',async e=>{
+  e.preventDefault();if(busy)return;
+  busy=true;submit.disabled=true;submit.textContent='Criando demanda…';errorLabel.hidden=true;
+  try{
+   const d=await createScriptDemand(index,{postDate:form.elements.postDate.value,postTime:form.elements.postTime.value,assignee:form.elements.assignee.value});
+   close();render();status('Demanda de vídeo criada para '+d.assignee+' em '+d.postDate+' às '+d.postTime+'. Abra pelo botão do roteiro.');
+   if(typeof toast==='function')toast('Demanda criada e sincronizada. O roteiro completo foi incluído.',null,null,'success');
+  }catch(error){
+   errorLabel.textContent=error.message||'Não foi possível criar a demanda.';errorLabel.hidden=false;
+   submit.disabled=false;submit.textContent='Criar demanda';
+  }finally{busy=false;}
+ });
+ form.elements.postDate.focus();
+}
 
 /* Implementação isolada: o antigo editor chamava funcoes privadas de outro <script>
    (feedTextBrand e feedPDFBlob), provocando ReferenceError em visualizar/baixar. */
@@ -474,5 +614,5 @@ async function pagesFor(data){
   footer();return pages;
 }
 window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue='';}});
-window.owScripts={render,pagesFor,wrap,validate,seconds,refreshCloud,fontScale,pdfIssue,referenceURLs,referenceQR,scriptPDFBlob};
+window.owScripts={render,pagesFor,wrap,validate,seconds,refreshCloud,fontScale,pdfIssue,referenceURLs,referenceQR,scriptPDFBlob,scriptDemandDescription,scriptDemandPayload,createScriptDemand,scriptDemandLookup};
 })();
