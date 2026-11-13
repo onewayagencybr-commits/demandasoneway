@@ -14,7 +14,6 @@ const fixtures=[
  {area:'arte',assignee:'Gabriel',id:'a-gabriel'},
  {area:'arte',assignee:'Lucas',id:'a-lucas'},
  {area:'arte',id:'a-old-unassigned'},
- {area:'video',assignee:'Pedro',id:'v-pedro'},
  {area:'video',assignee:'Tiago',id:'v-tiago'},
  {area:'video',assignee:'Fernando',id:'v-fernando'},
  {area:'video',id:'v-old-unassigned'},
@@ -36,16 +35,16 @@ test('Design Login sees only João arts',()=>{
  assert.equal(role.canAccessDemand(fixtures[1]),false);
  assert.equal(role.canAccessDemand(fixtures[4]),false);
 });
-test('Vídeos Login sees only Pedro videos',()=>{
+test('Vídeos Login sees only Tiago videos',()=>{
  const role=asRole('video');
- assert.equal(ids(fixtures.filter(role.isDemandVisible)),'v-pedro');
+ assert.equal(ids(fixtures.filter(role.isDemandVisible)),'v-tiago');
  assert.equal(role.canAccessDemand(fixtures[5]),false);
  assert.equal(role.canAccessDemand(fixtures[0]),false);
 });
 test('administrator sees all demands by default and can select others or an individual',()=>{
  const role=asRole('admin');
  assert.equal(fixtures.filter(role.isDemandVisible).length,fixtures.length);
- role.setFilter('others');assert.equal(ids(fixtures.filter(role.isDemandVisible)),'a-gabriel,a-lucas,a-old-unassigned,v-tiago,v-fernando,v-old-unassigned');
+ role.setFilter('others');assert.equal(ids(fixtures.filter(role.isDemandVisible)),'a-gabriel,a-lucas,a-old-unassigned,v-fernando,v-old-unassigned');
  role.setFilter('all');assert.equal(fixtures.filter(role.isDemandVisible).length,fixtures.length);
  role.setFilter('João');assert.equal(ids(fixtures.filter(role.isDemandVisible)),'a-joao,t-joao');
  role.setFilter('unassigned');assert.equal(ids(fixtures.filter(role.isDemandVisible)),'a-old-unassigned,v-old-unassigned');
@@ -76,7 +75,7 @@ test('Agenda filters each responsible independently from the area filter',()=>{
   document:{getElementById:()=>null},esc:x=>x
  });
  assert.equal(fixtures.filter(api.matchesAgendaAssignee).length,fixtures.length);
- for(const person of ['Gabriel','João','Pedro','Tiago','Fernando','Lucas']){
+ for(const person of ['Gabriel','João','Tiago','Fernando','Lucas']){
   api.setAgenda(person);
   assert.equal(ids(fixtures.filter(api.matchesAgendaAssignee)),ids(fixtures.filter(d=>d.assignee===person)));
  }
@@ -90,6 +89,29 @@ test('Agenda filter cannot widen editor permissions',()=>{
    isAdmin:()=>false,isDesign:()=>role==='design',isVideoUser:()=>role==='video',
    canAccessArea:area=>area===(role==='design'?'arte':'video'),document:{getElementById:()=>null},esc:x=>x
   });
-  assert.equal(ids(fixtures.filter(api.matchesAgendaAssignee)),role==='design'?'a-joao':'v-pedro');
+  assert.equal(ids(fixtures.filter(api.matchesAgendaAssignee)),role==='design'?'a-joao':'v-tiago');
  }
+});
+
+test('Pedro saiu da equipe e o Vídeos Login segue o colaborador vinculado',()=>{
+ assert.ok(!/'Pedro'/.test(functions.split('function ensureCollaborators')[0]),'Pedro não está na lista padrão');
+ const ctx={isAdmin:()=>false,isDesign:()=>false,isVideoUser:()=>true,canAccessArea:a=>a==='video',document:{getElementById:()=>null},esc:x=>x,
+  state:{collaborators:[{id:'1',name:'Tiago',login:''},{id:'2',name:'Fernando',login:'video'}],demands:[]}};
+ const api=vm.runInNewContext(functions+';({canAccessDemand,syncCollaborators})',ctx);
+ api.syncCollaborators();
+ assert.equal(api.canAccessDemand({area:'video',assignee:'Fernando'}),true);
+ assert.equal(api.canAccessDemand({area:'video',assignee:'Tiago'}),false);
+ ctx.state.collaborators[1].login='';
+ assert.equal(api.canAccessDemand({area:'video',assignee:''}),false,'sem login vinculado, nada de demandas sem responsável');
+});
+test('primeira carga cria colaboradores e transfere as demandas do Pedro para o Tiago',()=>{
+ const ctx={document:{getElementById:()=>null},esc:x=>x,
+  state:{demands:[{id:'a',assignee:'Pedro'},{id:'b',assignee:'João'}],deletedDemands:[{id:'c',assignee:'Pedro'}]}};
+ const api=vm.runInNewContext(functions+';({ensureCollaborators,syncCollaborators,DEMAND_ASSIGNEES})',ctx);
+ assert.equal(api.ensureCollaborators(),true);
+ assert.deepEqual(ctx.state.demands.map(d=>d.assignee),['Tiago','João']);
+ assert.equal(ctx.state.deletedDemands[0].assignee,'Tiago');
+ assert.equal(ctx.state.collaborators.find(c=>c.login==='video').name,'Tiago');
+ assert.equal(api.ensureCollaborators(),false,'roda uma única vez');
+ assert.equal(api.syncCollaborators().join(','),'Gabriel,João,Tiago,Fernando,Lucas');
 });

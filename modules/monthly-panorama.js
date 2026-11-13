@@ -1356,6 +1356,7 @@
     [
       'adminAgendaTab',
       'manageClientsTab',
+      'collaboratorsTab',
       'weekCalendarTab',
       'scriptsTab',
       'instagramReportsTab',
@@ -1730,6 +1731,7 @@
     {id:'weekCalendarTab',title:'Calendário'}
   ];
   var additionalTools=[
+    {id:'collaboratorsTab',title:'Colaboradores'},
     {id:'scriptsTab',title:'Roteiros'},
     {id:'instagramReportsTab',title:'Relatórios IG'},
     {id:'feedPlannerTab',title:'Planejar Feed'},

@@ -26,7 +26,10 @@ Se aparecer o erro `A função public.is_app_admin() não existe`, nada foi alte
 - Para conferir o espaço ocupado pelo histórico, rode no SQL Editor:
   `select pg_size_pretty(pg_total_relation_size('public.app_state_history'));`
 
-## 4. Limite conhecido
+## 4. Senha da equipe
 
-Os acessos **Visitante**, **Design** e **Vídeos** entram sem senha. Por isso, quem abrir o site do sistema ainda consegue ver e editar o painel de clientes e demandas.
-O histórico e a trava protegem contra perda de dados. Para fechar esse acesso por completo, a equipe precisaria ter login próprio.
+Os acessos **Visitante**, **Design** e **Vídeos** pedem a senha padrão da equipe. O Administrador continua com o e-mail e a senha dele.
+O código guarda só o resumo criptográfico (hash PBKDF2) da senha, nunca a senha em texto.
+
+**Limite:** essa senha bloqueia a tela de entrada. A tabela do painel no Supabase continua aberta para a chave pública do site.
+O histórico e a trava protegem contra perda de dados. Para um bloqueio também no banco, é preciso criar um usuário da equipe no Supabase Auth.
