@@ -48,9 +48,21 @@
     }
   }
 
+  // Menu do celular: é montado à parte, então marcamos o botão "Agenda" para o destaque azul.
+  function markMobileAgenda() {
+    document.querySelectorAll('.ow-mob-nav-button').forEach(function (b) {
+      b.classList.toggle('ow-mob-agenda', b.textContent.trim() === 'Agenda');
+    });
+  }
+  var pending = false;
+  new MutationObserver(function () {
+    if (pending) return; pending = true;
+    requestAnimationFrame(function () { pending = false; markMobileAgenda(); });
+  }).observe(document.body, { childList: true, subtree: true });
+
   renderAll = function () {
     var result = previous.apply(this, arguments);
-    try { decorateTabs(); decorateHero(); } catch (e) { console.error('Acabamento visual:', e); }
+    try { decorateTabs(); decorateHero(); markMobileAgenda(); } catch (e) { console.error('Acabamento visual:', e); }
     return result;
   };
 
