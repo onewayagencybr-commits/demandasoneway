@@ -1,0 +1,342 @@
+/* One Way · Acabamento premium (2026-11)
+   Camada visual final, carregada por último. Não muda estrutura, permissões
+   nem dados: só superfícies, tipografia, espaçamento e estados.
+   Escopo alto (html body #app#app#app) para vencer as camadas anteriores. */
+
+:root{
+  --owr-bg:#050b18;
+  --owr-surface:rgba(255,255,255,.032);
+  --owr-surface-2:rgba(255,255,255,.055);
+  --owr-surface-3:rgba(255,255,255,.08);
+  --owr-line:rgba(205,222,255,.085);
+  --owr-line-2:rgba(205,222,255,.15);
+  --owr-text:#eef3ff;
+  --owr-muted:rgba(214,226,255,.62);
+  --owr-faint:rgba(214,226,255,.42);
+  --owr-accent:#7aa2ff;
+  --owr-accent-strong:#4a76ff;
+  --owr-accent-soft:rgba(98,140,255,.16);
+  --owr-radius:18px;
+  --owr-radius-sm:12px;
+  --owr-ease:cubic-bezier(.2,.7,.2,1);
+}
+
+/* Fundo contínuo: sem emendas claras ao rolar páginas longas. */
+html,body{background:var(--owr-bg)!important}
+html body #app#app#app{
+  min-height:100vh;
+  background:
+    radial-gradient(1200px 520px at 12% -8%,rgba(64,110,255,.16),transparent 62%),
+    radial-gradient(900px 480px at 100% 0%,rgba(40,160,255,.07),transparent 60%),
+    var(--owr-bg)!important;
+  background-attachment:fixed!important;
+  color:var(--owr-text);
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ───────── Barra superior ───────── */
+html body #app#app#app .topbar{
+  position:sticky;top:0;z-index:50;
+  background:rgba(5,11,24,.72)!important;
+  backdrop-filter:blur(18px) saturate(140%);
+  -webkit-backdrop-filter:blur(18px) saturate(140%);
+  border-bottom:1px solid var(--owr-line)!important;
+  box-shadow:none!important;
+}
+html body #app#app#app .brand-copy strong{font-weight:600!important;letter-spacing:-.01em}
+html body #app#app#app .brand-copy span{color:var(--owr-faint)!important;letter-spacing:.16em}
+html body #app#app#app .top-actions{gap:4px!important}
+html body #app#app#app .top-actions>.ghost,
+html body #app#app#app .top-actions>button.ghost{
+  height:36px!important;min-height:36px!important;
+  padding:0 12px!important;
+  border:1px solid transparent!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  border-radius:10px!important;
+  color:var(--owr-muted)!important;
+  font-size:12.5px!important;font-weight:500!important;
+  transition:background .2s var(--owr-ease),color .2s var(--owr-ease),border-color .2s var(--owr-ease)!important;
+}
+html body #app#app#app .top-actions>.ghost:hover{
+  background:var(--owr-surface-2)!important;color:var(--owr-text)!important;
+}
+html body #app#app#app .top-actions>.ghost.active{
+  background:var(--owr-accent-soft)!important;color:#fff!important;border-color:rgba(122,162,255,.3)!important;
+}
+html body #app#app#app .top-actions #logoutBtn{
+  border-color:var(--owr-line-2)!important;color:var(--owr-text)!important;
+}
+html body #app#app#app .user-chip{
+  background:var(--owr-surface)!important;
+  border:1px solid var(--owr-line)!important;
+  box-shadow:none!important;
+  border-radius:999px!important;
+}
+html body #app#app#app .user-chip .avatar{
+  background:linear-gradient(135deg,#2b4fd1,#6d95ff)!important;color:#fff!important;border:0!important;
+}
+
+/* ───────── Cabeçalho da página ───────── */
+html body #app#app#app .hero{
+  max-width:none!important;
+  margin:30px 0 22px!important;
+  padding:0!important;
+  min-height:0!important;
+  border:0!important;
+  background:none!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+  display:block!important;
+  text-align:left!important;
+}
+html body #app#app#app .hero::before,html body #app#app#app .hero::after{display:none!important}
+html body #app#app#app .hero>div:first-child{
+  display:flex!important;flex-direction:column!important;align-items:flex-start!important;
+  gap:6px!important;text-align:left!important;width:100%;
+}
+html body #app#app#app .hero .eyebrow{
+  display:block!important;margin:0!important;
+  font-size:11px!important;font-weight:600!important;
+  letter-spacing:.18em!important;text-transform:uppercase;
+  color:var(--owr-accent)!important;opacity:1!important;
+}
+html body #app#app#app .hero h1{
+  margin:0!important;
+  font-size:clamp(26px,2.4vw,34px)!important;
+  font-weight:600!important;
+  letter-spacing:-.025em!important;
+  line-height:1.15!important;
+  text-align:left!important;
+  color:#fff!important;
+}
+html body #app#app#app .hero p{
+  margin:0!important;max-width:720px!important;
+  white-space:normal!important;
+  font-size:13.5px!important;line-height:1.5!important;
+  color:var(--owr-muted)!important;opacity:1!important;
+  text-align:left!important;
+}
+html body #app#app#app.home-mode .hero{margin:44px 0 26px!important}
+html body #app#app#app.home-mode .hero h1{font-size:clamp(30px,3vw,42px)!important}
+
+/* ───────── Navegação: Áreas de trabalho + Ferramentas ───────── */
+html body #app#app#app .nav-row{gap:14px!important;margin-bottom:22px!important}
+@media (min-width:701px){
+  /* Áreas em cima, ferramentas embaixo: cada uma com a largura toda, sem apertar os rótulos. */
+  html body #app#app#app .nav-row{grid-template-columns:minmax(0,1fr)!important;max-width:none!important}
+  html body #app#app#app .nav-row .tabs{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))!important;display:grid!important}
+  html body #app#app#app .nav-row .admin-utility-tabs{
+    display:grid!important;grid-template-columns:repeat(auto-fit,minmax(132px,1fr))!important;
+  }
+}
+html body #app#app#app .nav-row .area-nav-cluster,
+html body #app#app#app .nav-row .admin-utility-tabs{
+  background:var(--owr-surface)!important;
+  border:1px solid var(--owr-line)!important;
+  border-radius:var(--owr-radius)!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+  padding:18px!important;
+  animation:none!important;
+}
+html body #app#app#app .nav-row .area-nav-cluster::before,
+html body #app#app#app .nav-row .admin-utility-tabs::before{
+  font-size:10.5px!important;font-weight:600!important;
+  letter-spacing:.18em!important;color:var(--owr-faint)!important;
+}
+
+/* Áreas: cartões horizontais e baixos, ícone num selo suave e contagem do mês. */
+html body #app#app#app .nav-row .tabs{gap:10px!important}
+html body #app#app#app .nav-row .tabs .tab{
+  position:relative!important;
+  height:64px!important;min-height:64px!important;
+  display:flex!important;flex-direction:row!important;
+  align-items:center!important;justify-content:flex-start!important;
+  gap:12px!important;
+  padding:0 14px 0 14px!important;
+  border:1px solid var(--owr-line)!important;
+  border-radius:14px!important;
+  background:var(--owr-surface)!important;
+  box-shadow:none!important;
+  color:var(--owr-text)!important;
+  font-size:13.5px!important;font-weight:500!important;letter-spacing:0!important;
+  text-align:left!important;
+  transition:background .22s var(--owr-ease),border-color .22s var(--owr-ease),transform .22s var(--owr-ease)!important;
+}
+html body #app#app#app .nav-row .tabs .tab::after{
+  content:""!important;position:absolute!important;
+  left:12px;top:50%;width:36px;height:36px;margin-top:-18px;
+  border-radius:11px;background:var(--owr-surface-3);
+  z-index:0;pointer-events:none;display:block!important;
+  transition:background .22s var(--owr-ease);
+}
+html body #app#app#app .nav-row .tabs .tab::before{
+  position:relative!important;z-index:1;
+  flex:0 0 36px!important;width:36px!important;height:18px!important;
+  -webkit-mask-size:18px 18px!important;mask-size:18px 18px!important;
+  -webkit-mask-position:center!important;mask-position:center!important;
+  -webkit-mask-repeat:no-repeat!important;mask-repeat:no-repeat!important;
+  background-color:#cfe0ff!important;
+  margin:0!important;
+}
+html body #app#app#app .nav-row .tabs .tab:hover{
+  background:var(--owr-surface-2)!important;border-color:var(--owr-line-2)!important;transform:translateY(-1px);
+}
+html body #app#app#app .nav-row .tabs .tab.active{
+  background:linear-gradient(135deg,rgba(74,118,255,.26),rgba(74,118,255,.08))!important;
+  border-color:rgba(122,162,255,.45)!important;
+  color:#fff!important;
+}
+html body #app#app#app .nav-row .tabs .tab.active::after{background:rgba(122,162,255,.28)}
+html body #app#app#app .nav-row .tabs .tab.active::before{background-color:#fff!important}
+html body #app#app#app .ow-tab-count{
+  margin-left:auto;position:relative;z-index:1;
+  min-width:24px;height:22px;padding:0 7px;
+  display:inline-flex;align-items:center;justify-content:center;
+  border-radius:999px;
+  background:var(--owr-surface-3);
+  color:var(--owr-muted);
+  font-size:11px;font-weight:600;font-variant-numeric:tabular-nums;
+}
+html body #app#app#app .tab.active .ow-tab-count{background:rgba(255,255,255,.16);color:#fff}
+
+/* Ferramentas: linhas compactas com ícone à esquerda. */
+html body #app#app#app .nav-row .admin-utility-tabs{gap:8px!important}
+html body #app#app#app .nav-row .admin-utility-tabs button{
+  height:44px!important;min-height:44px!important;
+  display:flex!important;flex-direction:row!important;
+  align-items:center!important;justify-content:flex-start!important;
+  gap:9px!important;padding:0 12px!important;
+  border:1px solid transparent!important;
+  border-radius:11px!important;
+  background:var(--owr-surface)!important;
+  box-shadow:none!important;
+  color:var(--owr-muted)!important;
+  font-size:12.5px!important;font-weight:500!important;line-height:1.2!important;
+  text-align:left!important;white-space:normal!important;
+  transition:background .2s var(--owr-ease),color .2s var(--owr-ease),border-color .2s var(--owr-ease)!important;
+}
+html body #app#app#app .nav-row .admin-utility-tabs button::before{
+  flex:0 0 16px!important;width:16px!important;height:16px!important;
+  -webkit-mask-size:16px 16px!important;mask-size:16px 16px!important;
+  background-color:currentColor!important;margin:0!important;opacity:.9;
+}
+html body #app#app#app .nav-row .admin-utility-tabs button:hover{
+  background:var(--owr-surface-2)!important;color:var(--owr-text)!important;border-color:var(--owr-line)!important;
+}
+html body #app#app#app .nav-row .admin-utility-tabs button.active{
+  background:var(--owr-accent-soft)!important;color:#fff!important;border-color:rgba(122,162,255,.35)!important;
+}
+
+/* Agenda e Calendário alinhados à mesma largura do restante da página. */
+html body #app#app#app #agendaContent>.agenda-wrap,
+html body #app#app#app #agendaContent .ow-agenda-toolbar-line,
+html body #app#app#app #weekCalendarContent>.wk-shell{max-width:none!important;margin-left:0!important;margin-right:0!important;width:100%!important}
+
+/* Botões ocultos por permissão continuam ocultos (o display acima não pode vencê-los). */
+html body #app#app#app .nav-row .admin-utility-tabs>button.hidden,
+html body #app#app#app .nav-row .tabs>.tab.hidden{display:none!important}
+html body #app#app#app .nav-row .admin-utility-tabs:not(:has(>button:not(.hidden))){display:none!important}
+
+/* ───────── Busca, mês e ações ───────── */
+html body #app#app#app .shell>.hero-controls:not(.hidden){margin:0 0 18px!important;gap:8px!important;justify-content:flex-start!important}
+html body #app#app#app .shell>.hero-controls :is(.search,.month-select){
+  height:38px!important;min-height:38px!important;
+  background:var(--owr-surface)!important;
+  border:1px solid var(--owr-line)!important;
+  border-radius:11px!important;
+  box-shadow:none!important;
+  color:var(--owr-text)!important;
+  font-size:12px!important;
+}
+html body #app#app#app .shell>.hero-controls .search{width:240px!important;max-width:240px!important;flex-basis:240px!important}
+html body #app#app#app .shell>.hero-controls :is(.search,.month-select):focus{
+  border-color:rgba(122,162,255,.55)!important;outline:none!important;box-shadow:0 0 0 3px rgba(98,140,255,.15)!important;
+}
+html body #app#app#app .shell>.hero-controls .primary{
+  height:38px!important;min-height:38px!important;
+  padding:0 16px!important;border-radius:11px!important;
+  font-size:12.5px!important;font-weight:600!important;
+}
+html body #app#app#app .primary{
+  background:linear-gradient(135deg,#3a63f0,#5b86ff)!important;
+  box-shadow:0 8px 22px rgba(58,99,240,.28)!important;
+  border:0!important;
+}
+html body #app#app#app .primary:hover{filter:brightness(1.07)}
+
+/* Filtro de responsável */
+html body #app#app#app .ow-assignee-toolbar:not(.hidden){
+  background:var(--owr-surface)!important;
+  border:1px solid var(--owr-line)!important;
+  border-radius:14px!important;
+  box-shadow:none!important;
+  padding:10px 16px!important;
+  min-height:0!important;
+}
+html body #app#app#app .ow-assignee-toolbar label{font-size:12px!important;letter-spacing:.02em!important;color:var(--owr-muted)!important;font-weight:500!important}
+html body #app#app#app .ow-assignee-toolbar select{
+  height:36px!important;border-radius:10px!important;font-size:12.5px!important;
+  background-color:var(--owr-surface-2)!important;border:1px solid var(--owr-line)!important;
+}
+html body #app#app#app .ow-assignee-toolbar small{color:var(--owr-faint)!important}
+
+/* Indicadores de status */
+html body #app#app#app .stats{gap:8px!important;margin:16px 0 26px!important}
+html body #app#app#app .stats .stat{
+  min-height:34px!important;padding:0 12px!important;gap:8px!important;
+  background:var(--owr-surface)!important;
+  border:1px solid var(--owr-line)!important;
+  border-radius:999px!important;box-shadow:none!important;
+}
+html body #app#app#app .stats .stat small{font-size:11.5px!important;color:var(--owr-muted)!important;letter-spacing:0!important}
+html body #app#app#app .stats .stat strong{font-size:13px!important;font-weight:600!important;color:#fff!important}
+html body #app#app#app .stats .stat .dot{width:7px!important;height:7px!important}
+
+/* ───────── Seções e cartões de clientes ───────── */
+html body #app#app#app .section-head h2{font-size:20px!important;font-weight:600!important;letter-spacing:-.015em!important}
+html body #app#app#app .section-head #clientCount,
+html body #app#app#app .section-head .section-copy span{color:var(--owr-muted)!important;font-size:12.5px!important}
+html body #app#app#app .section-actions .ghost{
+  border:1px solid var(--owr-line-2)!important;background:var(--owr-surface)!important;
+  border-radius:11px!important;box-shadow:none!important;font-size:12.5px!important;
+}
+html body #app#app#app #clients .client{
+  background:var(--owr-surface)!important;
+  border:1px solid var(--owr-line)!important;
+  border-radius:var(--owr-radius)!important;
+  box-shadow:none!important;
+  transition:border-color .22s var(--owr-ease),background .22s var(--owr-ease)!important;
+}
+html body #app#app#app #clients .client:hover{border-color:var(--owr-line-2)!important;background:var(--owr-surface-2)!important}
+html body #app#app#app #clients .client.open{border-color:rgba(122,162,255,.32)!important}
+html body #app#app#app #clients .client-name{font-size:16px!important;font-weight:600!important;letter-spacing:-.01em}
+html body #app#app#app #clients .type-chip{
+  background:var(--owr-surface-3)!important;color:var(--owr-muted)!important;
+  border-radius:999px!important;padding:3px 8px!important;font-size:10px!important;letter-spacing:.08em!important;
+}
+html body #app#app#app #clients .demand-count{color:var(--owr-muted)!important}
+
+/* ───────── Barra lateral "Financeiro" e prévia ───────── */
+html body .ow-preview-banner{
+  position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:10000;
+  padding:9px 16px;border-radius:999px;
+  background:rgba(12,22,48,.92);border:1px solid rgba(122,162,255,.35);
+  color:#dce7ff;font:500 12px/1.3 Montserrat,Arial,sans-serif;
+  box-shadow:0 10px 30px rgba(0,0,0,.35);backdrop-filter:blur(10px);
+  max-width:calc(100vw - 32px);text-align:center;
+}
+
+/* ───────── Celular ───────── */
+@media (max-width:700px){
+  html body #app#app#app .topbar .brand-logo{width:92px!important;max-width:92px!important;height:36px!important;flex:0 0 92px!important;object-fit:cover!important;object-position:50% 50%!important}
+  html body #app#app#app .hero{margin:22px 0 16px!important}
+  html body #app#app#app .hero h1{font-size:26px!important}
+  html body #app#app#app .hero p{font-size:12.5px!important}
+  html body #app#app#app .shell>.hero-controls .search{width:100%!important;max-width:100%!important;flex-basis:100%!important}
+  html body #app#app#app .ow-tab-count{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  html body #app#app#app *{transition:none!important}
+}
