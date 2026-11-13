@@ -11,10 +11,11 @@ function fixture() {
   const eventType = {value:'Gravação', addEventListener() {}};
   const count = {textContent:''};
   const details = {open:false};
+  const option = () => ({querySelector() {return {textContent:''};}});
   const inputs = [
-    {value:'sony-a6700',checked:false,addEventListener() {}},
-    {value:'godox-nova-1',checked:false,addEventListener() {}},
-    {value:'godox-nova-2',checked:false,addEventListener() {}}
+    {value:'sony-a6700',checked:false,addEventListener() {},closest:option},
+    {value:'godox-nova-1',checked:false,addEventListener() {},closest:option},
+    {value:'godox-nova-2',checked:false,addEventListener() {},closest:option}
   ];
   const panel = {
     innerHTML:'',id:'',className:'',
