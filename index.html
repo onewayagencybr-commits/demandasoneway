@@ -907,6 +907,7 @@ body.calendar-view{background-attachment:scroll!important}
 @media(max-width:700px){.ow-assignee-toolbar{padding:12px}.ow-assignee-toolbar select{max-width:100%;flex-basis:100%}.ow-assignee-chip{max-width:90px;font-size:9px}.ow-assignee-toolbar small{width:100%}}
 </style>
 <link rel="stylesheet" href="/modules/oneway-premium-navigation.css?v=20261031-unified2">
+<link rel="stylesheet" href="/modules/oneway-refined.css?v=20261113-premium1">
 </head>
 <body class="booting">
 <section class="login" id="loginScreen">
@@ -1643,7 +1644,7 @@ async function saveState({strictRemote=false}={}){
   state.updatedAt=Date.now();
   const localSnapshot=typeof structuredClone==='function'?structuredClone(state):JSON.parse(JSON.stringify(state));
   writeLocalCache(localSnapshot);
-  if(!supabaseClient)return true;
+  if(!supabaseClient||window.OW_PREVIEW)return true;
   try{
     const {error}=await supabaseClient.from('app_state').upsert({id:REMOTE_STATE_ID,data:sharedStateSnapshot(localSnapshot),updated_at:new Date().toISOString()},{onConflict:'id'});
     if(error)throw error;
@@ -4221,7 +4222,13 @@ function start(){
  document.getElementById('wkExportJpegBtn').onclick=exportWeekCalendarJPEG;document.getElementById('wkExportPdfBtn').onclick=exportWeekCalendarPDF;
  setTimeout(()=>document.body.classList.remove('booting'),900);document.getElementById('logoutBtn').onclick=logout;document.getElementById('trafficReportBtn').onclick=openTrafficAnalytics;document.getElementById('analyzePdfBtn').onclick=analyzeAnalyticsPdf;document.querySelectorAll('#analyticsSourceOptions [data-source]').forEach(b=>b.onclick=()=>setAnalyticsSource(b.dataset.source));bindProductProposalUI();document.getElementById('newProposalBtn').onclick=e=>{e.preventDefault();showProposalChoice()};document.getElementById('newProposalHistoryBtn').onclick=e=>{e.preventDefault();showProposalChoice()};document.getElementById('newContractBtn').onclick=e=>{e.preventDefault();openContractModal()};document.getElementById('contractsTab').onclick=e=>{e.preventDefault();if(!isAdmin())return;currentArea='contracts';contractView='active';renderAll()};document.getElementById('contractAlertBtn').onclick=e=>{e.preventDefault();if(!isAdmin())return;currentArea='contracts';contractView='ending';renderAll()};document.getElementById('newContractListBtn').onclick=()=>openContractModal();document.getElementById('bulkImportBtn').onclick=openBulkDemandImport;document.getElementById('bulkMicBtn').onclick=toggleBulkSpeech;document.getElementById('bulkAnalyzeBtn').onclick=analyzeBulkDemandImport;document.getElementById('bulkConfirmBtn').onclick=confirmBulkDemandImport;document.getElementById('addFinanceIncomeBtn').onclick=()=>addFinanceItem('income');document.getElementById('addFinanceCostBtn').onclick=()=>addFinanceItem('cost');document.getElementById('financeJpegBtn').onclick=exportFinanceJPEG;document.getElementById('newDemandTop').onclick=()=>openDemandModal();document.getElementById('addClientBtn').onclick=openClientModal;document.getElementById('demandForm').onsubmit=submitDemand;document.getElementById('formReferenceFiles').onchange=renderDemandReferenceFileSelection;document.getElementById('formProductionFiles').onchange=renderDemandProductionFileSelection;document.getElementById('clientForm').onsubmit=submitClient;document.getElementById('proposalForm').onsubmit=submitProposal;document.getElementById('contractForm').onsubmit=e=>{e.preventDefault();saveContractFromForm(true)};document.getElementById('contractSaveBtn').onclick=()=>saveContractFromForm(false);document.getElementById('contractStartDate').onchange=recalcContractEnd;document.getElementById('contractDurationMonths').oninput=recalcContractEnd;document.getElementById('contractPdfBtn').onclick=()=>{const c=secureContracts.find(x=>x.id===activeContractId);if(c)exportContractPDF(c)};document.getElementById('contractEditBtn').onclick=()=>{const id=activeContractId;closeModal('contractDetailModal');openContractModal(id)};document.getElementById('contractSignedFile').onchange=uploadSignedContract;document.getElementById('contractDeleteBtn').onclick=()=>{if(activeContractId)deleteContractRecord(activeContractId)};document.getElementById('addProposalItem').onclick=()=>addProposalItem();document.getElementById('proposalTotal').oninput=updateProposalTotals;document.getElementById('proposalSaveBtn').onclick=saveProposalChangesOnly;document.getElementById('proposalJpegBtn').onclick=async()=>{const data=proposalData();if(validateProposal(data)){rememberClientName(data.client);const ok=await exportProposalJPEG(data);if(ok){const saved=await recordGeneratedProposal(data,'jpeg');if(saved){const edited=Boolean(editingProposalId);editingProposalId=null;if(edited)closeModal('proposalModal');toast(edited?'Proposta atualizada e JPEG gerado.':'JPEG gerado e salvo no histórico.',null,null,'success')}}}};document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>closeModal(b.dataset.close));document.querySelectorAll('.modal-backdrop').forEach(m=>m.onclick=e=>{if(e.target===m){e.preventDefault();signalModalCloseHint(m)}});document.querySelectorAll('#clientTypeChoices .choice').forEach(b=>b.onclick=()=>setClientType(b.dataset.type));document.querySelectorAll('#clientAreaChoices [data-client-area]').forEach(b=>b.onclick=()=>toggleClientArea(b.dataset.clientArea));document.getElementById('clientNameInput').oninput=e=>renderRecentClientSuggestions(e.target.value);document.getElementById('searchInput').oninput=()=>{openClientId=null;openDemandId=null;if(currentArea==='deleted')renderDeleted();else if(currentArea==='agenda')renderAgenda();else if(currentArea&&Object.keys(AREAS).includes(currentArea)){renderStats();renderClients()}};document.addEventListener('click',e=>{if(!e.target.closest('.client-options')&&!e.target.closest('.client-menu'))document.querySelectorAll('.client-menu').forEach(m=>m.classList.add('hidden'))});document.addEventListener('keydown',handleGlobalEscape);initLogin()}
 
-(async()=>{state=await loadState();subscribeRealtime();start()})();
+async function owMaybeStartPreview(){
+  try{const ctl=new AbortController();setTimeout(()=>ctl.abort(),3000);const r=await fetch('/api/preview-mode',{cache:'no-store',signal:ctl.signal});if(!r.ok)return;const j=await r.json();if(!j||j.preview!==true)return}catch{return}
+  window.OW_PREVIEW=true;document.body.classList.add('ow-preview');
+  const bar=document.createElement('div');bar.className='ow-preview-banner';bar.setAttribute('role','status');bar.textContent='Prévia para aprovação · navegue à vontade, nada é salvo no sistema real';document.body.appendChild(bar);
+  currentUser='Administrador';enterApp();
+}
+(async()=>{state=await loadState();subscribeRealtime();start();owMaybeStartPreview()})();
 </script>
 <script src="/modules/instagram-pdf.js" defer></script>
 <script src="/modules/instagram-library.js?v=20261030-general-audit2" defer></script>
@@ -4236,6 +4243,7 @@ function start(){
 <script src="/modules/video-covers.js?v=20261030-audit" defer></script>
 <script src="/modules/data-backup.js?v=20261113-backup1" defer></script>
 <script src="/modules/collaborators.js?v=20261113-colab1" defer></script>
+<script src="/modules/oneway-refined.js?v=20261113-premium1" defer></script>
 </body>
 </html>
 <script async data-explicit-opt-in="true" data-deployment-id="dpl_Ao14UeTAg11RytLdLPreqf8HrSbi" src="https://vercel.live/_next-live/feedback/feedback.js"></script>
