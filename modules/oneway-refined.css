@@ -369,3 +369,83 @@ html body .ow-preview-banner{
 @media (prefers-reduced-motion:reduce){
   html body #app#app#app *{transition:none!important}
 }
+
+/* ───────── Barra de filtros da Agenda ─────────
+   Largura toda, texto legível, mesma altura em todos os controles e o filtro
+   "Mostrar demandas de" no tamanho certo (antes ficava espremido e cortado). */
+@media (min-width:701px){
+
+html body #app#app#app #agendaContent .ow-agenda-toolbar-line{
+  display:flex!important;flex-wrap:wrap!important;align-items:center!important;justify-content:flex-start!important;
+  gap:10px!important;padding:12px!important;margin:0 0 16px!important;
+  background:var(--owr-surface)!important;border:1px solid var(--owr-line)!important;
+  border-radius:16px!important;box-shadow:none!important;
+}
+html body #app#app#app #agendaContent .ow-agenda-toolbar-line>*,
+html body #app#app#app #agendaContent #owAgendaControls{flex:0 0 auto!important;margin:0!important}
+html body #app#app#app #agendaContent #owAgendaControls{display:flex!important;gap:10px!important;justify-content:flex-start!important;flex-wrap:wrap!important}
+/* Grupos segmentados (Agenda/Finalizadas, Lista/Panorama, Filtrar) */
+html body #app#app#app #agendaContent :is(.agenda-view-tabs,.ow-agenda-mode,.ow-agenda-areas){
+  display:flex!important;align-items:center!important;gap:2px!important;
+  height:40px!important;padding:3px!important;
+  background:rgba(6,16,38,.45)!important;border:1px solid var(--owr-line)!important;border-radius:12px!important;box-shadow:none!important;
+}
+html body #app#app#app #agendaContent :is(.agenda-view-tabs,.ow-agenda-mode,.ow-agenda-areas) button{
+  height:32px!important;min-height:32px!important;padding:0 13px!important;
+  border:0!important;border-radius:9px!important;background:transparent!important;box-shadow:none!important;
+  color:var(--owr-muted)!important;font-size:12.5px!important;font-weight:500!important;line-height:1!important;
+  display:inline-flex!important;align-items:center!important;gap:6px!important;white-space:nowrap!important;
+}
+html body #app#app#app #agendaContent :is(.agenda-view-tabs,.ow-agenda-mode,.ow-agenda-areas) button:hover{color:#fff!important;background:var(--owr-surface-2)!important}
+html body #app#app#app #agendaContent :is(.agenda-view-tab.active,.ow-agenda-mode button.is-active,.ow-agenda-areas button.is-active){
+  background:var(--owr-blue)!important;color:#fff!important;font-weight:600!important;box-shadow:0 4px 14px rgba(47,102,255,.35)!important;
+}
+html body #app#app#app #agendaContent .ow-agenda-areas>span{
+  padding:0 8px 0 10px!important;font-size:11px!important;font-weight:600!important;letter-spacing:.08em!important;
+  text-transform:uppercase!important;color:var(--owr-faint)!important;
+}
+html body #app#app#app #agendaContent #agendaFinishedCount{
+  min-width:22px!important;height:20px!important;padding:0 6px!important;border-radius:999px!important;
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  background:rgba(255,255,255,.14)!important;color:#fff!important;font-size:11px!important;font-weight:600!important;
+}
+/* Responsável + busca ocupam o espaço que sobra */
+html body #app#app#app #agendaContent .ow-agenda-person-filters{
+  flex:1 1 420px!important;display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:10px!important;min-width:0!important;
+}
+html body #app#app#app #agendaContent #owAgendaAssigneeToolbar{
+  display:flex!important;align-items:center!important;gap:10px!important;flex:0 1 auto!important;
+  height:40px!important;min-height:40px!important;margin:0!important;padding:0 4px 0 14px!important;
+  background:rgba(6,16,38,.45)!important;border:1px solid var(--owr-line)!important;border-radius:12px!important;box-shadow:none!important;
+}
+html body #app#app#app #agendaContent #owAgendaAssigneeToolbar label{
+  margin:0!important;font-size:12.5px!important;font-weight:500!important;color:var(--owr-muted)!important;white-space:nowrap!important;letter-spacing:0!important;
+}
+html body #app#app#app #agendaContent #owAgendaAssigneeFilter{
+  width:auto!important;min-width:210px!important;max-width:none!important;flex:0 0 auto!important;
+  height:32px!important;min-height:32px!important;padding:0 32px 0 12px!important;
+  border:1px solid var(--owr-line)!important;border-radius:9px!important;
+  background-color:var(--owr-surface-2)!important;color:#fff!important;font-size:12.5px!important;
+}
+html body #app#app#app #agendaContent #searchInput.ow-agenda-search{
+  flex:1 1 220px!important;width:auto!important;min-width:180px!important;max-width:340px!important;
+  height:40px!important;min-height:40px!important;padding:0 14px 0 38px!important;
+  border:1px solid var(--owr-line)!important;border-radius:12px!important;
+  background-color:rgba(6,16,38,.45)!important;color:#fff!important;font-size:12.5px!important;
+}
+/* Larguras soltas (as camadas antigas fixavam larguras e causavam sobreposição)
+   e duas linhas: abas/filtros em cima, responsável + busca embaixo. */
+html body #app#app#app #agendaContent :is(.agenda-view-tabs,.ow-agenda-mode,.ow-agenda-areas,#owAgendaControls,#owAgendaAssigneeToolbar){
+  width:auto!important;max-width:none!important;min-width:0!important;overflow:visible!important;
+}
+html body #app#app#app #agendaContent :is(.agenda-view-tabs,.ow-agenda-mode,.ow-agenda-areas) button,
+html body #app#app#app #agendaContent .ow-agenda-areas>span{flex:0 0 auto!important;width:auto!important;max-width:none!important}
+html body #app#app#app #agendaContent .ow-agenda-person-filters{
+  flex:1 1 100%!important;justify-content:flex-start!important;
+  padding-top:10px!important;border-top:1px solid var(--owr-line)!important;
+}
+html body #app#app#app #agendaContent #owAgendaAssigneeToolbar{flex:0 0 auto!important}
+html body #app#app#app #agendaContent #searchInput.ow-agenda-search{flex:1 1 260px!important;max-width:none!important}
+html body #app#app#app #agendaContent #owAgendaAssigneeToolbar.hidden{display:none!important}
+html body #app#app#app #agendaContent .ow-agenda-person-filters:not(:has(#owAgendaAssigneeToolbar:not(.hidden))){padding-top:10px!important}
+}
