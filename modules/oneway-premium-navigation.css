@@ -96,12 +96,11 @@
   }
   #app#app .nav-row .admin-utility-tabs:not(:has(>button:not(.hidden))) {display:none!important}
   #app#app .nav-row:not(:has(.admin-utility-tabs>button:not(.hidden))) {
-    grid-template-columns:minmax(0,1fr)!important; max-width:1100px!important;
+    grid-template-columns:minmax(0,1fr)!important;
   }
   #app#app .nav-row:not(:has(.admin-utility-tabs>button:not(.hidden))) .tabs {
     grid-template-columns:repeat(auto-fit,minmax(120px,1fr))!important;
   }
-  #app#app .nav-row .area-nav-cluster.role-limited {max-width:680px!important;margin:0 auto!important}
   #app#app .hero h1 {letter-spacing:-.035em!important;font-weight:500!important}
   #app#app.home-mode .hero {padding-top:40px!important;padding-bottom:12px!important}
   #app#app.home-mode .hero h1 {font-size:clamp(28px,3vw,44px)!important}
@@ -241,11 +240,6 @@ body {
     color:#a6d8fb!important;
     font-weight:600!important;
     letter-spacing:.17em!important;
-  }
-  #app#app .nav-row .area-nav-cluster.role-limited {max-width:680px!important}
-  #app#app .nav-row:has(.area-nav-cluster.role-limited) {max-width:720px!important}
-  #app#app .nav-row:has(.area-nav-cluster.role-limited) .tabs {
-    grid-template-columns:repeat(auto-fit,minmax(145px,1fr))!important;
   }
 }
 @keyframes owNavSurfaceIn {
