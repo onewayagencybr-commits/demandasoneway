@@ -95,12 +95,15 @@
       dayItems.forEach(function (d) {
         var title = (scope === 'agenda' ? displayClient(d) + ' · ' : '') + String(d.title || 'Sem título');
         var description = displayClient(d) + ' | ' + areaLabel(d.area) + ' | ' +
-          String(d.title || '') + ' | ' + statusLabel(d) + ' | ' + fmtPostDate(d.postDate);
+          String(d.title || '') + ' | ' + statusLabel(d) + ' | ' + fmtPostDate(d.postDate) +
+          (d.postedAt ? ' | Postado' : '') + ' — clique duas vezes para ' + (d.postedAt ? 'desmarcar' : 'marcar como postado');
         cells += '<div class="ow-cal-demand ow-cal-' + esc(d.area) + (d.id === selectedCalendarDemand ? ' ow-cal-selected' : '') +
           (d.status === 'purple' && d.area !== 'trafego' ? ' ow-cal-approval' : '') +
           (d.status === 'salmon' && d.area !== 'trafego' ? ' ow-cal-oneway' : '') +
+          (d.postedAt ? ' ow-cal-posted' : '') +
           '" data-ow-demand="' + esc(d.id) + '" draggable="' + (isAdmin() && !calendarSaving ? 'true' : 'false') +
           '" title="' + esc(description) + '" tabindex="0" role="button" aria-label="' + esc(description) + '">' +
+          (d.postedAt ? '<span class="ow-cal-check" aria-hidden="true">✓</span>' : '') +
           '<span class="ow-cal-text">' + esc(title) + '</span>' +
           '<button type="button" class="ow-cal-open" data-ow-open="' + esc(d.id) + '" title="Abrir demanda" aria-label="Abrir demanda">↗</button></div>';
       });
@@ -110,8 +113,40 @@
       '<div class="ow-calendar-scroll"><div class="ow-calendar-grid">' + weekday + cells +
       '</div></div><div class="ow-month-foot" aria-live="polite">' +
       (selectedCalendarDemand ? 'Demanda selecionada. Escolha um dia para reagendar ou outra demanda para cancelar.' :
-        'Passe o mouse para ver os detalhes. A alteração de data é salva para toda a equipe.') +
+        'Clique duas vezes numa demanda para marcar como postada (fica verde); repita para desmarcar. As alterações são salvas para toda a equipe.') +
       '</div></div>';
+  }
+
+  // Marca/desmarca uma demanda como "postada" no panorama (verde). Fica salvo para a equipe.
+  var postedSaving = false;
+  async function togglePostedDemand(id, container) {
+    if (postedSaving) return;
+    var item = state.demands.find(function (d) { return d.id === id; });
+    if (!item || (typeof canAccessDemand === 'function' && !canAccessDemand(item))) return;
+    var previous = item.postedAt || '';
+    if (previous) delete item.postedAt; else item.postedAt = new Date().toISOString();
+    selectedCalendarDemand = '';
+    container.querySelectorAll('.ow-cal-demand[data-ow-demand="' + CSS.escape(id) + '"]').forEach(function (node) {
+      node.classList.remove('ow-cal-selected');
+      node.classList.toggle('ow-cal-posted', !previous);
+      var check = node.querySelector('.ow-cal-check');
+      if (!previous && !check) node.insertAdjacentHTML('afterbegin', '<span class="ow-cal-check" aria-hidden="true">✓</span>');
+      if (previous && check) check.remove();
+    });
+    var foot = container.querySelector('.ow-month-foot');
+    if (foot) foot.textContent = previous ? 'Demanda voltou ao normal.' : 'Demanda marcada como postada. Clique duas vezes de novo para desmarcar.';
+    postedSaving = true;
+    try {
+      var ok = await saveState({ strictRemote: true });
+      if (!ok) throw new Error('save');
+      toast(previous ? 'Demanda voltou ao normal.' : 'Demanda marcada como postada.');
+    } catch (e) {
+      if (previous) item.postedAt = previous; else delete item.postedAt;
+      toast('Não foi possível salvar agora. Tente de novo.');
+      if (currentArea === 'agenda') renderAgenda(); else renderClients();
+    } finally {
+      postedSaving = false;
+    }
   }
 
   async function rescheduleDemand(id, newDate) {
@@ -233,7 +268,13 @@
       }
       var demand = event.target.closest('.ow-cal-demand');
       if (demand) {
-        if (!isAdmin()) return openCalendarDemand(demand.dataset.owDemand);
+        if (!isAdmin()) {
+          // Espera um instante: se vier o segundo clique, é "marcar como postado", não abrir.
+          var openId = demand.dataset.owDemand;
+          clearTimeout(container._owOpenTimer);
+          container._owOpenTimer = setTimeout(function () { openCalendarDemand(openId); }, 280);
+          return;
+        }
         var id = demand.dataset.owDemand;
         selectedCalendarDemand = selectedCalendarDemand === id ? '' : id;
         container.querySelectorAll('.ow-cal-demand').forEach(function (node) {
@@ -249,6 +290,14 @@
       if (day && isAdmin() && selectedCalendarDemand) {
         rescheduleDemand(selectedCalendarDemand, day.dataset.owDate);
       }
+    });
+    container.addEventListener('dblclick', function (event) {
+      if (event.target.closest('[data-ow-open]')) return;
+      var card = event.target.closest('.ow-cal-demand');
+      if (!card) return;
+      event.preventDefault();
+      clearTimeout(container._owOpenTimer);
+      togglePostedDemand(card.dataset.owDemand, container);
     });
     container.addEventListener('keydown', function (event) {
       if (event.key !== 'Enter' && event.key !== ' ') return;
@@ -276,7 +325,11 @@
     var label = clientCalendarMode ? 'Visualizar lista' : 'Panorama mensal';
     var button = '<button type="button" class="ow-mode-toggle ' + (clientCalendarMode ? 'is-active' : '') +
       '" data-ow-client-mode="1" aria-pressed="' + clientCalendarMode + '">' + label + '</button>';
-    html = html.replace('<button class="ghost small add-demand-client"', button + '<button class="ghost small add-demand-client"');
+    if (html.indexOf('<button class="ghost small add-demand-client"') !== -1) {
+      html = html.replace('<button class="ghost small add-demand-client"', button + '<button class="ghost small add-demand-client"');
+    } else {
+      html = html.replace('<div class="client-toolbar-actions">', '<div class="client-toolbar-actions">' + button);
+    }
     var calendar = '<div class="ow-client-calendar ' + (clientCalendarMode ? '' : 'hidden') + '">' +
       (clientCalendarMode ? renderClientCalendar(client) : '') + '</div>';
     html = html.replace('<div class="demand-list">', calendar +

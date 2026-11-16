@@ -449,3 +449,43 @@ html body #app#app#app #agendaContent #searchInput.ow-agenda-search{flex:1 1 260
 html body #app#app#app #agendaContent #owAgendaAssigneeToolbar.hidden{display:none!important}
 html body #app#app#app #agendaContent .ow-agenda-person-filters:not(:has(#owAgendaAssigneeToolbar:not(.hidden))){padding-top:10px!important}
 }
+
+
+/* ───────── Panorama mensal ───────── */
+/* Demanda postada: verde (dois cliques no panorama marcam/desmarcam). */
+html body #app#app#app .ow-cal-demand.ow-cal-posted{
+  background:linear-gradient(135deg,#dcfce7,#bbf7d0)!important;
+  border:1px solid #22c55e!important;color:#14532d!important;
+  outline:none!important;
+  box-shadow:inset 3px 0 0 #16a34a!important;
+}
+html body #app#app#app .ow-cal-demand.ow-cal-posted::before,
+html body #app#app#app .ow-cal-demand.ow-cal-posted::after{border-color:#22c55e!important;box-shadow:none!important}
+html body #app#app#app .ow-cal-demand.ow-cal-posted .ow-cal-text{color:#14532d!important}
+html body #app#app#app .ow-cal-demand.ow-cal-posted .ow-cal-open{background:rgba(22,101,52,.12)!important;color:#14532d!important}
+html body #app#app#app .ow-cal-check{
+  flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;
+  width:15px;height:15px;margin-right:5px;border-radius:50%;
+  background:#16a34a;color:#fff;font-size:10px;font-weight:700;line-height:1;
+}
+html body #app#app#app .ow-cal-demand{user-select:none;-webkit-user-select:none}
+
+/* Botão "Panorama mensal" dentro do cliente: sempre por último na barra do cliente. */
+html body #app#app#app .client-toolbar-actions .ow-mode-toggle{order:9}
+html body #app#app#app .client-toolbar-actions .add-demand-client{order:10}
+
+@media (min-width:701px){
+  /* Ordem fixa da barra da Agenda (lista e panorama), sem pular de lugar. */
+  html body #app#app#app #agendaContent .ow-agenda-toolbar-line>.agenda-view-tabs{order:1}
+  html body #app#app#app #agendaContent .ow-agenda-toolbar-line>#owAgendaControls{order:2}
+  html body #app#app#app #agendaContent .ow-agenda-toolbar-line>.ow-agenda-person-filters{order:3}
+  html body #app#app#app #agendaContent .agenda-view-tabs.ow-agenda-tabs-hidden{display:none!important}
+  /* "Lista" e "Panorama mensal" com ícone, para ficarem fáceis de achar. */
+  html body #app#app#app #agendaContent .ow-agenda-mode button::before{
+    content:"";width:15px;height:15px;flex:0 0 15px;background-color:currentColor;
+    -webkit-mask:var(--owr-mode-icon) center/15px 15px no-repeat;mask:var(--owr-mode-icon) center/15px 15px no-repeat;
+  }
+  html body #app#app#app #agendaContent .ow-agenda-mode button[data-ow-agenda-mode="list"]{--owr-mode-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%3E%3Cpath%20d%3D%22M9%206h11M9%2012h11M9%2018h11%22/%3E%3Ccircle%20cx%3D%224.5%22%20cy%3D%226%22%20r%3D%221%22%20fill%3D%22black%22/%3E%3Ccircle%20cx%3D%224.5%22%20cy%3D%2212%22%20r%3D%221%22%20fill%3D%22black%22/%3E%3Ccircle%20cx%3D%224.5%22%20cy%3D%2218%22%20r%3D%221%22%20fill%3D%22black%22/%3E%3C/svg%3E")}
+  html body #app#app#app #agendaContent .ow-agenda-mode button[data-ow-agenda-mode="calendar"]{--owr-mode-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%223%22%20y%3D%225%22%20width%3D%2218%22%20height%3D%2216%22%20rx%3D%222.5%22/%3E%3Cpath%20d%3D%22M3%2010h18M8%203v4M16%203v4%22/%3E%3C/svg%3E")}
+  html body #app#app#app #agendaContent .ow-agenda-mode button:not(.is-active){color:var(--owr-text)!important}
+}
