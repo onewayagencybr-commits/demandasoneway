@@ -373,7 +373,7 @@ html body .ow-preview-banner{
 /* ───────── Barra de filtros da Agenda ─────────
    Largura toda, texto legível, mesma altura em todos os controles e o filtro
    "Mostrar demandas de" no tamanho certo (antes ficava espremido e cortado). */
-@media (min-width:701px){
+@media (min-width:701px) and (min-device-width:701px){
 
 html body #app#app#app #agendaContent .ow-agenda-toolbar-line{
   display:flex!important;flex-wrap:wrap!important;align-items:center!important;justify-content:flex-start!important;
@@ -468,13 +468,13 @@ html body #app#app#app .ow-cal-check{
   width:15px;height:15px;margin-right:5px;border-radius:50%;
   background:#16a34a;color:#fff;font-size:10px;font-weight:700;line-height:1;
 }
-html body #app#app#app .ow-cal-demand{user-select:none;-webkit-user-select:none}
+html body #app#app#app .ow-cal-demand{user-select:none;-webkit-user-select:none;touch-action:manipulation;-webkit-touch-callout:none}
 
 /* Botão "Panorama mensal" dentro do cliente: sempre por último na barra do cliente. */
 html body #app#app#app .client-toolbar-actions .ow-mode-toggle{order:9}
 html body #app#app#app .client-toolbar-actions .add-demand-client{order:10}
 
-@media (min-width:701px){
+@media (min-width:701px) and (min-device-width:701px){
   /* Ordem fixa da barra da Agenda (lista e panorama), sem pular de lugar. */
   html body #app#app#app #agendaContent .ow-agenda-toolbar-line>.agenda-view-tabs{order:1}
   html body #app#app#app #agendaContent .ow-agenda-toolbar-line>#owAgendaControls{order:2}
@@ -489,3 +489,7 @@ html body #app#app#app .client-toolbar-actions .add-demand-client{order:10}
   html body #app#app#app #agendaContent .ow-agenda-mode button[data-ow-agenda-mode="calendar"]{--owr-mode-icon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%223%22%20y%3D%225%22%20width%3D%2218%22%20height%3D%2216%22%20rx%3D%222.5%22/%3E%3Cpath%20d%3D%22M3%2010h18M8%203v4M16%203v4%22/%3E%3C/svg%3E")}
   html body #app#app#app #agendaContent .ow-agenda-mode button:not(.is-active){color:var(--owr-text)!important}
 }
+
+/* Celular: no modo Panorama a lista some de verdade (uma regra antiga de
+   celular forçava a lista a aparecer e o calendário ficava escondido lá embaixo). */
+html body #app#app#app #agendaContent #agendaList.agenda-list.hidden{display:none!important}

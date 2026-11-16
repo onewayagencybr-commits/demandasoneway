@@ -268,11 +268,21 @@
       }
       var demand = event.target.closest('.ow-cal-demand');
       if (demand) {
+        // Dois cliques/toques rápidos na mesma demanda = marcar/desmarcar como postada.
+        // Feito pelo clique (e não pelo "dblclick") porque o Safari do iPhone não envia dblclick.
+        var tapId = demand.dataset.owDemand, tapNow = Date.now(), last = container._owLastTap;
+        if (last && last.id === tapId && tapNow - last.t < 420) {
+          container._owLastTap = null;
+          clearTimeout(container._owOpenTimer);
+          togglePostedDemand(tapId, container);
+          return;
+        }
+        container._owLastTap = { id: tapId, t: tapNow };
         if (!isAdmin()) {
           // Espera um instante: se vier o segundo clique, é "marcar como postado", não abrir.
           var openId = demand.dataset.owDemand;
           clearTimeout(container._owOpenTimer);
-          container._owOpenTimer = setTimeout(function () { openCalendarDemand(openId); }, 280);
+          container._owOpenTimer = setTimeout(function () { openCalendarDemand(openId); }, 440);
           return;
         }
         var id = demand.dataset.owDemand;
@@ -292,12 +302,8 @@
       }
     });
     container.addEventListener('dblclick', function (event) {
-      if (event.target.closest('[data-ow-open]')) return;
-      var card = event.target.closest('.ow-cal-demand');
-      if (!card) return;
-      event.preventDefault();
-      clearTimeout(container._owOpenTimer);
-      togglePostedDemand(card.dataset.owDemand, container);
+      // Evita seleção de texto/zoom no duplo clique; a marcação é feita no clique acima.
+      if (event.target.closest('.ow-cal-demand')) event.preventDefault();
     });
     container.addEventListener('keydown', function (event) {
       if (event.key !== 'Enter' && event.key !== ' ') return;
