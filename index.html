@@ -1435,7 +1435,7 @@ const REMOTE_STATE_ID='main';
 const SM_KDF_SALT='oneway-social-media-v1';
 const SM_KDF_ITERATIONS=250000;
 const STORAGE_BUCKET='demand-files';
-const supabaseClient=window.supabase?.createClient?.(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:false,autoRefreshToken:true,detectSessionInUrl:false}})||null;
+const supabaseClient=window.supabase?.createClient?.(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:'ow-admin-auth-v1'}})||null;
 let supabaseAdminAuthenticated=false,supabaseAdminEmail='';
 let realtimeChannel=null,financeRealtimeChannel=null,financeCryptoKey=null,financeUnlocked=false,financeUpdatedAt=0,legacyFinanceItems=[];
 let contractsRealtimeChannel=null,contractsCryptoKey=null,contractsUnlocked=false,contractsUpdatedAt=0,secureContracts=[],hiddenContractClientProfiles=[],savedContractAgencyProfiles=[],contractView='active',activeContractId=null;
@@ -1548,7 +1548,29 @@ function mergeRemoteWithLocalPrivate(remote,local){
   return merged;
 }
 function adminAuthReady(){return !!(supabaseClient&&supabaseAdminAuthenticated)}
-async function clearSupabaseAdminAuth(){supabaseAdminAuthenticated=false;supabaseAdminEmail='';if(!supabaseClient)return;try{await supabaseClient.auth.signOut({scope:'local'})}catch{}try{supabaseClient.realtime?.setAuth?.()}catch{}}
+/* Login de Administrador lembrado neste navegador até clicar em Sair.
+   A sessão fica com o Supabase; as chaves de Financeiro, Contratos e Social Media são guardadas
+   no IndexedDB como CryptoKey não exportável (a senha nunca é salva). */
+const OW_ADMIN_VAULT_DB='ow-admin-vault-v1';
+function owAdminVaultDb(){return new Promise((resolve,reject)=>{const req=indexedDB.open(OW_ADMIN_VAULT_DB,1);req.onupgradeneeded=()=>req.result.createObjectStore('keys');req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
+async function owAdminVaultSave(keys){try{const db=await owAdminVaultDb();await new Promise((resolve,reject)=>{const tx=db.transaction('keys','readwrite');tx.objectStore('keys').put({...keys,savedAt:Date.now()},'admin');tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});db.close()}catch(e){console.warn('Não foi possível lembrar o login neste navegador',e)}}
+async function owAdminVaultLoad(){try{const db=await owAdminVaultDb();const value=await new Promise((resolve,reject)=>{const req=db.transaction('keys','readonly').objectStore('keys').get('admin');req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(req.error)});db.close();return value}catch{return null}}
+async function owAdminVaultClear(){try{const db=await owAdminVaultDb();await new Promise(resolve=>{const tx=db.transaction('keys','readwrite');tx.objectStore('keys').delete('admin');tx.oncomplete=resolve;tx.onerror=resolve});db.close()}catch{}}
+async function owRestoreAdminSession(){
+  if(!supabaseClient)return false;
+  const keys=await owAdminVaultLoad();if(!keys)return false;
+  let session=null;try{session=(await supabaseClient.auth.getSession())?.data?.session||null}catch{}
+  if(!session){await owAdminVaultClear();return false}
+  try{supabaseClient.realtime?.setAuth?.(session.access_token)}catch{}
+  const {data:allowed,error}=await supabaseClient.rpc('is_app_admin');
+  if(error||allowed!==true){await clearSupabaseAdminAuth();return false}
+  supabaseAdminAuthenticated=true;supabaseAdminEmail=String(session.user?.email||'');
+  if(keys.finance){try{await loadSecureFinance(keys.finance)}catch(e){console.error(e);lockFinance()}}
+  if(keys.contracts){try{await loadSecureContracts(keys.contracts);await migrateLegacySignedContractsEncryption()}catch(e){console.error(e);lockContracts()}}
+  if(keys.sm){try{await smUnlock(keys.sm)}catch(e){console.error(e);smLock()}}
+  return true;
+}
+async function clearSupabaseAdminAuth(){supabaseAdminAuthenticated=false;supabaseAdminEmail='';owAdminVaultClear();if(!supabaseClient)return;try{await supabaseClient.auth.signOut({scope:'local'})}catch{}try{supabaseClient.realtime?.setAuth?.()}catch{}}
 async function authenticateAdminWithSupabase(email,password){
   if(!supabaseClient)throw new Error('Supabase indisponível. Por segurança, o acesso administrativo foi bloqueado.');
   const normalized=String(email||'').trim().toLowerCase();if(!normalized)throw new Error('Informe o e-mail do administrador cadastrado no Supabase Auth.');
@@ -1569,7 +1591,7 @@ async function decryptFinancePayload(pack){if(!financeCryptoKey||!pack?.iv||!pac
 function setFinanceSyncStatus(text){const el=document.getElementById('financeSyncStatus');if(el)el.textContent=text}
 async function loadSecureFinance(password){
   if(supabaseClient&&!adminAuthReady())throw new Error('Sessão administrativa segura ausente');
-  financeCryptoKey=await deriveFinanceKey(password);
+  financeCryptoKey=password instanceof CryptoKey?password:await deriveFinanceKey(password);
   financeUnlocked=false;
   let remotePack=null;
   if(supabaseClient){const {data,error}=await supabaseClient.from('app_state').select('data').eq('id',REMOTE_FINANCE_ID).maybeSingle();if(error)throw error;remotePack=data?.data?.cipher?data.data:null}
@@ -1610,7 +1632,7 @@ function contractSetSyncLabel(text){const el=document.getElementById('contractDe
 async function deriveContractsKey(password){const material=await crypto.subtle.importKey('raw',new TextEncoder().encode(password),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt:new TextEncoder().encode(CONTRACTS_KDF_SALT),iterations:CONTRACTS_KDF_ITERATIONS,hash:'SHA-256'},material,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])}
 async function encryptContractsPayload(items){if(!contractsCryptoKey)throw new Error('Contratos bloqueados');const iv=crypto.getRandomValues(new Uint8Array(12)),payload={items:Array.isArray(items)?items:[],hiddenClientProfiles:Array.isArray(hiddenContractClientProfiles)?hiddenContractClientProfiles:[],agencyProfiles:Array.isArray(savedContractAgencyProfiles)?savedContractAgencyProfiles:[],updatedAt:Date.now()},plain=new TextEncoder().encode(JSON.stringify(payload)),cipher=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},contractsCryptoKey,plain));return {v:1,alg:'AES-GCM',iv:bytesToBase64(iv),cipher:bytesToBase64(cipher),updatedAt:payload.updatedAt}}
 async function decryptContractsPayload(pack){if(!contractsCryptoKey||!pack?.iv||!pack?.cipher)throw new Error('Pacote de contratos inválido');const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:base64ToBytes(pack.iv)},contractsCryptoKey,base64ToBytes(pack.cipher)),parsed=JSON.parse(new TextDecoder().decode(plain));return {items:Array.isArray(parsed?.items)?parsed.items:[],hiddenClientProfiles:Array.isArray(parsed?.hiddenClientProfiles)?parsed.hiddenClientProfiles:[],agencyProfiles:Array.isArray(parsed?.agencyProfiles)?parsed.agencyProfiles:[],updatedAt:Number(parsed?.updatedAt||pack?.updatedAt)||0}}
-async function loadSecureContracts(password){if(supabaseClient&&!adminAuthReady())throw new Error('Sessão administrativa segura ausente');contractsCryptoKey=await deriveContractsKey(password);contractsUnlocked=false;let remotePack=null;if(supabaseClient){const {data,error}=await supabaseClient.from('app_state').select('data').eq('id',REMOTE_CONTRACTS_ID).maybeSingle();if(error)throw error;remotePack=data?.data?.cipher?data.data:null}if(remotePack){const decoded=await decryptContractsPayload(remotePack);secureContracts=decoded.items;hiddenContractClientProfiles=decoded.hiddenClientProfiles||[];savedContractAgencyProfiles=decoded.agencyProfiles||[];contractsUpdatedAt=decoded.updatedAt;contractsUnlocked=true;try{localStorage.setItem(CONTRACTS_LOCAL_KEY,JSON.stringify(remotePack))}catch{}subscribeContractsRealtime();return true}let cached=null;try{const raw=localStorage.getItem(CONTRACTS_LOCAL_KEY);if(raw)cached=JSON.parse(raw)}catch{}if(cached?.cipher){try{const decoded=await decryptContractsPayload(cached);secureContracts=decoded.items;hiddenContractClientProfiles=decoded.hiddenClientProfiles||[];savedContractAgencyProfiles=decoded.agencyProfiles||[];contractsUpdatedAt=decoded.updatedAt;contractsUnlocked=true}catch{cached=null}}if(!contractsUnlocked){secureContracts=[];hiddenContractClientProfiles=[];savedContractAgencyProfiles=[];contractsUnlocked=true}const ok=await saveContractsSecure({silent:true});if(!ok&&supabaseClient)throw new Error('Não foi possível criar o banco seguro de contratos');subscribeContractsRealtime();return true}
+async function loadSecureContracts(password){if(supabaseClient&&!adminAuthReady())throw new Error('Sessão administrativa segura ausente');contractsCryptoKey=password instanceof CryptoKey?password:await deriveContractsKey(password);contractsUnlocked=false;let remotePack=null;if(supabaseClient){const {data,error}=await supabaseClient.from('app_state').select('data').eq('id',REMOTE_CONTRACTS_ID).maybeSingle();if(error)throw error;remotePack=data?.data?.cipher?data.data:null}if(remotePack){const decoded=await decryptContractsPayload(remotePack);secureContracts=decoded.items;hiddenContractClientProfiles=decoded.hiddenClientProfiles||[];savedContractAgencyProfiles=decoded.agencyProfiles||[];contractsUpdatedAt=decoded.updatedAt;contractsUnlocked=true;try{localStorage.setItem(CONTRACTS_LOCAL_KEY,JSON.stringify(remotePack))}catch{}subscribeContractsRealtime();return true}let cached=null;try{const raw=localStorage.getItem(CONTRACTS_LOCAL_KEY);if(raw)cached=JSON.parse(raw)}catch{}if(cached?.cipher){try{const decoded=await decryptContractsPayload(cached);secureContracts=decoded.items;hiddenContractClientProfiles=decoded.hiddenClientProfiles||[];savedContractAgencyProfiles=decoded.agencyProfiles||[];contractsUpdatedAt=decoded.updatedAt;contractsUnlocked=true}catch{cached=null}}if(!contractsUnlocked){secureContracts=[];hiddenContractClientProfiles=[];savedContractAgencyProfiles=[];contractsUnlocked=true}const ok=await saveContractsSecure({silent:true});if(!ok&&supabaseClient)throw new Error('Não foi possível criar o banco seguro de contratos');subscribeContractsRealtime();return true}
 async function saveContractsSecure(options={}){if(!contractsUnlocked||!contractsCryptoKey)return false;if(supabaseClient&&!adminAuthReady())return false;try{const pack=await encryptContractsPayload(secureContracts);try{localStorage.setItem(CONTRACTS_LOCAL_KEY,JSON.stringify(pack))}catch{}contractsUpdatedAt=Number(pack.updatedAt)||Date.now();if(!supabaseClient)return true;const {error}=await supabaseClient.from('app_state').upsert({id:REMOTE_CONTRACTS_ID,data:pack,updated_at:new Date().toISOString()},{onConflict:'id'});if(error)throw error;return true}catch(e){console.error('Falha ao sincronizar contratos:',e);if(!options.silent)toast('Contrato salvo neste navegador, mas não sincronizou com os outros administradores.');return false}}
 function subscribeContractsRealtime(){if(!supabaseClient||!adminAuthReady()||contractsRealtimeChannel)return;contractsRealtimeChannel=supabaseClient.channel('oneway-contracts-tempo-real').on('postgres_changes',{event:'*',schema:'public',table:'app_state',filter:`id=eq.${REMOTE_CONTRACTS_ID}`},async payload=>{if(!contractsUnlocked||!contractsCryptoKey)return;const pack=payload?.new?.data;if(!pack?.cipher)return;try{const decoded=await decryptContractsPayload(pack);if(decoded.updatedAt&&decoded.updatedAt<=contractsUpdatedAt)return;secureContracts=decoded.items;hiddenContractClientProfiles=decoded.hiddenClientProfiles||[];savedContractAgencyProfiles=decoded.agencyProfiles||[];contractsUpdatedAt=decoded.updatedAt;try{localStorage.setItem(CONTRACTS_LOCAL_KEY,JSON.stringify(pack))}catch{}if(currentUser&&isAdmin()){renderContractAlert();if(currentArea==='contracts')renderContracts();if(activeContractId&&document.getElementById('contractDetailModal')&&!document.getElementById('contractDetailModal').classList.contains('hidden'))openContractDetail(activeContractId)}}catch(e){console.error('Falha ao abrir atualização de contratos:',e)}}).subscribe(status=>console.log('Contracts realtime:',status))}
 function lockContracts(){contractsUnlocked=false;contractsCryptoKey=null;contractsUpdatedAt=0;secureContracts=[];hiddenContractClientProfiles=[];savedContractAgencyProfiles=[];activeContractId=null;if(contractsRealtimeChannel&&supabaseClient){try{supabaseClient.removeChannel(contractsRealtimeChannel)}catch{}contractsRealtimeChannel=null}}
@@ -1724,11 +1746,13 @@ function initLogin(){
       try{await loadSecureContracts(password);await migrateLegacySignedContractsEncryption()}catch(e){console.error(e);lockContracts();syncIssues.push('Contratos')}
       try{await smUnlock(password)}catch(e){console.error(e);smLock();syncIssues.push('Social Media')}
       if(syncIssues.length)error.textContent=`Administrador autenticado. ${syncIssues.join(' e ')} não conseguiu sincronizar agora.`;
+      await owAdminVaultSave({finance:financeUnlocked?financeCryptoKey:null,contracts:contractsUnlocked?contractsCryptoKey:null,sm:smUnlocked?smCryptoKey:null});
       enterAs('Administrador');
     }finally{adminBtn.disabled=false}
   };
   adminBtn.onclick=doAdminLogin;passwordInput.addEventListener('keydown',e=>{if(e.key==='Enter')doAdminLogin()});emailInput.addEventListener('keydown',e=>{if(e.key==='Enter')passwordInput.focus()});
   let saved=null;try{saved=sessionStorage.getItem('demanda-user-v7')}catch{}let teamOk=false;try{teamOk=sessionStorage.getItem(TEAM_SESSION_KEY)==='1'}catch{}if(saved&&USERS[saved]&&saved!=='Administrador'&&teamOk){currentUser=saved;enterApp()}else if(saved==='Administrador'){try{sessionStorage.removeItem('demanda-user-v7')}catch{}}
+  if(!currentUser)owRestoreAdminSession().then(ok=>{if(ok&&!currentUser&&!loginTransitioning)enterAs('Administrador')}).catch(e=>console.warn('Login lembrado indisponível',e));
 }
 function enterApp(){document.getElementById('loginScreen').classList.add('hidden');document.getElementById('app').classList.remove('hidden');if(isAdmin()){if(currentArea==='agenda')currentArea=null}else if(isDesign()){currentArea='arte'}else if(isVideoUser()){currentArea='video'}else if(!currentArea||!canAccessArea(currentArea)){currentArea='agenda'}renderAll()}
 async function logout(){smLock();lockFinance();lockContracts();try{sessionStorage.removeItem('demanda-user-v7');sessionStorage.removeItem(TEAM_SESSION_KEY)}catch{}await clearSupabaseAdminAuth();location.reload()}
@@ -3462,7 +3486,7 @@ async function smEncrypt(items){
 }
 async function smUnlock(password){
   if(!adminAuthReady())throw new Error('Autenticação administrativa necessária');
-  smCryptoKey=await smDeriveKey(password);smUnlocked=false;smItems=[];smUpdatedAt=0;
+  smCryptoKey=password instanceof CryptoKey?password:await smDeriveKey(password);smUnlocked=false;smItems=[];smUpdatedAt=0;
   const pack=state.socialMediaSecure;
   if(pack?.cipher){const decoded=await smDecrypt(pack);smItems=decoded.items;smUpdatedAt=decoded.updatedAt}
   smUnlocked=true;
