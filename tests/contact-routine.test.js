@@ -50,29 +50,44 @@ function load(todayISO) {
 test('segunda tem todos os clientes e os outros dias seguem a prioridade', () => {
   const {api} = load('2026-11-23');
   const list = api.contacts('2026-11-23');
-  const monday = list.filter(c => c.day === 'seg').map(c => c.key).sort();
-  assert.deepEqual(plain(monday), ['boreal', 'cuiabaleiloes', 'eag']);
+  assert.deepEqual(plain(list.filter(c => c.day === 'seg').map(c => c.key).sort()), ['boreal', 'cuiabaleiloes', 'eag']);
   assert.deepEqual(plain(list.filter(c => c.key === 'cuiabaleiloes').map(c => c.day)), ['seg', 'ter', 'qua', 'qui', 'sex']);
   assert.deepEqual(plain(list.filter(c => c.key === 'eag').map(c => c.day)), ['seg', 'sex']);
   assert.deepEqual(plain(list.filter(c => c.key === 'boreal').map(c => c.day)), ['seg', 'ter', 'qui', 'sex']);
 });
 
-test('contato não feito em dia que já passou fica atrasado', () => {
-  const {api, context} = load('2026-11-24');
-  assert.equal(api.lateCount('2026-11-23'), 3);
-  context.state.contactRoutine.weeks = {'2026-11-23': {entries: {'eag|seg': {done: true}}}};
-  assert.equal(api.lateCount('2026-11-23'), 2);
-  const tuesday = api.contacts('2026-11-23').find(c => c.id === 'cuiabaleiloes|ter');
-  assert.equal(api.status(tuesday, '2026-11-23'), 'today');
+test('a própria agência fica fora e entra/sai da rotina com um clique', () => {
+  const {api, context} = load('2026-11-23');
+  context.cmSelectableRecords = () => [{name: 'One Way Agency'}, {name: 'Boreal'}];
+  assert.deepEqual(plain(api.activeClients().map(c => c.key)), ['boreal']);
+  context.state.contactRoutine = {clients: {onewayagency: {active: true}, boreal: {active: false}}};
+  assert.deepEqual(plain(api.activeClients().map(c => c.key)), ['onewayagency']);
 });
 
-test('contato remanejado muda de dia e não some quando a prioridade muda', () => {
+test('alerta: vermelho com o dia incompleto, piscando quando um dia passa sem 100%', () => {
+  const full = {checks: {sent: true, replied: true, noted: true}};
+  let {api, context} = load('2026-11-23');
+  assert.equal(api.alertInfo('2026-11-23').level, 'red');
+  context.state.contactRoutine = {weeks: {'2026-11-23': {entries: {'boreal|seg': full, 'eag|seg': full, 'cuiabaleiloes|seg': full}}}};
+  assert.equal(api.alertInfo('2026-11-23').level, 'ok');
+  context.state.contactRoutine.weeks['2026-11-23'].entries['eag|seg'] = {checks: {sent: true, replied: true}};
+  assert.equal(api.alertInfo('2026-11-23').level, 'red');
+  ({api, context} = load('2026-11-24'));
+  context.state.contactRoutine = {weeks: {'2026-11-23': {entries: {'boreal|seg': full, 'eag|seg': {checks: {sent: true}}, 'cuiabaleiloes|seg': full}}}};
+  const info = api.alertInfo('2026-11-23');
+  assert.equal(info.level, 'blink');
+  assert.equal(info.late, 1);
+});
+
+test('contato remanejado muda de dia e notas ficam no mês do cliente', () => {
   const {api, context} = load('2026-11-23');
   context.state.contactRoutine = {
     clients: {boreal: {priority: 'leve'}},
-    weeks: {'2026-11-23': {entries: {'boreal|ter': {day: 'qua', note: 'Pediu orçamento'}}}}
+    weeks: {'2026-11-23': {entries: {'boreal|ter': {day: 'qua', checks: {sent: true}}}}},
+    notes: {'2026-11': {boreal: [{id: 'n1', text: 'Pediu orçamento'}]}}
   };
   const boreal = api.contacts('2026-11-23').filter(c => c.key === 'boreal');
   assert.deepEqual(plain(boreal.map(c => c.day).sort()), ['qua', 'seg', 'sex']);
-  assert.equal(boreal.find(c => c.id === 'boreal|ter').entry.note, 'Pediu orçamento');
+  assert.equal(api.notes('2026-11', 'boreal')[0].text, 'Pediu orçamento');
+  assert.equal(api.notes('2026-12', 'boreal').length, 0);
 });

@@ -1,7 +1,9 @@
-/* One Way: Contato com clientes.
-   Checklist semanal obrigatório da equipe (somente Administrador):
-   segunda fala com todos, os outros dias seguem a prioridade de cada cliente,
-   com checklist de conversa, checklist de acompanhamento e nota por contato.
+/* One Way: Contatos — rotina semanal obrigatória de contato com clientes (só Administrador).
+   Por dia: cartões dos clientes daquele dia com checklist curto (3 itens).
+   Segunda é com todos; os outros dias seguem a prioridade de cada cliente.
+   Notas ficam por cliente durante o mês inteiro e podem ser apagadas.
+   Alerta no botão do topo: vermelho com checklist do dia incompleto; piscando
+   quando um dia já passou sem o checklist 100%.
    Tudo fica em state.contactRoutine (linha app_state "main"). */
 (()=>{
 'use strict';
@@ -9,11 +11,11 @@ const $=id=>document.getElementById(id);
 const h=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 const DAYS=[
- {k:'seg',label:'Segunda',type:'Bom dia no grupo + abertura da semana'},
- {k:'ter',label:'Terça',type:'Pedido de material'},
- {k:'qua',label:'Quarta',type:'Acompanhamento'},
- {k:'qui',label:'Quinta',type:'Ideia da semana'},
- {k:'sex',label:'Sexta',type:'Fechamento da semana'}
+ {k:'seg',label:'Segunda',short:'Seg',type:'Bom dia no grupo e abertura da semana'},
+ {k:'ter',label:'Terça',short:'Ter',type:'Pedido de material'},
+ {k:'qua',label:'Quarta',short:'Qua',type:'Acompanhamento'},
+ {k:'qui',label:'Quinta',short:'Qui',type:'Ideia da semana'},
+ {k:'sex',label:'Sexta',short:'Sex',type:'Fechamento da semana'}
 ];
 const PRIORITIES={
  alta:{label:'Alta',days:['ter','qua','qui','sex']},
@@ -22,34 +24,31 @@ const PRIORITIES={
  leve:{label:'Leve',days:['sex']}
 };
 const PRIORITY_ORDER=['alta','media','normal','leve'];
-// Prioridade inicial sugerida pela carteira atual (pode ser trocada na tela).
 const PRESETS=[['cuiabaleiloes','alta'],['soldocerrado','alta'],['boreal','media'],['orocasa','media'],['medina','media'],['simonetto','normal'],['florealgodao','normal'],['familia','normal']];
-const DEFAULT_CHECKLISTS={
- conversa:['Abriu a conversa (bom dia no grupo)','Mostrou o que vai ao ar','Pediu material com prazo','Levou uma ideia ou sugestão','Pediu aprovação'],
- acompanhamento:['Cliente respondeu','Material recebido','Aprovação recebida','Pendência anotada','Cobrança feita (24h sem resposta)']
-};
-const CHECK_TITLES={conversa:'Checklist de conversa',acompanhamento:'Checklist de acompanhamento'};
+const CHECKS=[{k:'sent',label:'Mensagem enviada'},{k:'replied',label:'Cliente respondeu'},{k:'noted',label:'Combinado anotado'}];
+const MONTHS=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
 
-let view='semana',weekStart=null,openId=null,openNotesKey=null;
+let weekStart=null,selDay=null,openId=null,managing=false;
 
 const allowed=()=>typeof isAdmin==='function'&&isAdmin();
 const today=()=>calendarLocalISO(new Date());
 const thisWeek=()=>calendarMonday(today());
 const dayISO=(wk,idx)=>calendarAddDays(wk,idx);
-const dm=iso=>{const [y,m,d]=String(iso).split('-');return d+'/'+m};
-const stamp=iso=>{try{return new Intl.DateTimeFormat('pt-BR',{timeZone:'America/Cuiaba',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}).format(new Date(iso))}catch{return ''}};
+const dm=iso=>{const p=String(iso).split('-');return p[2]+'/'+p[1]};
+const monthOf=iso=>String(iso).slice(0,7);
+const monthLabel=key=>MONTHS[Number(key.slice(5,7))-1]||key;
+const when=iso=>{try{return new Intl.DateTimeFormat('pt-BR',{timeZone:'America/Cuiaba',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}).format(new Date(iso))}catch{return ''}};
+const who=()=>typeof currentUser==='string'?currentUser:'';
+const newId=()=>typeof uid==='function'?uid():'id_'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 
 function data(){
  if(!state.contactRoutine||typeof state.contactRoutine!=='object'||Array.isArray(state.contactRoutine))state.contactRoutine={};
  const d=state.contactRoutine;
  if(typeof d.responsible!=='string')d.responsible='';
- if(!d.clients||typeof d.clients!=='object')d.clients={};
- if(!d.weeks||typeof d.weeks!=='object')d.weeks={};
- if(!d.checklists||typeof d.checklists!=='object')d.checklists={};
+ for(const k of ['clients','weeks','notes'])if(!d[k]||typeof d[k]!=='object'||Array.isArray(d[k]))d[k]={};
  return d;
 }
-function checklist(kind){const list=data().checklists[kind];return Array.isArray(list)&&list.length?list:DEFAULT_CHECKLISTS[kind]}
-function clientList(){
+function allClients(){
  if(typeof cmSelectableRecords!=='function')return [];
  return cmSelectableRecords().map(c=>({key:cmSelectionKey(c.name),name:c.name})).filter(c=>c.key);
 }
@@ -59,8 +58,11 @@ function cfg(key){
  const priority=PRIORITIES[c.priority]?c.priority:defaultPriority(key);
  const custom=Array.isArray(c.days);
  const days=custom?c.days.filter(d=>d!=='seg'&&DAYS.some(x=>x.k===d)):PRIORITIES[priority].days;
- return {priority,days,custom};
+ // A própria agência não é cliente: fica fora até alguém incluir.
+ const active=typeof c.active==='boolean'?c.active:!key.includes('oneway');
+ return {priority,days,custom,active};
 }
+const activeClients=()=>allClients().filter(c=>cfg(c.key).active);
 function weekData(wk,create=false){
  const weeks=data().weeks;
  if(!weeks[wk]&&create)weeks[wk]={entries:{}};
@@ -69,18 +71,18 @@ function weekData(wk,create=false){
  return w||{entries:{}};
 }
 function entry(wk,id){const w=weekData(wk,true);if(!w.entries[id]||typeof w.entries[id]!=='object')w.entries[id]={};return w.entries[id]}
-const hasChecks=e=>!!e&&['conversa','acompanhamento'].some(k=>e.checks&&e.checks[k]&&Object.values(e.checks[k]).some(Boolean));
+const checksOf=e=>{const c=e&&e.checks&&typeof e.checks==='object'?e.checks:{};return {sent:!!(c.sent||e?.done),replied:!!c.replied,noted:!!c.noted}};
+const checkCount=e=>{const c=checksOf(e);return CHECKS.filter(x=>c[x.k]).length};
+const complete=e=>checkCount(e)===CHECKS.length;
 
 function makeContact(id,c,orig,e,conf){
  const known=k=>DAYS.some(d=>d.k===k);
  const day=known(e?.day)?e.day:(known(orig)?orig:'seg');
  return {id,key:c.key,name:c.name,orig,day,idx:DAYS.findIndex(d=>d.k===day),entry:e||{},priority:conf.priority,
-  type:e?.type||DAYS.find(d=>d.k===orig)?.type||'Contato extra',extra:!!e?.extra};
+  type:e?.extra?'Contato extra':(DAYS.find(d=>d.k===orig)?.type||'Contato'),extra:!!e?.extra};
 }
-// Segunda: todos os clientes. Demais dias: os dias da prioridade (ou os escolhidos).
-// Contatos já trabalhados (feitos, com nota, checklist ou extras) nunca somem.
 function contacts(wk){
- const active=clientList(),byKey=new Map(active.map(c=>[c.key,c])),entries=weekData(wk).entries,list=[],seen=new Set();
+ const active=activeClients(),byKey=new Map(active.map(c=>[c.key,c])),entries=weekData(wk).entries,list=[],seen=new Set();
  for(const c of active){
   const conf=cfg(c.key);
   for(const day of ['seg',...conf.days]){const id=c.key+'|'+day;seen.add(id);list.push(makeContact(id,c,day,entries[id],conf))}
@@ -88,33 +90,23 @@ function contacts(wk){
  for(const [id,e] of Object.entries(entries)){
   if(seen.has(id)||!e)continue;
   const key=id.split('|')[0],c=byKey.get(key);
-  if(!c||!(e.extra||e.done||e.note||hasChecks(e)))continue;
+  if(!c||!(e.extra||checkCount(e)))continue;
   list.push(makeContact(id,c,id.split('|')[1],e,cfg(key)));
  }
  return list;
 }
 function status(c,wk){
- if(c.entry.done)return 'done';
+ if(complete(c.entry))return 'done';
  const iso=dayISO(wk,c.idx),t=today();
  return iso<t?'late':iso===t?'today':'next';
 }
-const sortContacts=list=>list.sort((a,b)=>PRIORITY_ORDER.indexOf(a.priority)-PRIORITY_ORDER.indexOf(b.priority)||a.name.localeCompare(b.name,'pt-BR',{sensitivity:'base'}));
-function lateCount(wk=thisWeek()){return contacts(wk).filter(c=>status(c,wk)==='late').length}
-function lastContact(key){
- let last='';
- for(const w of Object.values(data().weeks||{}))for(const [id,e] of Object.entries(w?.entries||{}))
-  if(id.split('|')[0]===key&&e?.done&&e.doneAt&&e.doneAt>last)last=e.doneAt;
- return last;
+// Nível do alerta do topo: 'blink' (dia passado incompleto), 'red' (hoje incompleto), 'ok' (hoje 100%), '' (nada hoje).
+function alertInfo(wk=thisWeek()){
+ const list=contacts(wk),late=list.filter(c=>status(c,wk)==='late').length,todayOpen=list.filter(c=>status(c,wk)==='today').length;
+ const todayIdx=DAYS.findIndex((d,i)=>dayISO(wk,i)===today()),todayTotal=todayIdx<0?0:list.filter(c=>c.idx===todayIdx).length;
+ return {late,todayOpen,level:late?'blink':todayOpen?'red':todayTotal?'ok':''};
 }
-function notesOf(key){
- const out=[];
- for(const [wk,w] of Object.entries(data().weeks||{}))for(const [id,e] of Object.entries(w?.entries||{})){
-  if(id.split('|')[0]!==key||!e?.note)continue;
-  const day=DAYS.find(d=>d.k===e.day)||DAYS.find(d=>d.k===id.split('|')[1])||DAYS[0];
-  out.push({when:e.noteAt||'',wk,day:day.label,date:dayISO(wk,DAYS.indexOf(day)),note:e.note,by:e.noteBy||''});
- }
- return out.sort((a,b)=>String(b.date+b.when).localeCompare(String(a.date+a.when)));
-}
+function notes(month,key){const m=data().notes[month];return m&&Array.isArray(m[key])?m[key]:[]}
 
 async function commit(message){
  if(!allowed())return;
@@ -123,186 +115,194 @@ async function commit(message){
  if(ok&&message&&typeof toast==='function')toast(message,null,null,'success');
 }
 
-/* ---------- telas ---------- */
-function header(wk){
- const d=data(),list=contacts(wk),done=list.filter(c=>c.entry.done).length,late=list.filter(c=>status(c,wk)==='late').length;
- const pct=list.length?Math.round(done/list.length*100):0,current=wk===thisWeek();
+/* ---------------- tela ---------------- */
+function defaultDay(wk){
+ if(wk!==thisWeek())return 'seg';
+ const idx=DAYS.findIndex((d,i)=>dayISO(wk,i)===today());
+ return idx>=0?DAYS[idx].k:(today()>dayISO(wk,4)?'sex':'seg');
+}
+function top(wk,list){
+ const d=data(),total=list.length,doneN=list.filter(c=>complete(c.entry)).length,pct=total?Math.round(doneN/total*100):0;
  const names=typeof collaboratorList==='function'?collaboratorList().map(c=>String(c.name).trim()):[];
  if(d.responsible&&!names.includes(d.responsible))names.push(d.responsible);
- const weekday=new Date(today()+'T12:00:00').getDay();
- const banner=current&&(weekday===4||weekday===5)
-  ?`<div class="ow-cr-banner"><div><strong>${weekday===4?'Hoje é quinta: dia de remanejar.':'Semana quase no fim.'}</strong><span>Revise a próxima semana e mova os contatos que precisar.</span></div><button type="button" class="ow-cr-btn" data-act="next-week">Ver próxima semana</button></div>`:'';
- return `<div class="ow-cr-head">
-  <div class="ow-cr-head-main">
-   <span class="ow-cr-mandatory">Tarefa obrigatória da equipe</span>
-   <label class="ow-cr-resp"><span>Responsável pela rotina</span>
-    <select data-act="responsible"><option value="">Escolha quem organiza</option>${names.map(n=>`<option value="${h(n)}" ${n===d.responsible?'selected':''}>${h(n)}</option>`).join('')}</select>
-   </label>
-   ${d.responsible?'':'<p class="ow-cr-warn">! Defina quem é o responsável por esta rotina.</p>'}
+ const current=wk===thisWeek();
+ return `<div class="ow-cr-top">
+  <div class="ow-cr-who ${d.responsible?'':'missing'}">
+   <span class="ow-cr-kicker">Responsável pela rotina</span>
+   <select data-act="responsible" aria-label="Responsável pela rotina"><option value="">${d.responsible?'Sem responsável':'! Escolha o responsável'}</option>${names.map(n=>`<option value="${h(n)}" ${n===d.responsible?'selected':''}>${h(n)}</option>`).join('')}</select>
   </div>
-  <div class="ow-cr-progress">
-   <div class="ow-cr-progress-top"><strong>${done} de ${list.length}</strong><span>contatos feitos</span>${late?`<span class="ow-cr-late-chip">! ${late} atrasado${late===1?'':'s'}</span>`:''}</div>
-   <div class="ow-cr-bar"><i style="width:${pct}%"></i></div>
+  <div class="ow-cr-weeknav">
+   <button type="button" class="ow-cr-round" data-act="prev-week" aria-label="Semana anterior">‹</button>
+   <div><span class="ow-cr-kicker">${current?'Esta semana':'Semana'}</span><strong>${dm(wk)} a ${dm(dayISO(wk,4))}</strong></div>
+   <button type="button" class="ow-cr-round" data-act="next-week" aria-label="Próxima semana">›</button>
+   ${current?'':'<button type="button" class="ow-cr-text" data-act="this-week">Hoje</button>'}
   </div>
- </div>
- ${banner}
- <div class="ow-cr-weeknav">
-  <button type="button" class="ow-cr-icon" data-act="prev-week" aria-label="Semana anterior">‹</button>
-  <strong>Semana de ${dm(wk)} a ${dm(dayISO(wk,4))}</strong>
-  <button type="button" class="ow-cr-icon" data-act="next-week" aria-label="Próxima semana">›</button>
-  ${current?'':'<button type="button" class="ow-cr-link" data-act="this-week">Voltar para esta semana</button>'}
- </div>
- <div class="ow-cr-tabs">${[['semana','Semana'],['clientes','Clientes e prioridades'],['checklists','Checklists']].map(([k,l])=>`<button type="button" class="${view===k?'active':''}" data-act="view" data-view="${k}">${l}</button>`).join('')}</div>`;
-}
-
-function card(c,wk){
- const st=status(c,wk),e=c.entry,open=openId===c.id;
- const checks=kind=>checklist(kind).map((item,i)=>`<label class="ow-cr-check"><input type="checkbox" data-act="check" data-id="${h(c.id)}" data-kind="${kind}" data-i="${i}" ${e.checks?.[kind]?.[item]?'checked':''}><span>${h(item)}</span></label>`).join('');
- const detail=open?`<div class="ow-cr-detail">
-  <div class="ow-cr-lists">
-   <div><h4>${CHECK_TITLES.conversa}</h4>${checks('conversa')}</div>
-   <div><h4>${CHECK_TITLES.acompanhamento}</h4>${checks('acompanhamento')}</div>
+  <div class="ow-cr-score">
+   <div class="ow-cr-ring" style="--p:${pct}"><span>${pct}%</span></div>
+   <div><strong>${doneN} de ${total}</strong><span>checklists completos</span></div>
   </div>
-  <label class="ow-cr-note"><span>Nota do contato</span><textarea data-act="note" data-id="${h(c.id)}" rows="3" placeholder="O que o cliente disse, o que ficou combinado, próximos passos…">${h(e.note||'')}</textarea>${e.noteAt?`<small>Atualizada ${h(stamp(e.noteAt))}${e.noteBy?' por '+h(e.noteBy):''}</small>`:''}</label>
-  <div class="ow-cr-detail-foot">
-   <label>Remanejar para <select data-act="move" data-id="${h(c.id)}">${DAYS.map((d,i)=>`<option value="${d.k}" ${d.k===c.day?'selected':''}>${d.label} ${dm(dayISO(wk,i))}</option>`).join('')}</select></label>
-   ${e.done&&e.doneAt?`<span class="ow-cr-meta">✓ Feito ${h(stamp(e.doneAt))}${e.doneBy?' por '+h(e.doneBy):''}</span>`:''}
-   ${c.extra?`<button type="button" class="ow-cr-link danger" data-act="remove-extra" data-id="${h(c.id)}">Remover contato extra</button>`:''}
-  </div>
- </div>`:'';
- const flag=st==='late'?'<span class="ow-cr-flag" title="Atrasado">!</span>':'';
- return `<div class="ow-cr-card st-${st} ${open?'open':''}">
-  <div class="ow-cr-card-row">
-   <label class="ow-cr-done" title="Marcar contato como feito"><input type="checkbox" data-act="done" data-id="${h(c.id)}" ${e.done?'checked':''}><span></span></label>
-   <button type="button" class="ow-cr-card-main" data-act="open" data-id="${h(c.id)}"><strong>${h(c.name)}</strong><small>${h(c.type)}${c.day!==c.orig&&!c.extra?' · remanejado':''}${e.note?' · com nota':''}</small></button>
-   <span class="ow-cr-pill p-${c.priority}">${PRIORITIES[c.priority].label}</span>${flag}
-  </div>${detail}
+  <button type="button" class="ow-cr-manage" data-act="manage">Clientes da rotina</button>
  </div>`;
 }
-
-function weekView(wk){
- const list=contacts(wk),active=clientList();
- if(!active.length)return '<div class="ow-cr-empty">Nenhum cliente ativo. Cadastre os clientes em Gerenciar Clientes.</div>';
- return `<div class="ow-cr-week">${DAYS.map((d,i)=>{
-  const items=sortContacts(list.filter(c=>c.idx===i)),done=items.filter(c=>c.entry.done).length,late=items.some(c=>status(c,wk)==='late'),iso=dayISO(wk,i);
-  return `<section class="ow-cr-day ${iso===today()?'is-today':''} ${late?'has-late':''}">
-   <header><div><strong>${d.label}</strong><span>${dm(iso)}</span></div><em>${late?'! ':''}${done}/${items.length}</em></header>
-   ${i===0?'<p class="ow-cr-day-hint">Bom dia em todos os grupos.</p>':''}
-   <div class="ow-cr-cards">${items.map(c=>card(c,wk)).join('')||'<p class="ow-cr-none">Sem contatos neste dia.</p>'}</div>
-   <label class="ow-cr-add"><select data-act="add-extra" data-day="${d.k}"><option value="">+ Contato extra</option>${active.map(c=>`<option value="${h(c.key)}">${h(c.name)}</option>`).join('')}</select></label>
-  </section>`}).join('')}</div>`;
+function strip(wk,list){
+ return `<div class="ow-cr-strip" role="tablist">${DAYS.map((d,i)=>{
+  const items=list.filter(c=>c.idx===i),doneN=items.filter(c=>complete(c.entry)).length,iso=dayISO(wk,i);
+  const st=!items.length?'empty':doneN===items.length?'done':iso<today()?'late':iso===today()?'today':'next';
+  return `<button type="button" role="tab" aria-selected="${selDay===d.k}" class="ow-cr-daybtn st-${st} ${selDay===d.k?'active':''}" data-act="day" data-day="${d.k}">
+   <span class="ow-cr-daybtn-top"><b>${d.short}</b><small>${dm(iso)}</small>${st==='late'?'<i class="ow-cr-dot blink">!</i>':st==='today'?'<i class="ow-cr-dot">!</i>':st==='done'?'<i class="ow-cr-dot ok">✓</i>':''}</span>
+   <span class="ow-cr-daybtn-count">${doneN}/${items.length}</span>
+   <span class="ow-cr-daybtn-bar"><i style="width:${items.length?Math.round(doneN/items.length*100):0}%"></i></span>
+  </button>`}).join('')}</div>`;
 }
-
-function clientsView(){
- const active=clientList();
- if(!active.length)return '<div class="ow-cr-empty">Nenhum cliente ativo. Cadastre os clientes em Gerenciar Clientes.</div>';
- const rows=active.map(c=>({...c,conf:cfg(c.key)})).sort((a,b)=>PRIORITY_ORDER.indexOf(a.conf.priority)-PRIORITY_ORDER.indexOf(b.conf.priority)||a.name.localeCompare(b.name,'pt-BR',{sensitivity:'base'}));
- const week=7*86400000;
- return `<p class="ow-cr-help">Segunda é com todos. Os outros dias seguem a prioridade: Alta fala de terça a sexta, Média na terça, quinta e sexta, Normal na quarta e sexta, Leve na sexta. Toque nos dias pra ajustar um cliente.</p>
- <div class="ow-cr-clients">${rows.map(c=>{
-  const last=lastContact(c.key),stale=!last||Date.now()-new Date(last).getTime()>week,notes=notesOf(c.key),open=openNotesKey===c.key;
-  return `<div class="ow-cr-client">
-   <div class="ow-cr-client-row">
-    <strong class="ow-cr-client-name">${h(c.name)}</strong>
-    <select class="ow-cr-pri p-${c.conf.priority}" data-act="priority" data-key="${h(c.key)}">${PRIORITY_ORDER.map(p=>`<option value="${p}" ${p===c.conf.priority?'selected':''}>${PRIORITIES[p].label}</option>`).join('')}</select>
-    <div class="ow-cr-days"><span class="ow-cr-daychip on fixed" title="Segunda é com todos">Seg</span>${DAYS.slice(1).map(d=>`<button type="button" class="ow-cr-daychip ${c.conf.days.includes(d.k)?'on':''}" data-act="toggle-day" data-key="${h(c.key)}" data-day="${d.k}">${d.label.slice(0,3)}</button>`).join('')}${c.conf.custom?`<button type="button" class="ow-cr-link" data-act="reset-days" data-key="${h(c.key)}">Padrão</button>`:''}</div>
-    <span class="ow-cr-last ${stale?'stale':''}">${stale?'! ':''}${last?'Último contato '+h(stamp(last)):'Sem contato registrado'}</span>
-    <button type="button" class="ow-cr-link" data-act="notes" data-key="${h(c.key)}">${notes.length?`Notas (${notes.length})`:'Sem notas'}</button>
-   </div>
-   ${open?`<div class="ow-cr-notes">${notes.length?notes.map(n=>`<div class="ow-cr-noteitem"><small>${h(n.day)} ${dm(n.date)}${n.by?' · '+h(n.by):''}</small><p>${h(n.note)}</p></div>`).join(''):'<p class="ow-cr-none">Nenhuma nota ainda. As notas ficam nos contatos da aba Semana.</p>'}</div>`:''}
-  </div>`}).join('')}</div>`;
+function tile(c,wk){
+ const st=status(c,wk),ck=checksOf(c.entry),n=checkCount(c.entry),month=monthOf(dayISO(wk,c.idx)),ns=notes(month,c.key),last=ns[0];
+ const badgeTxt=st==='done'?'✓ Completo':st==='late'?'! Atrasado':st==='today'?'Pendente hoje':'Agendado';
+ return `<article class="ow-cr-tile st-${st} p-${c.priority}">
+  <header>
+   <div class="ow-cr-tile-name"><strong>${h(c.name)}</strong><span>${h(PRIORITIES[c.priority].label)}${c.day!==c.orig&&!c.extra?' · remanejado':''}${c.extra?' · extra':''}</span></div>
+   <span class="ow-cr-state">${badgeTxt}</span>
+  </header>
+  <div class="ow-cr-checks">${CHECKS.map(x=>`<button type="button" class="ow-cr-chk ${ck[x.k]?'on':''}" data-act="check" data-id="${h(c.id)}" data-k="${x.k}" aria-pressed="${ck[x.k]}"><i></i>${x.label}</button>`).join('')}</div>
+  <div class="ow-cr-tile-bar"><i style="width:${Math.round(n/CHECKS.length*100)}%"></i></div>
+  <button type="button" class="ow-cr-tile-notes" data-act="open" data-id="${h(c.id)}">
+   ${last?`<span class="ow-cr-note-preview">“${h(last.text.length>70?last.text.slice(0,70)+'…':last.text)}”</span>`:'<span class="ow-cr-note-empty">+ Anotar algo deste cliente</span>'}
+   <small>${ns.length?`${ns.length} nota${ns.length===1?'':'s'} em ${monthLabel(month)}`:'Notas do mês'} ›</small>
+  </button>
+ </article>`;
 }
-
-function checklistView(){
- return `<p class="ow-cr-help">Um item por linha. Esses itens aparecem em todo contato, quando você abre o cliente na aba Semana.</p>
- <div class="ow-cr-config">${['conversa','acompanhamento'].map(k=>`<label><strong>${CHECK_TITLES[k]}</strong><textarea id="owCrList-${k}" rows="7">${h(checklist(k).join('\n'))}</textarea></label>`).join('')}</div>
- <div class="ow-cr-config-actions"><button type="button" class="ow-cr-btn" data-act="save-lists">Salvar checklists</button><button type="button" class="ow-cr-link" data-act="reset-lists">Restaurar padrão</button></div>`;
+function dayView(wk,list){
+ const i=DAYS.findIndex(d=>d.k===selDay),d=DAYS[i],items=list.filter(c=>c.idx===i);
+ const order={late:0,today:1,next:2,done:3};
+ items.sort((a,b)=>order[status(a,wk)]-order[status(b,wk)]||PRIORITY_ORDER.indexOf(a.priority)-PRIORITY_ORDER.indexOf(b.priority)||a.name.localeCompare(b.name,'pt-BR',{sensitivity:'base'}));
+ const inDay=new Set(items.map(c=>c.key)),others=activeClients().filter(c=>!inDay.has(c.key));
+ return `<div class="ow-cr-dayhead">
+   <div><h3>${d.label}, ${dm(dayISO(wk,i))}</h3><p>${h(d.type)}${i===0?' · fale com todos os clientes':''}</p></div>
+   ${others.length?`<select class="ow-cr-extra" data-act="add-extra" data-day="${d.k}" aria-label="Adicionar contato extra"><option value="">+ Incluir cliente neste dia</option>${others.map(c=>`<option value="${h(c.key)}">${h(c.name)}</option>`).join('')}</select>`:''}
+  </div>
+  ${items.length?`<div class="ow-cr-grid">${items.map(c=>tile(c,wk)).join('')}</div>`:'<div class="ow-cr-empty">Nenhum contato neste dia.</div>'}`;
 }
-
+function drawer(wk,list){
+ const c=list.find(x=>x.id===openId);if(!c)return '';
+ const ck=checksOf(c.entry),month=monthOf(dayISO(wk,c.idx)),ns=notes(month,c.key);
+ return `<div class="ow-cr-overlay" data-act="close"></div>
+ <aside class="ow-cr-drawer" role="dialog" aria-label="${h(c.name)}">
+  <header><div><span class="ow-cr-kicker">${h(DAYS[c.idx].label)}, ${dm(dayISO(wk,c.idx))} · ${h(c.type)}</span><h3>${h(c.name)}</h3></div><button type="button" class="ow-cr-round" data-act="close" aria-label="Fechar">×</button></header>
+  <section><h4>Checklist do contato</h4><div class="ow-cr-checks big">${CHECKS.map(x=>`<button type="button" class="ow-cr-chk ${ck[x.k]?'on':''}" data-act="check" data-id="${h(c.id)}" data-k="${x.k}" aria-pressed="${ck[x.k]}"><i></i>${x.label}</button>`).join('')}</div></section>
+  <section><h4>Notas de ${monthLabel(month)}</h4>
+   <div class="ow-cr-noteform"><textarea id="owCrNoteText" rows="3" placeholder="Ex.: pediu as fotos do produto novo até quinta"></textarea><button type="button" class="ow-cr-primary" data-act="add-note" data-key="${h(c.key)}" data-month="${month}">Salvar nota</button></div>
+   <div class="ow-cr-notelist">${ns.length?ns.map(n=>`<div class="ow-cr-note"><p>${h(n.text)}</p><small>${h(when(n.at))}${n.by?' · '+h(n.by):''}</small><button type="button" class="ow-cr-del" data-act="del-note" data-key="${h(c.key)}" data-month="${month}" data-note="${h(n.id)}" aria-label="Apagar nota">×</button></div>`).join(''):'<p class="ow-cr-muted">Nenhuma nota neste mês. O que for anotado aqui aparece em todos os dias deste cliente até o fim do mês.</p>'}</div>
+  </section>
+  <section class="ow-cr-drawer-foot">
+   <label>Remanejar este contato para <select data-act="move" data-id="${h(c.id)}">${DAYS.map((d,i)=>`<option value="${d.k}" ${d.k===c.day?'selected':''}>${d.label} ${dm(dayISO(wk,i))}</option>`).join('')}</select></label>
+   ${c.extra?`<button type="button" class="ow-cr-text danger" data-act="remove-extra" data-id="${h(c.id)}">Tirar este contato extra</button>`:''}
+  </section>
+ </aside>`;
+}
+function manager(){
+ if(!managing)return '';
+ const rows=allClients().map(c=>({...c,conf:cfg(c.key)})).sort((a,b)=>(b.conf.active-a.conf.active)||PRIORITY_ORDER.indexOf(a.conf.priority)-PRIORITY_ORDER.indexOf(b.conf.priority)||a.name.localeCompare(b.name,'pt-BR',{sensitivity:'base'}));
+ return `<div class="ow-cr-overlay" data-act="close"></div>
+ <div class="ow-cr-modal" role="dialog" aria-label="Clientes da rotina">
+  <header><div><h3>Clientes da rotina</h3><p>Um clique tira ou coloca o cliente. Segunda é com todos; os outros dias seguem a prioridade.</p></div><button type="button" class="ow-cr-round" data-act="close" aria-label="Fechar">×</button></header>
+  <div class="ow-cr-mlist">${rows.map(c=>`<div class="ow-cr-mrow ${c.conf.active?'':'off'}">
+   <button type="button" class="ow-cr-switch ${c.conf.active?'on':''}" data-act="toggle-client" data-key="${h(c.key)}" aria-pressed="${c.conf.active}" title="${c.conf.active?'Tirar da rotina':'Colocar na rotina'}"><i></i></button>
+   <strong>${h(c.name)}</strong>
+   ${c.conf.active?`<div class="ow-cr-seg">${PRIORITY_ORDER.map(p=>`<button type="button" class="p-${p} ${c.conf.priority===p?'on':''}" data-act="priority" data-key="${h(c.key)}" data-p="${p}">${PRIORITIES[p].label}</button>`).join('')}</div>
+   <div class="ow-cr-days"><span class="on fixed">Seg</span>${DAYS.slice(1).map(d=>`<button type="button" class="${c.conf.days.includes(d.k)?'on':''}" data-act="toggle-day" data-key="${h(c.key)}" data-day="${d.k}">${d.short}</button>`).join('')}</div>`:'<span class="ow-cr-muted">Fora da rotina</span>'}
+  </div>`).join('')||'<p class="ow-cr-muted">Nenhum cliente cadastrado.</p>'}</div>
+ </div>`;
+}
 function render(){
  const el=$('contactRoutineContent');if(!el)return;
- if(!allowed()){el.innerHTML='';return}
- // Não apaga o que alguém está digitando quando chega atualização de outro usuário.
- const typing=document.activeElement;if(typing&&el.contains(typing)&&typing.tagName==='TEXTAREA')return;
+ if(!allowed()){el.innerHTML='';document.body.classList.remove('ow-cr-locked');return}
+ // Guarda o rascunho da nota (e o foco) quando a tela é redesenhada por outra atualização.
+ const box=$('owCrNoteText'),draft=box?box.value:'',focused=box&&document.activeElement===box,caret=focused?box.selectionStart:0,draftFor=openId;
  if(!weekStart)weekStart=thisWeek();
- const wk=weekStart;
- el.innerHTML=`<div class="ow-cr">${header(wk)}${view==='clientes'?clientsView():view==='checklists'?checklistView():weekView(wk)}</div>`;
+ if(!selDay)selDay=defaultDay(weekStart);
+ const wk=weekStart,list=contacts(wk),wd=new Date(today()+'T12:00:00').getDay(),current=wk===thisWeek();
+ const banner=current&&wd===4?'<div class="ow-cr-banner"><strong>Quinta é dia de remanejar.</strong><span>Confira a próxima semana e mova o que precisar.</span><button type="button" class="ow-cr-text" data-act="plan-next">Abrir próxima semana ›</button></div>':'';
+ el.innerHTML=`<div class="ow-cr">${top(wk,list)}${banner}${strip(wk,list)}${activeClients().length?dayView(wk,list):'<div class="ow-cr-empty">Nenhum cliente na rotina. Use “Clientes da rotina” para incluir.</div>'}${drawer(wk,list)}${manager()}</div>`;
+ const nb=$('owCrNoteText');if(nb&&draft&&draftFor===openId){nb.value=draft;if(focused){nb.focus({preventScroll:true});try{nb.setSelectionRange(caret,caret)}catch{}}}
+ document.body.classList.toggle('ow-cr-locked',!el.classList.contains('hidden')&&(!!(openId&&list.some(x=>x.id===openId))||managing));
 }
 
 function badge(){
  const btn=$('contactRoutineTab'),b=$('contactRoutineBadge');if(!btn||!b)return;
- const n=allowed()?lateCount():0;
- b.textContent=n>99?'99+':String(n);
- b.classList.toggle('hidden',!n);
- btn.classList.toggle('ow-cr-tab-late',!!n);
- btn.title=n?`Contato com clientes · ${n} atrasado${n===1?'':'s'}`:'Contato com clientes';
+ const info=allowed()?alertInfo():{level:'',late:0,todayOpen:0};
+ btn.classList.toggle('ow-cr-alert',info.level==='red'||info.level==='blink');
+ btn.classList.toggle('ow-cr-blink',info.level==='blink');
+ btn.classList.toggle('ow-cr-ok',info.level==='ok');
+ b.textContent=info.level==='ok'?'✓':'!';
+ b.classList.toggle('hidden',!info.level);
+ const open=info.late+info.todayOpen;
+ btn.title=info.level==='blink'?`Contatos atrasados: ${info.late} checklist${info.late===1?'':'s'} de dias anteriores incompleto${info.late===1?'':'s'}`:info.level==='red'?`Contatos de hoje: ${open} checklist${open===1?'':'s'} pendente${open===1?'':'s'}`:info.level==='ok'?'Contatos de hoje completos':'Contatos com clientes';
+ if(document.getElementById('contactRoutineContent')?.classList.contains('hidden')){document.body.classList.remove('ow-cr-locked');openId=null;managing=false}
 }
 
-/* ---------- ações ---------- */
+/* ---------------- ações ---------------- */
 function onClick(ev){
  const t=ev.target.closest('[data-act]');if(!t||!allowed())return;
- const act=t.dataset.act;
- if(['done','check','move','add-extra','responsible','priority','note'].includes(act))return;
- const wk=weekStart;
- if(act==='view'){view=t.dataset.view;openId=null;render();return}
- if(act==='prev-week'){weekStart=calendarAddDays(wk,-7);openId=null;render();return}
- if(act==='next-week'){weekStart=calendarAddDays(t.closest('.ow-cr-banner')?thisWeek():wk,7);if(t.closest('.ow-cr-banner'))view='semana';openId=null;render();return}
- if(act==='this-week'){weekStart=thisWeek();openId=null;render();return}
- if(act==='open'){openId=openId===t.dataset.id?null:t.dataset.id;render();return}
- if(act==='notes'){openNotesKey=openNotesKey===t.dataset.key?null:t.dataset.key;render();return}
+ const act=t.dataset.act,wk=weekStart;
+ if(['responsible','move','add-extra'].includes(act))return;
+ if(act==='close'){openId=null;managing=false;render();return}
+ if(act==='day'){selDay=t.dataset.day;render();return}
+ if(act==='prev-week'||act==='next-week'){weekStart=calendarAddDays(wk,act==='prev-week'?-7:7);selDay=defaultDay(weekStart);openId=null;render();return}
+ if(act==='this-week'){weekStart=thisWeek();selDay=defaultDay(weekStart);render();return}
+ if(act==='plan-next'){weekStart=calendarAddDays(thisWeek(),7);selDay='seg';render();return}
+ if(act==='open'){openId=t.dataset.id;render();return}
+ if(act==='manage'){managing=true;render();return}
+ if(act==='check'){
+  const e=entry(wk,t.dataset.id),k=t.dataset.k,c=checksOf(e);
+  e.checks={...c,[k]:!c[k]};delete e.done;
+  if(complete(e)){e.completedAt=new Date().toISOString();e.completedBy=who()}else{delete e.completedAt;delete e.completedBy}
+  commit();return;
+ }
+ if(act==='add-note'){
+  const box=$('owCrNoteText'),text=String(box?.value||'').trim().slice(0,2000);if(!text){box?.focus();return}
+  const all=data().notes,m=all[t.dataset.month]=all[t.dataset.month]||{};
+  m[t.dataset.key]=[{id:newId(),text,at:new Date().toISOString(),by:who()},...(Array.isArray(m[t.dataset.key])?m[t.dataset.key]:[])];
+  box.value='';box.blur();commit('Nota salva.');return;
+ }
+ if(act==='del-note'){
+  const m=data().notes[t.dataset.month];if(!m||!Array.isArray(m[t.dataset.key]))return;
+  m[t.dataset.key]=m[t.dataset.key].filter(n=>n.id!==t.dataset.note);
+  if(!m[t.dataset.key].length)delete m[t.dataset.key];
+  commit('Nota apagada.');return;
+ }
+ if(act==='remove-extra'){delete weekData(wk).entries[t.dataset.id];openId=null;commit('Contato extra retirado.');return}
+ if(act==='toggle-client'){
+  const key=t.dataset.key,conf=cfg(key);data().clients[key]={...(data().clients[key]||{}),active:!conf.active};
+  commit(conf.active?'Cliente fora da rotina.':'Cliente na rotina.');return;
+ }
+ if(act==='priority'){const key=t.dataset.key,c={...(data().clients[key]||{}),priority:t.dataset.p};delete c.days;data().clients[key]=c;commit();return}
  if(act==='toggle-day'){
   const key=t.dataset.key,conf=cfg(key),days=new Set(conf.days);
   days.has(t.dataset.day)?days.delete(t.dataset.day):days.add(t.dataset.day);
   data().clients[key]={...(data().clients[key]||{}),priority:conf.priority,days:DAYS.map(d=>d.k).filter(k=>days.has(k))};
   commit();return;
  }
- if(act==='reset-days'){const c=data().clients[t.dataset.key];if(c)delete c.days;commit('Dias voltaram ao padrão da prioridade.');return}
- if(act==='remove-extra'){const w=weekData(wk);delete w.entries[t.dataset.id];openId=null;commit('Contato extra removido.');return}
- if(act==='save-lists'){
-  for(const k of ['conversa','acompanhamento']){const lines=String($('owCrList-'+k)?.value||'').split('\n').map(s=>s.trim()).filter(Boolean);data().checklists[k]=lines.length?[...new Set(lines)].slice(0,15):DEFAULT_CHECKLISTS[k].slice()}
-  commit('Checklists salvos.');return;
- }
- if(act==='reset-lists'){data().checklists={};commit('Checklists restaurados.');return}
 }
 function onChange(ev){
  const t=ev.target.closest('[data-act]');if(!t||!allowed())return;
  const act=t.dataset.act,wk=weekStart;
- if(act==='done'){
-  const e=entry(wk,t.dataset.id);
-  if(t.checked){e.done=true;e.doneAt=new Date().toISOString();e.doneBy=typeof currentUser==='string'?currentUser:''}
-  else{delete e.done;delete e.doneAt;delete e.doneBy}
-  commit();return;
- }
- if(act==='check'){
-  const item=checklist(t.dataset.kind)[Number(t.dataset.i)];if(!item)return;
-  const e=entry(wk,t.dataset.id);e.checks=e.checks||{};e.checks[t.dataset.kind]=e.checks[t.dataset.kind]||{};
-  if(t.checked)e.checks[t.dataset.kind][item]=true;else delete e.checks[t.dataset.kind][item];
-  commit();return;
- }
- if(act==='note'){
-  const e=entry(wk,t.dataset.id),text=String(t.value||'').trim().slice(0,4000);
-  if((e.note||'')===text)return;
-  if(text){e.note=text;e.noteAt=new Date().toISOString();e.noteBy=typeof currentUser==='string'?currentUser:''}else{delete e.note;delete e.noteAt;delete e.noteBy}
-  commit('Nota salva.');return;
- }
- if(act==='move'){const e=entry(wk,t.dataset.id),orig=t.dataset.id.split('|')[1];if(t.value===orig&&!e.extra)delete e.day;else e.day=t.value;commit('Contato remanejado.');return}
+ if(act==='responsible'){data().responsible=t.value;commit(t.value?'Responsável definido.':'');return}
+ if(act==='move'){const e=entry(wk,t.dataset.id),orig=t.dataset.id.split('|')[1];if(t.value===orig&&!e.extra)delete e.day;else e.day=t.value;selDay=t.value;openId=null;commit('Contato remanejado.');return}
  if(act==='add-extra'){
   const key=t.value;if(!key)return;
-  const id=key+'|x_'+(typeof uid==='function'?uid():Date.now().toString(36));
-  weekData(wk,true).entries[id]={extra:true,day:t.dataset.day,type:'Contato extra'};
-  openId=id;commit('Contato extra adicionado.');return;
+  weekData(wk,true).entries[key+'|x_'+newId()]={extra:true,day:t.dataset.day};
+  commit('Cliente incluído neste dia.');return;
  }
- if(act==='responsible'){data().responsible=t.value;commit(t.value?'Responsável definido.':'');return}
- if(act==='priority'){const key=t.dataset.key;data().clients[key]={...(data().clients[key]||{}),priority:t.value};commit();return}
 }
 
 function init(){
  const el=$('contactRoutineContent');if(!el)return;
  el.addEventListener('click',onClick);
  el.addEventListener('change',onChange);
- setInterval(()=>{badge();if(!el.classList.contains('hidden')&&!el.contains(document.activeElement))render()},5*60*1000);
+ // Esc fecha o painel/janela sem sair da área (o Esc global do sistema volta para o início).
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&(openId||managing)&&!el.classList.contains('hidden')){e.preventDefault();e.stopImmediatePropagation();openId=null;managing=false;render()}},true);
+ setInterval(()=>{badge();if(!el.classList.contains('hidden'))render()},5*60*1000);
  badge();
 }
-window.owContactRoutine={render,badge,_test:{contacts,status,cfg,lateCount,data}};
+window.owContactRoutine={render,badge,_test:{contacts,status,cfg,alertInfo,data,complete,notes,activeClients}};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
