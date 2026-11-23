@@ -28,16 +28,79 @@ async function webhook(req,res){
   const secret=env('WHATSAPP_WEBHOOK_SECRET');
   if(!secret)return reply(res,503,{error:'Webhook ainda não configurado.'});
   if(!core.safeEqual(q(req,'key'),secret))return reply(res,401,{error:'Não autorizado.'});
-  const messages=core.extractMessages(body(req)).filter(m=>!m.groupId);
-  if(!messages.length)return reply(res,200,{ok:true,received:0});
-  const job=(async()=>{for(const m of messages)await wa.processMessage(m)})().catch(e=>console.error('WhatsApp webhook:',e?.message));
+  const payload=body(req);
+  const messages=core.extractMessages(payload).filter(m=>!m.groupId);
+  const statuses=core.extractStatuses(payload);
+  if(!messages.length&&!statuses.length)return reply(res,200,{ok:true,received:0});
+  const job=(async()=>{
+    if(statuses.length)await wa.applyStatuses(statuses);
+    for(const m of messages)await wa.processMessage(m);
+  })().catch(e=>console.error('WhatsApp webhook:',e?.message));
   if(background(job))return reply(res,200,{ok:true,received:messages.length});
   await job;
   return reply(res,200,{ok:true,received:messages.length});
 }
 
-async function adminAction(action,req,res){
+const teamSecret=()=>env('OW_TEAM_TOKEN_SECRET')||env('WHATSAPP_WEBHOOK_SECRET');
+// Administrador (login do Supabase) ou equipe (passe de 12h obtido com a senha da equipe).
+async function who(req){
+  const team=core.readTeamToken(teamSecret(),req.headers?.['x-ow-team']);
+  if(team)return {admin:false,name:team.name||'Equipe'};
   await admin(req);
+  return {admin:true,name:'Administrador'};
+}
+
+async function panelAction(action,req,res){
+  if(action==='team-login'){
+    if(req.method!=='POST')return reply(res,405,{error:'Use POST.'});
+    if(!teamSecret())return reply(res,503,{error:'O WhatsApp ainda não foi configurado na Vercel.'});
+    const b=body(req);
+    if(!await core.verifyTeamPassword(b.password))return reply(res,401,{error:'Senha da equipe incorreta.'});
+    return reply(res,200,{token:core.signTeamToken(teamSecret(),core.clip(b.name,60)||'Equipe')});
+  }
+  const user=await who(req);
+  if(action==='conversations'){
+    const [rows,contacts]=await Promise.all([
+      wa.db('whatsapp_conversations?select=*&order=last_at.desc&limit=300'),
+      wa.db('whatsapp_contacts?select=*')
+    ]);
+    const byPhone=new Map((contacts||[]).map(c=>[c.phone,c]));
+    const list=(rows||[]).map(r=>{
+      const c=byPhone.get(r.phone)||{};
+      return {phone:r.phone,name:c.contact_name||r.profile_name||'',clientName:c.client_name||'',isTeam:!!c.is_team,
+        lastAt:r.last_at,lastInAt:r.last_in_at,lastText:core.clip(r.last_text,160),lastType:r.last_type,lastDirection:r.last_direction,
+        unanswered:core.isUnanswered(r),windowOpen:core.windowOpen(r.last_in_at)};
+    });
+    return reply(res,200,{conversations:list,unanswered:list.filter(c=>c.unanswered).length,me:user});
+  }
+  if(action==='messages'){
+    const phone=core.normalizePhone(q(req,'phone'));
+    if(!phone)return reply(res,400,{error:'Número inválido.'});
+    const rows=await wa.db('whatsapp_messages?phone=eq.'+phone+'&select=id,direction,message_type,text,transcript,media_id,mime,status,sent_by,error,created_at&order=created_at.desc&limit=300');
+    return reply(res,200,{messages:(rows||[]).reverse()});
+  }
+  if(action==='media'){
+    const id=String(q(req,'id')).replace(/[^\w.\-]/g,'');
+    if(!id)return reply(res,400,{error:'Mídia inválida.'});
+    const file=await wa.downloadMedia(id);
+    res.setHeader('Content-Type',file.mime.split(';')[0]||'application/octet-stream');
+    res.setHeader('Cache-Control','private, max-age=3600');
+    return res.status(200).send(file.buffer);
+  }
+  if(req.method==='POST'&&action==='chat-send'){
+    const b=body(req),to=core.normalizePhone(b.phone),text=core.clip(b.text,3800).trim();
+    if(to.length<10||!text)return reply(res,400,{error:'Escreva a mensagem.'});
+    const rows=await wa.db('whatsapp_conversations?phone=eq.'+to+'&select=last_in_at');
+    if(!core.windowOpen(rows?.[0]?.last_in_at))return reply(res,409,{error:'Passaram 24h desde a última mensagem do cliente. Pela regra do WhatsApp, ele precisa mandar mensagem primeiro.'});
+    await wa.sendAndLog(to,text,user.admin?(core.clip(b.by,60)||'Administrador'):user.name);
+    return reply(res,200,{ok:true});
+  }
+  if(req.method==='POST'&&action==='resolve'){
+    const phone=core.normalizePhone(body(req).phone);
+    if(!phone)return reply(res,400,{error:'Número inválido.'});
+    await wa.db('whatsapp_threads?on_conflict=phone',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({phone,resolved_at:new Date().toISOString(),resolved_by:user.name})});
+    return reply(res,200,{ok:true});
+  }
   if(action==='status'){
     return reply(res,200,{config:wa.config(),webhookPath:'/api/whatsapp?key=SEU_SEGREDO'});
   }
@@ -81,7 +144,7 @@ async function adminAction(action,req,res){
   if(action==='send'){
     const to=core.normalizePhone(b.phone),text=core.clip(b.text,3800).trim();
     if(to.length<10||!text)return reply(res,400,{error:'Informe número e mensagem.'});
-    await wa.sendText(to,text);
+    await wa.sendAndLog(to,text,user.name);
     return reply(res,200,{ok:true});
   }
   return reply(res,404,{error:'Ação desconhecida.'});
@@ -95,7 +158,7 @@ module.exports=async function(req,res){
       return reply(res,403,{error:'Token de verificação inválido.'});
     }
     const action=q(req,'action');
-    if(action)return await adminAction(action,req,res);
+    if(action)return await panelAction(action,req,res);
     if(req.method==='POST')return await webhook(req,res);
     return reply(res,200,{ok:true,service:'One Way · WhatsApp'});
   }catch(error){

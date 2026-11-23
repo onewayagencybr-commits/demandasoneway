@@ -1,44 +1,71 @@
-/* One Way: WhatsApp da agência (só Administrador).
-   Mostra o que chegou pelo WhatsApp Business: solicitações, agendamentos, dúvidas,
-   notas da equipe e reuniões transcritas com plano de ação.
-   Os dados ficam nas tabelas whatsapp_items e whatsapp_contacts (Supabase),
-   lidas só pelo servidor em /api/whatsapp. Daqui dá para virar demanda com um clique. */
+/* One Way: WhatsApp da agência — para todos os logins do sistema.
+   Conversas: o WhatsApp da empresa dentro do sistema (lista à esquerda, conversa à direita).
+   Conversa fica vermelha enquanto o cliente estiver sem resposta de alguém da equipe.
+   Pedidos/Reuniões: o que a IA organizou (solicitações, agendamentos, reuniões transcritas).
+   Os dados ficam no Supabase e só o servidor (/api/whatsapp) lê. O Administrador entra
+   com o login dele; os outros logins confirmam a senha da equipe uma vez (passe de 12h). */
 (()=>{
 'use strict';
 const $=id=>document.getElementById(id);
 const h=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const KIND={solicitacao:'Solicitação',agendamento:'Agendamento',duvida:'Dúvida',reuniao:'Reunião',nota:'Nota da equipe',outro:'Outro'};
 const AREA_LABEL={arte:'Arte',video:'Vídeo',trafego:'Tráfego'};
-const TABS=[['inbox','Caixa de entrada'],['meetings','Reuniões'],['contacts','Contatos'],['setup','Configuração']];
+const TABS=[['chat','Conversas'],['inbox','Pedidos'],['meetings','Reuniões'],['contacts','Contatos'],['setup','Configuração']];
+const TEAM_KEY='ow-wa-team-v1';
 const FILTERS=[['','Pendentes'],['feito','Feitos'],['arquivado','Arquivados']];
 
-let open=false,tab='inbox',filter='',data={items:[],contacts:[],clients:[],config:null},loading=false,err='',formFor=null,expanded=new Set(),newCount=0;
+let open=false,tab='chat',filter='',data={items:[],contacts:[],clients:[],config:null},loading=false,err='',formFor=null,expanded=new Set(),newCount=0;
+let convs=[],current=null,msgs=[],search='',chatErr='',needTeam=false,sending=false,mediaUrls=new Map(),lastSig='';
 
-const allowed=()=>typeof isAdmin==='function'&&isAdmin();
+const allowed=()=>typeof currentUser==='string'&&!!currentUser;
+const adm=()=>typeof isAdmin==='function'&&isAdmin();
+const me=()=>typeof currentUser==='string'?currentUser.replace(' Login',''):'';
 const when=iso=>{try{return new Intl.DateTimeFormat('pt-BR',{timeZone:'America/Cuiaba',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}).format(new Date(iso))}catch{return ''}};
 const phoneLabel=p=>{const s=String(p||'');return s.length>=12?`+${s.slice(0,2)} (${s.slice(2,4)}) ${s.slice(4,-4)}-${s.slice(-4)}`:s};
 const notify=(msg,type)=>{try{if(typeof toast==='function')toast(msg,null,null,type)}catch{}};
 
-async function api(action,opts={}){
- if(typeof supabaseClient==='undefined'||!supabaseClient)throw Error('Entre como administrador.');
- const {data:s,error}=await supabaseClient.auth.getSession();
- if(error||!s?.session?.access_token)throw Error('Sessão expirada. Faça login novamente.');
+const teamToken=()=>{try{return sessionStorage.getItem(TEAM_KEY)||''}catch{return ''}};
+async function authHeaders(){
+ if(adm()&&typeof supabaseClient!=='undefined'&&supabaseClient){
+  const {data:s}=await supabaseClient.auth.getSession();
+  if(s?.session?.access_token)return {Authorization:'Bearer '+s.session.access_token};
+ }
+ const t=teamToken();
+ if(t)return {'X-OW-Team':t};
+ throw Object.assign(Error('Confirme a senha da equipe para abrir o WhatsApp.'),{needTeam:true});
+}
+async function raw(action,opts={}){
  const qs=new URLSearchParams({action,...(opts.query||{})});
- const res=await fetch('/api/whatsapp?'+qs,{method:opts.body?'POST':'GET',cache:'no-store',headers:{Authorization:'Bearer '+s.session.access_token,'Content-Type':'application/json'},body:opts.body?JSON.stringify(opts.body):undefined});
+ const res=await fetch('/api/whatsapp?'+qs,{method:opts.body?'POST':'GET',cache:'no-store',headers:{...(await authHeaders()),'Content-Type':'application/json'},body:opts.body?JSON.stringify(opts.body):undefined});
+ if(res.status===401&&!adm()){try{sessionStorage.removeItem(TEAM_KEY)}catch{}throw Object.assign(Error('Confirme a senha da equipe para abrir o WhatsApp.'),{needTeam:true})}
+ return res;
+}
+async function api(action,opts={}){
+ const res=await raw(action,opts);
  const json=await res.json().catch(()=>({}));
  if(!res.ok){
   const m=String(json.error||'');
-  if(/whatsapp_(items|contacts)/.test(m))throw Error('Falta criar as tabelas do WhatsApp no Supabase (arquivo supabase/migrations/20261123_whatsapp_assistant.sql).');
+  if(/whatsapp_(items|contacts|messages|threads|conversations)/.test(m))throw Error('Falta criar as tabelas do WhatsApp no Supabase (arquivo supabase/migrations/20261123_whatsapp_assistant.sql).');
   throw Error(m||'Não foi possível falar com o servidor.');
  }
  return json;
 }
 async function load(){
  if(!allowed())return;
+ if(tab==='chat')return loadChat(true);
  loading=true;err='';render();
- try{data=await api('list',{query:filter?{status:filter}:{}});if(!filter)newCount=data.items.filter(i=>i.status==='novo'||i.status==='erro').length}
- catch(e){err=e.message}
- loading=false;render();badge();
+ try{data=await api('list',{query:filter?{status:filter}:{}});needTeam=false}
+ catch(e){err=e.message;needTeam=!!e.needTeam}
+ loading=false;render();
+}
+async function loadChat(full){
+ try{
+  const r=await api('conversations');convs=r.conversations||[];newCount=r.unanswered||0;needTeam=false;chatErr='';
+  if(current){const m=await api('messages',{query:{phone:current}});msgs=m.messages||[]}
+ }catch(e){chatErr=e.message;needTeam=!!e.needTeam}
+ const sig=JSON.stringify([convs.map(c=>[c.phone,c.lastAt,c.unanswered]),msgs.map(m=>[m.id,m.status,m.transcript?1:0]),chatErr,needTeam]);
+ if(full||sig!==lastSig){lastSig=sig;render()}
+ badge();
 }
 
 /* ---------- clientes e demandas ---------- */
@@ -113,7 +140,7 @@ function itemCard(i){
   ${i.demandIds?.length?`<p class="ow-wa-ok">✓ ${i.demandIds.length} demanda${i.demandIds.length===1?'':'s'} criada${i.demandIds.length===1?'':'s'}</p>`:''}
   ${noClient&&i.phone?`<div class="ow-wa-link"><select data-act="link-client" data-phone="${h(i.phone)}" data-name="${h(i.contactName)}">${clientOptions('').replace('— escolha o cliente —','Vincular este número a um cliente…')}</select></div>`:''}
   <div class="ow-wa-actions">
-   ${i.kind!=='nota'?`<button type="button" class="ow-wa-primary" data-act="form" data-id="${h(i.id)}">Virar demanda</button>`:''}
+   ${i.kind!=='nota'&&adm()?`<button type="button" class="ow-wa-primary" data-act="form" data-id="${h(i.id)}">Virar demanda</button>`:''}
    ${i.status!=='feito'?`<button type="button" class="ow-wa-ghost" data-act="status" data-id="${h(i.id)}" data-status="feito">Feito</button>`:`<button type="button" class="ow-wa-ghost" data-act="status" data-id="${h(i.id)}" data-status="novo">Reabrir</button>`}
    ${i.status!=='arquivado'?`<button type="button" class="ow-wa-ghost" data-act="status" data-id="${h(i.id)}" data-status="arquivado">Arquivar</button>`:''}
    ${i.phone?`<a class="ow-wa-ghost" href="https://wa.me/${h(i.phone)}" target="_blank" rel="noopener">Abrir conversa</a>`:''}
@@ -137,7 +164,7 @@ function meetingCard(i){
   ${i.status==='erro'?`<p class="ow-wa-error">Não foi possível processar: ${h(i.error)}</p>`:''}
   ${d.summary?`<p class="ow-wa-summary">${h(d.summary)}</p>`:''}
   ${d.decisions?.length?`<h4>Decisões</h4><ul>${d.decisions.map(x=>`<li>${h(x)}</li>`).join('')}</ul>`:''}
-  ${plan.length?`<h4>Plano de ação</h4><ol class="ow-wa-plan">${plan.map((t,n)=>`<li><div><span>${h(t.task)}</span><small>${[t.owner,t.deadline&&'até '+t.deadline,AREA_LABEL[t.area]].filter(Boolean).map(h).join(' · ')}</small></div><button type="button" class="ow-wa-mini" data-act="form" data-id="${h(i.id)}" data-task="${n}">→ demanda</button>${demandForm(i,n)}</li>`).join('')}</ol>`:''}
+  ${plan.length?`<h4>Plano de ação</h4><ol class="ow-wa-plan">${plan.map((t,n)=>`<li><div><span>${h(t.task)}</span><small>${[t.owner,t.deadline&&'até '+t.deadline,AREA_LABEL[t.area]].filter(Boolean).map(h).join(' · ')}</small></div>${adm()?`<button type="button" class="ow-wa-mini" data-act="form" data-id="${h(i.id)}" data-task="${n}">→ demanda</button>`:''}${demandForm(i,n)}</li>`).join('')}</ol>`:''}
   ${d.clientPending?.length?`<h4>Pendências do cliente</h4><ul>${d.clientPending.map(x=>`<li>${h(x)}</li>`).join('')}</ul>`:''}
   ${i.transcript?`<details><summary>Ver transcrição completa</summary><p class="ow-wa-original">${h(i.transcript)}</p></details>`:''}
   ${i.demandIds?.length?`<p class="ow-wa-ok">✓ ${i.demandIds.length} demanda${i.demandIds.length===1?'':'s'} criada${i.demandIds.length===1?'':'s'} a partir desta reunião</p>`:''}
@@ -183,29 +210,91 @@ function setupView(){
   <code class="ow-wa-code">${h(origin)}/api/whatsapp?key=<b>SEU_SEGREDO</b></code>
   <p class="ow-wa-muted">Troque SEU_SEGREDO pelo mesmo valor que você colocou em WHATSAPP_WEBHOOK_SECRET na Vercel.</p></section>`;
 }
+/* ---------- conversas ---------- */
+const hhmm=iso=>{try{const d=new Date(iso),today=new Date();const same=d.toDateString()===today.toDateString();return new Intl.DateTimeFormat('pt-BR',same?{timeZone:'America/Cuiaba',hour:'2-digit',minute:'2-digit'}:{timeZone:'America/Cuiaba',day:'2-digit',month:'2-digit'}).format(d)}catch{return ''}};
+const TYPE_ICON={audio:'🎤 Áudio',image:'📷 Foto',video:'🎬 Vídeo',document:'📄 Arquivo',sticker:'Figurinha',location:'📍 Localização',contacts:'👤 Contato',reaction:'Reação'};
+function convTitle(c){return c.name||phoneLabel(c.phone)}
+function convList(){
+ const q=search.trim().toLowerCase();
+ const list=convs.filter(c=>!q||[c.name,c.clientName,c.phone].some(v=>String(v||'').toLowerCase().includes(q)));
+ return `<div class="ow-wa-search"><input type="search" placeholder="Buscar conversa" value="${h(search)}" data-act="search" aria-label="Buscar conversa"></div>
+ <div class="ow-wa-convs">${list.length?list.map(c=>`<button type="button" class="ow-wa-conv ${c.unanswered?'red':''} ${c.phone===current?'on':''}" data-act="conv" data-phone="${h(c.phone)}">
+  <span class="ow-wa-avatar">${h((convTitle(c).replace(/[^\p{L}\p{N}]/gu,'')[0]||'#').toUpperCase())}</span>
+  <span class="ow-wa-convtxt"><b>${h(convTitle(c))}</b><small>${c.clientName?`<i>${h(c.clientName)}</i> · `:c.isTeam?'<i>Equipe</i> · ':''}${c.lastDirection==='out'?'Você: ':''}${h(c.lastText||TYPE_ICON[c.lastType]||'')}</small></span>
+  <span class="ow-wa-convmeta"><small>${h(hhmm(c.lastAt))}</small>${c.unanswered?'<em>sem resposta</em>':''}</span>
+ </button>`).join(''):`<p class="ow-wa-muted pad">${convs.length?'Nenhuma conversa encontrada.':'Nenhuma conversa ainda. Quando um cliente mandar mensagem para o número da agência, ela aparece aqui.'}</p>`}</div>`;
+}
+function bubble(m){
+ const out=m.direction==='out',media=m.media_id&&['audio','image','video','document','sticker'].includes(m.message_type);
+ const url=mediaUrls.get(m.media_id);
+ let mediaHtml='';
+ if(media){
+  if(url&&m.message_type==='audio')mediaHtml=`<audio controls src="${h(url)}"></audio>`;
+  else if(url&&(m.message_type==='image'||m.message_type==='sticker'))mediaHtml=`<img src="${h(url)}" alt="Imagem recebida">`;
+  else if(url)mediaHtml=`<a href="${h(url)}" target="_blank" rel="noopener" download>Abrir arquivo</a>`;
+  else mediaHtml=`<button type="button" class="ow-wa-mini" data-act="media" data-id="${h(m.media_id)}">${m.message_type==='audio'?'▶ Ouvir áudio':m.message_type==='image'?'Ver foto':'Abrir '+h((TYPE_ICON[m.message_type]||'arquivo').replace(/^\S+\s/,'').toLowerCase())}</button>`;
+ }
+ const st={sending:'🕓',sent:'✓',delivered:'✓✓',read:'✓✓',failed:'⚠'}[m.status]||'';
+ return `<div class="ow-wa-msg ${out?'out':'in'} ${m.status==='failed'?'fail':''}">
+  ${out&&m.sent_by?`<span class="ow-wa-by">${h(m.sent_by)}</span>`:''}
+  ${media?`<div class="ow-wa-media"><span class="ow-wa-type">${h(TYPE_ICON[m.message_type]||'')}</span>${mediaHtml}</div>`:''}
+  ${m.text?`<p>${h(m.text)}</p>`:!media&&TYPE_ICON[m.message_type]?`<p class="ow-wa-muted">${h(TYPE_ICON[m.message_type])}</p>`:''}
+  ${m.transcript?`<p class="ow-wa-transcript"><b>Transcrição:</b> ${h(m.transcript)}</p>`:''}
+  ${m.status==='failed'&&m.error?`<p class="ow-wa-error">Não enviada: ${h(m.error)}</p>`:''}
+  <small>${h(hhmm(m.created_at))}${out?` <span class="ow-wa-st ${m.status==='read'?'read':''}">${st}</span>`:''}</small>
+ </div>`;
+}
+function chatPane(){
+ const c=convs.find(x=>x.phone===current);
+ if(!c)return `<div class="ow-wa-nochat"><p>Escolha uma conversa na lista.</p><p class="ow-wa-muted">Conversas em <b class="ow-wa-redtxt">vermelho</b> estão esperando resposta.</p></div>`;
+ return `<header class="ow-wa-chathead"><button type="button" class="ow-wa-back" data-act="back" aria-label="Voltar">‹</button><div><b>${h(convTitle(c))}</b><small>${h(phoneLabel(c.phone))}${c.clientName?' · '+h(c.clientName):''}</small></div>
+  <div class="ow-wa-chatbtns">${c.unanswered?`<button type="button" class="ow-wa-ghost" data-act="resolve" data-phone="${h(c.phone)}" title="Tira o vermelho sem mandar mensagem">Não precisa responder</button>`:''}${!c.clientName&&!c.isTeam?`<select data-act="link-client" data-phone="${h(c.phone)}" data-name="${h(c.name)}">${clientOptions('').replace('— escolha o cliente —','Vincular a um cliente…')}</select>`:''}</div></header>
+ <div class="ow-wa-msgs" id="owWaMsgs">${msgs.map(bubble).join('')||'<p class="ow-wa-muted pad">Carregando…</p>'}</div>
+ ${c.windowOpen?`<form class="ow-wa-compose" data-form="chat"><textarea id="owWaDraft" name="text" rows="1" placeholder="Escreva uma mensagem (Enter envia, Shift+Enter pula linha)" maxlength="3800"></textarea><button type="submit" class="ow-wa-primary" ${sending?'disabled':''}>${sending?'Enviando…':'Enviar'}</button></form>`
+ :`<div class="ow-wa-closed">Passaram 24h desde a última mensagem deste contato. Pela regra do WhatsApp, só dá para responder quando ele mandar mensagem de novo.</div>`}`;
+}
+function chatView(){
+ if(needTeam)return teamForm();
+ return `${chatErr?`<div class="ow-wa-error">${h(chatErr)}</div>`:''}<div class="ow-wa-chat ${current?'has-current':''}"><aside class="ow-wa-side">${convList()}</aside><section class="ow-wa-pane">${chatPane()}</section></div>`;
+}
+function teamForm(){
+ return `<form class="ow-wa-box ow-wa-team" data-form="team"><h4>Abrir o WhatsApp da agência</h4><p class="ow-wa-muted">Confirme a senha da equipe (a mesma do login). Fica liberado por 12 horas neste navegador.</p>
+  <input type="password" name="password" autocomplete="current-password" placeholder="Senha da equipe" required><div class="ow-wa-formfoot"><button type="submit" class="ow-wa-primary">Entrar</button></div></form>`;
+}
+
 function body(){
+ if(tab==='chat')return chatView();
+ if(needTeam)return teamForm();
  if(err)return `<div class="ow-wa-error big">${h(err)}</div>`;
  if(tab==='contacts')return contactsView();
- if(tab==='setup')return setupView();
+ if(tab==='setup')return adm()?setupView():'<p class="ow-wa-muted">Só o Administrador vê a configuração.</p>';
  const list=data.items.filter(i=>tab==='meetings'?i.kind==='reuniao':i.kind!=='reuniao');
  if(loading&&!list.length)return '<p class="ow-wa-muted">Carregando…</p>';
  if(!list.length)return `<div class="ow-wa-empty">${tab==='meetings'?'Nenhuma reunião aqui. Para transcrever, a equipe encaminha o áudio da reunião para o WhatsApp da agência.':'Nada por aqui. As mensagens dos clientes aparecem assim que chegarem.'}</div>`;
  return `<div class="ow-wa-list">${list.map(i=>tab==='meetings'?meetingCard(i):itemCard(i)).join('')}</div>`;
 }
 function render(){
+ const box=$('owWaDraft'),draft=box?box.value:'',focused=box&&document.activeElement===box,draftFor=current;
+ const list=document.querySelector('.ow-wa-convs'),listTop=list?list.scrollTop:0;
+ const mb=$('owWaMsgs'),atBottom=!mb||mb.scrollHeight-mb.scrollTop-mb.clientHeight<60,msgTop=mb?mb.scrollTop:0;
+ const sInput=document.querySelector('.ow-wa-search input'),searchFocused=sInput&&document.activeElement===sInput;
  let root=$('owWaRoot');
  if(!open||!allowed()){if(root)root.remove();document.body.classList.remove('ow-wa-locked');return}
- if(!root){root=document.createElement('div');root.id='owWaRoot';document.body.appendChild(root);root.addEventListener('click',onClick);root.addEventListener('change',onChange);root.addEventListener('submit',onSubmit)}
- const counts={inbox:data.items.filter(i=>i.kind!=='reuniao').length,meetings:data.items.filter(i=>i.kind==='reuniao').length};
+ if(!root){root=document.createElement('div');root.id='owWaRoot';document.body.appendChild(root);root.addEventListener('click',onClick);root.addEventListener('change',onChange);root.addEventListener('submit',onSubmit);root.addEventListener('keydown',onKey);root.addEventListener('input',onInput)}
+ const counts={chat:newCount,inbox:data.items.filter(i=>i.kind!=='reuniao'&&i.status==='novo').length,meetings:data.items.filter(i=>i.kind==='reuniao'&&i.status==='novo').length};
  root.innerHTML=`<div class="ow-wa-overlay" data-act="close"></div>
  <aside class="ow-wa-panel" role="dialog" aria-label="WhatsApp da agência">
   <header class="ow-wa-head"><div><span class="ow-wa-kicker">One Way · WhatsApp</span><h3>WhatsApp da agência</h3></div>
    <div class="ow-wa-headbtns"><button type="button" class="ow-wa-ghost" data-act="reload">${loading?'Atualizando…':'Atualizar'}</button><button type="button" class="ow-wa-round" data-act="close" aria-label="Fechar">×</button></div></header>
-  <nav class="ow-wa-tabs">${TABS.map(([k,l])=>`<button type="button" class="${tab===k?'on':''}" data-act="tab" data-tab="${k}">${l}${counts[k]?` <em>${counts[k]}</em>`:''}</button>`).join('')}</nav>
+  <nav class="ow-wa-tabs">${TABS.filter(([k])=>k!=='setup'||adm()).map(([k,l])=>`<button type="button" class="${tab===k?'on':''}" data-act="tab" data-tab="${k}">${l}${counts[k]?` <em class="${k==='chat'?'red':''}">${counts[k]}</em>`:''}</button>`).join('')}</nav>
   ${tab==='inbox'||tab==='meetings'?`<div class="ow-wa-filters">${FILTERS.map(([k,l])=>`<button type="button" class="${filter===k?'on':''}" data-act="filter" data-filter="${k}">${l}</button>`).join('')}</div>`:''}
-  <div class="ow-wa-body">${body()}</div>
+  <div class="ow-wa-body ${tab==='chat'?'is-chat':''}">${body()}</div>
  </aside>`;
  document.body.classList.add('ow-wa-locked');
+ const nb=$('owWaDraft');if(nb&&draftFor===current&&draft){nb.value=draft}if(nb&&focused)nb.focus({preventScroll:true});
+ const nl=document.querySelector('.ow-wa-convs');if(nl)nl.scrollTop=listTop;
+ const nm=$('owWaMsgs');if(nm)nm.scrollTop=atBottom?nm.scrollHeight:msgTop;
+ if(searchFocused){const si=document.querySelector('.ow-wa-search input');if(si){si.focus();si.setSelectionRange(si.value.length,si.value.length)}}
 }
 
 /* ---------- botão do topo ---------- */
@@ -224,11 +313,19 @@ function ensureButton(){
 function badge(){
  const b=ensureButton();if(!b)return;
  b.classList.toggle('hidden',!allowed());
+ b.classList.toggle('ow-wa-alert',allowed()&&newCount>0);
  const n=$('owWaBadge');if(!n)return;
  n.textContent=newCount>99?'99+':String(newCount);n.classList.toggle('hidden',!allowed()||!newCount);
- b.title=newCount?`${newCount} mensage${newCount===1?'m':'ns'} do WhatsApp para ver`:'WhatsApp da agência';
+ b.title=newCount?`${newCount} conversa${newCount===1?'':'s'} sem resposta no WhatsApp`:'WhatsApp da agência';
 }
-async function poll(){if(!allowed()||document.hidden)return;if(open)return load();try{const r=await api('list');newCount=r.items.filter(i=>i.status==='novo'||i.status==='erro').length;badge()}catch{}}
+let pollBusy=false;
+async function poll(){
+ if(!allowed()||document.hidden||pollBusy)return;pollBusy=true;
+ try{
+  if(open&&tab==='chat')await loadChat(false);
+  else{const r=await api('conversations');convs=r.conversations||[];newCount=r.unanswered||0;badge()}
+ }catch{}finally{pollBusy=false}
+}
 
 /* ---------- ações ---------- */
 const findItem=id=>data.items.find(i=>i.id===id);
@@ -238,10 +335,14 @@ async function setItem(id,patch,msg){
 async function onClick(ev){
  const t=ev.target.closest('[data-act]');if(!t||!allowed())return;
  const act=t.dataset.act;
- if(['link-client','set-client'].includes(act))return;
+ if(['link-client','set-client','search'].includes(act))return;
  if(act==='close'){open=false;formFor=null;render();return}
- if(act==='reload'){load();return}
- if(act==='tab'){tab=t.dataset.tab;formFor=null;render();return}
+ if(act==='conv'){current=t.dataset.phone;msgs=[];render();loadChat(true);return}
+ if(act==='back'){current=null;msgs=[];render();return}
+ if(act==='resolve'){try{await api('resolve',{body:{phone:t.dataset.phone}});notify('Conversa marcada como resolvida.','success');loadChat(true)}catch(e){notify(e.message)}return}
+ if(act==='media'){const id=t.dataset.id;t.disabled=true;t.textContent='Carregando…';try{const res=await raw('media',{query:{id}});if(!res.ok)throw Error('Não foi possível abrir a mídia.');mediaUrls.set(id,URL.createObjectURL(await res.blob()));render()}catch(e){notify(e.message);t.disabled=false}return}
+ if(act==='reload'){tab==='chat'?loadChat(true):load();return}
+ if(act==='tab'){tab=t.dataset.tab;formFor=null;render();load();return}
  if(act==='filter'){filter=t.dataset.filter;formFor=null;load();return}
  if(act==='form'){const id=t.dataset.id+(t.dataset.task!=null?'|'+t.dataset.task:'');formFor=formFor===id?null:id;render();return}
  if(act==='cancel-form'){formFor=null;render();return}
@@ -252,7 +353,7 @@ async function onClick(ev){
 async function onChange(ev){
  const t=ev.target.closest('[data-act]');if(!t||!allowed()||!t.value)return;
  if(t.dataset.act==='link-client'){
-  try{await api('contact',{body:{phone:t.dataset.phone,clientName:t.value,contactName:t.dataset.name||''}});notify('Número vinculado a '+t.value+'.','success');load()}catch(e){notify(e.message)}
+  try{await api('contact',{body:{phone:t.dataset.phone,clientName:t.value,contactName:t.dataset.name||''}});notify('Número vinculado a '+t.value+'.','success');tab==='chat'?loadChat(true):load()}catch(e){notify(e.message)}
  }
  if(t.dataset.act==='set-client')setItem(t.dataset.id,{clientName:t.value},'Cliente definido.');
 }
@@ -262,6 +363,19 @@ async function onSubmit(ev){
  const fd=Object.fromEntries(new FormData(f).entries()),btn=f.querySelector('[type=submit]');
  if(btn){btn.disabled=true}
  try{
+  if(f.dataset.form==='team'){
+   const res=await fetch('/api/whatsapp?action=team-login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:fd.password,name:me()})});
+   const json=await res.json().catch(()=>({}));if(!res.ok)throw Error(json.error||'Não foi possível entrar.');
+   try{sessionStorage.setItem(TEAM_KEY,json.token)}catch{}needTeam=false;notify('WhatsApp liberado.','success');await load();return;
+  }
+  if(f.dataset.form==='chat'){
+   const text=String(fd.text||'').trim();if(!text||!current||sending)return;
+   sending=true;const box=$('owWaDraft');if(box)box.value='';
+   msgs=[...msgs,{id:'tmp'+Date.now(),direction:'out',message_type:'text',text,status:'sending',sent_by:me(),created_at:new Date().toISOString()}];render();
+   try{await api('chat-send',{body:{phone:current,text,by:me()}})}catch(e){notify(e.message);const nb=$('owWaDraft');if(nb&&!nb.value)nb.value=text}
+   finally{sending=false}
+   await loadChat(true);return;
+  }
   if(f.dataset.form==='contact'){
    await api('contact',{body:{phone:fd.phone,contactName:fd.contactName,clientName:fd.clientName,isTeam:!!fd.isTeam}});
    notify('Número salvo.','success');await load();return;
@@ -276,15 +390,26 @@ async function onSubmit(ev){
  finally{if(btn&&btn.isConnected)btn.disabled=false}
 }
 
+function onKey(ev){
+ if(ev.target.id==='owWaDraft'&&ev.key==='Enter'&&!ev.shiftKey&&!ev.isComposing){ev.preventDefault();ev.target.form?.requestSubmit()}
+}
+function onInput(ev){
+ if(ev.target.dataset?.act==='search'){search=ev.target.value;render()}
+ if(ev.target.id==='owWaDraft'){ev.target.style.height='auto';ev.target.style.height=Math.min(ev.target.scrollHeight,160)+'px'}
+}
 function init(){
  ensureButton();badge();
  const ref=$('contactRoutineTab');
  // O botão aparece e some junto com o de Contatos (que segue o login de Administrador).
  if(ref)new MutationObserver(()=>{badge();if(!allowed()&&open){open=false;render()}}).observe(ref,{attributes:true,attributeFilter:['class']});
  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&open){e.preventDefault();e.stopImmediatePropagation();if(formFor){formFor=null}else{open=false}render()}},true);
- setTimeout(poll,4000);
- setInterval(poll,3*60*1000);
+ // Aparece para qualquer login; some ao sair.
+ setInterval(()=>{const was=!$('owWaTab')?.classList.contains('hidden');badge();if(was!==allowed()){if(!allowed()){open=false;newCount=0;convs=[];current=null;render()}else poll()}},2000);
+ setTimeout(poll,3000);
+ // Conversa aberta: atualiza a cada 8s. Fechado: confere o vermelho a cada 30s.
+ setInterval(()=>{if(open&&tab==='chat')poll()},8000);
+ setInterval(()=>{if(!open)poll()},30000);
 }
-window.owWhatsApp={open:()=>{open=true;render();load()},_test:{planText,clientOptions,createDemand,phoneLabel}};
+window.owWhatsApp={open:()=>{open=true;render();load()},_test:{planText,clientOptions,createDemand,phoneLabel,set:(o)=>{({convs,msgs,current,newCount}={convs,msgs,current,newCount,...o})}}};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();

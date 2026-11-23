@@ -101,3 +101,45 @@ test('a página carrega o módulo do WhatsApp', () => {
   assert.match(html, /modules\/whatsapp-inbox\.js/);
   assert.match(html, /modules\/whatsapp-inbox\.css/);
 });
+
+test('conversa vermelha: cliente falou depois da última resposta humana', () => {
+  assert.equal(core.isUnanswered({last_in_at: '2026-11-23T10:00:00Z', last_human_out_at: '2026-11-23T09:00:00Z'}), true);
+  assert.equal(core.isUnanswered({last_in_at: '2026-11-23T10:00:00Z', last_human_out_at: '2026-11-23T10:05:00Z'}), false);
+  assert.equal(core.isUnanswered({last_in_at: '2026-11-23T10:00:00Z', resolved_at: '2026-11-23T10:01:00Z'}), false);
+  assert.equal(core.isUnanswered({last_in_at: null}), false);
+});
+
+test('janela de 24h do WhatsApp', () => {
+  const now = Date.parse('2026-11-23T12:00:00Z');
+  assert.equal(core.windowOpen('2026-11-23T00:00:00Z', now), true);
+  assert.equal(core.windowOpen('2026-11-22T11:00:00Z', now), false);
+  assert.equal(core.windowOpen(null, now), false);
+});
+
+test('confirmações de entrega e leitura', () => {
+  const list = core.extractStatuses({entry: [{changes: [{value: {statuses: [{id: 'wamid.9', status: 'read'}, {id: 'x', status: 'deleted'}, {status: 'sent'}]}}]}]});
+  assert.deepEqual(list, [{id: 'wamid.9', status: 'read', error: ''}]);
+});
+
+test('passe da equipe: assinado, com validade e sem senha errada', async () => {
+  const t = core.signTeamToken('segredo', 'Design', 0);
+  assert.deepEqual(core.readTeamToken('segredo', t, 1000), {name: 'Design'});
+  assert.equal(core.readTeamToken('outro', t, 1000), null);
+  assert.equal(core.readTeamToken('segredo', t, 13 * 60 * 60 * 1000), null);
+  assert.equal(core.readTeamToken('segredo', t.replace(/.$/, c => (c === 'A' ? 'B' : 'A')), 1000), null);
+  assert.equal(await core.verifyTeamPassword('senha-errada'), false);
+});
+
+test('API: senha errada da equipe e conversas sem login', async () => {
+  const handler = require('../api/whatsapp');
+  process.env.WHATSAPP_WEBHOOK_SECRET = 'segredo';
+  let res = fakeRes();
+  await handler({method: 'POST', query: {action: 'team-login'}, headers: {}, body: {password: 'errada'}}, res);
+  assert.equal(res.statusCode, 401);
+  res = fakeRes();
+  await handler({method: 'GET', query: {action: 'conversations'}, headers: {'x-ow-team': 'falso.token'}}, res);
+  assert.equal(res.statusCode, 401);
+  res = fakeRes();
+  await handler({method: 'POST', query: {action: 'chat-send'}, headers: {}, body: {phone: '5565999990000', text: 'oi'}}, res);
+  assert.equal(res.statusCode, 401);
+});

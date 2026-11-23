@@ -2,8 +2,9 @@
 
 O que já está pronto no sistema:
 
-- **Botão "WhatsApp"** no topo, ao lado de Contatos. Só aparece para o Administrador.
-- **Caixa de entrada.** Cada mensagem de cliente é lida pela IA e separada em **Solicitação**, **Agendamento** ou **Dúvida**, com resumo, prazo citado e horário pedido. O robô responde na hora, sem prometer preço, prazo ou horário: diz que a equipe confirma. Um botão **Virar demanda** cria a demanda no cliente e na área certa.
+- **Botão "WhatsApp"** no topo, para **todos os logins** do sistema. O Administrador entra direto; os outros logins confirmam a senha da equipe uma vez (vale 12h).
+- **Conversas:** o WhatsApp da agência dentro do sistema, com a lista de conversas à esquerda e a conversa aberta à direita. A conversa fica **vermelha** enquanto o cliente estiver sem resposta de alguém da equipe, e o botão do topo fica vermelho com o número de conversas esperando. Áudios chegam com a transcrição. Pela regra do WhatsApp, só dá para escrever até 24h depois da última mensagem do cliente.
+- **Pedidos.** Cada mensagem de cliente é lida pela IA e separada em **Solicitação**, **Agendamento** ou **Dúvida**, com resumo, prazo citado e horário pedido. O robô responde na hora, sem prometer preço, prazo ou horário: diz que a equipe confirma. Um botão **Virar demanda** cria a demanda no cliente e na área certa.
 - **Reuniões.** Alguém da equipe encaminha o áudio da reunião para o WhatsApp da agência. O sistema transcreve e monta o resumo, as decisões, o **plano de ação** (com um botão "→ demanda" em cada tarefa) e as pendências do cliente. O botão **Copiar plano para o grupo** copia tudo já formatado para colar no grupo do cliente.
 - **Contatos.** Aqui você liga cada número a um cliente e marca quem é da equipe.
 
