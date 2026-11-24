@@ -908,8 +908,6 @@ body.calendar-view{background-attachment:scroll!important}
 </style>
 <link rel="stylesheet" href="/modules/oneway-premium-navigation.css?v=20261031-unified2">
 <link rel="stylesheet" href="/modules/oneway-refined.css?v=20261116-premium7">
-<link rel="stylesheet" href="/modules/contact-routine.css?v=20261123-2">
-<link rel="stylesheet" href="/modules/whatsapp-inbox.css?v=20261123-2">
 </head>
 <body class="booting">
 <section class="login" id="loginScreen">
@@ -936,7 +934,7 @@ body.calendar-view{background-attachment:scroll!important}
 <div id="app" class="hidden">
   <header class="topbar"><div class="topbar-inner">
     <div class="brand"><img class="brand-logo" src="oneway-logo.png" alt="One Way Agency"><div class="brand-copy"><strong>Acompanhamento de Demandas</strong><span>Painel interno</span></div></div>
-    <div class="top-actions"><button class="ghost small hidden" id="bulkImportBtn">+ Importar demandas</button><button type="button" class="ghost small proposal-launch" id="newProposalBtn">+ Nova Proposta</button><button class="ghost small proposal-history-tab hidden" id="proposalHistoryTab">Propostas</button><button type="button" class="ghost small ow-cr-tab hidden" id="contactRoutineTab" title="Contato com clientes"><span class="ow-cr-tab-icon" aria-hidden="true"></span>Contatos<span class="ow-cr-tab-badge hidden" id="contactRoutineBadge">!</span></button><button type="button" class="ghost small contract-launch hidden" id="newContractBtn">+ Novo Contrato</button><button type="button" class="ghost small contracts-tab hidden" id="contractsTab">Contratos</button><button type="button" class="ghost small contract-alert-btn hidden" id="contractAlertBtn" title="Contratos próximos do vencimento"><span>i</span><span class="contract-alert-count hidden" id="contractAlertCount">0</span></button><div class="user-chip"><div class="avatar" id="avatar">G</div><div class="user-meta"><strong id="userName"></strong><span id="userRole"></span></div></div><button class="ghost small" id="logoutBtn">Sair</button></div>
+    <div class="top-actions"><button class="ghost small hidden" id="bulkImportBtn">+ Importar demandas</button><button type="button" class="ghost small proposal-launch" id="newProposalBtn">+ Nova Proposta</button><button class="ghost small proposal-history-tab hidden" id="proposalHistoryTab">Propostas</button><button type="button" class="ghost small contract-launch hidden" id="newContractBtn">+ Novo Contrato</button><button type="button" class="ghost small contracts-tab hidden" id="contractsTab">Contratos</button><button type="button" class="ghost small contract-alert-btn hidden" id="contractAlertBtn" title="Contratos próximos do vencimento"><span>i</span><span class="contract-alert-count hidden" id="contractAlertCount">0</span></button><div class="user-chip"><div class="avatar" id="avatar">G</div><div class="user-meta"><strong id="userName"></strong><span id="userRole"></span></div></div><button class="ghost small" id="logoutBtn">Sair</button></div>
   </div></header>
   <button class="finance-side-tab hidden" id="financeTab"><span class="finance-icon">R$</span><span>Financeiro</span></button>
 
@@ -1787,7 +1785,7 @@ function renderTabs(){
 function renderMonths(){const s=document.getElementById('monthSelect');const year=currentMonthKey().slice(0,4),finance=currentArea==='finance';if(finance&&currentMonth.slice(0,4)!==year)currentMonth=currentMonthKey();s.min=finance?`${year}-01`:'';s.max=finance?`${year}-12`:'';s.value=/^\d{4}-(0[1-9]|1[0-2])$/.test(currentMonth)?currentMonth:currentMonthKey();s.onchange=()=>{if(!s.value)return;currentMonth=s.value;openClientId=null;openDemandId=null;renderAll()}}
 function renderAll(){
   if(ensureCollaborators())saveState();syncCollaborators();
-  if(['manageClients','feedPlanner','instagramReports','scripts','contactRoutine'].includes(currentArea)&&!isAdmin())currentArea=null;
+  if(currentArea==='contactRoutine')currentArea=null;if(['manageClients','feedPlanner','instagramReports','scripts','contactRoutine'].includes(currentArea)&&!isAdmin())currentArea=null;
   if(currentArea==='geral'&&!canAccessGeneral())currentArea='agenda';
   if(currentArea&&!['geral','agenda','deleted','proposals','finance','contracts','commemorativeDates','weekCalendar','socialMedia','manageClients','feedPlanner','instagramReports','scripts','contactRoutine'].includes(currentArea)&&!canAccessArea(currentArea))currentArea=isDesign()?'arte':isVideoUser()?'video':'agenda';
   const app=document.getElementById('app');app.classList.toggle('sm-enabled',isAdmin());document.body.classList.toggle('calendar-view',isAdmin()&&currentArea==='weekCalendar');app.classList.toggle('home-mode',isAdmin()&&!currentArea);
@@ -4309,8 +4307,6 @@ async function owMaybeStartPreview(){
 <script src="/modules/demand-notes.js?v=20261030-general-audit2" defer></script>
 <script src="/modules/video-covers.js?v=20261030-audit" defer></script>
 <script src="/modules/data-backup.js?v=20261113-backup1" defer></script>
-<script src="/modules/contact-routine.js?v=20261123-2" defer></script>
-<script src="/modules/whatsapp-inbox.js?v=20261123-2" defer></script>
 <script src="/modules/oneway-refined.js?v=20261113-premium3" defer></script>
 </body>
 </html>
