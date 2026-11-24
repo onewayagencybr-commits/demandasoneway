@@ -65,3 +65,14 @@
 .agenda-info .ow-who-created,.agenda-info .ow-who-label{display:inline-flex!important;align-items:center;width:auto!important;margin:0 0 0 4px!important;overflow:visible!important}
 .agenda-info .ow-who-created .ow-who-label{margin:0!important}
 .agenda-info .agenda-last-action .ow-who{margin-left:4px!important}
+
+/* Quem inseriu links e arquivos */
+.ow-ref-main{display:flex;flex-direction:column;gap:3px;min-width:0}
+.ow-item-who{display:flex;align-items:center;flex-wrap:wrap;gap:0;font-size:10px;color:rgba(220,233,255,.62);line-height:1.3}
+.ow-item-who .ow-who{margin:0 5px 0 4px}
+.ow-item-who span{opacity:.85}
+.final-material-timestamp small .ow-who{margin-left:6px}
+.production-asset-main .ow-item-who{display:flex!important;margin-top:3px}
+.production-asset-main .ow-item-who .ow-who{display:inline-flex!important;color:hsl(var(--ow-who-h) 70% 24%)!important;-webkit-text-fill-color:hsl(var(--ow-who-h) 70% 24%)!important;font-size:8.5px!important;width:auto!important;overflow:visible!important;white-space:nowrap!important;opacity:1!important}
+.production-asset-main .ow-item-who .ow-who.ow-who-neutral{color:#4b5563!important;-webkit-text-fill-color:#4b5563!important}
+.production-asset-main .ow-item-who>span:not(.ow-who){display:inline!important;font-size:10px!important}

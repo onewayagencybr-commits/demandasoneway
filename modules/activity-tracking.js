@@ -69,8 +69,11 @@
   function creatorOf(d) {
     if (d.createdBy && d.createdBy.ini) return { actor: actorOf(d.createdBy), at: d.createdBy.at || d.createdAt };
     var e = (Array.isArray(d.activityLog) ? d.activityLog : []).find(function (x) { return x && x.kind === 'created'; });
-    return e ? { actor: actorOf(e), at: e.at } : null;
+    if (e) return { actor: actorOf(e), at: e.at };
+    // Demandas criadas antes do histórico: mostra que o criador não foi registrado.
+    return d.createdAt ? { actor: UNKNOWN_CREATOR, at: d.createdAt, unknown: true } : null;
   }
+  var UNKNOWN_CREATOR = { by: 'Não registrado — criada antes do sistema guardar quem cria (24/11/2026)', ini: '--', login: '', legacy: true };
   window.OWActivity = { actorOf: actorOf, statusMarks: statusMarks, creatorOf: creatorOf, collectEvents: collectEvents, badge: badge };
 
   /* ---------- siglas nas demandas ---------- */
@@ -83,7 +86,8 @@
       var m = marks[key];
       return m ? open + label + badge(m.actor, 'Marcado “' + label.trim() + '”', m.at) + close : all;
     });
-    var current = marks[d.status] || creatorOf(d);
+    html = decorateItems(d, html);
+    var creator = creatorOf(d), current = marks[d.status] || (creator && !creator.unknown ? creator : null);
     if (current) {
       html = html.replace(/(<span class="current-status [^"]*">)([^<]*)(<\/span>)/, function (all, open, label, close) {
         return open + label + badge(current.actor, marks[d.status] ? 'Status atual marcado' : 'Criada', current.at) + close;
@@ -91,11 +95,39 @@
     }
     return html;
   };
+  /* Quem inseriu cada link/arquivo de referência, de produção e o link do material finalizado. */
+  function itemActor(m) { return m && (m.ini || m.addedByIni) ? actorOf(m.ini ? m : { by: m.addedBy, ini: m.addedByIni, login: m.addedByLogin }) : null; }
+  function itemMeta(m, what) {
+    var a = itemActor(m), at = m && (m.at || m.addedAt);
+    if (!a) return '';
+    return '<small class="ow-item-who">' + esc(what) + ' por ' + badge(a, what, at) + (at ? ' <span>' + esc(fmt(at)) + '</span>' : '') + '</small>';
+  }
+  function decorateItems(d, html) {
+    var marks = plainObj(d.itemMarks);
+    var links = (d.links || []), files = (d.attachments || []), i = 0;
+    html = html.replace(/<div class="ref-item">(<a [^>]*>[^<]*<\/a>|<span>[^<]*<\/span>)/g, function (all, inner) {
+      var n = i++, meta = n < links.length ? itemMeta(marks['links|' + links[n]], 'Inserido') : itemMeta(files[n - links.length], 'Enviado');
+      return meta ? '<div class="ref-item"><div class="ow-ref-main">' + inner + meta + '</div>' : all;
+    });
+    var plinks = (d.productionLinks || []).filter(Boolean), pfiles = (d.productionAttachments || []), j = 0;
+    html = html.replace(/(<div class="production-asset-main"><strong[^>]*>[^<]*<\/strong><span>[^<]*<\/span>)(<\/div>)/g, function (all, inner, close) {
+      var n = j++, meta = n < plinks.length ? itemMeta(marks['productionLinks|' + plinks[n]], 'Inserido') : itemMeta(pfiles[n - plinks.length], 'Enviado');
+      return meta ? inner + meta + close : all;
+    });
+    var added = d.finalLinkAddedAt ? actorOf({ by: d.finalLinkAddedBy, ini: d.finalLinkAddedByIni, login: d.finalLinkAddedByLogin }) : null;
+    var updated = d.finalLinkUpdatedBy ? actorOf({ by: d.finalLinkUpdatedBy, ini: d.finalLinkUpdatedByIni, login: d.finalLinkUpdatedByLogin }) : null;
+    var k = 0;
+    html = html.replace(/<small>Por [^<]*<\/small>/g, function (all) {
+      var a = (k++ === 0 && added) ? added : updated;
+      return a ? '<small>Por ' + esc(a.by) + badge(a, 'Link do material finalizado', '') + '</small>' : all;
+    });
+    return html;
+  }
   if (typeof formatDemandCreatedMini === 'function') {
     var prevCreatedMini = formatDemandCreatedMini;
     formatDemandCreatedMini = function (d) {
       var html = prevCreatedMini.apply(this, arguments), c = d && creatorOf(d);
-      return html && c ? html.replace(/<\/span>$/, ' <span class="ow-who-label">por</span>' + badge(c.actor, 'Criada', c.at) + '</span>') : html;
+      return html && c ? html.replace(/<\/span>$/, ' ' + createdByHTML(c) + '</span>') : html;
     };
   }
   if (typeof demandLatestActivityMini === 'function') {
@@ -117,13 +149,17 @@
         }).join('') : '<p class="ow-demand-audit-empty">Novas atualizações serão registradas aqui. Não estimamos horários antigos.</p>') + '</div></section>';
     };
   }
+  function createdByHTML(c) {
+    if (c.unknown) return '<span class="ow-who-label" title="' + esc(c.actor.by) + '">· criador não registrado (demanda antiga)</span>';
+    return '<span class="ow-who-label">por</span>' + badge(c.actor, 'Criada', c.at);
+  }
   function decorateAgenda() {
     document.querySelectorAll('#agendaList .agenda-item[data-agenda-id]').forEach(function (card) {
       var d = state.demands.find(function (x) { return x.id === card.dataset.agendaId; });
       if (!d) return;
       var pill = card.querySelector('.current-status');
       if (pill && !pill.querySelector('.ow-who')) {
-        var m = statusMarks(d)[d.status] || creatorOf(d);
+        var cr = creatorOf(d), m = statusMarks(d)[d.status] || (cr && !cr.unknown ? cr : null);
         if (m) pill.insertAdjacentHTML('beforeend', badge(m.actor, 'Status atual marcado', m.at));
       }
       var created = card.querySelector('.agenda-created-date');
@@ -131,12 +167,26 @@
       if (created && c && !created.querySelector('.ow-who-created')) {
         var holder = document.createElement('span');
         holder.className = 'ow-who-created';
-        holder.innerHTML = '<span class="ow-who-label">por</span>' + badge(c.actor, 'Criada', c.at);
+        holder.innerHTML = createdByHTML(c);
         var last = created.querySelector('.agenda-last-action');
         created.insertBefore(holder, last || null);
       }
     });
   }
+  // A Agenda também é redesenhada por outros módulos (Lista/Panorama, filtros): observa a lista.
+  var agendaQueued = false;
+  function queueAgenda() {
+    if (agendaQueued) return; agendaQueued = true;
+    requestAnimationFrame(function () { agendaQueued = false; try { decorateAgenda(); } catch (e) {} });
+  }
+  try {
+    new MutationObserver(function (list) {
+      for (var i = 0; i < list.length; i++) {
+        var t = list[i].target;
+        if (t && t.closest && t.closest('#agendaList') && !(t.closest('.ow-who') || t.classList && t.classList.contains('ow-who-created'))) { queueAgenda(); return; }
+      }
+    }).observe(document.body, { childList: true, subtree: true });
+  } catch (e) {}
   if (typeof renderAgenda === 'function') {
     var prevRenderAgenda = renderAgenda;
     renderAgenda = function () { var r = prevRenderAgenda.apply(this, arguments); try { decorateAgenda(); } catch (e) { console.warn(e); } return r; };

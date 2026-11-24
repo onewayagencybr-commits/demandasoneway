@@ -908,7 +908,7 @@ body.calendar-view{background-attachment:scroll!important}
 </style>
 <link rel="stylesheet" href="/modules/oneway-premium-navigation.css?v=20261031-unified2">
 <link rel="stylesheet" href="/modules/oneway-refined.css?v=20261124-status1">
-<link rel="stylesheet" href="/modules/activity-tracking.css?v=20261124-who1">
+<link rel="stylesheet" href="/modules/activity-tracking.css?v=20261124-who3">
 </head>
 <body class="booting">
 <section class="login" id="loginScreen">
@@ -2042,6 +2042,7 @@ function owLogAction(kind,detail,extra){
  state.auditLog.push({id:uid(),kind,detail:String(detail||''),at:new Date().toISOString(),...a,...(extra||{})});
  const limit=Date.now()-120*864e5;state.auditLog=state.auditLog.filter(e=>Date.parse(e.at)>=limit).slice(-1500);
 }
+function owMarkItem(d,field,key){if(!d||!key)return;const a=owActorStamp();d.itemMarks={...owPlainObject(d.itemMarks),[field+'|'+key]:{by:a.by,ini:a.ini,login:a.login,at:new Date().toISOString()}}}
 function appendDemandActivity(d,kind,detail){
  if(!d)return;const items=Array.isArray(d.activityLog)?d.activityLog:[];const a=owActorStamp(),at=new Date().toISOString();
  d.activityLog=[...items,{id:uid(),kind,detail,at,...a}].slice(-100);
@@ -2850,7 +2851,9 @@ function openDemandModal(id=null,clientId=null){
  document.getElementById('demandModal').classList.remove('hidden');
 }
 
-async function stageDemandFiles(d,fileList,kind='reference'){if(!d||!fileList?.length)return [];const field=kind==='production'?'productionAttachments':'attachments';d[field]=d[field]||[];const added=[];for(const file of [...fileList]){if(file.size>20*1024*1024){toast(`${file.name}: máximo de 20 MB.`);continue}const fileId=uid(),path=`${d.id}/${kind}/${fileId}-${cleanFileName(file.name)}`;try{if(!supabaseClient)throw new Error('Supabase indisponível');const {error}=await supabaseClient.storage.from(STORAGE_BUCKET).upload(path,file,{cacheControl:'3600',upsert:false,contentType:file.type||undefined});if(error)throw error;const meta={id:fileId,name:file.name,type:file.type,size:file.size,path,kind};d[field].push(meta);added.push(meta)}catch(e){console.error(e);const meta={id:fileId,name:file.name,type:file.type,size:file.size,kind};try{await dbPutFile({...meta,blob:file});d[field].push(meta);added.push(meta)}catch{toast(`Não foi possível anexar ${file.name}.`)}}}return added}
+function owFileStamp(){const a=owActorStamp();return {addedAt:new Date().toISOString(),addedBy:a.by,addedByIni:a.ini,addedByLogin:a.login}}
+function owLogFile(d,kind,name){appendDemandActivity(d,kind==='production'?'production':'reference',(kind==='production'?'Arquivo para produção adicionado: ':'Arquivo de referência adicionado: ')+name)}
+async function stageDemandFiles(d,fileList,kind='reference'){if(!d||!fileList?.length)return [];const field=kind==='production'?'productionAttachments':'attachments';d[field]=d[field]||[];const added=[];for(const file of [...fileList]){if(file.size>20*1024*1024){toast(`${file.name}: máximo de 20 MB.`);continue}const fileId=uid(),path=`${d.id}/${kind}/${fileId}-${cleanFileName(file.name)}`;try{if(!supabaseClient)throw new Error('Supabase indisponível');const {error}=await supabaseClient.storage.from(STORAGE_BUCKET).upload(path,file,{cacheControl:'3600',upsert:false,contentType:file.type||undefined});if(error)throw error;const meta={id:fileId,name:file.name,type:file.type,size:file.size,path,kind,...owFileStamp()};d[field].push(meta);added.push(meta);owLogFile(d,kind,file.name)}catch(e){console.error(e);const meta={id:fileId,name:file.name,type:file.type,size:file.size,kind,...owFileStamp()};try{await dbPutFile({...meta,blob:file});d[field].push(meta);added.push(meta);owLogFile(d,kind,file.name)}catch{toast(`Não foi possível anexar ${file.name}.`)}}}return added}
 async function submitDemand(e){
   e.preventDefault();
   if(!isAdmin())return;
@@ -2881,8 +2884,8 @@ async function submitDemand(e){
     d={id:uid(),clientId:targetClientId,month:destinationMonth,area:destinationArea,title,postDate,description,assignee,status:statusesForArea(destinationArea)[status]?status:'red',links:[],attachments:[],productionLinks:[],productionAttachments:[],createdAt:new Date().toISOString(),createdDate:demandCreationCalendarDate()};
     appendDemandActivity(d,'created','Demanda criada');newId=d.id;state.demands.push(d);openClientId=targetClientId;openDemandId=d.id;
   }
-  if(referenceLink&&!d.links.includes(referenceLink))d.links.push(referenceLink);
-  if(productionLink&&!d.productionLinks.includes(productionLink))d.productionLinks.push(productionLink);
+  if(referenceLink&&!d.links.includes(referenceLink)){d.links.push(referenceLink);owMarkItem(d,'links',referenceLink);appendDemandActivity(d,'reference','Link de referência adicionado')}
+  if(productionLink&&!d.productionLinks.includes(productionLink)){d.productionLinks.push(productionLink);owMarkItem(d,'productionLinks',productionLink);appendDemandActivity(d,'production','Link para produção adicionado')}
   if(referenceFiles?.length)addedFiles=await stageDemandFiles(d,referenceFiles,'reference');
   if(productionFiles?.length)addedProductionFiles=await stageDemandFiles(d,productionFiles,'production');
   let ok=false;
@@ -2956,19 +2959,19 @@ async function saveFinalMaterialLink(id,val){
  if(clean){const href=safeUrl(/^https?:\/\//i.test(clean)?clean:`https://${clean}`);if(href==='#'){toast('Link do material inválido.');return}clean=href}
  if(clean===old.finalLink){toast('Este link já estava salvo. A data e o horário foram preservados.');return}
  const now=new Date().toISOString();d.finalLink=clean;
- d.finalLinkUpdatedAt=clean?now:'';d.finalLinkUpdatedBy=clean?currentUser:'';
- d.finalLinkAddedAt=clean?now:'';d.finalLinkAddedBy=clean?(currentUser||'Equipe One Way'):'';
+ const owA=owActorStamp();d.finalLinkUpdatedAt=clean?now:'';d.finalLinkUpdatedBy=clean?owA.by:'';d.finalLinkUpdatedByIni=clean?owA.ini:'';d.finalLinkUpdatedByLogin=clean?owA.login:'';
+ d.finalLinkAddedAt=clean?now:'';d.finalLinkAddedBy=clean?owA.by:'';d.finalLinkAddedByIni=clean?owA.ini:'';d.finalLinkAddedByLogin=clean?owA.login:'';
  appendDemandActivity(d,'final-link',clean?(old.finalLink?'Link final atualizado':'Link final adicionado (Drive/material)'):'Link final removido');
  if(!await saveState()){Object.assign(d,old);return}
  openDemandId=id;if(currentArea==='agenda')renderAgenda();else renderClients();
  toast(clean?'Link do material finalizado salvo.':'Link do material removido.',null,null,'success');
 }
-async function addLink(id,val){if(!isAdmin())return;val=val.trim();if(!val)return;const href=safeUrl(/^https?:\/\//i.test(val)?val:`https://${val}`);if(href==='#'){toast('Link inválido.');return}const d=state.demands.find(x=>x.id===id);d.links=d.links||[];d.links.push(href);const oldActivity=d.activityLog;appendDemandActivity(d,'reference','Link de referência adicionado');if(!await saveState()){d.links.pop();d.activityLog=oldActivity;return}openDemandId=id;renderClients();toast('Link adicionado.')}
+async function addLink(id,val){if(!isAdmin())return;val=val.trim();if(!val)return;const href=safeUrl(/^https?:\/\//i.test(val)?val:`https://${val}`);if(href==='#'){toast('Link inválido.');return}const d=state.demands.find(x=>x.id===id);d.links=d.links||[];d.links.push(href);owMarkItem(d,'links',href);const oldActivity=d.activityLog;appendDemandActivity(d,'reference','Link de referência adicionado');if(!await saveState()){d.links.pop();d.activityLog=oldActivity;return}openDemandId=id;renderClients();toast('Link adicionado.')}
 async function removeLink(id,index){const d=state.demands.find(x=>x.id===id);const old=d.links.splice(index,1)[0],oldActivity=d.activityLog;appendDemandActivity(d,'reference','Link de referência removido');if(!await saveState()){d.links.splice(index,0,old);d.activityLog=oldActivity;return}openDemandId=id;renderClients()}
-async function addProductionLink(id,val){if(!isAdmin())return;const href=normalizeReferenceLinkValue(val);if(!href){toast('Link para produção inválido.');return}const d=state.demands.find(x=>x.id===id);if(!d)return;d.productionLinks=d.productionLinks||[];if(d.productionLinks.includes(href)){toast('Esse link para produção já foi adicionado.');return}d.productionLinks.push(href);const oldActivity=d.activityLog;appendDemandActivity(d,'production','Link para produção adicionado');if(!await saveState()){d.productionLinks.pop();d.activityLog=oldActivity;return}openDemandId=id;renderClients();toast('Link para produção adicionado.',null,null,'success')}
+async function addProductionLink(id,val){if(!isAdmin())return;const href=normalizeReferenceLinkValue(val);if(!href){toast('Link para produção inválido.');return}const d=state.demands.find(x=>x.id===id);if(!d)return;d.productionLinks=d.productionLinks||[];if(d.productionLinks.includes(href)){toast('Esse link para produção já foi adicionado.');return}d.productionLinks.push(href);owMarkItem(d,'productionLinks',href);const oldActivity=d.activityLog;appendDemandActivity(d,'production','Link para produção adicionado');if(!await saveState()){d.productionLinks.pop();d.activityLog=oldActivity;return}openDemandId=id;renderClients();toast('Link para produção adicionado.',null,null,'success')}
 async function removeProductionLink(id,index){if(!isAdmin())return;const d=state.demands.find(x=>x.id===id),old=d?.productionLinks?.splice(index,1)[0];if(!old)return;const oldActivity=d.activityLog;appendDemandActivity(d,'production','Link para produção removido');if(!await saveState()){d.productionLinks.splice(index,0,old);d.activityLog=oldActivity;return}openDemandId=id;renderClients()}
 async function addProductionFiles(id,fileList){if(!isAdmin()||!fileList?.length)return;const d=state.demands.find(x=>x.id===id);if(!d)return;const added=await stageDemandFiles(d,fileList,'production');if(!added.length)return;if(!await saveState()){for(const f of added){d.productionAttachments=d.productionAttachments.filter(x=>x.id!==f.id);await deleteStoredFile(f)}return}openDemandId=id;renderClients();toast(`${added.length} arquivo${added.length===1?' para produção adicionado':'s para produção adicionados'}.`,null,null,'success')}
-async function removeProductionFile(id,fileId){if(!isAdmin())return;const d=state.demands.find(x=>x.id===id),idx=d?.productionAttachments?.findIndex(f=>f.id===fileId)??-1;if(idx<0)return;const old=d.productionAttachments.splice(idx,1)[0];if(!await saveState()){d.productionAttachments.splice(idx,0,old);return}await deleteStoredFile(old);openDemandId=id;renderClients()}
+async function removeProductionFile(id,fileId){if(!isAdmin())return;const d=state.demands.find(x=>x.id===id),idx=d?.productionAttachments?.findIndex(f=>f.id===fileId)??-1;if(idx<0)return;const old=d.productionAttachments.splice(idx,1)[0];appendDemandActivity(d,'production','Arquivo para produção removido: '+(old?.name||''));if(!await saveState()){d.productionAttachments.splice(idx,0,old);return}await deleteStoredFile(old);openDemandId=id;renderClients()}
 async function encryptContractSignedBlob(blob){if(!contractsCryptoKey)throw new Error('Contratos bloqueados');const iv=crypto.getRandomValues(new Uint8Array(12)),plain=new Uint8Array(await blob.arrayBuffer()),cipher=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},contractsCryptoKey,plain));return {blob:new Blob([cipher],{type:'application/octet-stream'}),iv:bytesToBase64(iv)}}
 async function decryptContractSignedBlob(blob,meta){if(!contractsCryptoKey||!meta?.iv)throw new Error('Chave do contrato indisponível');const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:base64ToBytes(meta.iv)},contractsCryptoKey,await blob.arrayBuffer());return new Blob([plain],{type:meta.originalType||meta.type||'application/octet-stream'})}
 function cleanFileName(name){return String(name||'arquivo').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9._-]+/g,'-').replace(/-+/g,'-').slice(0,120)||'arquivo'}
@@ -2992,7 +2995,7 @@ async function openFile(fileId){
 }
 async function removeFile(id,fileId){
   const d=state.demands.find(x=>x.id===id),idx=d?.attachments?.findIndex(f=>f.id===fileId)??-1;if(idx<0)return;
-  const old=d.attachments.splice(idx,1)[0];if(!await saveState()){d.attachments.splice(idx,0,old);return}await deleteStoredFile(old);openDemandId=id;renderClients();
+  const old=d.attachments.splice(idx,1)[0];appendDemandActivity(d,'reference','Arquivo de referência removido: '+(old?.name||''));if(!await saveState()){d.attachments.splice(idx,0,old);return}await deleteStoredFile(old);openDemandId=id;renderClients();
 }
 
 // Converte valores escritos como R$ 1.350,50, 1350,50, 1350.50 ou 1.350.
@@ -4334,7 +4337,7 @@ async function owMaybeStartPreview(){
 <script src="/modules/video-covers.js?v=20261030-audit" defer></script>
 <script src="/modules/data-backup.js?v=20261113-backup1" defer></script>
 <script src="/modules/oneway-refined.js?v=20261113-premium3" defer></script>
-<script src="/modules/activity-tracking.js?v=20261124-who1" defer></script>
+<script src="/modules/activity-tracking.js?v=20261124-who3" defer></script>
 </body>
 </html>
 <script async data-explicit-opt-in="true" data-deployment-id="dpl_Ao14UeTAg11RytLdLPreqf8HrSbi" src="https://vercel.live/_next-live/feedback/feedback.js"></script>
