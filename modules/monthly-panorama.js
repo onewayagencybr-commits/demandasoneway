@@ -59,6 +59,26 @@
   function areaLabel(area) {
     return area === 'socialMedia' ? 'Social Media' : (AREAS[area] || area);
   }
+  // Sigla da área antes do nome: A = Arte, V = Vídeo, T = Tráfego, SC = Social Media.
+  var AREA_TAG = { arte: 'A', video: 'V', trafego: 'T', socialMedia: 'SC' };
+  function areaTag(area) {
+    var tag = AREA_TAG[area] || String(areaLabel(area) || '?').charAt(0).toUpperCase();
+    return '<span class="ow-cal-tag" aria-hidden="true">' + esc(tag) + '</span>';
+  }
+  // Cor do quadradinho = cor do status da demanda (a mesma dos botões de status).
+  var STATUS_ORDER = ['red', 'yellow', 'purple', 'salmon', 'orange', 'green'];
+  function statusKey(d) {
+    var set = statusesForArea(d && d.area);
+    return d && set[d.status] ? d.status : 'red';
+  }
+  function statusLegend(items) {
+    var area = agendaCalendarArea !== 'all' && currentArea === 'agenda' ? agendaCalendarArea : '';
+    var set = statusesForArea(area || 'arte');
+    return STATUS_ORDER.filter(function (key) { return set[key]; }).map(function (key) {
+      return '<span class="ow-legend-st ow-legend-st-' + key + '">' + esc(set[key]) + '</span>';
+    }).join('') + '<span class="ow-legend-st ow-legend-st-posted">✓ Postado</span>' +
+      '<span class="ow-legend-tags">A Arte · V Vídeo · T Tráfego · SC Social Media</span>';
+  }
   function buildCalendar(items, month, scope) {
     month = safeMonth(month);
     var parts = month.split('-').map(Number), first = new Date(parts[0], parts[1] - 1, 1);
@@ -74,8 +94,7 @@
       '<div class="ow-month-nav"><button type="button" data-ow-month="-1" aria-label="Mês anterior">‹</button>' +
       '<strong>' + esc(fmtMonth(month)) + '</strong>' +
       '<button type="button" data-ow-month="1" aria-label="Próximo mês">›</button></div></div>';
-    var legend = '<div class="ow-month-legend"><span class="ow-legend-arte">Arte</span>' +
-      '<span class="ow-legend-video">Vídeo</span><span class="ow-legend-trafego">Tráfego</span>' +
+    var legend = '<div class="ow-month-legend">' + statusLegend(items) +
       '<span class="ow-legend-count">' + items.length + ' demanda' + (items.length === 1 ? '' : 's') + ' no mês</span></div>';
     var weekday = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
       .map(function (label) { return '<span class="ow-weekday">' + label + '</span>'; }).join('');
@@ -97,14 +116,14 @@
         var description = displayClient(d) + ' | ' + areaLabel(d.area) + ' | ' +
           String(d.title || '') + ' | ' + statusLabel(d) + ' | ' + fmtPostDate(d.postDate) +
           (d.postedAt ? ' | Postado' : '') + ' — clique duas vezes para ' + (d.postedAt ? 'desmarcar' : 'marcar como postado');
-        cells += '<div class="ow-cal-demand ow-cal-' + esc(d.area) + (d.id === selectedCalendarDemand ? ' ow-cal-selected' : '') +
+        cells += '<div class="ow-cal-demand ow-cal-' + esc(d.area) + ' ow-cal-st-' + statusKey(d) + (d.id === selectedCalendarDemand ? ' ow-cal-selected' : '') +
           (d.status === 'purple' && d.area !== 'trafego' ? ' ow-cal-approval' : '') +
           (d.status === 'salmon' && d.area !== 'trafego' ? ' ow-cal-oneway' : '') +
           (d.postedAt ? ' ow-cal-posted' : '') +
           '" data-ow-demand="' + esc(d.id) + '" draggable="' + (isAdmin() && !calendarSaving ? 'true' : 'false') +
           '" title="' + esc(description) + '" tabindex="0" role="button" aria-label="' + esc(description) + '">' +
           (d.postedAt ? '<span class="ow-cal-check" aria-hidden="true">✓</span>' : '') +
-          '<span class="ow-cal-text">' + esc(title) + '</span>' +
+          areaTag(d.area) + '<span class="ow-cal-text">' + esc(title) + '</span>' +
           '<button type="button" class="ow-cal-open" data-ow-open="' + esc(d.id) + '" title="Abrir demanda" aria-label="Abrir demanda">↗</button></div>';
       });
       cells += '</div></div>';
@@ -633,6 +652,10 @@
     root.querySelectorAll('.ow-cal-demand').forEach(function (card) {
       var d = state.demands.find(function (item) { return item.id === card.dataset.owDemand; });
       card.classList.toggle('ow-cal-oneway', !!d && d.status === 'salmon' && d.area !== 'trafego');
+      if (d) {
+        STATUS_ORDER.forEach(function (key) { card.classList.remove('ow-cal-st-' + key); });
+        card.classList.add('ow-cal-st-' + statusKey(d));
+      }
     });
   };
   renderDemand = function (d, index, showAreaLabel) {
@@ -890,7 +913,7 @@
   function makeCalendarCard(item) {
     var el = document.createElement('div');
     el.className = 'ow-cal-demand ow-cal-socialMedia' +
-      (isFinished(item) ? ' ow-cal-social-finished' : '');
+      (isFinished(item) ? ' ow-cal-social-finished ow-cal-st-green' : ' ow-cal-st-red');
     el.dataset.owSocialAgendaId = item.id;
     el.draggable = false;
     el.tabIndex = 0;
@@ -898,7 +921,7 @@
     var title = (item.client || 'Cliente') + ' · ' + (item.title || 'Sem título');
     el.title = title + ' · Social Media';
     el.setAttribute('aria-label', 'Abrir ' + title + ' no Social Media');
-    el.innerHTML = '<span class="ow-cal-text">' + esc(title) + '</span>' +
+    el.innerHTML = areaTag('socialMedia') + '<span class="ow-cal-text">' + esc(title) + '</span>' +
       '<button type="button" class="ow-cal-open" aria-label="Abrir no Social Media">↗</button>';
     el.addEventListener('click', function (event) {
       event.stopPropagation();
@@ -945,10 +968,6 @@
     if (!visibleCount) return;
     var legend = shell.querySelector('.ow-month-legend');
     if (legend) {
-      var chip = document.createElement('span');
-      chip.className = 'ow-legend-socialMedia';
-      chip.textContent = 'Social Media';
-      legend.querySelector('.ow-legend-count')?.before(chip);
       var counter = legend.querySelector('.ow-legend-count');
       if (counter) {
         var countBefore = Number.parseInt(counter.textContent, 10) || 0;

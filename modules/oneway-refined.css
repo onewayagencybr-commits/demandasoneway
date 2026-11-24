@@ -493,3 +493,35 @@ html body #app#app#app .client-toolbar-actions .add-demand-client{order:10}
 /* Celular: no modo Panorama a lista some de verdade (uma regra antiga de
    celular forçava a lista a aparecer e o calendário ficava escondido lá embaixo). */
 html body #app#app#app #agendaContent #agendaList.agenda-list.hidden{display:none!important}
+
+/* ───────── Panorama mensal: cor = status da demanda + sigla da área ───────── */
+/* Mesmas cores dos botões de status das demandas. */
+html body #app#app#app .ow-cal-demand[class*="ow-cal-st-"]{border:1px solid rgba(255,255,255,.22)!important;border-left-width:1px!important;color:#fff!important;outline:none!important;box-shadow:none!important}
+html body #app#app#app .ow-cal-demand.ow-cal-st-red{background:#dc2626!important}
+html body #app#app#app .ow-cal-demand.ow-cal-st-yellow{background:#eab308!important;color:#2b2100!important}
+html body #app#app#app .ow-cal-demand.ow-cal-st-purple{background:#7c3aed!important}
+html body #app#app#app .ow-cal-demand.ow-cal-st-salmon{background:#ff7600!important;color:#2b1300!important}
+html body #app#app#app .ow-cal-demand.ow-cal-st-orange{background:#f97316!important;color:#2b1300!important}
+html body #app#app#app .ow-cal-demand.ow-cal-st-green{background:#16a34a!important}
+html body #app#app#app .ow-cal-demand[class*="ow-cal-st-"] .ow-cal-text{color:inherit!important}
+html body #app#app#app .ow-cal-demand[class*="ow-cal-st-"] .ow-cal-open{background:rgba(0,0,0,.16)!important;color:inherit!important}
+html body #app#app#app .ow-cal-demand.ow-cal-selected{outline:3px solid #fff!important;outline-offset:1px!important;box-shadow:0 0 0 5px rgba(111,168,255,.55)!important}
+/* Postada continua verde-clara com ✓ (vale mais que o status). */
+html body #app#app#app .ow-cal-demand.ow-cal-posted[class*="ow-cal-st-"]{
+  background:linear-gradient(135deg,#dcfce7,#bbf7d0)!important;border:1px solid #22c55e!important;color:#14532d!important;box-shadow:inset 3px 0 0 #16a34a!important}
+html body #app#app#app .ow-cal-demand.ow-cal-posted[class*="ow-cal-st-"] .ow-cal-open{background:rgba(22,101,52,.12)!important}
+/* Sigla da área (A, V, T, SC) à esquerda do nome. */
+html body #app#app#app .ow-cal-tag{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;min-width:15px;height:15px;padding:0 3px;margin-right:4px;border-radius:4px;background:rgba(0,0,0,.24);color:inherit;font-size:8.5px;font-weight:900;letter-spacing:.02em;line-height:1}
+html body #app#app#app .ow-cal-posted .ow-cal-tag{background:rgba(22,101,52,.16)}
+html body #app#app#app .ow-cal-demand .ow-cal-text{flex:1 1 auto}
+/* Legenda por status */
+html body #app#app#app .ow-month-legend{flex-wrap:wrap}
+html body #app#app#app .ow-legend-st{border-radius:7px;padding:4px 8px;font-size:9px;font-weight:850;color:#fff}
+html body #app#app#app .ow-legend-st-red{background:#dc2626}
+html body #app#app#app .ow-legend-st-yellow{background:#eab308;color:#2b2100}
+html body #app#app#app .ow-legend-st-purple{background:#7c3aed}
+html body #app#app#app .ow-legend-st-salmon{background:#ff7600;color:#2b1300}
+html body #app#app#app .ow-legend-st-orange{background:#f97316;color:#2b1300}
+html body #app#app#app .ow-legend-st-green{background:#16a34a}
+html body #app#app#app .ow-legend-st-posted{background:#dcfce7;color:#14532d}
+html body #app#app#app .ow-legend-tags{color:rgba(235,244,255,.72);font-size:9.5px;font-weight:750;padding:0 4px}
