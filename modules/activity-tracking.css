@@ -1,0 +1,67 @@
+/* One Way · Quem fez o quê (siglas + painel de atividades) */
+.ow-who{--ow-who-h:210;display:inline-flex;align-items:center;justify-content:center;min-width:17px;height:15px;padding:0 3px;margin-left:5px;border-radius:4px;
+  background:hsl(var(--ow-who-h) 70% 92%);color:hsl(var(--ow-who-h) 70% 24%);border:1px solid hsl(var(--ow-who-h) 55% 70%);
+  font:800 8.5px/1 Montserrat,Arial,sans-serif;letter-spacing:.04em;vertical-align:middle;-webkit-text-fill-color:currentColor;flex:none;cursor:help}
+.ow-who.ow-who-neutral{background:#e8ebf0;color:#4b5563;border-color:#c5cbd5}
+.ow-who.ow-who-lg{min-width:24px;height:20px;font-size:10px;border-radius:5px;margin:0}
+.status-btn .ow-who{margin-left:6px}
+.current-status .ow-who{margin-left:6px;height:14px;min-width:16px;font-size:8px}
+.ow-who-label{font-size:9px;opacity:.7;margin-left:4px}
+.ow-who-created{display:inline-flex;align-items:center;gap:0}
+.ow-demand-audit-event .ow-who-lg{margin-top:1px}
+
+.ow-act-overlay{position:fixed;inset:0;z-index:9998;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(3,10,24,.72)}
+.ow-act-box{width:100%;max-width:900px;max-height:90vh;display:flex;flex-direction:column;padding:20px 22px;border-radius:16px;background:#0d1b3d;border:1px solid rgba(180,207,255,.23);color:#f2f6ff;font-family:Montserrat,Arial,sans-serif;box-shadow:0 24px 70px rgba(0,0,0,.45)}
+.ow-act-box h3{margin:0 0 4px;font-size:17px;color:#fff}
+.ow-act-box h4{margin:16px 0 8px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#9fb4d8}
+.ow-act-box p{margin:0 0 10px;font-size:12px;line-height:1.55;color:#bfd0ea}
+.ow-act-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.ow-act-tabs{display:flex;gap:6px;margin:8px 0 12px;border-bottom:1px solid rgba(180,207,255,.15)}
+.ow-act-tabs button{background:none;border:0;border-bottom:2px solid transparent;color:#bfd0ea;padding:8px 10px;font:600 12px Montserrat,Arial,sans-serif;cursor:pointer}
+.ow-act-tabs button.active{color:#fff;border-bottom-color:#5aa9ff}
+.ow-act-body{overflow:auto;min-height:200px}
+.ow-act-filters{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:12px}
+.ow-act-filters label{display:flex;flex-direction:column;gap:4px;font-size:10px;color:#9fb4d8;text-transform:uppercase;letter-spacing:.05em}
+.ow-act-filters select,.ow-act-filters input,.ow-act-profile-box input,.ow-act-ini{background:#132650;color:#fff;border:1px solid rgba(180,207,255,.25);border-radius:8px;padding:7px 9px;font:500 12px Montserrat,Arial,sans-serif;-webkit-text-fill-color:#fff}
+.ow-act-search{flex:1;min-width:180px}
+.ow-act-people{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.ow-act-chip{display:inline-flex;align-items:center;gap:4px;background:rgba(24,55,110,.45);color:#dce8ff;border:1px solid rgba(180,207,255,.18);border-radius:999px;padding:5px 10px;font:600 11px Montserrat,Arial,sans-serif;cursor:pointer}
+.ow-act-chip .ow-who{margin-left:0}
+.ow-act-chip b{color:#fff;margin-left:2px}
+.ow-act-chip.active{background:#2a5bb8;border-color:#5aa9ff;color:#fff}
+.ow-act-summary{display:flex;flex-wrap:wrap;gap:12px;font-size:11px;color:#9fb4d8;margin-bottom:8px}
+.ow-act-summary b{color:#fff}
+.ow-act-list{display:flex;flex-direction:column;gap:5px}
+.ow-act-row{display:grid;grid-template-columns:118px 28px 1fr auto;gap:10px;align-items:center;padding:8px 10px;border-radius:9px;background:rgba(24,55,110,.32);font-size:12px}
+.ow-act-row.ow-act-legacy{opacity:.78}
+.ow-act-row.ow-act-alert{background:rgba(180,60,40,.28);border:1px solid rgba(255,140,110,.35)}
+.ow-act-when{color:#9fb4d8;font-size:11px;font-variant-numeric:tabular-nums}
+.ow-act-main{display:flex;flex-direction:column;gap:2px;min-width:0}
+.ow-act-main strong{color:#fff;font-weight:600}
+.ow-act-main small{color:#9fb4d8;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ow-act-person{color:#dce8ff;font-size:11px;white-space:nowrap}
+.ow-act-empty{color:#9fb4d8;font-size:12px;padding:14px 0}
+.ow-act-small{font-size:11px!important;color:#9fb4d8!important;margin-top:10px!important}
+.ow-act-warning{color:#ffb4a1!important}
+.ow-act-more{align-self:center;margin-top:6px}
+.ow-act-team-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;background:rgba(24,55,110,.32);margin-bottom:5px;font-size:12px}
+.ow-act-team-row strong{color:#fff;min-width:90px}
+.ow-act-team-row span:not(.ow-who){color:#9fb4d8;flex:1}
+.ow-act-ini{width:46px;text-align:center;text-transform:uppercase}
+.ow-act-profile-box{max-width:440px;gap:10px}
+.ow-act-profile-box label{display:flex;flex-direction:column;gap:5px;font-size:11px;color:#9fb4d8}
+.ow-act-actions{display:flex;gap:8px;margin-top:6px}
+.ow-act-preview{font-size:12px;color:#bfd0ea;display:flex;align-items:center;gap:6px}
+@media (max-width:640px){
+  .ow-act-row{grid-template-columns:28px 1fr;gap:8px}
+  .ow-act-when{grid-column:1/-1;order:-1}
+  .ow-act-person{grid-column:2}
+}
+
+/* Dentro dos cartões da Agenda (lá todo span vira bloco) */
+.agenda-info .ow-who,.agenda-item .ow-who{display:inline-flex!important;width:auto!important;min-width:17px!important;height:15px!important;margin:0 0 0 5px!important;padding:0 3px!important;overflow:visible!important;opacity:1!important;
+  color:hsl(var(--ow-who-h) 70% 24%)!important;font-size:8.5px!important;line-height:1!important;white-space:nowrap!important;vertical-align:middle!important}
+.agenda-info .ow-who.ow-who-neutral,.agenda-item .ow-who.ow-who-neutral{color:#4b5563!important}
+.agenda-info .ow-who-created,.agenda-info .ow-who-label{display:inline-flex!important;align-items:center;width:auto!important;margin:0 0 0 4px!important;overflow:visible!important}
+.agenda-info .ow-who-created .ow-who-label{margin:0!important}
+.agenda-info .agenda-last-action .ow-who{margin-left:4px!important}

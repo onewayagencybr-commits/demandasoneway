@@ -908,6 +908,7 @@ body.calendar-view{background-attachment:scroll!important}
 </style>
 <link rel="stylesheet" href="/modules/oneway-premium-navigation.css?v=20261031-unified2">
 <link rel="stylesheet" href="/modules/oneway-refined.css?v=20261124-status1">
+<link rel="stylesheet" href="/modules/activity-tracking.css?v=20261124-who1">
 </head>
 <body class="booting">
 <section class="login" id="loginScreen">
@@ -1444,7 +1445,7 @@ let smCryptoKey=null,smUnlocked=false,smItems=[],smUpdatedAt=0,smSelectedClient=
 let state=seed(),currentUser=null,currentArea=null,currentMonth=currentMonthKey(),openClientId=null,openDemandId=null,toastTimer=null,lastAddedClientId=null,activeAnalytics=null,bulkImportDrafts=[],bulkImportMeta={warnings:[],expected:{}},agendaView="active",commemorativeYear=2026,commemorativeMonth=10,commemorativeCategory='all',formDemandArea='arte',calendarWeekStart=calendarMonday(calendarLocalISO(new Date())),calendarViewFilter='todos';
 let bulkSpeechRecognition=null,bulkSpeechListening=false,bulkSpeechBaseText='',bulkSpeechCommitted='';
 
-function seed(){return {version:7,clients:[],demands:[],deletedDemands:[],removedClientMonths:[],recentClients:[],proposalHistory:[],analyticsReports:{},financeItems:[],calendarEvents:[],socialMediaSecure:null,clientDirectory:[],archivedClientKeys:[],clientMergeRecordBackups:[],contactRoutine:{},updatedAt:Date.now()}}
+function seed(){return {version:7,clients:[],demands:[],deletedDemands:[],removedClientMonths:[],recentClients:[],proposalHistory:[],analyticsReports:{},financeItems:[],calendarEvents:[],socialMediaSecure:null,clientDirectory:[],archivedClientKeys:[],clientMergeRecordBackups:[],contactRoutine:{},auditLog:[],adminProfiles:{},teamInitials:{},updatedAt:Date.now()}}
 function uid(){return 'id_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,10)}
 function esc(v=''){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function currentMonthKey(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}
@@ -1508,7 +1509,7 @@ function renderAgendaAssigneeToolbar(){
  el.querySelector('select').onchange=e=>{agendaAssigneeFilter=e.target.value;renderAgenda()};
 }
 function safeUrl(v){try{const u=new URL(v);return ['http:','https:'].includes(u.protocol)?u.href:'#'}catch{return '#'}}
-function normalizeState(s){if(!s||typeof s!=='object')return seed();const clients=Array.isArray(s.clients)?s.clients:[];const derivedRecent=[...clients].sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||''))).map(c=>c.name).filter(Boolean);const recent=Array.isArray(s.recentClients)?s.recentClients:derivedRecent;return {version:7,clients,demands:Array.isArray(s.demands)?s.demands:[],deletedDemands:Array.isArray(s.deletedDemands)?s.deletedDemands:[],removedClientMonths:Array.isArray(s.removedClientMonths)?s.removedClientMonths:[],recentClients:[...new Set(recent)].slice(0,8),proposalHistory:Array.isArray(s.proposalHistory)?s.proposalHistory:[],analyticsReports:s.analyticsReports&&typeof s.analyticsReports==='object'?s.analyticsReports:{},financeItems:Array.isArray(s.financeItems)?s.financeItems:[],calendarEvents:Array.isArray(s.calendarEvents)?s.calendarEvents:[],socialMediaSecure:s.socialMediaSecure&&typeof s.socialMediaSecure==='object'?s.socialMediaSecure:null,clientDirectory:Array.isArray(s.clientDirectory)?s.clientDirectory:[],archivedClientKeys:Array.isArray(s.archivedClientKeys)?s.archivedClientKeys:[],clientMergeRecordBackups:Array.isArray(s.clientMergeRecordBackups)?s.clientMergeRecordBackups:[],collaborators:Array.isArray(s.collaborators)?s.collaborators:undefined,contactRoutine:s.contactRoutine&&typeof s.contactRoutine==='object'&&!Array.isArray(s.contactRoutine)?s.contactRoutine:{},updatedAt:Number(s.updatedAt)||0}}
+function normalizeState(s){if(!s||typeof s!=='object')return seed();const clients=Array.isArray(s.clients)?s.clients:[];const derivedRecent=[...clients].sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||''))).map(c=>c.name).filter(Boolean);const recent=Array.isArray(s.recentClients)?s.recentClients:derivedRecent;return {version:7,clients,demands:Array.isArray(s.demands)?s.demands:[],deletedDemands:Array.isArray(s.deletedDemands)?s.deletedDemands:[],removedClientMonths:Array.isArray(s.removedClientMonths)?s.removedClientMonths:[],recentClients:[...new Set(recent)].slice(0,8),proposalHistory:Array.isArray(s.proposalHistory)?s.proposalHistory:[],analyticsReports:s.analyticsReports&&typeof s.analyticsReports==='object'?s.analyticsReports:{},financeItems:Array.isArray(s.financeItems)?s.financeItems:[],calendarEvents:Array.isArray(s.calendarEvents)?s.calendarEvents:[],socialMediaSecure:s.socialMediaSecure&&typeof s.socialMediaSecure==='object'?s.socialMediaSecure:null,clientDirectory:Array.isArray(s.clientDirectory)?s.clientDirectory:[],archivedClientKeys:Array.isArray(s.archivedClientKeys)?s.archivedClientKeys:[],clientMergeRecordBackups:Array.isArray(s.clientMergeRecordBackups)?s.clientMergeRecordBackups:[],collaborators:Array.isArray(s.collaborators)?s.collaborators:undefined,contactRoutine:s.contactRoutine&&typeof s.contactRoutine==='object'&&!Array.isArray(s.contactRoutine)?s.contactRoutine:{},auditLog:Array.isArray(s.auditLog)?s.auditLog.slice(-1500):[],adminProfiles:owPlainObject(s.adminProfiles),teamInitials:owPlainObject(s.teamInitials),lastActor:owPlainObject(s.lastActor),updatedAt:Number(s.updatedAt)||0}}
 
 function openDB(){return new Promise((resolve,reject)=>{try{const req=indexedDB.open(DB_NAME,1);req.onupgradeneeded=()=>{const db=req.result;if(!db.objectStoreNames.contains('app'))db.createObjectStore('app',{keyPath:'key'});if(!db.objectStoreNames.contains('files'))db.createObjectStore('files',{keyPath:'id'})};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)}catch(e){reject(e)}})}
 async function dbReadState(){try{const db=await openDB();return await new Promise((resolve,reject)=>{const req=db.transaction('app').objectStore('app').get('state');req.onsuccess=()=>resolve(req.result?.value||null);req.onerror=()=>reject(req.error)})}catch{return null}}
@@ -2018,9 +2019,34 @@ function formatDemandCreatedMini(d){
  const time=new Intl.DateTimeFormat('pt-BR',{timeZone:'America/Cuiaba',hour:'2-digit',minute:'2-digit',hour12:false}).format(created);
  return '<span class="demand-created-mini" title="Data e horário de criação">'+esc(demandCreatedLabel(d))+'</span>';
 }
+/* Quem fez cada ação: nome + sigla (2 letras) do login em uso. */
+let owAdminProfileKey='';
+const OW_DEFAULT_INITIALS={thiago:'TI'};
+function owPlainObject(v){return v&&typeof v==='object'&&!Array.isArray(v)?v:{}}
+function owPlainText(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'')}
+function owCleanInitials(v){return owPlainText(v).replace(/[^A-Za-z0-9]/g,'').slice(0,2).toUpperCase()}
+function owInitialsFor(name){
+ const custom=owPlainObject(state.teamInitials)[name];if(custom&&owCleanInitials(custom))return owCleanInitials(custom);
+ const first=owPlainText(name).trim().split(/\s+/)[0].toLowerCase();if(OW_DEFAULT_INITIALS[first])return OW_DEFAULT_INITIALS[first];
+ return owCleanInitials(first)||'??';
+}
+function owActorStamp(){
+ const login=USERS[currentUser]||'';
+ if(login==='admin'){const p=owAdminProfileKey?owPlainObject(state.adminProfiles)[owAdminProfileKey]:null;return p&&p.name?{by:String(p.name),ini:owCleanInitials(p.ini)||owInitialsFor(p.name),login:'admin'}:{by:'Administrador',ini:'AD',login:'admin'}}
+ if(login==='design'||login==='video'){const c=(state.collaborators||[]).find(x=>x.login===login);const name=c?.name||currentUser;return {by:name,ini:owInitialsFor(name),login}}
+ if(currentUser)return {by:'Visitante',ini:'VS',login:'status'};
+ return {by:'Equipe One Way',ini:'OW',login:''};
+}
+function owLogAction(kind,detail,extra){
+ const a=owActorStamp();state.auditLog=Array.isArray(state.auditLog)?state.auditLog:[];
+ state.auditLog.push({id:uid(),kind,detail:String(detail||''),at:new Date().toISOString(),...a,...(extra||{})});
+ const limit=Date.now()-120*864e5;state.auditLog=state.auditLog.filter(e=>Date.parse(e.at)>=limit).slice(-1500);
+}
 function appendDemandActivity(d,kind,detail){
- if(!d)return;const items=Array.isArray(d.activityLog)?d.activityLog:[];
- d.activityLog=[...items,{id:uid(),kind,detail,at:new Date().toISOString(),by:currentUser||'Equipe One Way'}].slice(-100);
+ if(!d)return;const items=Array.isArray(d.activityLog)?d.activityLog:[];const a=owActorStamp(),at=new Date().toISOString();
+ d.activityLog=[...items,{id:uid(),kind,detail,at,...a}].slice(-100);
+ if(kind==='status'&&d.status)d.statusMarks={...owPlainObject(d.statusMarks),[d.status]:{by:a.by,ini:a.ini,login:a.login,at}};
+ if(kind==='created'&&!d.createdBy)d.createdBy={by:a.by,ini:a.ini,login:a.login,at};
 }
 function demandActivityHTML(d){
  const entries=(Array.isArray(d.activityLog)?d.activityLog:[]).slice().reverse();
@@ -2850,7 +2876,7 @@ async function submitDemand(e){
   if(id){
     d=state.demands.find(x=>x.id===id);if(!d){if(submitBtn){submitBtn.disabled=false;submitBtn.textContent='Salvar demanda'}return}
     rollback={...d,links:[...(d.links||[])],attachments:[...(d.attachments||[])],productionLinks:[...(d.productionLinks||[])],productionAttachments:[...(d.productionAttachments||[])],activityLog:[...(d.activityLog||[])]};// Não altera createdAt: a data de criação é automática e permanece fixa após qualquer edição.
-    Object.assign(d,{clientId:targetClientId,area:destinationArea,month:destinationMonth,title,postDate,description,assignee,status:statusesForArea(destinationArea)[status]?status:'red'});d.links=d.links||[];d.attachments=d.attachments||[];d.productionLinks=d.productionLinks||[];d.productionAttachments=d.productionAttachments||[];appendDemandActivity(d,'edited','Demanda editada');openClientId=targetClientId;openDemandId=id;
+    const owPrevStatus=d.status;Object.assign(d,{clientId:targetClientId,area:destinationArea,month:destinationMonth,title,postDate,description,assignee,status:statusesForArea(destinationArea)[status]?status:'red'});d.links=d.links||[];d.attachments=d.attachments||[];d.productionLinks=d.productionLinks||[];d.productionAttachments=d.productionAttachments||[];appendDemandActivity(d,'edited','Demanda editada');if(d.status!==owPrevStatus)appendDemandActivity(d,'status','Status: '+statusLabel({area:d.area,status:owPrevStatus})+' → '+statusLabel(d));openClientId=targetClientId;openDemandId=id;
   }else{
     d={id:uid(),clientId:targetClientId,month:destinationMonth,area:destinationArea,title,postDate,description,assignee,status:statusesForArea(destinationArea)[status]?status:'red',links:[],attachments:[],productionLinks:[],productionAttachments:[],createdAt:new Date().toISOString(),createdDate:demandCreationCalendarDate()};
     appendDemandActivity(d,'created','Demanda criada');newId=d.id;state.demands.push(d);openClientId=targetClientId;openDemandId=d.id;
@@ -2883,8 +2909,8 @@ async function submitDemand(e){
   toast(coverTransaction?`Vídeo salvo e capa atribuída a ${coverTransaction.cover.assignee}, com o mesmo prazo.`:(extras?`Demanda salva · ${extras}.`:'Demanda salva.'),null,null,'success');
 }
 async function updateStatus(id,status){const d=state.demands.find(x=>x.id===id);if(!canAccessDemand(d)||!statusesForArea(d.area)[status])return;const old=d.status,log=d.activityLog;if(old===status)return;d.status=status;appendDemandActivity(d,'status','Status: '+statusLabel({area:d.area,status:old})+' → '+statusLabel(d));if(!await saveState()){d.status=old;d.activityLog=log;return}if(currentArea==='agenda'){renderAgenda()}else{renderStats();renderClients()}toast('Status atualizado.')}
-async function deleteDemand(id){if(!isAdmin()||!confirm('Mover esta demanda para Excluídos?'))return;const idx=state.demands.findIndex(d=>d.id===id);if(idx<0)return;const d=state.demands.splice(idx,1)[0];d.deletedAt=new Date().toISOString();d.deletedBy=currentUser;state.deletedDemands.push(d);if(!await saveState()){state.deletedDemands.pop();delete d.deletedAt;delete d.deletedBy;state.demands.splice(idx,0,d);return}openDemandId=null;renderStats();renderClients();toast('Demanda movida para Excluídos.','Desfazer',()=>restoreDemand(id))}
-async function restoreDemand(id){const idx=state.deletedDemands.findIndex(d=>d.id===id);if(idx<0)return;const d=state.deletedDemands.splice(idx,1)[0];delete d.deletedAt;delete d.deletedBy;state.demands.push(d);if(!await saveState()){state.demands.pop();state.deletedDemands.splice(idx,0,d);return}currentArea==='deleted'?renderDeleted():(renderStats(),renderClients());toast('Demanda restaurada.')}
+async function deleteDemand(id){if(!isAdmin()||!confirm('Mover esta demanda para Excluídos?'))return;const idx=state.demands.findIndex(d=>d.id===id);if(idx<0)return;const d=state.demands.splice(idx,1)[0];d.deletedAt=new Date().toISOString();{const a=owActorStamp();d.deletedBy=a.by;d.deletedByIni=a.ini;d.deletedByLogin=a.login}appendDemandActivity(d,'deleted','Demanda movida para Excluídos');state.deletedDemands.push(d);if(!await saveState()){state.deletedDemands.pop();delete d.deletedAt;delete d.deletedBy;state.demands.splice(idx,0,d);return}openDemandId=null;renderStats();renderClients();toast('Demanda movida para Excluídos.','Desfazer',()=>restoreDemand(id))}
+async function restoreDemand(id){const idx=state.deletedDemands.findIndex(d=>d.id===id);if(idx<0)return;const d=state.deletedDemands.splice(idx,1)[0];delete d.deletedAt;delete d.deletedBy;delete d.deletedByIni;delete d.deletedByLogin;appendDemandActivity(d,'restored','Demanda restaurada');state.demands.push(d);if(!await saveState()){state.demands.pop();state.deletedDemands.splice(idx,0,d);return}currentArea==='deleted'?renderDeleted():(renderStats(),renderClients());toast('Demanda restaurada.')}
 async function purgeDemand(id){if(!isAdmin()||!confirm('Excluir definitivamente?'))return;const idx=state.deletedDemands.findIndex(d=>d.id===id);if(idx<0)return;const d=state.deletedDemands.splice(idx,1)[0];if(!await saveState()){state.deletedDemands.splice(idx,0,d);return}for(const f of [...(d.attachments||[]),...(d.productionAttachments||[])])await deleteStoredFile(f);renderDeleted();toast('Demanda excluída definitivamente.')}
 async function emptyTrashMonth(){
   if(!isAdmin())return;
@@ -3178,7 +3204,7 @@ async function recordProductProposal(data){
  state.proposalHistory=Array.isArray(state.proposalHistory)?state.proposalHistory:[];
  const snapshot={...data,items:[],valueRaw:undefined};
  if(editingProductProposalId)return updateProposalInHistory(editingProductProposalId,snapshot,'pdf');
- state.proposalHistory.unshift({id:uid(),generatedAt:new Date().toISOString(),format:'pdf',data:snapshot});
+ state.proposalHistory.unshift({id:uid(),generatedAt:new Date().toISOString(),format:'pdf',data:snapshot,createdBy:owActorStamp()});owLogAction('proposal','Proposta criada: '+(snapshot.title||'Produto One Way'),{client:snapshot.client||''});
  state.proposalHistory=state.proposalHistory.slice(0,150);
  await saveState();if(currentArea==='proposals')renderProposalHistory();
  return true;
@@ -3323,7 +3349,7 @@ async function updateProposalInHistory(id,data,format=null){
  rec.data=data?.type==='agency-product'?{...data,items:[],valueRaw:undefined}:proposalSnapshot(data);
  if(format)rec.format=format;
  rec.updatedAt=new Date().toISOString();
- rec.revisionCount=(Number(rec.revisionCount)||0)+1;
+ rec.revisionCount=(Number(rec.revisionCount)||0)+1;rec.updatedBy=owActorStamp();owLogAction('proposal','Proposta editada',{client:rec.data?.client||''});
  const ok=await saveState({strictRemote:true});
  if(!ok){toast('Alteração não sincronizada. Verifique a conexão e salve novamente.');return false}
  if(currentArea==='proposals')renderProposalHistory();
@@ -3332,7 +3358,7 @@ async function updateProposalInHistory(id,data,format=null){
 async function recordGeneratedProposal(data,format){
  if(editingProposalId)return updateProposalInHistory(editingProposalId,data,format);
  state.proposalHistory=Array.isArray(state.proposalHistory)?state.proposalHistory:[];
- state.proposalHistory.unshift({id:uid(),generatedAt:new Date().toISOString(),format,data:proposalSnapshot(data)});
+ state.proposalHistory.unshift({id:uid(),generatedAt:new Date().toISOString(),format,data:proposalSnapshot(data),createdBy:owActorStamp()});owLogAction('proposal','Proposta criada',{client:data.client||''});
  state.proposalHistory=state.proposalHistory.slice(0,150);
  await saveState();
  if(currentArea==='proposals')renderProposalHistory();
@@ -4308,6 +4334,7 @@ async function owMaybeStartPreview(){
 <script src="/modules/video-covers.js?v=20261030-audit" defer></script>
 <script src="/modules/data-backup.js?v=20261113-backup1" defer></script>
 <script src="/modules/oneway-refined.js?v=20261113-premium3" defer></script>
+<script src="/modules/activity-tracking.js?v=20261124-who1" defer></script>
 </body>
 </html>
 <script async data-explicit-opt-in="true" data-deployment-id="dpl_Ao14UeTAg11RytLdLPreqf8HrSbi" src="https://vercel.live/_next-live/feedback/feedback.js"></script>
