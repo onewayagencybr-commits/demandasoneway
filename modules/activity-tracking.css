@@ -76,3 +76,12 @@
 .production-asset-main .ow-item-who .ow-who{display:inline-flex!important;color:hsl(var(--ow-who-h) 70% 24%)!important;-webkit-text-fill-color:hsl(var(--ow-who-h) 70% 24%)!important;font-size:8.5px!important;width:auto!important;overflow:visible!important;white-space:nowrap!important;opacity:1!important}
 .production-asset-main .ow-item-who .ow-who.ow-who-neutral{color:#4b5563!important;-webkit-text-fill-color:#4b5563!important}
 .production-asset-main .ow-item-who>span:not(.ow-who){display:inline!important;font-size:10px!important}
+
+/* Siglas legíveis também nos cartões atrasados e destacados da Agenda */
+#agendaList .agenda-item .agenda-info .ow-who,#agendaContent .agenda-item .agenda-info .ow-who{color:hsl(var(--ow-who-h) 70% 24%)!important;-webkit-text-fill-color:hsl(var(--ow-who-h) 70% 24%)!important}
+#agendaList .agenda-item .agenda-info .ow-who.ow-who-neutral,#agendaContent .agenda-item .agenda-info .ow-who.ow-who-neutral{color:#4b5563!important;-webkit-text-fill-color:#4b5563!important}
+
+/* Listas de opções (Mostrar demandas de…, filtros do painel Atividades): fundo escuro e texto claro */
+#owAgendaAssigneeFilter option,.ow-act-filters select option{background:#0d1b3d!important;color:#f2f6ff!important;-webkit-text-fill-color:#f2f6ff!important}
+#owAgendaAssigneeFilter option:checked,.ow-act-filters select option:checked{background:#2a5bb8!important;color:#fff!important}
+#owAgendaAssigneeFilter{color-scheme:dark}
